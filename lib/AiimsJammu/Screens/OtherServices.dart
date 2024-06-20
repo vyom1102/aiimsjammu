@@ -16,6 +16,7 @@ import '../Widgets/CalculateDistance.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/OpeningClosingStatus.dart';
 import 'serviceInfo.dart';
+
 class OtherServiceScreen extends StatefulWidget {
   @override
   _OtherServiceScreenState createState() => _OtherServiceScreenState();

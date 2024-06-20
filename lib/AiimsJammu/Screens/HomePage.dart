@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:hive/hive.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +47,8 @@ class _HomePageState extends State<HomePage> {
   List<dynamic> _atmfilteredServices = [];
   List<dynamic> _pharmacyfilteredServices = [];
   List<dynamic> _countersfilteredServices = [];
+  List<dynamic> _cafeteriafilteredServices = [];
+
   int _currentPage = 0;
   String token = "";
   late int index;
@@ -58,7 +61,7 @@ class _HomePageState extends State<HomePage> {
   String? userName;
   String? emailAddress;
   bool nameLoading= false;
-
+  bool isOnline = true;
   @override
   void initState() {
     super.initState();
@@ -79,6 +82,12 @@ class _HomePageState extends State<HomePage> {
     // _timer = Timer.periodic(Duration(seconds: 10), (timer) {
     //   _scrollToNext();
     // });
+  }
+  Future<void> checkConnectivity() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    setState(() {
+      isOnline = connectivityResult != ConnectivityResult.none;
+    });
   }
   void _loadImageCorousalFromAPI() async {
     try {
@@ -224,6 +233,9 @@ class _HomePageState extends State<HomePage> {
             _pharmacyfilteredServices = _services.where((service) => service['type'] == 'Pharmacy').toList();
             _atmfilteredServices = _services.where((service) => service['type'] == 'ATM').toList();
             _countersfilteredServices = _services.where((service) => service['type'] == 'Counters').toList();
+            _cafeteriafilteredServices = _services.where((service) => service['type'] == 'Cafeteria').toList();
+
+
 
           });
         } else {
@@ -481,7 +493,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      body: Stack(
+      body: isOnline?Stack(
         children: [
           SingleChildScrollView(
             child: Column(
@@ -590,8 +602,9 @@ class _HomePageState extends State<HomePage> {
                             child: _buildCard(
                                 'assets/images/Atm.svg', 'ATM'),
                           ),
-
+                          if(_cafeteriafilteredServices.isNotEmpty)
                           SizedBox(width: 12),
+                          if(_cafeteriafilteredServices.isNotEmpty)
                           GestureDetector(
                             onTap: () {
                               Navigator.push(
@@ -813,7 +826,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ],
-      ),
+      ):Text("Offline"),
     );
   }
 }

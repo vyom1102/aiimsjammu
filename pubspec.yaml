@@ -87,6 +87,7 @@ dependencies:
   in_app_update: ^4.2.2
   image_picker: ^1.1.1
   quickalert: ^1.1.0
+  connectivity_plus: ^6.0.3
 
 
 
