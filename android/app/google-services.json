@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "61576302596",
+    "firebase_url": "https://iwaymaps-9af30-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "iwaymaps-9af30",
+    "storage_bucket": "iwaymaps-9af30.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:61576302596:android:d3fe1d777f07152f14e551",
+        "android_client_info": {
+          "package_name": "com.iwayplus.aiimsjammunavigation"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLSREgrglMD3YDY7vlyNWDvhh1O9yZhUE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
