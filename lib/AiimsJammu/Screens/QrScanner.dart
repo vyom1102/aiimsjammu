@@ -10,6 +10,7 @@ class QRScannerScreen extends StatefulWidget {
   _QRScannerScreenState createState() => _QRScannerScreenState();
 }
 
+
 class _QRScannerScreenState extends State<QRScannerScreen> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   QRViewController? controller;

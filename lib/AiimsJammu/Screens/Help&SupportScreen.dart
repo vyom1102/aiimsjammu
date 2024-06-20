@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:iwaymaps/RGCI/Screens/ContactUs.dart';
+import 'package:iwaymaps/AiimsJammu/Screens/ContactUs.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 

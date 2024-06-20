@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
-import '/RGCI/Data/ServicesDemoData.dart';
+import '/AiimsJammu/Data/ServicesDemoData.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -16,12 +16,12 @@ import '../Widgets/CalculateDistance.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/OpeningClosingStatus.dart';
 import 'serviceInfo.dart';
-class PharmacyScreen extends StatefulWidget {
+class ServiceListScreen extends StatefulWidget {
   @override
-  _PharmacyScreenState createState() => _PharmacyScreenState();
+  _ServiceListScreenState createState() => _ServiceListScreenState();
 }
 
-class _PharmacyScreenState extends State<PharmacyScreen> {
+class _ServiceListScreenState extends State<ServiceListScreen> {
   List<dynamic> _services = [];
   List<dynamic> _filteredServices= [];
   List<String> _selectedServices = [];
@@ -33,11 +33,11 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
   void initState() {
     super.initState();
     // _loadServices();
-    _loadPharmacyServicesFromAPI();
+    _loadServicesFromAPI();
   }
 
 
-  void _loadPharmacyServicesFromAPI() async {
+  void _loadServicesFromAPI() async {
 
     try {
       await guestApi().guestlogin().then((value){
@@ -60,9 +60,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
         if (responseData.containsKey('data') && responseData['data'] is List) {
           setState(() {
             _services = responseData['data'];
-            // _filteredServices = _services;
-            _filteredServices = _services.where((service) => service['type'] == 'Pharmacy').toList();
-
+            _filteredServices = _services;
             _isLoading = false;
           });
         } else {
@@ -76,6 +74,15 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
       // Handle error
     }
   }
+  // void _loadServices() {
+  //   Future.delayed(Duration(seconds: 2), () {
+  //     setState(() {
+  //       _services = jsonDecode(getServices());
+  //       _filteredServices = _services;
+  //       _isLoading = false; // Set loading to false after loading is done
+  //     });
+  //   });
+  // }
 
   void _filterServices() {
     setState(() {
@@ -101,7 +108,16 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
           .toList();
     });
   }
-
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    await launch(launchUri.toString());
+  }
+  Future<void> _shareContent(String text) async {
+    await Share.share(text);
+  }
   @override
   Widget build(BuildContext context) {
     List specialities =
@@ -109,18 +125,6 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          'Pharmacy',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Color(0xFF374151),
-            fontSize: 16,
-            fontFamily: 'Roboto',
-            fontWeight: FontWeight.w500,
-            height: 0.09,
-          ),
-        ),
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(0),
           child: Container(
@@ -139,109 +143,109 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
 
       ),
       body:_isLoading
-          ? _buildShimmerLoading()
+      ? _buildShimmerLoading()
           :Column(
         children: [
 
-          // Semantics(
-          //   label: "Services",
-          //   header: true,
-          //   child: SizedBox(
-          //
-          //     height: 60,
-          //     child: ListView.builder(
-          //       scrollDirection: Axis.horizontal,
-          //       itemCount: specialities.length + 1,
-          //       itemBuilder: (context, index) {
-          //         if (index == 0) {
-          //           return Padding(
-          //             padding: const EdgeInsets.only(left: 8.0,right: 4),
-          //             child: FilterChip(
-          //               disabledColor: Colors.white,
-          //               label: Text(
-          //                 'All',
-          //                 style: TextStyle(
-          //                   color: _selectedServices.isEmpty ? Colors.white : Color(0xFF1C2A3A),
-          //                 ),
-          //               ),
-          //               showCheckmark: false,
-          //               selectedColor: Color(0xFF1C2A3A),
-          //               backgroundColor: Colors.white,
-          //               selected: _selectedServices.isEmpty,
-          //               // backgroundColor: _selectedSpecialities.isEmpty ? Color(0xFF1C2A3A) : Colors.transparent,
-          //               onSelected: (value) {
-          //                 setState(() {
-          //                   _selectedServices.clear();
-          //                   _filterServices();
-          //                 });
-          //               },
-          //               shape: RoundedRectangleBorder(
-          //                 borderRadius: BorderRadius.circular(20),
-          //               ),
-          //             ),
-          //           );
-          //         } else {
-          //           final speciality = specialities[index - 1];
-          //           return Padding(
-          //             padding: const EdgeInsets.all(4.0),
-          //             child: FilterChip(
-          //               label: Text(
-          //                 speciality,
-          //                 style: TextStyle(
-          //                   color: _selectedServices.contains(speciality) ? Colors.white : Color(0xFF1C2A3A),
-          //                 ),
-          //               ),
-          //               selectedColor: Color(0xFF1C2A3A),
-          //
-          //               showCheckmark: false,
-          //               selected: _selectedServices.contains(speciality),
-          //               // backgroundColor: _selectedSpecialities.contains(speciality) ? Color(0xFF1C2A3A) : Colors.transparent,
-          //               onSelected: (value) {
-          //                 setState(() {
-          //                   if (value) {
-          //
-          //                     _selectedServices.add(speciality);
-          //
-          //                   } else {
-          //                     _selectedServices.remove(speciality);
-          //                   }
-          //                   _filterServices();
-          //                 });
-          //               },
-          //               shape: RoundedRectangleBorder(
-          //                 borderRadius: BorderRadius.circular(20),
-          //               ),
-          //             ),
-          //           );
-          //         }
-          //       },
-          //     ),
-          //   ),
-          // ),
+          Semantics(
+            label: "Services",
+            header: true,
+            child: SizedBox(
 
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
-          //   child: Row(
-          //     children: [
-          //       Semantics(
-          //         header:true,
-          //         child: Container(
-          //           height: 16,
-          //           child: Text(
-          //             'Nearby Services',
-          //             style: TextStyle(
-          //               color: Color(0xFF18181B),
-          //               fontSize: 16,
-          //               fontFamily: 'Roboto',
-          //               fontWeight: FontWeight.w500,
-          //               height: 0.09,
-          //             ),
-          //           ),
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // ),
+              height: 60,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: specialities.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 8.0,right: 4),
+                      child: FilterChip(
+                        disabledColor: Colors.white,
+                        label: Text(
+                          'All',
+                          style: TextStyle(
+                            color: _selectedServices.isEmpty ? Colors.white : Color(0xFF1C2A3A),
+                          ),
+                        ),
+                        showCheckmark: false,
+                        selectedColor: Color(0xFF1C2A3A),
+                        backgroundColor: Colors.white,
+                        selected: _selectedServices.isEmpty,
+                        // backgroundColor: _selectedSpecialities.isEmpty ? Color(0xFF1C2A3A) : Colors.transparent,
+                        onSelected: (value) {
+                          setState(() {
+                            _selectedServices.clear();
+                            _filterServices();
+                          });
+                        },
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                    );
+                  } else {
+                    final speciality = specialities[index - 1];
+                    return Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: FilterChip(
+                        label: Text(
+                          speciality,
+                          style: TextStyle(
+                            color: _selectedServices.contains(speciality) ? Colors.white : Color(0xFF1C2A3A),
+                          ),
+                        ),
+                        selectedColor: Color(0xFF1C2A3A),
+
+                        showCheckmark: false,
+                        selected: _selectedServices.contains(speciality),
+                        // backgroundColor: _selectedSpecialities.contains(speciality) ? Color(0xFF1C2A3A) : Colors.transparent,
+                        onSelected: (value) {
+                          setState(() {
+                            if (value) {
+
+                              _selectedServices.add(speciality);
+
+                            } else {
+                              _selectedServices.remove(speciality);
+                            }
+                            _filterServices();
+                          });
+                        },
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
+            child: Row(
+              children: [
+                Semantics(
+                  header:true,
+                  child: Container(
+                    height: 16,
+                    child: Text(
+                      'Nearby Services',
+                      style: TextStyle(
+                        color: Color(0xFF18181B),
+                        fontSize: 16,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w500,
+                        height: 0.09,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           SizedBox(
             height: 4,
           ),
@@ -266,7 +270,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => ServiceInfo(
-                            id:service['_id'],
+                            id: service['_id'],
                             imagePath: service['image'],
                             name: service['name'],
                             location:service['locationName'],
@@ -456,7 +460,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 16),
+                                SizedBox(height: 12),
 
                               ],
                             ),

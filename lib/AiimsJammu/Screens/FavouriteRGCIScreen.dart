@@ -5,8 +5,8 @@ import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'package:iwaymaps/RGCI/Screens/FavouriteDoctor.dart';
-import 'package:iwaymaps/RGCI/Screens/FavouriteService.dart';
+import 'package:iwaymaps/AiimsJammu/Screens/FavouriteDoctor.dart';
+import 'package:iwaymaps/AiimsJammu/Screens/FavouriteService.dart';
 class FavouriteRGCIScreen extends StatefulWidget {
   const FavouriteRGCIScreen({Key? key}) : super(key: key);
 

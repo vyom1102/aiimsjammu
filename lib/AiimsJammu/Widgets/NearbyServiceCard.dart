@@ -238,7 +238,7 @@
 // }
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '/RGCI/Screens/ServiceInfo.dart';
+import '/AiimsJammu/Screens/ServiceInfo.dart';
 
 import 'CalculateDistance.dart';
 import 'OpeningClosingStatus.dart';

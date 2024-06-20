@@ -7,21 +7,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
-import 'package:iwaymaps/RGCI/Widgets/OpeningClosingStatus.dart';
+import 'package:iwaymaps/AiimsJammu/Widgets/OpeningClosingStatus.dart';
 import '/DestinationSearchPage.dart';
-import '/RGCI/Screens/ATMScreen.dart';
-import '/RGCI/Screens/AllAnnouncementScreen.dart';
-import '/RGCI/Screens/CafeteriaScreen.dart';
-import '/RGCI/Screens/CountersScreen.dart';
-import '/RGCI/Screens/DoctorScreen.dart';
-import '/RGCI/Screens/EmergencyScreen.dart';
-import '/RGCI/Screens/NotificationScreen.dart';
-import '/RGCI/Screens/OtherServices.dart';
-import '/RGCI/Screens/ServiceInfo.dart';
-import '/RGCI/Screens/ServicesScreen.dart';
+import '/AiimsJammu/Screens/ATMScreen.dart';
+import '/AiimsJammu/Screens/AllAnnouncementScreen.dart';
+import '/AiimsJammu/Screens/CafeteriaScreen.dart';
+import '/AiimsJammu/Screens/CountersScreen.dart';
+import '/AiimsJammu/Screens/DoctorScreen.dart';
+import '/AiimsJammu/Screens/EmergencyScreen.dart';
+import '/AiimsJammu/Screens/NotificationScreen.dart';
+import '/AiimsJammu/Screens/OtherServices.dart';
+import '/AiimsJammu/Screens/ServiceInfo.dart';
+import '/AiimsJammu/Screens/ServicesScreen.dart';
 import 'package:http/http.dart' as http;
-import '/RGCI/Widgets/LocationIdFunction.dart';
-import '/RGCI/Widgets/NearbyServiceCard.dart';
+import '/AiimsJammu/Widgets/LocationIdFunction.dart';
+import '/AiimsJammu/Widgets/NearbyServiceCard.dart';
 import '../../API/guestloginapi.dart';
 import '../Widgets/AnouncementCard.dart';
 import '../Widgets/CalculateDistance.dart';
@@ -43,6 +43,9 @@ class _HomePageState extends State<HomePage> {
   PageController _pageController = PageController();
   List<dynamic> _services = [];
   List<dynamic> _filteredServices = [];
+  List<dynamic> _atmfilteredServices = [];
+  List<dynamic> _pharmacyfilteredServices = [];
+  List<dynamic> _countersfilteredServices = [];
   int _currentPage = 0;
   String token = "";
   late int index;
@@ -69,6 +72,7 @@ class _HomePageState extends State<HomePage> {
     _loadServicesFromAPI();
     _loadAnnouncementsFromAPI();
     getUserDataFromHive();
+
 
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
@@ -217,6 +221,9 @@ class _HomePageState extends State<HomePage> {
           setState(() {
             _services = responseData['data'];
             _filteredServices = _services;
+            _pharmacyfilteredServices = _services.where((service) => service['type'] == 'Pharmacy').toList();
+            _atmfilteredServices = _services.where((service) => service['type'] == 'ATM').toList();
+            _countersfilteredServices = _services.where((service) => service['type'] == 'Counters').toList();
 
           });
         } else {
@@ -479,145 +486,9 @@ class _HomePageState extends State<HomePage> {
           SingleChildScrollView(
             child: Column(
               children: [
-                // s
+
                 Column(
                   children: [
-                    // Padding(
-                    //   padding: const EdgeInsets.only(left: 16.0, right: 14),
-                    //   child: Row(
-                    //     mainAxisAlignment: MainAxisAlignment.start,
-                    //     children: [
-                    //       Column(
-                    //         mainAxisAlignment: MainAxisAlignment.start,
-                    //         crossAxisAlignment: CrossAxisAlignment.start,
-                    //         children: [
-                    //           nameLoading?CircularProgressIndicator():
-                    //           Text(
-                    //             "Hi,${userName}",
-                    //             style: const TextStyle(
-                    //               fontFamily: "Roboto",
-                    //               fontSize: 20,
-                    //               fontWeight: FontWeight.w700,
-                    //               color: Color(0xff18181b),
-                    //               height: 26 / 20,
-                    //             ),
-                    //             textAlign: TextAlign.left,
-                    //           ),
-                    //           Text(
-                    //             "How can we help you today?",
-                    //             style: TextStyle(
-                    //               fontFamily: "Roboto",
-                    //               fontSize: 14,
-                    //               fontWeight: FontWeight.w400,
-                    //               color: Color(0xff5e5e5f),
-                    //               height: 20 / 14,
-                    //             ),
-                    //             textAlign: TextAlign.left,
-                    //           )
-                    //         ],
-                    //       ),
-                    //       Spacer(),
-                    //       IconButton(
-                    //         icon: Icon(Icons.notifications_none_outlined),
-                    //         onPressed: () {
-                    //           Navigator.push(
-                    //             context,
-                    //             MaterialPageRoute(
-                    //                 builder: (context) => NotificationScreen()),
-                    //           );
-                    //         },
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ),
-                    // Padding(
-                    //   padding: const EdgeInsets.only(
-                    //       left: 16.0, right: 16.0),
-                    //   child: Container(
-                    //     padding: EdgeInsets.only(left: 16, right: 8),
-                    //     decoration: BoxDecoration(
-                    //       // color: Colors.grey[200],
-                    //       borderRadius: BorderRadius.circular(10),
-                    //       border:
-                    //           Border.all(color: Color(0xFFE0E0E0), width: 1),
-                    //     ),
-                    //     child: Row(
-                    //       children: [
-                    //         SizedBox(
-                    //           child: SvgPicture.asset(
-                    //               'assets/images/searchicon.svg'),
-                    //         ),
-                    //         // Icon(Icons.search),
-                    //         SizedBox(width: 16),
-                    //         // Semantics(
-                    //         //   header: true,
-                    //         //   // label: "Search Bar",
-                    //         //   child: GestureDetector(
-                    //         //     onTap: (){
-                    //         //       Navigator.push(
-                    //         //         context,
-                    //         //         MaterialPageRoute(
-                    //         //             builder: (context) => DestinationSearchPage(voiceInputEnabled: false)),
-                    //         //       );
-                    //         //     },
-                    //         //     child: Container(
-                    //         //       width: MediaQuery.sizeOf(context).width * 0.67,
-                    //         //       child: TextField(
-                    //         //         decoration: InputDecoration(
-                    //         //           hintText: 'Doctor, services..',
-                    //         //           border: InputBorder.none,
-                    //         //         ),
-                    //         //       ),
-                    //         //     ),
-                    //         //   ),
-                    //         // ),
-                    //         Semantics(
-                    //           header: true,
-                    //           // label: "Search Bar",
-                    //           child: GestureDetector(
-                    //             onTap: () {
-                    //               Navigator.push(
-                    //                 context,
-                    //                 MaterialPageRoute(
-                    //                   builder: (context) => DestinationSearchPage(voiceInputEnabled: false),
-                    //                 ),
-                    //               ).then((value) => PassLocationId(context, value));
-                    //             },
-                    //             child: Container(
-                    //               padding: EdgeInsets.only(top: 8),
-                    //               width: MediaQuery.of(context).size.width * 0.67,
-                    //               height: 40,
-                    //               child: Text(
-                    //                 "Doctor, services,",
-                    //                 style: const TextStyle(
-                    //                   fontFamily: "Roboto",
-                    //                   fontSize: 16,
-                    //                   fontWeight: FontWeight.w400,
-                    //                   color: Color(0xff535353),
-                    //
-                    //                 ),
-                    //                 textAlign: TextAlign.left,
-                    //               )
-                    //             ),
-                    //           ),
-                    //         ),
-                    //
-                    //         // SizedBox(width: 26,),
-                    //         // Spacer(),
-                    //         // Semantics(
-                    //         //   label: "Microphone",
-                    //         //   child: Icon(
-                    //         //     Icons.mic_none_outlined,
-                    //         //     color: Color(0xff8E8C8C),
-                    //         //   ),
-                    //         // ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
-                    // SizedBox(
-                    //   height: 10,
-                    // ),
 
                     Padding(
                       padding: const EdgeInsets.symmetric(
@@ -679,10 +550,10 @@ class _HomePageState extends State<HomePage> {
                               },
                               child: _buildCard(
                                   'assets/images/Doctor.svg', 'Doctor')),
-
+                          if(_pharmacyfilteredServices.isNotEmpty)
                           SizedBox(width: 12),
 
-
+                          if(_pharmacyfilteredServices.isNotEmpty)
                           GestureDetector(
                               onTap: () {
                                 Navigator.push(
@@ -705,7 +576,9 @@ class _HomePageState extends State<HomePage> {
                             child: _buildCard(
                                 'assets/images/Doctor (1).svg', 'Emergency'),
                           ),
+                          if(_atmfilteredServices.isNotEmpty)
                           SizedBox(width: 12),
+                          if(_atmfilteredServices.isNotEmpty)
                           GestureDetector(
                             onTap: () {
                               Navigator.push(
@@ -717,6 +590,7 @@ class _HomePageState extends State<HomePage> {
                             child: _buildCard(
                                 'assets/images/Atm.svg', 'ATM'),
                           ),
+
                           SizedBox(width: 12),
                           GestureDetector(
                             onTap: () {
@@ -729,7 +603,9 @@ class _HomePageState extends State<HomePage> {
                             child: _buildCard(
                                 'assets/images/Cafetaria.svg', 'Cafeteria'),
                           ),
+                          if(_countersfilteredServices.isNotEmpty)
                           SizedBox(width: 12),
+                          if(_countersfilteredServices.isNotEmpty)
                           GestureDetector(
                               onTap: () {
                                 Navigator.push(

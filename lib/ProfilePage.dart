@@ -9,7 +9,7 @@ import 'package:hive/hive.dart';
 import 'package:iwaymaps/API/DeleteApi.dart';
 import 'package:iwaymaps/Elements/UserCredential.dart';
 import 'package:iwaymaps/LOGIN%20SIGNUP/SignIn.dart';
-import 'package:iwaymaps/RGCI/Screens/Help&SupportScreen.dart';
+import 'package:iwaymaps/AiimsJammu/Screens/Help&SupportScreen.dart';
 
 import 'DebugToggle.dart';
 import 'EditProfile.dart';

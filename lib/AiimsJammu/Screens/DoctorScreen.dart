@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:iwaymaps/RGCI/Screens/DoctorProfile.dart';
+import 'package:iwaymaps/AiimsJammu/Screens/DoctorProfile.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../API/guestloginapi.dart';
 import '../Data/DoctorDemoData.dart';

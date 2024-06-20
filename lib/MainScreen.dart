@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '/MapScreen.dart';
-import '/RGCI/Screens/FavouriteRGCIScreen.dart';
-import '/RGCI/Screens/QrScanner.dart';
+import '/AiimsJammu/Screens/FavouriteRGCIScreen.dart';
+import '/AiimsJammu/Screens/QrScanner.dart';
 import '/VenueSelectionScreen.dart';
 import '/Navigation.dart';
 
-import './RGCI/Screens/HomePage.dart';
-import 'RGCI/Screens/ProfilePage.dart';
+import './AiimsJammu/Screens/HomePage.dart';
+import 'AiimsJammu/Screens/ProfilePage.dart';
 import 'FavouriteScreen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -27,6 +27,7 @@ class _MainScreenState extends State<MainScreen> {
     HomePage(),
     Navigation(),
     QRScannerScreen(),
+
     FavouriteRGCIScreen(),
     ProfilePage(),
   ];
@@ -102,12 +103,12 @@ class _MainScreenState extends State<MainScreen> {
 // import 'package:fluttertoast/fluttertoast.dart';
 // import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 // import '/MapScreen.dart';
-// import '/RGCI/Screens/FavouriteRGCIScreen.dart';
-// import '/RGCI/Screens/QrScanner.dart';
+// import '/AiimsJammu/Screens/FavouriteRGCIScreen.dart';
+// import '/AiimsJammu/Screens/QrScanner.dart';
 // import '/Navigation.dart';
 //
-// import './RGCI/Screens/HomePage.dart';
-// import 'RGCI/Screens/ProfilePage.dart';
+// import './AiimsJammu/Screens/HomePage.dart';
+// import 'AiimsJammu/Screens/ProfilePage.dart';
 // import 'FavouriteScreen.dart';
 //
 // class MainScreen extends StatefulWidget {

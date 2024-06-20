@@ -1,6 +1,6 @@
 // //
 // // import 'package:flutter/material.dart';
-// // import '/RGCI/Screens/HomePage.dart';
+// // import '/AiimsJammu/Screens/HomePage.dart';
 // //
 // //
 // // class AnnouncementCard extends StatelessWidget {
