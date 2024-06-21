@@ -46,7 +46,7 @@ class _SignInState extends State<SignIn> {
   Color outlineTextColorForPass = new Color(0xff49454f);
   bool loginclickable = false;
   Color buttonBGColor =  Color(0xff0B6B94);
-
+bool isLoading = false;
   @override
   void initState() {
     super.initState();
@@ -134,6 +134,9 @@ class _SignInState extends State<SignIn> {
     print("Signin api info send");
     print(phoneNumberOEmail);
     print(passEditingController.text);
+    setState(() {
+      isLoading = true;
+    });
     SignInApiModel? signInResponse = await SignInAPI().signIN(phoneNumberOEmail, passEditingController.text);
     print("signInResponse.accessToken");
     print(signInResponse?.refreshToken);
@@ -141,6 +144,7 @@ class _SignInState extends State<SignIn> {
     if (signInResponse == null) {
       setState(() {
         passincorrect = true;
+        isLoading = false;
       });
       HelperClass.showToast("Invalid Username or Password");
     } else {
@@ -465,7 +469,7 @@ class _SignInState extends State<SignIn> {
                                         ),
                                         onPressed: loginclickable ? _signIn : null,
                                         child: Center(
-                                          child: Text(
+                                          child: !isLoading ? Text(
                                             'Sign in',
                                             style: TextStyle(
                                               fontFamily: 'Roboto',
@@ -473,7 +477,14 @@ class _SignInState extends State<SignIn> {
                                               fontWeight: FontWeight.w500,
                                               color: Color(0xffffffff),
                                             ),
-                                          ),
+                                          ):Container(
+                                              height: 20,
+                                              width: 20,
+
+                                              child: CircularProgressIndicator(
+                                                backgroundColor: Colors.grey,
+                                                color: Colors.white,
+                                              )),
                                         ),
                                       ),
                                     ),
