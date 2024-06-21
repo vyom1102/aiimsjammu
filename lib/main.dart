@@ -131,6 +131,14 @@ class _MyAppState extends State<MyApp> {
     requestLocationPermission();
     return MaterialApp(
       title: "IWAYPLUS",
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        textSelectionTheme: TextSelectionThemeData(
+          cursorColor: Color(0xff0B6B94), // Change cursor color
+          selectionColor: Colors.greenAccent.withOpacity(0.5), // Change selection color
+          selectionHandleColor: Color(0xff0B6B94), // Change selection handle color
+        ),
+      ),
       home: FutureBuilder<bool>(
         future: null,
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {

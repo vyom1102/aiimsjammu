@@ -264,7 +264,7 @@ class _ImageCarouselWidgetState extends State<ImageCarouselWidget> {
                   children: [
                     ClipRRect(
                       child: FadeInImage.assetNetwork(
-                        placeholder: 'assets/images/DefaultCorousalImage.png', 
+                        placeholder: 'assets/images/DefaultCorousalImage.png',
                         image: 'https://dev.iwayplus.in/uploads/${pair.image}',
                         fit: BoxFit.fill,
                         placeholderFit: BoxFit.fill,

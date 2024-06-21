@@ -39,7 +39,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool isConnectedToInternet =false;
+  bool isConnectedToInternet =true;
   StreamSubscription? _internetConnection;
   List<dynamic> carouselImages = [];
   // List<AnnouncementAData> AnnounceData = [];

@@ -45,7 +45,7 @@ class _SignInState extends State<SignIn> {
   Color outlineheaderColorForPass = new Color(0xff49454f);
   Color outlineTextColorForPass = new Color(0xff49454f);
   bool loginclickable = false;
-  Color buttonBGColor = new Color(0xff8D8C8C);
+  Color buttonBGColor =  Color(0xff0B6B94);
 
   @override
   void initState() {
@@ -75,13 +75,13 @@ class _SignInState extends State<SignIn> {
     if (mailEditingController.text.length > 0) {
       if (passEditingController.text.length > 0) {
         setState(() {
-          buttonBGColor = Color(0xff24b9b0);
+          buttonBGColor = Color(0xff0B6B94);
           loginclickable = true;
         });
       }
       setState(() {
-        outlineheaderColor = Color(0xff24b9b0); // Change the button color to green
-        outlineTextColor = Color(0xff24b9b0); // Change the button color to green
+        outlineheaderColor = Color(0xff0B6B94); // Change the button color to green
+        outlineTextColor = Color(0xff0B6B94); // Change the button color to green
       });
     } else {
       setState(() {
@@ -96,13 +96,13 @@ class _SignInState extends State<SignIn> {
     if (passEditingController.text.length > 0) {
       if (mailEditingController.text.length > 0) {
         setState(() {
-          buttonBGColor = Color(0xff24b9b0);
+          buttonBGColor = Color(0xff0B6B94);
           loginclickable = true;
         });
       }
       setState(() {
-        outlineheaderColorForPass = Color(0xff24b9b0); // Change the button color to green
-        outlineTextColorForPass = Color(0xff24b9b0); // Change the button color to green
+        outlineheaderColorForPass = Color(0xff0B6B94); // Change the button color to green
+        outlineTextColorForPass = Color(0xff0B6B94); // Change the button color to green
       });
     } else {
       setState(() {
@@ -115,7 +115,7 @@ class _SignInState extends State<SignIn> {
 
   void signINButtonControler() {
     setState(() {
-      buttonBGColor = Color(0xff24b9b0);
+      buttonBGColor = Color(0xff0B6B94);
     });
   }
 
@@ -227,16 +227,29 @@ class _SignInState extends State<SignIn> {
                                                     label: "Enter email or phone number",
                                                     child: ExcludeSemantics(
                                                       child: TextFormField(
+
+                                                        cursorColor: Color(0xff0B6B94),
+                                                        cursorErrorColor: Color(0xff0B6B94),
                                                         autofillHints: [AutofillHints.username],
                                                         focusNode: smallTextMailFocus,
                                                         controller: mailEditingController,
+
                                                         decoration: InputDecoration(
                                                           labelText: "Email or mobile number",
                                                           labelStyle: TextStyle(
                                                             fontFamily: "Roboto",
                                                             fontSize: 14,
                                                             fontWeight: FontWeight.w400,
-                                                            color: Color(0xff49454f),
+                                                            // color: Color(0xff0B6B94),
+                                                           color: Color(0xff49454f),
+                                                            height: 16/12,
+                                                          ),
+                                                          floatingLabelStyle: TextStyle(
+                                                            fontFamily: "Roboto",
+                                                            fontSize: 14,
+                                                            fontWeight: FontWeight.w400,
+                                                            color: Color(0xff0B6B94),
+                                                            //  color: Color(0xff49454f),
                                                             height: 16/12,
                                                           ),
 
@@ -250,7 +263,7 @@ class _SignInState extends State<SignIn> {
                                                           focusedBorder: OutlineInputBorder(
                                                               borderRadius: BorderRadius.circular(6),
                                                               borderSide: BorderSide(
-                                                                color: Color(0xff24b9b0),
+                                                                color: Color(0xff0B6B94),
                                                                 width: 2,
                                                               )
                                                           ),
@@ -306,6 +319,7 @@ class _SignInState extends State<SignIn> {
                                                     label: "Enter password",
                                                     child: ExcludeSemantics(
                                                       child: TextFormField(
+                                                        cursorColor: Color(0xff0B6B94),
                                                         autofillHints: [AutofillHints.password],
                                                         focusNode: smallTextPassFocus,
                                                         controller: passEditingController,
@@ -327,19 +341,26 @@ class _SignInState extends State<SignIn> {
                                                             fontSize: 14,
                                                             fontWeight: FontWeight.w400,
                                                             color: Color(0xff49454f),
-                                                            height: 16/12,
+
+                                                          ),
+                                                          floatingLabelStyle: TextStyle(
+                                                            fontFamily: "Roboto",
+                                                            fontSize: 14,
+                                                            fontWeight: FontWeight.w400,
+                                                            color: Color(0xff0B6B94),
+
                                                           ),
                                                           hintStyle: TextStyle(
                                                             fontFamily: "Roboto",
                                                             fontSize: 16,
                                                             fontWeight: FontWeight.w400,
                                                             color: Color(0xff49454f),
-                                                            height: 24/16,
+
                                                           ),
                                                           focusedBorder: OutlineInputBorder(
                                                               borderRadius: BorderRadius.circular(6),
                                                               borderSide: BorderSide(
-                                                                color: Color(0xff24b9b0),
+                                                                color: Color(0xff0B6B94),
                                                                 width: 2,
                                                               )
                                                           ),
@@ -404,7 +425,7 @@ class _SignInState extends State<SignIn> {
                                       Spacer(),
                                       Container(
                                         color: Colors.white,
-                                        margin: EdgeInsets.fromLTRB(0, 0, 26, 0),
+                                        margin: EdgeInsets.fromLTRB(0, 8, 8, 0),
                                         child: TextButton(
                                           onPressed: () {
                                             Navigator.push(
@@ -416,12 +437,12 @@ class _SignInState extends State<SignIn> {
                                           },
                                           child: Text(
                                             "Forgot Password?",
-                                            style: const TextStyle(
+                                            style:  TextStyle(
                                               fontFamily: "Roboto",
                                               fontSize: 14,
                                               fontWeight: FontWeight.w400,
-                                              color: Color(0xff24b9b0),
-                                              height: 20 / 14,
+                                              color: Color(0xff0B6B94),
+
                                             ),
                                             textAlign: TextAlign.center,
                                           ),
@@ -435,7 +456,7 @@ class _SignInState extends State<SignIn> {
                                       height: 48,
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(
-                                          foregroundColor: Color(0xff777777),
+                                          foregroundColor: Color(0xff888686),
                                           backgroundColor: buttonBGColor,
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(4.0),
@@ -517,48 +538,58 @@ class _SignInState extends State<SignIn> {
                       //         ],
                       //       )),
                       // ),
-                      Container(
-                        margin: EdgeInsets.only(top:20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                                child: Text(
-                                  "Don't have an account?",
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                    height: 20/14,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                )
+                      InkWell(
+                        onTap: (){
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SignUp(),
                             ),
-                            Container(
-                                child: TextButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => SignUp(),
-                                      ),
-                                    );
-                                  },
+                          );
+                        },
+                        child: Container(
+                          // margin: EdgeInsets.only(top:20),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
                                   child: Text(
-                                    "Sign up",
+                                    "Don't have an account?",
                                     style: const TextStyle(
                                       fontFamily: "Roboto",
                                       fontSize: 14,
                                       fontWeight: FontWeight.w400,
                                       height: 20/14,
-                                      color: Color(0xff24b9b0),
                                     ),
                                     textAlign: TextAlign.center,
-                                  ),
-                                )
-                            ),
+                                  )
+                              ),
+                              Container(
+                                  child: TextButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => SignUp(),
+                                        ),
+                                      );
+                                    },
+                                    child: Text(
+                                      "Sign up",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                        height: 20/14,
+                                        color: Color(0xff0B6B94),
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  )
+                              ),
 
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ],
