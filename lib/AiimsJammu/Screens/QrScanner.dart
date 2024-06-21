@@ -1,15 +1,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'dart:convert';
 
-
+import '../Widgets/LocationIdFunction.dart';
 
 class QRScannerScreen extends StatefulWidget {
   @override
   _QRScannerScreenState createState() => _QRScannerScreenState();
 }
-
 
 class _QRScannerScreenState extends State<QRScannerScreen> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
@@ -49,23 +48,26 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       ),
     );
   }
-  Future<void> _launchInWebView(Uri url) async {
-    if (!await launchUrl(url, mode: LaunchMode.inAppBrowserView)) {
-      throw Exception('Could not launch $url');
-    }
-  }
 
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) {
+      try {
 
-      _launchInWebView(Uri.parse(scanData.code??""));
+        final data = jsonDecode(scanData.code ?? '');
 
-      print(scanData.code);
+        final id = data['id'];
+
+        final isSource=data['source'];
+        print("-----qr-----");
+        print(isSource);
+        print(id);
+        PassLocationId(context, id);
+      } catch (e) {
+        print('Error parsing JSON: $e');
+      }
     });
   }
-
-
 
   @override
   void dispose() {

@@ -7,7 +7,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:iwaymaps/AiimsJammu/Screens/NoInternetConnection.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/OpeningClosingStatus.dart';
 import '/DestinationSearchPage.dart';
 import '/AiimsJammu/Screens/ATMScreen.dart';
@@ -37,6 +39,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  bool isConnectedToInternet =false;
+  StreamSubscription? _internetConnection;
   List<dynamic> carouselImages = [];
   // List<AnnouncementAData> AnnounceData = [];
   List<dynamic> announcements = [];
@@ -66,7 +70,28 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentPage);
-
+    _internetConnection = InternetConnection().onStatusChange.listen((event) {
+      switch(event){
+        case InternetStatus.disconnected:
+          _showNoInternetSnackbar();
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(content: Text('No Internet Connection')),
+          // );
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => NoInternetConnection(),
+          //   ),
+          // );
+        case InternetStatus.connected:
+          break;
+        default:
+          setState(() {
+            isConnectedToInternet = true;
+          });
+          break;
+      }
+    });
     // Battery Consuming
     // startAutoAnimation();
     // _fetchHospitalData();
@@ -83,11 +108,54 @@ class _HomePageState extends State<HomePage> {
     //   _scrollToNext();
     // });
   }
-  Future<void> checkConnectivity() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _scrollController.dispose();
+    _internetConnection?.cancel();
+    super.dispose();
+  }
+  // Future<void> checkConnectivity() async {
+  //   var connectivityResult = await (Connectivity().checkConnectivity());
+  //   setState(() {
+  //     isOnline = connectivityResult != ConnectivityResult.none;
+  //   });
+  // }
+  void _showNoInternetSnackbar() {
     setState(() {
-      isOnline = connectivityResult != ConnectivityResult.none;
+      isConnectedToInternet = false;
     });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('No Internet Connection'),
+        behavior: SnackBarBehavior.floating,
+        duration: Duration(days: 1), // Long duration to keep the snackbar visible
+        action: SnackBarAction(
+          label: 'Retry',
+          onPressed: () {
+            // Attempt to check the connection again
+            _checkInternetConnection();
+          },
+        ),
+      ),
+    );
+  }
+
+  void _hideNoInternetSnackbar() {
+    setState(() {
+      isConnectedToInternet = true;
+    });
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  }
+
+  void _checkInternetConnection() async {
+    bool isConnected = await InternetConnection().hasInternetAccess;
+    if (isConnected) {
+      _hideNoInternetSnackbar();
+    } else {
+      _showNoInternetSnackbar();
+    }
   }
   void _loadImageCorousalFromAPI() async {
     try {
@@ -255,12 +323,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
+
 
   void animateToNextPage() {
     if (_currentPage < 4) {

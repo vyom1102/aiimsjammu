@@ -8,7 +8,7 @@ void PassLocationId(BuildContext context,String Id){
   Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) =>   Navigation(directLandID: Id,),
+      builder: (context) => Navigation(directLandID: Id,),
     ),
   );
 
