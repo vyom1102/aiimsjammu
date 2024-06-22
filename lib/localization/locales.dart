@@ -40,6 +40,7 @@ mixin LocaleData {
   static const String between56Feet = '5 to 6 Feet';
   static const String more6Feet = '> 6 Feet';
   static const String random = 'Random';
+  static const String upToDate ="Update";
 
   static const Map<String, dynamic> EN = {
     'title': 'Settings',
@@ -69,7 +70,8 @@ mixin LocaleData {
     '< 5 Feet':'< 5 Feet',
     '5 to 6 Feet':'5 to 6 Feet',
     '> 6 Feet':'> 6 Feet',
-    'random':'random'
+    'random':'random',
+    'upToDate':'Up To Date ',
   };
 
   static const Map<String, dynamic> HI = {
@@ -100,7 +102,8 @@ mixin LocaleData {
   '< 5 Feet': '< 5 फीट',
   '5 to 6 Feet': '5 से 6 फीट',
   '> 6 Feet': '> 6 फीट',
-    'random':'random'
+    'random':'random',
+    'upToDate':'अद्यतन',
   };
 
   static const Map<String, dynamic> TA = {
@@ -131,7 +134,9 @@ mixin LocaleData {
   '< 5 Feet': '< 5 அடி',
   '5 to 6 Feet': '5 முதல் 6 அடி',
   '> 6 Feet': '> 6 அடி',
-    'random':'random'
+    'random':'random',
+    'upToDate':'புதுப்பிக்கப்பட்டது',
+
   };
 
   static const Map<String, dynamic> TE = {
@@ -161,7 +166,8 @@ mixin LocaleData {
     'userHeight': 'వాడుకరి ఎత్తు',
   '< 5 Feet': '< 5 అడుగులు',
   '5 to 6 Feet': '5 నుండి 6 అడుగులు',
-  '> 6 Feet': '> 6 అడుగులు'
+  '> 6 Feet': '> 6 అడుగులు',
+    'upToDate':'నవీకరించబడింది',
   };
 
   static const Map<String, dynamic> PA = {
@@ -192,6 +198,7 @@ mixin LocaleData {
   '< 5 Feet': '< 5 ਫੁੱਟ',
   '5 to 6 Feet': '5 ਤੋਂ 6 ਫੁੱਟ',
   '> 6 Feet': '> 6 ਫੁੱਟ',
+    'upToDate':'ਅਪ-ਟੂ-ਡੇਟ',
   };
   static const Map<String, dynamic> NE = {
     'title': 'सेटिङहरू',
@@ -220,7 +227,8 @@ mixin LocaleData {
     'userHeight': 'प्रयोगकर्ता उचाइ',
   '< 5 Feet': '< ५ फिट',
   '5 to 6 Feet': '५ देखि ६ फिट',
-  '> 6 Feet': '> ६ फिट'
+  '> 6 Feet': '> ६ फिट',
+    'upToDate':'अद्यावधिक',
   };
 
 }

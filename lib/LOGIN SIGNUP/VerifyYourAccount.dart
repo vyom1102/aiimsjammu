@@ -275,10 +275,13 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                       label: "Enter 4 digit OTP",
                                       child: ExcludeSemantics(
                                         child: TextFormField(
+
+
                                           focusNode: _focusNode1,
                                           keyboardType: TextInputType.number,
                                           inputFormatters: <TextInputFormatter>[
-                                            FilteringTextInputFormatter.digitsOnly
+                                            FilteringTextInputFormatter.digitsOnly,
+
                                           ],
                                           controller: OTPEditingController,
                                           decoration: InputDecoration(
@@ -315,6 +318,7 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                           ),
                                           onChanged: (value) {
                                             OTPFieldListner();
+
                                             outlineheaderColorForPass = new Color(0xff49454f);
                                             outlineheaderColorForName = new Color(0xff49454f);
                                           },

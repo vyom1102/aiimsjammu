@@ -53,16 +53,14 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) {
       try {
-
         final data = jsonDecode(scanData.code ?? '');
-
         final id = data['id'];
-
         final isSource=data['source'];
         print("-----qr-----");
         print(isSource);
         print(id);
         PassLocationId(context, id);
+        controller?.stopCamera();
       } catch (e) {
         print('Error parsing JSON: $e');
       }

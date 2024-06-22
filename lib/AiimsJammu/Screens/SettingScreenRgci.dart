@@ -18,18 +18,41 @@ class _SettingScreenState extends State<SettingScreen> {
   bool NotificationswitchValue = true;
   bool DisabilityswitchValue = false;
   bool ColorContrastswitchValue = false;
-  bool isNaturalDirectionSelected = true;
-  bool isFocusMode = true;
-  bool isDistanceinM = true;
+  // bool isNaturalDirectionSelected = true;
+  // bool isFocusMode = true;
+  // bool isDistanceinM = true;
+  late bool isNaturalDirectionSelected ;
+  late bool isFocusMode;
+  late bool isDistanceinM;
   // String? selectedLanguage = 'English';
   late FlutterLocalization _flutterLocalization;
   late String _currentLocale = '';
+  late List<bool> _selectedHeight = <bool>[false, false, false];
 
   @override
   void initState() {
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
-
+    print(UserCredentials().getuserNavigationModeSetting());
+    String NavigationMode = UserCredentials().getuserNavigationModeSetting();
+    isNaturalDirectionSelected = NavigationMode == 'Natural Direction';
+    print(UserCredentials().getUserOrentationSetting());
+    String Orientation = UserCredentials().getUserOrentationSetting();
+    isFocusMode = Orientation == 'Focus Mode';
+    print(UserCredentials().getUserPathDetails());
+    String Path = UserCredentials().getUserPathDetails();
+    isDistanceinM = Path == 'Distance in meters';
+    String userHeightString = UserCredentials().getUserHeight();
+    // Convert the height string to a double
+    double userHeight = double.tryParse(userHeightString) ?? 0.0;
+    // Determine which height range the user's height falls into
+    if (userHeight < 5.0) {
+      _selectedHeight[0] = true;
+    } else if (userHeight >= 5.0 && userHeight <= 6.0) {
+      _selectedHeight[1] = true;
+    } else if (userHeight > 6.0) {
+      _selectedHeight[2] = true;
+    }
     super.initState();
   }
 
@@ -65,7 +88,7 @@ class _SettingScreenState extends State<SettingScreen> {
   }
 
   final List<bool> _selectedDisability = <bool>[true, false, false];
-  final List<bool> _selectedHeight = <bool>[true, false, false];
+  // final List<bool> _selectedHeight = <bool>[true, false, false];
   // List<String> StringDisability = ['Blind','Low Vision','Wheelchair','Regular'];
   // List<Widget> disability = <Widget>[
   //   Text(
