@@ -52,6 +52,9 @@ class _HomePageState extends State<HomePage> {
   List<dynamic> _pharmacyfilteredServices = [];
   List<dynamic> _countersfilteredServices = [];
   List<dynamic> _cafeteriafilteredServices = [];
+  List<dynamic> _otherservices = [];
+  List<dynamic>   _otherfilteredServices = [];
+
 
   int _currentPage = 0;
   String token = "";
@@ -66,6 +69,7 @@ class _HomePageState extends State<HomePage> {
   String? emailAddress;
   bool nameLoading= false;
   bool isOnline = true;
+
   @override
   void initState() {
     super.initState();
@@ -122,6 +126,51 @@ class _HomePageState extends State<HomePage> {
   //     isOnline = connectivityResult != ConnectivityResult.none;
   //   });
   // }
+  void _loadOtherServicesFromAPI() async {
+
+    try {
+      await guestApi().guestlogin().then((value){
+        if(value.accessToken != null){
+          token = value.accessToken!;
+        }
+      });
+      print('trying');
+      final response = await http.get(
+
+        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
+        headers: {
+          'Content-Type': 'application/json',
+          "x-access-token": token,
+        },);
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        print(responseData);
+        if (responseData.containsKey('data') && responseData['data'] is List) {
+
+          setState(() {
+            _otherservices = responseData['data'];
+            _otherfilteredServices = _otherservices.where((service) =>
+            service['type'] != 'Pharmacy' &&
+                service['type'] != 'Ambulance' &&
+                service['type'] != 'BloodBank' &&
+                service['type'] != 'Counters' &&
+                service['type'] != 'Cafeteria'
+            ).toList();
+
+          });
+
+        } else {
+          throw Exception('Response data does not contain the expected list of doctors under the "ServiceData" key');
+        }
+      } else {
+        throw Exception('Failed to load data: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      // Handle error
+    }
+  }
   void _showNoInternetSnackbar() {
     setState(() {
       isConnectedToInternet = false;
@@ -692,7 +741,9 @@ class _HomePageState extends State<HomePage> {
                               },
 
                               child: _buildCard('assets/images/counter.svg', 'Counters')),
+                          if(_otherfilteredServices.isNotEmpty)
                           SizedBox(width: 12),
+                          if(_otherfilteredServices.isNotEmpty)
                           GestureDetector(
                               onTap: () {
                                 Navigator.push(

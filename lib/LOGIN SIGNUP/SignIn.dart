@@ -80,8 +80,8 @@ bool isLoading = false;
         });
       }
       setState(() {
-        outlineheaderColor = Color(0xff0B6B94); // Change the button color to green
-        outlineTextColor = Color(0xff0B6B94); // Change the button color to green
+        outlineheaderColor = Color(0xff0B6B94);
+        outlineTextColor = Color(0xff0B6B94);
       });
     } else {
       setState(() {
@@ -101,8 +101,8 @@ bool isLoading = false;
         });
       }
       setState(() {
-        outlineheaderColorForPass = Color(0xff0B6B94); // Change the button color to green
-        outlineTextColorForPass = Color(0xff0B6B94); // Change the button color to green
+        outlineheaderColorForPass = Color(0xff0B6B94);
+        outlineTextColorForPass = Color(0xff0B6B94);
       });
     } else {
       setState(() {
@@ -123,7 +123,7 @@ bool isLoading = false;
 
   Future<void> _signIn() async {
     if (mailEditingController.text.isEmpty && passEditingController.text.isEmpty) {
-      return HelperClass.showToast("Enter details");
+      return HelperClass.showToast("Enter username and password ");
     }
     String phoneNumberOEmail = '';
     if (containsOnlyNumeric(mailEditingController.text)) {

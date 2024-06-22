@@ -286,28 +286,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                             textAlign: TextAlign.left,
                                           ),
                         ),
-                              // Container(
-                              //   margin: EdgeInsets.only(
-                              //       left: 16, top: 8, right: 16),
-                              //   width: screenWidth,
-                              //   child: const Column(
-                              //     crossAxisAlignment: CrossAxisAlignment.start,
-                              //     children: [
-                              //       Flexible(
-                              //         child: Text(
-                              //           "If you’ve forgotten your password, don’t worry Enter your email or mobile number to verify",
-                              //           style: TextStyle(
-                              //             fontFamily: "Roboto",
-                              //             fontSize: 16,
-                              //             fontWeight: FontWeight.w400,
-                              //             color: Color(0xff242323),
-                              //           ),
-                              //           textAlign: TextAlign.left,
-                              //         ),
-                              //       ),
-                              //     ],
-                              //   ),
-                              // ),
+
                               Container(
                                 //color: Colors.amberAccent,
                                   margin: EdgeInsets.only(
@@ -318,10 +297,10 @@ class _ForgetPasswordState extends State<ForgetPassword> {
 
                                       child: Row(
                                         children: [
-                                          containsOnlyNumeric(
-                                              mailEditingController.text)
-                                              ? CountryCodeSelector()
-                                              : Text(""),
+                                          // containsOnlyNumeric(
+                                          //     mailEditingController.text)
+                                          //     ? CountryCodeSelector()
+                                          //     : Text(""),
                                           Expanded(
                                             child: Semantics(
                                               label: "Enter Email or mobile number",
@@ -339,6 +318,13 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                                         color: Color(0xff49454f),
                                                         height: 16/12,
                                                       ),
+                                                      floatingLabelStyle: TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 14,
+                                                        fontWeight: FontWeight.w400,
+                                                        color: Color(0xff0B6B94),
+                                                        height: 16/12,
+                                                      ),
                                                       hintStyle: TextStyle(
                                                         fontFamily: "Roboto",
                                                         fontSize: 16,
@@ -349,7 +335,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                                       focusedBorder: OutlineInputBorder(
                                                           borderRadius: BorderRadius.circular(6),
                                                           borderSide: BorderSide(
-                                                            color: Color(0xff24b9b0),
+                                                            color: Color(0xff0B6B94),
                                                             width: 2,
                                                           )
                                                       ),

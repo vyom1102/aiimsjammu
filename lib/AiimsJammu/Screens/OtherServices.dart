@@ -34,11 +34,11 @@ class _OtherServiceScreenState extends State<OtherServiceScreen> {
   void initState() {
     super.initState();
     // _loadServices();
-    _loadServicesFromAPI();
+    _loadOtherServicesFromAPI();
   }
 
 
-  void _loadServicesFromAPI() async {
+  void _loadOtherServicesFromAPI() async {
 
     try {
       await guestApi().guestlogin().then((value){

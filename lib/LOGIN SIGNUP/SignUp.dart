@@ -111,14 +111,14 @@ class _SignUpState extends State<SignUp> {
       if (mailEditingController.text.length > 0 &&
           passEditingController.text.length > 0) {
         setState(() {
-          buttonBGColor = Color(0xff24b9b0);
+          buttonBGColor = Color(0xff0B6B94);
         });
       }
       setState(() {
         outlineheaderColorForName =
-            Color(0xff24b9b0); // Change the button color to green
+            Color(0xff0B6B94); // Change the button color to green
         outlineTextColorForName =
-            Color(0xff24b9b0); // Change the button color to green
+            Color(0xff0B6B94); // Change the button color to green
       });
     } else {
       setState(() {
@@ -134,15 +134,15 @@ class _SignUpState extends State<SignUp> {
       if (passEditingController.text.length > 0 &&
           nameEditingController.text.length > 0) {
         setState(() {
-          buttonBGColor = Color(0xff24b9b0);
+          buttonBGColor = Color(0xff0B6B94);
           loginclickable = true;
         });
       }
       setState(() {
         outlineheaderColor =
-            Color(0xff24b9b0); // Change the button color to green
+            Color(0xff0B6B94); // Change the button color to green
         outlineTextColor =
-            Color(0xff24b9b0); // Change the button color to green
+            Color(0xff0B6B94); // Change the button color to green
       });
     } else {
       setState(() {
@@ -158,15 +158,15 @@ class _SignUpState extends State<SignUp> {
       if (mailEditingController.text.length > 0 &&
           nameEditingController.text.length > 0) {
         setState(() {
-          buttonBGColor = Color(0xff24b9b0);
+          buttonBGColor = Color(0xff0B6B94);
           loginclickable = true;
         });
       }
       setState(() {
         outlineheaderColorForPass =
-            Color(0xff24b9b0); // Change the button color to green
+            Color(0xff0B6B94); // Change the button color to green
         outlineTextColorForPass =
-            Color(0xff24b9b0); // Change the button color to green
+            Color(0xff0B6B94); // Change the button color to green
       });
     } else {
       setState(() {
@@ -328,7 +328,13 @@ class _SignUpState extends State<SignUp> {
                                                         color: Color(0xff49454f),
                                                         height: 16/12,
                                                       ),
-
+                                                      floatingLabelStyle: TextStyle(
+                                                        fontFamily: "Roboto",
+                                                        fontSize: 14,
+                                                        fontWeight: FontWeight.w400,
+                                                        color: Color(0xff0B6B94),
+                                                        height: 16/12,
+                                                      ),
                                                       hintStyle: TextStyle(
                                                         fontFamily: "Roboto",
                                                         fontSize: 16,
@@ -339,7 +345,7 @@ class _SignUpState extends State<SignUp> {
                                                       focusedBorder: OutlineInputBorder(
                                                           borderRadius: BorderRadius.circular(6),
                                                           borderSide: BorderSide(
-                                                            color: Color(0xff24b9b0),
+                                                            color: Color(0xff0B6B94),
                                                             width: 2,
                                                           )
                                                       ),
@@ -408,10 +414,17 @@ class _SignUpState extends State<SignUp> {
                                                     color: Color(0xff49454f),
                                                     height: 24/16,
                                                   ),
+                                                  floatingLabelStyle: TextStyle(
+                                                    fontFamily: "Roboto",
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    color: Color(0xff0B6B94),
+                                                    height: 16/12,
+                                                  ),
                                                   focusedBorder: OutlineInputBorder(
                                                       borderRadius: BorderRadius.circular(6),
                                                       borderSide: BorderSide(
-                                                        color: Color(0xff24b9b0),
+                                                        color: Color(0xff0B6B94),
                                                         width: 2,
                                                       )
                                                   ),
@@ -464,6 +477,13 @@ class _SignUpState extends State<SignUp> {
                                                 color: Color(0xff49454f),
                                                 height: 16/12,
                                               ),
+                                              floatingLabelStyle: TextStyle(
+                                                fontFamily: "Roboto",
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xff0B6B94),
+                                                height: 16/12,
+                                              ),
                                               hintStyle: TextStyle(
                                                 fontFamily: "Roboto",
                                                 fontSize: 16,
@@ -474,7 +494,7 @@ class _SignUpState extends State<SignUp> {
                                               focusedBorder: OutlineInputBorder(
                                                   borderRadius: BorderRadius.circular(6),
                                                   borderSide: BorderSide(
-                                                    color: Color(0xff24b9b0),
+                                                    color: Color(0xff0B6B94),
                                                     width: 2,
                                                   )
                                               ),
@@ -554,7 +574,13 @@ class _SignUpState extends State<SignUp> {
                                                 color: Color(0xff49454f),
                                                 height: 16/12,
                                               ),
-
+                                              floatingLabelStyle: TextStyle(
+                                                fontFamily: "Roboto",
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xff0B6B94),
+                                                height: 16/12,
+                                              ),
                                               hintStyle: TextStyle(
                                                 fontFamily: "Roboto",
                                                 fontSize: 16,
@@ -565,7 +591,7 @@ class _SignUpState extends State<SignUp> {
                                               focusedBorder: OutlineInputBorder(
                                                   borderRadius: BorderRadius.circular(6),
                                                   borderSide: BorderSide(
-                                                    color: Color(0xff24b9b0),
+                                                    color: Color(0xff0B6B94),
                                                     width: 2,
                                                   )
                                               ),
