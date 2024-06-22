@@ -1036,52 +1036,56 @@ class _NavigationState extends State<Navigation> {
       print("isBlueToothLoading");
       print(isBlueToothLoading);
     });
+try{
+  await beaconapi().fetchBeaconData().then((value) {
+    print("beacondatacheck");
 
-    await beaconapi().fetchBeaconData().then((value) {
-      print("beacondatacheck");
-
-      building.beacondata = value;
-      for (int i = 0; i < value.length; i++) {
-        print(value[i].name);
-        beacon beacons = value[i];
-        if (beacons.name != null) {
-          apibeaconmap[beacons.name!] = beacons;
-        }
+    building.beacondata = value;
+    for (int i = 0; i < value.length; i++) {
+      print(value[i].name);
+      beacon beacons = value[i];
+      if (beacons.name != null) {
+        apibeaconmap[beacons.name!] = beacons;
       }
-      Building.apibeaconmap = apibeaconmap;
+    }
+    Building.apibeaconmap = apibeaconmap;
 
-      print("scanningggg starteddddd");
+    print("scanningggg starteddddd");
 
-      if (Platform.isAndroid) {
-        print("starting scanning for android");
-        btadapter.startScanning(apibeaconmap);
-      } else {
-        print("starting scanning for IOS");
-        btadapter.startScanningIOS(apibeaconmap);
-        // btadapter.strtScanningIos(apibeaconmap);
-        // btadapter.getDevicesList();
-      }
+    if (Platform.isAndroid) {
+      print("starting scanning for android");
+      btadapter.startScanning(apibeaconmap);
+    } else {
+      print("starting scanning for IOS");
+      btadapter.startScanningIOS(apibeaconmap);
+      // btadapter.strtScanningIos(apibeaconmap);
+      // btadapter.getDevicesList();
+    }
 
-      //btadapter.startScanning(apibeaconmap);
-      setState(() {
-        resBeacons = apibeaconmap;
-      });
-      // print("printing bin");
-      // btadapter.printbin();
-      late Timer _timer;
-      //please wait
-      //searching your location
-
-      speak("Please wait");
-      speak("Searching your location. .");
-
-      _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
-        localizeUser();
-
-        print("localize user is calling itself.....");
-        _timer.cancel();
-      });
+    //btadapter.startScanning(apibeaconmap);
+    setState(() {
+      resBeacons = apibeaconmap;
     });
+    // print("printing bin");
+    // btadapter.printbin();
+    late Timer _timer;
+    //please wait
+    //searching your location
+
+    speak("Please wait");
+    speak("Searching your location. .");
+
+    _timer = Timer.periodic(Duration(milliseconds: 9000), (timer) {
+      localizeUser();
+
+      print("localize user is calling itself.....");
+      _timer.cancel();
+    });
+  });
+}catch(e){
+  print("no beacons found");
+}
+
     print("Himanshuchecker ids 1 ${buildingAllApi.getStoredAllBuildingID()}");
     print("Himanshuchecker ids 2 ${buildingAllApi.getStoredString()}");
     print("Himanshuchecker ids 3 ${buildingAllApi.getSelectedBuildingID()}");
