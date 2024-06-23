@@ -90,6 +90,9 @@ dependencies:
   connectivity_plus: ^6.0.3
   internet_connection_checker: ^1.0.0+1
   internet_connection_checker_plus: ^2.3.0
+  web_socket_channel: ^2.4.5
+  socket_io_client: ^2.0.3+1
+  bluetooth_enable_fork: ^0.1.6
 
 
 

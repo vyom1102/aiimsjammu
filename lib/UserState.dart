@@ -2,10 +2,12 @@ import 'package:geodesy/geodesy.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwaymaps/MotionModel.dart';
 import 'package:iwaymaps/pathState.dart';
+import 'package:iwaymaps/websocket/UserLog.dart';
 
 import 'Cell.dart';
 import 'navigationTools.dart';
 import 'package:geodesy/geodesy.dart' as geo;
+import 'package:iwaymaps/websocket/UserLog.dart';
 
 
 class UserState{
@@ -18,6 +20,7 @@ class UserState{
   double lng;
   String key;
   double theta;
+  String? locationName;
   bool isnavigating;
   int showcoordX;
   int showcoordY;
@@ -130,10 +133,16 @@ class UserState{
   }
 
   Future<void> moveOneStep()async{
+
+    wsocket.message["userPosition"]["X"]=coordX;
+    wsocket.message["userPosition"]["Y"]=coordY;
+    wsocket.message["userPosition"]["floor"]=floor;
+
     if(isnavigating){
       checkForMerge();
       pathobj.index = pathobj.index + 1;
-      List<int> transitionvalue = Cellpath[pathobj.index].move(this.theta);
+      List<int> p = tools.analyzeCell(Cellpath, Cellpath[pathobj.index]);
+      List<int> transitionvalue = Cellpath[pathobj.index].move(this.theta,currPointer:p[1],totalCells:p[0]);
       coordX = coordX + transitionvalue[0];
       coordY = coordY + transitionvalue[1];
       List<double> values = tools.localtoglobal(coordX, coordY);
