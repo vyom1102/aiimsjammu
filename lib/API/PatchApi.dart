@@ -9,6 +9,7 @@ import 'package:iwaymaps/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 
 
 import '../DATABASE/BOXES/PatchAPIModelBox.dart';
+import '../VersioInfo.dart';
 import 'RefreshTokenAPI.dart';
 import 'guestloginapi.dart';
 
@@ -68,7 +69,7 @@ class patchAPI {
     token = signInBox.get("accessToken");
     print("patch");
     final PatchBox = PatchAPIModelBox.getData();
-    if(PatchBox.containsKey(id??buildingAllApi.getStoredString())){
+    if(PatchBox.containsKey(id??buildingAllApi.getStoredString()) && !VersionInfo.patchDataVersionUpdate){
       print("PATCH API DATA FROM DATABASE");
       print(PatchBox.get(buildingAllApi.getStoredString())!.responseBody);
       Map<String, dynamic> responseBody = PatchBox.get(id??buildingAllApi.getStoredString())!.responseBody;

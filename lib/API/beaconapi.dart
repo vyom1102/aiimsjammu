@@ -5,6 +5,7 @@ import 'package:iwaymaps/API/buildingAllApi.dart';
 import 'package:iwaymaps/DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'package:iwaymaps/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/VersioInfo.dart';
 
 import '../APIMODELS/beaconData.dart';
 import 'RefreshTokenAPI.dart';
@@ -20,7 +21,7 @@ class beaconapi {
     print("beacon");
     token = signInBox.get("accessToken");
     final BeaconBox = BeaconAPIModelBOX.getData();
-    if(BeaconBox.containsKey(id??buildingAllApi.getStoredString())){
+    if(BeaconBox.containsKey(id??buildingAllApi.getStoredString()) && !VersionInfo.landmarksDataVersionUpdate){
       print("BEACON DATA FROM DATABASE");
       print(BeaconBox.keys);
       print(BeaconBox.values);

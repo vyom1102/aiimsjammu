@@ -9,8 +9,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:iwaymaps/API/DataVersionApi.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/NoInternetConnection.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/OpeningClosingStatus.dart';
+import '../../APIMODELS/DataVersion.dart';
+import '../../VersioInfo.dart';
 import '/DestinationSearchPage.dart';
 import '/AiimsJammu/Screens/ATMScreen.dart';
 import '/AiimsJammu/Screens/AllAnnouncementScreen.dart';
@@ -104,6 +107,7 @@ class _HomePageState extends State<HomePage> {
     _loadServicesFromAPI();
     _loadAnnouncementsFromAPI();
     getUserDataFromHive();
+    versionApiCall();
 
 
     index = 0;
@@ -111,6 +115,65 @@ class _HomePageState extends State<HomePage> {
     // _timer = Timer.periodic(Duration(seconds: 10), (timer) {
     //   _scrollToNext();
     // });
+
+  }
+  var versionBox = Hive.box('VersionData');
+  void versionApiCall() async{
+    DataVersion dataVersion = await DataVersionApi().fetchDataVersionApiData() ;
+    if( versionBox.containsKey("buildingID") && versionBox.get("buildingID") == dataVersion.versionData!.buildingID){
+      print("Already present");
+      if(dataVersion.versionData!.landmarksDataVersion == versionBox.get("landmarksDataVersion")){
+        VersionInfo.landmarksDataVersionUpdate = false;
+        print("LandmarkVersion change: False");
+      }else{
+        VersionInfo.landmarksDataVersionUpdate = true;
+        print("LandmarkVersion change: True");
+      }
+
+      if(dataVersion.versionData!.polylineDataVersion == versionBox.get("polylineDataVersion") ){
+        VersionInfo.polylineDataVersionUpdate = false;
+
+        print("PolylineVersion change: False");
+        print("${dataVersion.versionData!.polylineDataVersion} ${versionBox.get("polylineDataVersion")}");
+
+      }else{
+        VersionInfo.polylineDataVersionUpdate = true;
+        print("PolylineVersion change: True");
+        versionBox.put("polylineDataVersion", dataVersion.versionData!.polylineDataVersion);
+        print("${dataVersion.versionData!.polylineDataVersion} ${versionBox.get("polylineDataVersion")}");
+
+      }
+
+      if(dataVersion.versionData!.buildingDataVersion == versionBox.get("buildingDataVersion") ){
+        VersionInfo.buildingDataVersionUpdate = false;
+        print("BuildingDataVersion change: False");
+
+      }else{
+        VersionInfo.buildingDataVersionUpdate = true;
+        print("BuildingDataVersion change: True");
+
+      }
+
+      if(dataVersion.versionData!.patchDataVersion == versionBox.get("patchDataVersion")){
+        VersionInfo.patchDataVersionUpdate = false;
+        print("PatchDataVersion change: False");
+      }else{
+        VersionInfo.patchDataVersionUpdate = true;
+        print("PatchDataVersion change: True");
+
+      }
+    }else{
+      print("Not present");
+      versionBox.put("landmarksDataVersion",dataVersion.versionData!.landmarksDataVersion);
+      versionBox.put("polylineDataVersion",dataVersion.versionData!.polylineDataVersion);
+      versionBox.put("buildingDataVersion",dataVersion.versionData!.buildingDataVersion);
+      versionBox.put("patchDataVersion",dataVersion.versionData!.patchDataVersion);
+      versionBox.put("sId",dataVersion.versionData!.sId);
+      versionBox.put("iV",dataVersion.versionData!.iV);
+      versionBox.put("createdAt",dataVersion.versionData!.createdAt);
+      versionBox.put("updatedAt",dataVersion.versionData!.updatedAt);
+      versionBox.put("buildingID", dataVersion.versionData!.buildingID);
+    }
   }
 
   @override
@@ -456,6 +519,7 @@ class _HomePageState extends State<HomePage> {
         nameLoading = false;
       });
     }
+
   }
 
   @override

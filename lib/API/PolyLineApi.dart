@@ -5,6 +5,7 @@ import 'package:iwaymaps/API/RefreshTokenAPI.dart';
 import 'package:iwaymaps/DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import 'package:iwaymaps/API/buildingAllApi.dart';
 import 'package:iwaymaps/DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
+import 'package:iwaymaps/VersioInfo.dart';
 import '../APIMODELS/polylinedata.dart';
 import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'guestloginapi.dart';
@@ -75,11 +76,17 @@ class PolyLineApi {
     final PolyLineBox = PolylineAPIModelBOX.getData();
     token = signInBox.get("accessToken");
 
-    if(PolyLineBox.containsKey(id??buildingAllApi.getStoredString())){
+    print("");
+
+    if(PolyLineBox.containsKey(id??buildingAllApi.getStoredString()) && !VersionInfo.polylineDataVersionUpdate){
       print("POLYLINE API DATA FROM DATABASE");
       print(buildingAllApi.getStoredString());
       Map<String, dynamic> responseBody = PolyLineBox.get(id??buildingAllApi.getStoredString())!.responseBody;
       return polylinedata.fromJson(responseBody);
+    }
+    if(VersionInfo.polylineDataVersionUpdate){
+      print("Database ${PolyLineBox.containsKey(id??buildingAllApi.getStoredString())} but some changes");
+      // VersionInfo.polylineDataVersionUpdate
     }
 
 

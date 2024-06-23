@@ -32,7 +32,7 @@ class BuildingAPI {
     // }
     final BuildingBox = BuildingAPIModelBox.getData();
 
-    if(BuildingBox.length !=0){
+    if(BuildingBox.length !=0 ){
       print("BUILDING API DATA FROM DATABASE");
       print(BuildingBox.length);
       Map<String, dynamic> responseBody = BuildingBox.getAt(0)!.responseBody;

@@ -6631,6 +6631,7 @@ if(path[0]!=sourceIndex || path[path.length-1]!=destinationIndex){
       BitmapDescriptor greytorch = await BitmapDescriptor.fromAssetImage(
         ImageConfiguration(size: Size(44, 44)),
         'assets/greytorch.png',
+
       );
       // for(int a = i;a>i-5;a--){
       //   if(a!=i && tools.isTurn([user.path[a-1]%turn.numCols!,user.path[a-1]~/turn.numCols!], [user.path[a]%turn.numCols!,user.path[a]~/turn.numCols!], [user.path[a+1]%turn.numCols!,user.path[a+1]~/turn.numCols!])){
