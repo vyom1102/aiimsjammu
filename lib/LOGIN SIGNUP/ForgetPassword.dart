@@ -93,9 +93,9 @@ class _ForgetPasswordState extends State<ForgetPassword> {
     if (nameEditingController.text.length > 0) {
       setState(() {
         outlineheaderColorForName =
-            Color(0xff24b9b0); // Change the button color to green
+            Color(0xff0B6B94);
         outlineTextColorForName =
-            Color(0xff24b9b0); // Change the button color to green
+            Color(0xff0B6B94);
       });
     } else {
       setState(() {
@@ -109,15 +109,15 @@ class _ForgetPasswordState extends State<ForgetPassword> {
   void emailFieldListner() {
     if (mailEditingController.text.isNotEmpty) {
       setState(() {
-        buttonBGColor = Color(0xff24b9b0);
+        buttonBGColor = Color(0xff0B6B94);
         loginclickable = true;
       });
 
       setState(() {
         outlineheaderColor =
-            Color(0xff24b9b0); // Change the button color to green
+            Color(0xff0B6B94); // Change the button color to green
         outlineTextColor =
-            Color(0xff24b9b0); // Change the button color to green
+            Color(0xff0B6B94); // Change the button color to green
       });
     } else {
       setState(() {
@@ -132,15 +132,15 @@ class _ForgetPasswordState extends State<ForgetPassword> {
     if (passEditingController.text.length > 0) {
       if (mailEditingController.text.length > 0) {
         setState(() {
-          buttonBGColor = Color(0xff24b9b0);
+          buttonBGColor = Color(0xff0B6B94);
           loginclickable = true;
         });
       }
       setState(() {
         outlineheaderColorForPass =
-            Color(0xff24b9b0); // Change the button color to green
+            Color(0xff0B6B94); // Change the button color to green
         outlineTextColorForPass =
-            Color(0xff24b9b0); // Change the button color to green
+            Color(0xff0B6B94); // Change the button color to green
       });
     } else {
       setState(() {
@@ -153,7 +153,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
 
   void signINButtonControler() {
     setState(() {
-      buttonBGColor = Color(0xff24b9b0);
+      buttonBGColor = Color(0xff0B6B94);
     });
   }
 

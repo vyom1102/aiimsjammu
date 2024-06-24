@@ -730,6 +730,8 @@ class _SignUpState extends State<SignUp> {
                                                     );
                                                   }
                                                   else{
+                                                    bool otpSent = await SendOTPAPI().sendOTP(finalMailEditingController);
+
                                                     Navigator.push(
                                                       context,
                                                       MaterialPageRoute(
@@ -762,6 +764,8 @@ class _SignUpState extends State<SignUp> {
                                                     },
                                                   );
                                                 } else {
+                                                  bool otpSent = await SendOTPAPI().sendOTP(finalMailEditingController);
+
                                                   Navigator.push(
                                                     context,
                                                     MaterialPageRoute(
