@@ -130,7 +130,7 @@ class _MyAppState extends State<MyApp> {
     }
     requestLocationPermission();
     return MaterialApp(
-      title: "IWAYPLUS",
+      title: "AIIMS Jammu Navigation",
       theme: ThemeData(
         primarySwatch: Colors.blue,
         textSelectionTheme: TextSelectionThemeData(
