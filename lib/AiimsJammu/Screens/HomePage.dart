@@ -11,6 +11,7 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 import 'package:intl/intl.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/NoInternetConnection.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/OpeningClosingStatus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '/DestinationSearchPage.dart';
 import '/AiimsJammu/Screens/ATMScreen.dart';
 import '/AiimsJammu/Screens/AllAnnouncementScreen.dart';
@@ -54,7 +55,10 @@ class _HomePageState extends State<HomePage> {
   List<dynamic> _cafeteriafilteredServices = [];
   List<dynamic> _otherservices = [];
   List<dynamic>   _otherfilteredServices = [];
-
+  String twitter ="";
+  String facebook ="";
+  String youtube ="";
+  String instagram="";
 
   int _currentPage = 0;
   String token = "";
@@ -78,15 +82,7 @@ class _HomePageState extends State<HomePage> {
       switch(event){
         case InternetStatus.disconnected:
           _showNoInternetSnackbar();
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //   SnackBar(content: Text('No Internet Connection')),
-          // );
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => NoInternetConnection(),
-          //   ),
-          // );
+
         case InternetStatus.connected:
           break;
         default:
@@ -104,6 +100,7 @@ class _HomePageState extends State<HomePage> {
     _loadServicesFromAPI();
     _loadAnnouncementsFromAPI();
     getUserDataFromHive();
+    _loadSocialsFromAPI();
 
 
     index = 0;
@@ -171,6 +168,11 @@ class _HomePageState extends State<HomePage> {
       // Handle error
     }
   }
+  Future<void> _launchInWebView(Uri url) async {
+    if (!await launchUrl(url, mode: LaunchMode.inAppBrowserView)) {
+      throw Exception('Could not launch $url');
+    }
+  }
   void _showNoInternetSnackbar() {
     setState(() {
       isConnectedToInternet = false;
@@ -179,7 +181,7 @@ class _HomePageState extends State<HomePage> {
       SnackBar(
         content: Text('No Internet Connection'),
         behavior: SnackBarBehavior.floating,
-        duration: Duration(days: 1), // Long duration to keep the snackbar visible
+        duration: Duration(days: 1),
         action: SnackBarAction(
           label: 'Retry',
           onPressed: () {
@@ -322,7 +324,56 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _loadSocialsFromAPI() async {
+    try {
+      await guestApi().guestlogin().then((value) {
+        if (value.accessToken != null) {
+          token = value.accessToken!;
+        }
+      });
+      final response = await http.get(
+        Uri.parse('https://dev.iwayplus.in/secured/hospital/get-hospital/6673e7a3b92e69bc7f4b40ae'),
+        headers: {
+          'Content-Type': 'application/json',
+          "x-access-token": token,
+        },
+      );
 
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        print("Hospital data");
+        print(responseData['data']['twitter']);
+        if (responseData['status'] == true && responseData.containsKey('data')) {
+          setState(() {
+            if(responseData['data']['twitter']!=null)
+           twitter= responseData['data']['twitter'];
+            if(responseData['data']['facebook']!=null)
+              facebook= responseData['data']['facebook'];
+            if(responseData['data']['youtube']!=null)
+              youtube= responseData['data']['youtube'];
+            if(responseData['data']['instagram']!=null)
+              instagram= responseData['data']['instagram'];
+          });
+          print("twitteerrrr");
+          print(twitter);
+          print("dataaaa");
+          print(responseData['data']);
+          // setState(() {
+          //   announcements = responseData['data'];
+          //
+          // });
+          // print(announcements);
+        } else {
+          throw Exception('Response data does not contain the expected list of announcements');
+        }
+      } else {
+        throw Exception('Failed to load data: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      // Handle error
+    }
+  }
   void _loadServicesFromAPI() async {
     try {
       await guestApi().guestlogin().then((value) {
@@ -535,28 +586,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   // Icon(Icons.search),
                   SizedBox(width: 16),
-                  // Semantics(
-                  //   header: true,
-                  //   // label: "Search Bar",
-                  //   child: GestureDetector(
-                  //     onTap: (){
-                  //       Navigator.push(
-                  //         context,
-                  //         MaterialPageRoute(
-                  //             builder: (context) => DestinationSearchPage(voiceInputEnabled: false)),
-                  //       );
-                  //     },
-                  //     child: Container(
-                  //       width: MediaQuery.sizeOf(context).width * 0.67,
-                  //       child: TextField(
-                  //         decoration: InputDecoration(
-                  //           hintText: 'Doctor, services..',
-                  //           border: InputBorder.none,
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
+
                   Semantics(
                     header: true,
                     // label: "Search Bar",
@@ -933,7 +963,84 @@ class _HomePageState extends State<HomePage> {
                     ),
                     SizedBox(
                       height: 16,
-                    )
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16,right: 16,bottom: 8),
+                      child: Row(
+                        children: [
+                          Text(
+                            'Connect with us',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w500,
+                              
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+
+                    Row(
+                      children: [
+                        SizedBox(width: 16,),
+                        InkWell(
+                          onTap: (){
+                            _launchInWebView(Uri.parse(facebook));
+                          },
+                          child: Container(
+                            height: 40,
+                              width: 40,
+                            child: SvgPicture.asset("assets/images/facebook.svg"),
+                          ),
+                        ),
+                        SizedBox(width: 8,),
+                        InkWell(
+                          onTap: (){
+                            _launchInWebView(Uri.parse(twitter));
+                          },
+                          child: Container(
+                            height: 40,
+                            width: 40,
+                            child: SvgPicture.asset("assets/images/twitter.svg"),
+                          ),
+                        ),
+                        SizedBox(width: 8,),
+
+                        InkWell(
+                          onTap: (){
+                            _launchInWebView(Uri.parse(youtube));
+                          },
+                          child: Container(
+                            height: 40,
+                            width: 40,
+                            child: SvgPicture.asset("assets/images/youtube.svg"),
+
+                          ),
+                        ),
+                        SizedBox(width: 8,),
+
+                        InkWell(
+                          onTap: (){
+                            _launchInWebView(Uri.parse(instagram));
+                          },
+                          child: Container(
+
+                            height: 40,
+                            width: 40,
+                            child:
+                            SvgPicture.asset("assets/images/instagram.svg"),
+                            // Image.asset("assets/images/instaa.jpeg",height: 40,width: 40,),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16,),
+
+
+
                   ],
                 ),
               ],
