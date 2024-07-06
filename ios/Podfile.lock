@@ -3,6 +3,9 @@ PODS:
     - Flutter
     - MTBBarcodeScanner
     - SwiftProtobuf
+  - connectivity_plus (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - device_info_plus (0.0.1):
     - Flutter
   - device_information (0.0.1):
@@ -74,6 +77,7 @@ PODS:
 
 DEPENDENCIES:
   - barcode_scan2 (from `.symlinks/plugins/barcode_scan2/ios`)
+  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/darwin`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - device_information (from `.symlinks/plugins/device_information/ios`)
   - Flutter (from `Flutter`)
@@ -110,6 +114,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   barcode_scan2:
     :path: ".symlinks/plugins/barcode_scan2/ios"
+  connectivity_plus:
+    :path: ".symlinks/plugins/connectivity_plus/darwin"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
   device_information:
@@ -159,6 +165,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   barcode_scan2: 0af2bb63c81b4565aab6cd78278e4c0fa136dbb0
+  connectivity_plus: ddd7f30999e1faaef5967c23d5b6d503d10434db
   device_info_plus: 97af1d7e84681a90d0693e63169a5d50e0839a0d
   device_information: d652f6dcea86bdc5300ffd495486de1d5047bf4f
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7

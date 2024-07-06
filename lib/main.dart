@@ -130,6 +130,7 @@ class _MyAppState extends State<MyApp> {
     }
     requestLocationPermission();
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: "AIIMS Jammu Navigation",
       theme: ThemeData(
         primarySwatch: Colors.blue,
