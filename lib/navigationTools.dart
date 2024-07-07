@@ -240,7 +240,7 @@ class tools {
     double hor = dist * cos(ang * pi / 180.0);
 
     Map<String, double> finalCoords =
-        obtainCoordinates(ref[leastLat], ver, hor);
+    obtainCoordinates(ref[leastLat], ver, hor);
 
     return [finalCoords["lat"]!, finalCoords["lon"]!];
   }
@@ -253,9 +253,9 @@ class tools {
     double difflon =
         ((secondLocation["lon"]! - firstLocation["lon"]!) * pi) / 180;
     double arc = cos((firstLocation["lat"]! * pi) / 180) *
-            cos((secondLocation["lat"]! * pi) / 180) *
-            sin(difflon / 2) *
-            sin(difflon / 2) +
+        cos((secondLocation["lat"]! * pi) / 180) *
+        sin(difflon / 2) *
+        sin(difflon / 2) +
         sin(diffLat / 2) * sin(diffLat / 2);
     double line = 2 * atan2(sqrt(arc), sqrt(1 - arc));
     double distance = earthRadius * line * 1000;
@@ -281,7 +281,7 @@ class tools {
     return sqrt(dist);
   }
 
- static String angleToClocks(double angle) {
+  static String angleToClocks(double angle) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -482,7 +482,7 @@ class tools {
   }
 
 
-    static double calculateAngle2(List<int> a, List<int> b, List<int> c) {
+  static double calculateAngle2(List<int> a, List<int> b, List<int> c) {
     // //print("AAAAAA $a");
     // //print("B $b");
     // //print("C $c");
@@ -767,36 +767,49 @@ class tools {
 
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
     int distance=10;
+    List<int> pCoord = [];
+    pCoord.add(Beacon.coordinateX!);
+    pCoord.add(Beacon.coordinateY!);
     landmarksMap.forEach((key, value) {
-      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons"){
+
+      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && value.coordinateX!=null){
         if (Beacon.floor! == value.floor) {
-          List<int> pCoord = [];
-          pCoord.add(Beacon.coordinateX!);
-          pCoord.add(Beacon.coordinateY!);
+
           double d = 0.0;
 
           if (value.doorX != null) {
             d = calculateDistance(
                 pCoord, [value.doorX!, value.doorY!]);
 
-            if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
-                  doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
-              priorityQueue.add(MapEntry(currentLandInfo, d));
-              //print(value.name);
-            }
           }else{
+
+
             d = calculateDistance(
                 pCoord, [value.coordinateX!, value.coordinateY!]);
-            if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
-                doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
-              priorityQueue.add(MapEntry(currentLandInfo, d));
-            }
+            // if (d<distance) {
+            //   nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
+            //     doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
+            //   priorityQueue.add(MapEntry(currentLandInfo, d));
+            // }
+
+
           }
+          if (d<distance) {
+
+            nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
+              doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
+            print("currentLandInfo.name");
+            print(currentLandInfo.name);
+            priorityQueue.add(MapEntry(currentLandInfo, d));
+
+            //print(value.name);
+          }
+
         }
+
       }
     });
+
     nearestLandInfo? nearestLandmark;
     if(priorityQueue.isNotEmpty){
       MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
@@ -804,6 +817,8 @@ class tools {
     }else{
       //print("priorityQueue.isEmpty");
     }
+
+
     return nearestLandmark;
   }
   static List<nearestLandInfo> localizefindAllNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
@@ -812,32 +827,32 @@ class tools {
     int distance=10;
     landmarksMap.forEach((key, value) {
       if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && value.name != null && Beacon.floor! == value.floor){
-          List<int> pCoord = [];
-          pCoord.add(Beacon.coordinateX!);
-          pCoord.add(Beacon.coordinateY!);
-          double d = 0.0;
+        List<int> pCoord = [];
+        pCoord.add(Beacon.coordinateX!);
+        pCoord.add(Beacon.coordinateY!);
+        double d = 0.0;
 
-          if (value.doorX != null) {
-            d = calculateDistance(
-                pCoord, [value.doorX!, value.doorY!]);
-            //print("distance b/w beacon and location${d}");
-            //print(value.name);
-            if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
-                doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
-              priorityQueue.add(MapEntry(currentLandInfo, d));
-            }
-          }else{
-            d = calculateDistance(
-                pCoord, [value.coordinateX!, value.coordinateY!]);
-            //print("distance b/w beacon and location${d}");
-            //print(value.name);
-            if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
-                doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
-              priorityQueue.add(MapEntry(currentLandInfo, d));
-            }
+        if (value.doorX != null) {
+          d = calculateDistance(
+              pCoord, [value.doorX!, value.doorY!]);
+          //print("distance b/w beacon and location${d}");
+          //print(value.name);
+          if (d<distance) {
+            nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
+              doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
+            priorityQueue.add(MapEntry(currentLandInfo, d));
           }
+        }else{
+          d = calculateDistance(
+              pCoord, [value.coordinateX!, value.coordinateY!]);
+          //print("distance b/w beacon and location${d}");
+          //print(value.name);
+          if (d<distance) {
+            nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
+              doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
+            priorityQueue.add(MapEntry(currentLandInfo, d));
+          }
+        }
 
       }
     });
@@ -846,10 +861,10 @@ class tools {
       // MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
       //print("entry.key");
       while(priorityQueue.isNotEmpty)
-        {
-          MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
-          nearestLandmark.add(entry.key);
-        }
+      {
+        MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
+        nearestLandmark.add(entry.key);
+      }
     }else{
       //print("priorityQueue.isEmpty");
     }
@@ -914,7 +929,7 @@ class tools {
           if (d<distance) {
             coordinates.add(value.coordinateX!);
             coordinates.add(value.coordinateY!);
-           // finalCords.add(coordinates);
+            // finalCords.add(coordinates);
           }
         }
       }
@@ -948,6 +963,14 @@ class tools {
     }else if(Bid == "65d8835adb333f89456e687f"){
       i = 0;
       j = 1;
+    }else if(Bid == "66794105b80a6778c53c4856"){
+      //0,1
+      //1,2
+      //2,3
+      //1,3
+      //2,1
+      i=0;
+      j=1;
     }
 
     // Choose two adjacent corners
@@ -1072,7 +1095,7 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-   // //print(AngleBetweenBuildingandGlobalNorth);
+    // //print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;

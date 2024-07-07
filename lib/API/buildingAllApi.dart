@@ -13,10 +13,10 @@ import 'guestloginapi.dart';
 class buildingAllApi {
   final String baseUrl = "https://dev.iwayplus.in/secured/building/all";
   String token = "";
-  static String selectedID="6675792ca3119bff0e732f61";
-  static String selectedBuildingID="6675792ca3119bff0e732f61";
+  static String selectedID="66794105b80a6778c53c4856";
+  static String selectedBuildingID="66794105b80a6778c53c4856";
   static String selectedVenue="";
-  static Map<String,LatLng> allBuildingID = {"6675792ca3119bff0e732f61": LatLng( 32.56412350528441, 75.03593610031345),
+  static Map<String,LatLng> allBuildingID = {"66794105b80a6778c53c4856": LatLng(32.564752072362936, 75.03653526306154),
   };
   static String outdoorID = "";
 

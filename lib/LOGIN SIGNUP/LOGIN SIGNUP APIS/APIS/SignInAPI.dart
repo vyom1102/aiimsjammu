@@ -81,10 +81,12 @@ class SignInAPI{
     }
   }
   static Future<int> sendOtpForgetPassword(String user) async {
+    print("user");
+    print(user);
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request(
         'POST', Uri.parse('https://dev.iwayplus.in/auth/otp/username'));
-    request.body = json.encode({"username": "${user}", "digits":4,});
+    request.body = json.encode({"username": user, "digits":4,});
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();
@@ -94,7 +96,7 @@ class SignInAPI{
       return 1;
     } else {
       print("response.reasonPhrase");
-      print(response.reasonPhrase);
+      print(response.statusCode);
       return 0;
     }
   }
