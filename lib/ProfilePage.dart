@@ -505,7 +505,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 signInBox.clear();
                 print("Localdatabase cleared");
                 print(signInBox.keys);
-                Future<bool> response = DeleteApi.fetchPatchData();
+                Future<bool> response = DeleteApi.deleteData();
                 if(await response){
                   signInBox.clear();
                   print("Localdatabase cleared");
@@ -943,7 +943,7 @@ class _ProfilePageState extends State<ProfilePage> {
 //                 signInBox.clear();
 //                 print("Localdatabase cleared");
 //                 print(signInBox.keys);
-//                 Future<bool> response = DeleteApi.fetchPatchData();
+//                 Future<bool> response = DeleteApi..deleteDataa();
 //                 if(await response){
 //                   signInBox.clear();
 //                   print("Localdatabase cleared");

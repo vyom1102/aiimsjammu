@@ -426,7 +426,7 @@ class _EditProfileState extends State<EditProfile> {
                   //       signInBox.clear();
                   //       print("Localdatabase cleared");
                   //       print(signInBox.keys);
-                  //       Future<bool> response = DeleteApi.fetchPatchData();
+                  //       Future<bool> response = DeleteApi..deleteDataa();
                   //       if(await response){
                   //         signInBox.clear();
                   //         print("Localdatabase cleared");
@@ -480,7 +480,7 @@ class _EditProfileState extends State<EditProfile> {
                   print("Local database cleared");
                   print(signInBox.keys);
 
-                  Future<bool> response = DeleteApi.fetchPatchData();
+                  Future<bool> response = DeleteApi.deleteData();
                   if (await response) {
                     signInBox.clear();
                     print("Local database cleared");

@@ -10,6 +10,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:iwaymaps/API/DataVersionApi.dart';
+import 'package:iwaymaps/API/buildingAllApi.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/NoInternetConnection.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/OpeningClosingStatus.dart';
 import '../../APIMODELS/DataVersion.dart';
@@ -121,7 +122,7 @@ class _HomePageState extends State<HomePage> {
   void versionApiCall() async{
     try {
       DataVersion dataVersion = await DataVersionApi()
-          .fetchDataVersionApiData();
+          .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
       if (versionBox.containsKey("buildingID") &&
           versionBox.get("buildingID") == dataVersion.versionData!.buildingID) {
         print("Already present");

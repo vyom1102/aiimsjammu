@@ -19,11 +19,15 @@ import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/Elements/buildingCard.dart';
 import 'package:iwaymaps/Navigation.dart';
 import 'API/BuildingAPI.dart';
+import 'API/DataVersionApi.dart';
 import 'APIMODELS/Building.dart';
+import 'APIMODELS/DataVersion.dart';
 import 'APIMODELS/buildingAll.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'Elements/InsideBuildingCard.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
+
+import 'VersioInfo.dart';
 
 
 class BuildingInfoScreen extends StatefulWidget {
@@ -120,6 +124,90 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     BluetoothEnable.enableBluetooth.then((value) {
       print(value);
     });
+  }
+
+  var versionBox = Hive.box('VersionData');
+
+  void versionApiCall(String id) async{
+    print("inversioncall");
+    DataVersion dataVersion = await DataVersionApi()
+        .fetchDataVersionApiData(id);
+    if (versionBox.containsKey("buildingID") &&
+        versionBox.get("buildingID") == dataVersion.versionData!.buildingID) {
+      print("Already present");
+      if (dataVersion.versionData!.landmarksDataVersion ==
+          versionBox.get("landmarksDataVersion")) {
+        VersionInfo.landmarksDataVersionUpdate = false;
+        print("LandmarkVersion change: False");
+      } else {
+        versionBox.put("landmarksDataVersion",
+            dataVersion.versionData!.landmarksDataVersion);
+
+        VersionInfo.landmarksDataVersionUpdate = true;
+        print("LandmarkVersion change: True");
+      }
+
+      if (dataVersion.versionData!.polylineDataVersion ==
+          versionBox.get("polylineDataVersion")) {
+        VersionInfo.polylineDataVersionUpdate = false;
+
+        print("PolylineVersion change: False");
+        print(
+            "${dataVersion.versionData!.polylineDataVersion} ${versionBox.get(
+                "polylineDataVersion")}");
+      } else {
+        VersionInfo.polylineDataVersionUpdate = true;
+        print("PolylineVersion change: True");
+        versionBox.put("polylineDataVersion",
+            dataVersion.versionData!.polylineDataVersion);
+        print(
+            "${dataVersion.versionData!.polylineDataVersion} ${versionBox.get(
+                "polylineDataVersion")}");
+      }
+
+      if (dataVersion.versionData!.buildingDataVersion ==
+          versionBox.get("buildingDataVersion")) {
+        VersionInfo.buildingDataVersionUpdate = false;
+        print("BuildingDataVersion change: False");
+      } else {
+        VersionInfo.buildingDataVersionUpdate = true;
+        versionBox.put("buildingDataVersion",
+            dataVersion.versionData!.buildingDataVersion);
+        print("BuildingDataVersion change: True");
+      }
+
+      if (dataVersion.versionData!.patchDataVersion ==
+          versionBox.get("patchDataVersion")) {
+        VersionInfo.patchDataVersionUpdate = false;
+        print("PatchDataVersion change: False");
+      } else {
+        VersionInfo.patchDataVersionUpdate = true;
+        versionBox.put(
+            "patchDataVersion", dataVersion.versionData!.patchDataVersion);
+
+        print("PatchDataVersion change: True");
+      }
+    } else {
+      print("Not present");
+      versionBox.put("landmarksDataVersion",
+          dataVersion.versionData!.landmarksDataVersion);
+      versionBox.put("polylineDataVersion",
+          dataVersion.versionData!.polylineDataVersion);
+      versionBox.put("buildingDataVersion",
+          dataVersion.versionData!.buildingDataVersion);
+      versionBox.put(
+          "patchDataVersion", dataVersion.versionData!.patchDataVersion);
+      versionBox.put("sId", dataVersion.versionData!.sId);
+      versionBox.put("iV", dataVersion.versionData!.iV);
+      versionBox.put("createdAt", dataVersion.versionData!.createdAt);
+      versionBox.put("updatedAt", dataVersion.versionData!.updatedAt);
+      versionBox.put("buildingID", dataVersion.versionData!.buildingID);
+    }
+    try {
+
+    }catch(e){
+
+    }
   }
 
 
@@ -289,7 +377,6 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                         scrollDirection:Axis.horizontal ,
                         itemBuilder: (context,index){
                           currentData = widget.receivedAllBuildingList![index];
-                          currentData = widget.receivedAllBuildingList![index];
                           currentData.geofencing;
 
                           final isFavourite = value.get(currentData.buildingName)!=null;
@@ -307,9 +394,12 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                     wsocket.message["AppInitialization"]["buildingName"]=widget.receivedAllBuildingList![index].buildingName!;
 
 
+
                                     buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                                    versionApiCall(widget.receivedAllBuildingList![index].sId!);
+
                                     // while({
                                     //
                                     // }
@@ -325,7 +415,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                       ),
                                     );
                                 // }else{
-                                //     if(widget.dist==0 && currentData.geofencing){
+                                //     if(widget.dist==0 && currentData.geofencing!=false){
                                 //       wsocket.message["AppInitialization"]["BID"]=widget.receivedAllBuildingList![index].sId!;
                                 //       wsocket.message["AppInitialization"]["buildingName"]=widget.receivedAllBuildingList![index].buildingName!;
                                 //       buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
@@ -340,8 +430,8 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                 //     }else{
                                 //       HelperClass.showToast("Not your current venue");
                                 //     }
-
-                               //  }
+                                //
+                                //  }
 
                                 },
                                 title: Container(

@@ -5,7 +5,10 @@ class MapMarker extends Clusterable {
   final String id;
   final LatLng position;
   BitmapDescriptor? icon;
-  MapMarker({required this.id, required this.position, this.icon, isCluster = false, clusterId, pointsSize, childMarkerId,}) : super(
+  String Landmarkname;
+  GoogleMapController? mapController;
+
+  MapMarker({required this.id, required this.position, this.icon,required this.Landmarkname, isCluster = false, clusterId, pointsSize, childMarkerId,this.mapController,}) : super(
     markerId: id,
     latitude: position.latitude,
     longitude: position.longitude,
@@ -15,11 +18,32 @@ class MapMarker extends Clusterable {
     childMarkerId: childMarkerId,
   );
   Marker toMarker() => Marker(
-    markerId: MarkerId(id),
-    position: LatLng(
-      position.latitude,
-      position.longitude,
-    ),
-    icon: icon!,
+      markerId: MarkerId(id),
+      position: LatLng(
+        position.latitude,
+        position.longitude,
+      ),
+      icon: icon!,
+      infoWindow: InfoWindow(
+          title: isCluster == true? "$pointsSize landmarks" : "$Landmarkname",
+
+          onTap: () {
+            // if (mapController != null) {
+            //   mapController!.animateCamera(CameraUpdate.newLatLngZoom(position, 16.0));
+            // }
+            print("MarkerInfo Window ");
+          }),
+    onTap: (){
+      if (mapController != null) {
+        mapController!.animateCamera(CameraUpdate.newLatLngZoom(position, 21.0));
+      }
+        print("WilsonMarkerTapper");
+    },
+    onDrag: (e){
+        print("Drag");
+        print(e);
+    }
+
+
   );
 }

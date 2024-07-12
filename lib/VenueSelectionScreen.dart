@@ -225,7 +225,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
             label: "Iwayplus",
             child: InkWell(
               onTap: (){
-                RefreshTokenAPI.fetchPatchData();
+                RefreshTokenAPI.refresh();
               },
               child: Container(
                 alignment: Alignment.bottomLeft,
