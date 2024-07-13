@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:iwaymaps/AiimsJammu/Widgets/Translator.dart';
 
 import '../../API/guestloginapi.dart';
 import '../Widgets/AnouncementCard.dart';
@@ -68,7 +69,7 @@ class _AllAnnouncementScreenState extends State<AllAnnouncementScreen> {
 
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: TranslatorWidget(
           'Announcements',
           style: TextStyle(
             color: Color(0xFF18181B),

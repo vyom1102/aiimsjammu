@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import '../Widgets/Translator.dart';
 import '/AiimsJammu/Data/ServicesDemoData.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
@@ -162,7 +163,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                       padding: const EdgeInsets.only(left: 8.0,right: 4),
                       child: FilterChip(
                         disabledColor: Colors.white,
-                        label: Text(
+                        label: TranslatorWidget(
                           'All',
                           style: TextStyle(
                             color: _selectedServices.isEmpty ? Colors.white : Color(0xFF1C2A3A),
@@ -189,7 +190,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                     return Padding(
                       padding: const EdgeInsets.all(4.0),
                       child: FilterChip(
-                        label: Text(
+                        label: TranslatorWidget(
                           speciality,
                           style: TextStyle(
                             color: _selectedServices.contains(speciality) ? Colors.white : Color(0xFF1C2A3A),
@@ -231,7 +232,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                   header:true,
                   child: Container(
                     height: 16,
-                    child: Text(
+                    child: TranslatorWidget(
                       'Nearby Services',
                       style: TextStyle(
                         color: Color(0xFF18181B),
@@ -339,7 +340,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                                           mainAxisAlignment: MainAxisAlignment.start,
                                           crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
-                                            Text(
+                                            TranslatorWidget(
                                               service['type'],
                                               style: TextStyle(
                                                 color: Colors.white,
@@ -361,7 +362,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                                     SizedBox(
                                       width: 12,
                                     ),
-                                    Text(
+                                    TranslatorWidget(
                                       service['name'],
                                       style: const TextStyle(
                                         fontFamily: "Roboto",
@@ -394,7 +395,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                                     SizedBox(
                                       width: 8,
                                     ),
-                                    Text(
+                                    TranslatorWidget(
                                       service['locationName'],
                                       style: const TextStyle(
                                         fontFamily: "Roboto",
@@ -430,7 +431,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                                             child: CircularProgressIndicator(),
                                           );
                                         } else if (snapshot.hasError) {
-                                          return Text(
+                                          return TranslatorWidget(
                                             'Error',
                                             style: TextStyle(color: Colors.red),
                                           );

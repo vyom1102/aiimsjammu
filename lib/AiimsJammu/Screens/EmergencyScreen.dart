@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:iwaymaps/AiimsJammu/Widgets/Translator.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -116,7 +117,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: TranslatorWidget(
           'Emergency Services',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -158,7 +159,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
             child: Row(
               children: [
                 SizedBox(width: 22,),
-                Text(
+                TranslatorWidget(
                   'Help Center',
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -170,7 +171,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text(
+                TranslatorWidget(
                   '24/7',
                   style: TextStyle(
                     color: Colors.black,
@@ -235,7 +236,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
+                              TranslatorWidget(
                                 service['name'],
                                 style: const TextStyle(
                                   fontFamily: "Roboto",

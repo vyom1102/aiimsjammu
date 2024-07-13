@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive/hive.dart';
@@ -7,6 +6,9 @@ import 'dart:convert';
 
 import 'package:iwaymaps/AiimsJammu/Screens/FavouriteDoctor.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/FavouriteService.dart';
+
+import '../Widgets/Translator.dart';
+
 class FavouriteRGCIScreen extends StatefulWidget {
   const FavouriteRGCIScreen({Key? key}) : super(key: key);
 
@@ -29,6 +31,7 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
     // Retrieve user ID from Hive
     getUserIDFromHive();
   }
+
   Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
     final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
 
@@ -57,6 +60,7 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
       // Handle errors
     }
   }
+
   Future<void> getUserDetailsWithNewToken(String baseUrl) async {
     try {
       final response = await http.post(
@@ -93,9 +97,9 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
 
     if (userId != null) {
       getUserDetails();
-    } else {
-    }
+    } else {}
   }
+
   Future<void> getUserDetails() async {
     setState(() {
       isLoading = true;
@@ -113,12 +117,12 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
       );
 
       if (response.statusCode == 200) {
-
         Map<String, dynamic> responseBody = json.decode(response.body);
         print(responseBody);
 
-        var doctorsFavourites = responseBody['favourites']
-            .firstWhere((item) => item['favouriteType'] == 'doctors', orElse: () => null);
+        var doctorsFavourites = responseBody['favourites'].firstWhere(
+            (item) => item['favouriteType'] == 'doctors',
+            orElse: () => null);
 
         if (doctorsFavourites != null) {
           // Get the length of the favouriteIds array for doctors
@@ -130,12 +134,14 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
             });
           }
         }
-        var servicesFavourites = responseBody['favourites']
-            .firstWhere((item) => item['favouriteType'] == 'services', orElse: () => null);
+        var servicesFavourites = responseBody['favourites'].firstWhere(
+            (item) => item['favouriteType'] == 'services',
+            orElse: () => null);
 
         if (servicesFavourites != null) {
           // Get the length of the favouriteIds array for services
-          List<dynamic>? favouriteServiceIds = servicesFavourites['favouriteIds'];
+          List<dynamic>? favouriteServiceIds =
+              servicesFavourites['favouriteIds'];
           if (favouriteServiceIds != null) {
             setState(() {
               NoOfService = favouriteServiceIds.length.toString();
@@ -156,18 +162,19 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
       }
     } catch (e) {
       // Handle errors
-    }finally {
+    } finally {
       setState(() {
         isLoading = false;
       });
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: TranslatorWidget(
           'Favourite',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -183,7 +190,7 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
           Row(
             children: [
               SizedBox(width: 16),
-              Text(
+              TranslatorWidget(
                 'My saved items',
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -200,24 +207,27 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
           ),
           SizedBox(height: 16),
           InkWell(
-            onTap: (){
+            onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => FavouriteDoctor()),
+                MaterialPageRoute(builder: (context) => FavouriteDoctor()),
               );
             },
             child: Container(
               padding: EdgeInsets.all(16),
-
               child: Row(
                 children: [
-                  SvgPicture.asset('assets/images/Doctor.svg',width: 30,),
-                  SizedBox(width: 16,),
+                  SvgPicture.asset(
+                    'assets/images/Doctor.svg',
+                    width: 30,
+                  ),
+                  SizedBox(
+                    width: 16,
+                  ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      TranslatorWidget(
                         'Doctors',
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -230,10 +240,8 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
                       SizedBox(height: 8),
                       Row(
                         children: [
-
-
-                          Text(
-                            NoOfDoc!=null?"${NoOfDoc} items":"No items",
+                          TranslatorWidget(
+                            NoOfDoc != null ? "${NoOfDoc} items" : "No items",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Color(0xFFA1A1AA),
@@ -245,8 +253,6 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
                           )
                         ],
                       ),
-
-
                     ],
                   ),
                   Spacer(),
@@ -257,36 +263,39 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
                       width: 20,
                       height: 20,
                       // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                      child: SvgPicture.asset('assets/images/arrow_forward_ios.svg'),
+                      child: SvgPicture.asset(
+                          'assets/images/arrow_forward_ios.svg'),
                     ),
                   ),
-
                 ],
-
               ),
             ),
           ),
-          SizedBox(height: 8,),
-
+          SizedBox(
+            height: 8,
+          ),
           InkWell(
-            onTap: (){
+            onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => FavouriteService()),
+                MaterialPageRoute(builder: (context) => FavouriteService()),
               );
             },
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 16,vertical: 4),
-
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Row(
                 children: [
-                  SvgPicture.asset('assets/images/Cafetaria.svg',width: 30,),
-                  SizedBox(width: 16,),
+                  SvgPicture.asset(
+                    'assets/images/Cafetaria.svg',
+                    width: 30,
+                  ),
+                  SizedBox(
+                    width: 16,
+                  ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      TranslatorWidget(
                         'Services',
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -299,10 +308,10 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
                       SizedBox(height: 8),
                       Row(
                         children: [
-
-
-                          Text(
-                            NoOfService!=null?"$NoOfService items":"No items",
+                          TranslatorWidget(
+                            NoOfService != null
+                                ? "$NoOfService items"
+                                : "No items",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Color(0xFFA1A1AA),
@@ -328,16 +337,14 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
                       width: 20,
                       height: 20,
                       // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                      child: SvgPicture.asset('assets/images/arrow_forward_ios.svg'),
+                      child: SvgPicture.asset(
+                          'assets/images/arrow_forward_ios.svg'),
                     ),
                   ),
-
                 ],
-
               ),
             ),
           ),
-
         ],
       ),
     );

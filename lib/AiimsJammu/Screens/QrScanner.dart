@@ -4,6 +4,7 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'dart:convert';
 
 import '../Widgets/LocationIdFunction.dart';
+import '../Widgets/Translator.dart';
 
 class QRScannerScreen extends StatefulWidget {
   @override
@@ -27,7 +28,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('QR Scanner'),
+        title: TranslatorWidget('QR Scanner'),
       ),
       body: Column(
         children: [
@@ -41,7 +42,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           Expanded(
             flex: 1,
             child: Center(
-              child: Text('Scan a QR code'),
+              child: TranslatorWidget('Scan a QR code'),
             ),
           ),
         ],

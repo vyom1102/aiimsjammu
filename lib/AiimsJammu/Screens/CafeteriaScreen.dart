@@ -13,6 +13,7 @@ import '../../API/guestloginapi.dart';
 import '../Widgets/CalculateDistance.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/OpeningClosingStatus.dart';
+import '../Widgets/Translator.dart';
 import 'serviceInfo.dart';
 
 
@@ -88,7 +89,7 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: TranslatorWidget(
           'Cafeteria',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -96,7 +97,7 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
             fontSize: 16,
             fontFamily: 'Roboto',
             fontWeight: FontWeight.w500,
-            height: 0.09,
+
           ),
         ),
         bottom: PreferredSize(
@@ -214,7 +215,7 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
                                           mainAxisAlignment: MainAxisAlignment.start,
                                           crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
-                                            Text(
+                                            TranslatorWidget(
                                               service['type'],
                                               style: TextStyle(
                                                 color: Colors.white,
@@ -236,7 +237,7 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
                                     SizedBox(
                                       width: 12,
                                     ),
-                                    Text(
+                                    TranslatorWidget(
                                       service['name'],
                                       style: const TextStyle(
                                         fontFamily: "Roboto",
@@ -269,7 +270,7 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
                                     SizedBox(
                                       width: 8,
                                     ),
-                                    Text(
+                                    TranslatorWidget(
                                       service['locationName'],
                                       style: const TextStyle(
                                         fontFamily: "Roboto",

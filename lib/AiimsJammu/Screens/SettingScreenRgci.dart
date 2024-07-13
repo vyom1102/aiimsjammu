@@ -7,6 +7,7 @@ import 'package:hive/hive.dart';
 
 import '../../Elements/UserCredential.dart';
 import '../../localization/locales.dart';
+import '../Widgets/Translator.dart';
 
 
 class SettingScreen extends StatefulWidget {
@@ -485,13 +486,13 @@ class _SettingScreenState extends State<SettingScreen> {
                   isSelected: _selectedDisability,
                   // children: disability,
                   children: [
-                    Text(
+                    TranslatorWidget(
                         LocaleData.blind
                     ),
-                    Text(
+                    TranslatorWidget(
                         LocaleData.lowVision
                     ),
-                    Text(
+                    TranslatorWidget(
                         LocaleData.wheelchair
                     ),
 

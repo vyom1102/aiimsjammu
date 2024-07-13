@@ -9,6 +9,7 @@ import 'package:hive/hive.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../Widgets/LocationIdFunction.dart';
+import '../Widgets/Translator.dart';
 
 class DoctorProfile extends StatefulWidget {
   final Map<String, dynamic> doctor;
@@ -266,7 +267,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         centerTitle: true,
-        title: Text(
+        title: TranslatorWidget(
           'Doctor Details',
           style: TextStyle(
             color: Color(0xFF3F3F46),
@@ -307,7 +308,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                         radius: 73,
                       ),
                       SizedBox(height: 20),
-                      Text(
+                      TranslatorWidget(
                         widget.doctor['name'],
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -319,7 +320,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                         ),
                       ),
                       SizedBox(height: 24),
-                      Text(
+                      TranslatorWidget(
                         widget.doctor['speciality'],
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -368,7 +369,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                           height: 60,
                         ),
                         SizedBox(height: 10),
-                        Text(
+                        TranslatorWidget(
                           widget.doctor['experience'].toString(),
                           style: TextStyle(
                             fontSize: 16,
@@ -378,7 +379,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                         SizedBox(
                           height: 10,
                         ),
-                        Text(
+                        TranslatorWidget(
                           'Experience',
                           style: TextStyle(
                             color: Color(0xFFA1A1AA),
@@ -412,7 +413,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                           height: 60,
                         ),
                         SizedBox(height: 10),
-                        Text(
+                        TranslatorWidget(
                           widget.doctor['publications'].toString(),
                           style: TextStyle(
                             fontSize: 16,
@@ -422,7 +423,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                         SizedBox(
                           height: 10,
                         ),
-                        Text(
+                        TranslatorWidget(
                           'Publication',
                           style: TextStyle(
                             color: Color(0xFFA1A1AA),
@@ -456,7 +457,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                           height: 60,
                         ),
                         SizedBox(height: 10),
-                        Text(
+                        TranslatorWidget(
                           widget.doctor['awards'].toString(),
                           style: TextStyle(
                             fontSize: 16,
@@ -466,7 +467,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                         SizedBox(
                           height: 10,
                         ),
-                        Text(
+                        TranslatorWidget(
                           'Award',
                           style: TextStyle(
                             color: Color(0xFFA1A1AA),
@@ -488,7 +489,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
-              child: Text(
+              child: TranslatorWidget(
                 'About',
                 style: TextStyle(
                   color: Color(0xFF18181B),
@@ -503,7 +504,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0, right: 16, left: 16),
-                  child: Text(
+                  child: TranslatorWidget(
                     widget.doctor['about'],
                     style: TextStyle(
                       color: Color(0xFF3F3F46),
@@ -520,7 +521,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                       onPressed: () {
                         _launchInWebView(Uri.parse(widget.doctor['profile']));
                       },
-                      child: Text(
+                      child: TranslatorWidget(
                         'View profile',
                         style: TextStyle(
                           color: Color(0xFF0B6B94),
@@ -537,7 +538,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16),
-              child: Text(
+              child: TranslatorWidget(
                 'Working Time',
                 style: TextStyle(
                   color: Color(0xFF18181B),
@@ -554,7 +555,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
               children: widget.doctor['workingDays'].map<Widget>((day) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 16),
-                  child: Text(
+                  child: TranslatorWidget(
                     '${day['day']} - ${day['openingTime']} AM - ${day['closingTime']} PM',
                     style: TextStyle(
                       color: Color(0xFF6B7280),
@@ -588,7 +589,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
+              TranslatorWidget(
                 'Direction',
                 style: TextStyle(
                   color: Color(0xFF0B6B94),

@@ -1,6 +1,8 @@
 
 import 'package:flutter/material.dart';
 
+import 'Translator.dart';
+
 class OpeningClosingStatus extends StatelessWidget {
   final String startTime;
   final String endTime;
@@ -51,7 +53,7 @@ class OpeningClosingStatus extends StatelessWidget {
       textColor = Colors.red;
     }
 
-    return Text(
+    return TranslatorWidget(
       statusText,
       style: TextStyle(
         color:textColor,

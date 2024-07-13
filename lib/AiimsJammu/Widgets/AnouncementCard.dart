@@ -151,6 +151,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../Screens/AnnouncementDetail.dart';
+import 'Translator.dart';
 
 class AnnouncementCard extends StatelessWidget {
   final String image;
@@ -198,7 +199,7 @@ class AnnouncementCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              TranslatorWidget(
                 title,
                 style: TextStyle(
                   color: Color(0xFF3F3F46),
@@ -210,7 +211,7 @@ class AnnouncementCard extends StatelessWidget {
               SizedBox(height: 4),
               Row(
                 children: [
-                  Text(
+                  TranslatorWidget(
                     department,
                     style: TextStyle(
                       color: Color(0xff0B6B94),
@@ -220,7 +221,7 @@ class AnnouncementCard extends StatelessWidget {
                     ),
                   ),
                   SizedBox(width: 8,),
-                  Text(
+                  TranslatorWidget(
                     formattedDateTime,
                     style: TextStyle(
                       color: Color(0xFFA1A1AA),

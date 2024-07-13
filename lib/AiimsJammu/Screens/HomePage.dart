@@ -15,6 +15,7 @@ import 'package:iwaymaps/AiimsJammu/Screens/NoInternetConnection.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/OpeningClosingStatus.dart';
 import '../../APIMODELS/DataVersion.dart';
 import '../../VersioInfo.dart';
+import '../Widgets/Translator.dart';
 import '/DestinationSearchPage.dart';
 import '/AiimsJammu/Screens/ATMScreen.dart';
 import '/AiimsJammu/Screens/AllAnnouncementScreen.dart';
@@ -263,8 +264,10 @@ class _HomePageState extends State<HomePage> {
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+
         margin: EdgeInsets.only(bottom: 90,right: 10,left:10),
         content: Text('No Internet Connection'),
+
         behavior: SnackBarBehavior.floating,
         duration: Duration(days: 1), // Long duration to keep the snackbar visible
         action: SnackBarAction(
@@ -565,20 +568,25 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    nameLoading
-                        ? CircularProgressIndicator()
-                        : Text(
-                      "Hi, $userName",
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xff18181b),
-                        height: 26 / 20,
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                    Text(
+                    Row(
+                          children: [
+                            TranslatorWidget("Hello ,"),
+                            nameLoading
+                                ? CircularProgressIndicator()
+                                : TranslatorWidget(
+                                                  "$userName",
+                                                  style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xff18181b),
+                            height: 26 / 20,
+                                                  ),
+                                                  textAlign: TextAlign.left,
+                                                ),
+                          ],
+                        ),
+                    TranslatorWidget(
                       "How can we help you today?",
                       style: TextStyle(
                         fontFamily: "Roboto",
@@ -661,7 +669,7 @@ class _HomePageState extends State<HomePage> {
                           padding: EdgeInsets.only(top: 8),
                           width: MediaQuery.of(context).size.width * 0.67,
                           height: 40,
-                          child: Text(
+                          child: TranslatorWidget(
                             "Doctor, services,",
                             style: const TextStyle(
                               fontFamily: "Roboto",
@@ -726,7 +734,7 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Semantics(
                             header: true,
-                            child: Text(
+                            child: TranslatorWidget(
                               "Categories",
                               style: TextStyle(
                                 fontFamily: "Roboto",
@@ -855,7 +863,7 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Semantics(
                             header: true,
-                            child: Text(
+                            child: TranslatorWidget(
                               "Nearby Services",
                               style: TextStyle(
                                 fontFamily: "Roboto",
@@ -876,7 +884,7 @@ class _HomePageState extends State<HomePage> {
                                     builder: (context) => ServiceListScreen()),
                               );
                             },
-                            child: Text(
+                            child: TranslatorWidget(
                               "View all",
                               style: TextStyle(
                                 fontFamily: "Roboto",
@@ -964,7 +972,7 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Semantics(
                             header:true,
-                            child: Text(
+                            child: TranslatorWidget(
                               "Announcements",
                               style: TextStyle(
                                 fontFamily: "Roboto",
@@ -984,7 +992,7 @@ class _HomePageState extends State<HomePage> {
                                     builder: (context) => AllAnnouncementScreen()),
                               );
                             },
-                            child: Text(
+                            child: TranslatorWidget(
                               "View all",
                               style: TextStyle(
                                 fontFamily: "Roboto",
@@ -1028,7 +1036,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ],
-      ):Text("Offline"),
+      ):TranslatorWidget("Offline"),
     );
   }
 }
@@ -1062,7 +1070,7 @@ Widget _buildCard(String imagePath, String text) {
           SizedBox(
             height: 5,
           ),
-          Text(
+          TranslatorWidget(
             text,
             style: TextStyle(
               fontSize: 12,
@@ -1180,7 +1188,7 @@ Widget _buildNearbyService(String imagePath, String name, String Location,
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(
+                            TranslatorWidget(
                               type,
                               style: TextStyle(
                                 color: Colors.white,
@@ -1202,7 +1210,7 @@ Widget _buildNearbyService(String imagePath, String name, String Location,
                     SizedBox(
                       width: 12,
                     ),
-                    Text(
+                    TranslatorWidget(
                       name,
                       style: const TextStyle(
                         fontFamily: "Roboto",
@@ -1237,7 +1245,7 @@ Widget _buildNearbyService(String imagePath, String name, String Location,
                     SizedBox(
                       width: 8,
                     ),
-                    Text(
+                    TranslatorWidget(
                       Location,
                       style: const TextStyle(
                         fontFamily: "Roboto",
@@ -1277,7 +1285,7 @@ Widget _buildNearbyService(String imagePath, String name, String Location,
                             child: CircularProgressIndicator(),
                           );
                         } else if (snapshot.hasError) {
-                          return Text(
+                          return TranslatorWidget(
                             'Error',
                             style: TextStyle(color: Colors.red),
                           );

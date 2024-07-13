@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../Widgets/LocationIdFunction.dart';
+import '../Widgets/Translator.dart';
 
 class FavouriteService extends StatefulWidget {
   const FavouriteService({Key? key}) : super(key: key);
@@ -217,7 +218,7 @@ class _FavouriteServiceState extends State<FavouriteService> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: TranslatorWidget(
           'Favourite Services',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -247,7 +248,7 @@ class _FavouriteServiceState extends State<FavouriteService> {
                           width: 150,
                           height: 150,
                         ),
-                        Text(
+                        TranslatorWidget(
                           'No Favorites Yet',
                           style: TextStyle(
                             color: Color(0xFF18181B),
@@ -259,7 +260,7 @@ class _FavouriteServiceState extends State<FavouriteService> {
                         SizedBox(
                           height: 8,
                         ),
-                        Text(
+                        TranslatorWidget(
                           'Explore our services, doctors, and medicines to add your favorites here.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -293,7 +294,7 @@ class _FavouriteServiceState extends State<FavouriteService> {
                             children: [
                               Row(
                                 children: [
-                                  Text(
+                                  TranslatorWidget(
                                     ServiceNames[index],
                                     style: TextStyle(
                                       color: Color(0xFF18181B),
@@ -320,7 +321,7 @@ class _FavouriteServiceState extends State<FavouriteService> {
                               // SizedBox(height: 8,),
                               Row(
                                 children: [
-                                  Text(
+                                  TranslatorWidget(
                                     doctorSpeciality[index],
                                     style: TextStyle(
                                       color: Color(0xFFA1A1AA),
@@ -339,7 +340,7 @@ class _FavouriteServiceState extends State<FavouriteService> {
                                     color: Color(0xFF8D8C8C),
                                     size: 16,
                                   ),
-                                  Text(
+                                  TranslatorWidget(
                                     doctorLocations[index],
                                     style: TextStyle(
                                       color: Color(0xFFA1A1AA),
@@ -394,7 +395,7 @@ class _FavouriteServiceState extends State<FavouriteService> {
                                             ),
                                           ),
                                           SizedBox(width: 8),
-                                          Text(
+                                          TranslatorWidget(
                                             'Directions',
                                             style: TextStyle(
                                               color:
@@ -451,7 +452,7 @@ class _FavouriteServiceState extends State<FavouriteService> {
                                             size: 18,
                                           ),
                                           SizedBox(width: 8),
-                                          Text(
+                                          TranslatorWidget(
                                             'Share',
                                             style: TextStyle(
                                               color: Colors.black,

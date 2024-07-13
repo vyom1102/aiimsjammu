@@ -9,6 +9,7 @@ import '../Data/DoctorDemoData.dart';
 import 'package:http/http.dart' as http;
 
 import '../Widgets/LocationIdFunction.dart';
+import '../Widgets/Translator.dart';
 
 class DoctorListScreen extends StatefulWidget {
   @override
@@ -126,7 +127,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  TranslatorWidget(
                     'All Doctors',
                     style: TextStyle(
                       color: Color(0xFF374151),
@@ -170,7 +171,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                           return Padding(
                             padding: const EdgeInsets.only(left: 8.0, right: 4),
                             child: FilterChip(
-                              label: Text(
+                              label: TranslatorWidget(
                                 'All',
                                 style: TextStyle(
                                   color: _selectedSpeciality.isEmpty
@@ -196,7 +197,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                           return Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: FilterChip(
-                              label: Text(
+                              label: TranslatorWidget(
                                 speciality,
                                 style: TextStyle(
                                   color: _selectedSpeciality == speciality
@@ -248,7 +249,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                                     horizontal: 16.0),
                                 child: Semantics(
                                   header: true,
-                                  child: Text(
+                                  child: TranslatorWidget(
                                     speciality,
                                     style: TextStyle(
                                       fontWeight: FontWeight.w500,
@@ -317,7 +318,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                                                   children: [
                                                     Semantics(
                                                       label: "Name",
-                                                      child: Text(
+                                                      child: TranslatorWidget(
                                                         doctor['name'],
                                                         style: TextStyle(
                                                           color:
@@ -351,7 +352,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
 
                                                         Semantics(
                                                           label: "locationName",
-                                                          child: Text(
+                                                          child: TranslatorWidget(
 
                                                             // doctor['locationName'].split(' ').first,
                                                             // doctor['locationName'].split(' ').take(2).join(' '),
@@ -440,7 +441,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                                                             CrossAxisAlignment
                                                                 .center,
                                                         children: [
-                                                          Text(
+                                                          TranslatorWidget(
                                                             'View Profile',
                                                             style: TextStyle(
                                                               color: Color(
@@ -505,7 +506,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                                                             ),
                                                           ),
                                                           SizedBox(width: 8),
-                                                          Text(
+                                                          TranslatorWidget(
                                                             'Directions',
                                                             style: TextStyle(
                                                               color:
@@ -549,7 +550,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                                   child:
                                   Row(
                                     children: [
-                                      Text(
+                                      TranslatorWidget(
 
                                         speciality.length > 30
 
@@ -575,7 +576,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                                               EdgeInsets.symmetric(vertical: 0, horizontal: 10),
                                             ),
                                           ),
-                                          child: Text(
+                                          child: TranslatorWidget(
                                             'See all',
                                             style: TextStyle(
                                               color: Color(0xFF3F3F46),
@@ -641,7 +642,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                                                     crossAxisAlignment:
                                                         CrossAxisAlignment.start,
                                                     children: [
-                                                      Text(
+                                                      TranslatorWidget(
                                                         doctor['name'],
                                                         style: TextStyle(
                                                           color:
@@ -663,7 +664,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                                                             size: 16,
                                                           ),
                                                           SizedBox(width: 4),
-                                                          Text(
+                                                          TranslatorWidget(
                                                             // doctor['locationName'].split(' ').first,
                                                             doctor['locationName'].split(' ').isEmpty || !RegExp(r'^\d+$').hasMatch(doctor['locationName'].split(' ').first)
                                                                 ? doctor['locationName'].split(' ').take(2).join(' ')
@@ -732,7 +733,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                                                               MainAxisAlignment
                                                                   .center,
                                                           children: [
-                                                            Text(
+                                                            TranslatorWidget(
                                                               'View Profile',
                                                               style: TextStyle(
                                                                 color: Color(
@@ -791,7 +792,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                                                               ),
                                                             ),
                                                             SizedBox(width: 8),
-                                                            Text(
+                                                            TranslatorWidget(
                                                               'Directions',
                                                               style: TextStyle(
                                                                 color:

@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../Widgets/LocationIdFunction.dart';
+import '../Widgets/Translator.dart';
 
 class FavouriteDoctor extends StatefulWidget {
   const FavouriteDoctor({Key? key}) : super(key: key);
@@ -227,7 +228,7 @@ class _FavouriteDoctorState extends State<FavouriteDoctor> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: TranslatorWidget(
           'Favourite Doctors',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -258,7 +259,7 @@ class _FavouriteDoctorState extends State<FavouriteDoctor> {
                         width: 150,
                         height: 150,
                       ),
-                      Text(
+                      TranslatorWidget(
                         'No Favorites Yet',
                         style: TextStyle(
                           color: Color(0xFF18181B),
@@ -270,7 +271,7 @@ class _FavouriteDoctorState extends State<FavouriteDoctor> {
                       SizedBox(
                         height: 8,
                       ),
-                      Text(
+                      TranslatorWidget(
                         'Explore our services, doctors, and medicines to add your favorites here.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -307,8 +308,9 @@ class _FavouriteDoctorState extends State<FavouriteDoctor> {
                             children: [
                               Row(
                                 children: [
-        
-                                  Text(
+
+                          TranslatorWidget(
+
                                     doctorNames[index],
                                     style: TextStyle(
                                       color: Color(0xFF18181B),
@@ -336,7 +338,7 @@ class _FavouriteDoctorState extends State<FavouriteDoctor> {
                               // SizedBox(height: 8,),
                               Row(
                                 children: [
-                                  Text(
+                                  TranslatorWidget(
                                     doctorSpeciality[index],
                                     style: TextStyle(
                                       color: Color(0xFFA1A1AA),
@@ -380,7 +382,7 @@ class _FavouriteDoctorState extends State<FavouriteDoctor> {
                                   Expanded(
                                     child: SingleChildScrollView(
                                       scrollDirection: Axis.horizontal,
-                                      child: Text(
+                                      child: TranslatorWidget(
                                         doctorLocations[index],
                                         style: TextStyle(
                                           color: Color(0xFFA1A1AA),
@@ -438,7 +440,7 @@ class _FavouriteDoctorState extends State<FavouriteDoctor> {
                                             ),
                                           ),
                                           SizedBox(width: 8),
-                                          Text(
+                                          TranslatorWidget(
                                             'Directions',
                                             style: TextStyle(
                                               color:
@@ -495,7 +497,7 @@ class _FavouriteDoctorState extends State<FavouriteDoctor> {
                                             size: 18,
                                           ),
                                           SizedBox(width: 8),
-                                          Text(
+                                          TranslatorWidget(
                                             'Share',
                                             style: TextStyle(
                                               color: Colors.black,
