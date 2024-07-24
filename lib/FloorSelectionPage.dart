@@ -12,12 +12,12 @@ import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import '/API/buildingAllApi.dart';
-import '/API/ladmarkApi.dart';
-import '/APIMODELS/buildingAll.dart';
-import '/Elements/HelperClass.dart';
-import '/Elements/SearchNearby.dart';
-import '/Elements/SearchpageRecents.dart';
+import 'package:iwaymaps/API/buildingAllApi.dart';
+import 'package:iwaymaps/API/ladmarkApi.dart';
+import 'package:iwaymaps/APIMODELS/buildingAll.dart';
+import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/Elements/SearchNearby.dart';
+import 'package:iwaymaps/Elements/SearchpageRecents.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
@@ -240,9 +240,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
     // }
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 0,
-        ),
         body: Container(
           color: Colors.white,
           child: Column(

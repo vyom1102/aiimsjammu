@@ -135,12 +135,6 @@ class tools {
     } else {
       Data = globalData;
     }
-
-    if(x>=100000000 || y>=100000000){
-      var result = CoordinateConverter.localToGlobal(x.toDouble(), y.toDouble(), Data.patchData!.toJson());
-      return[result["lat"]!,result["lng"]!];
-    }
-
     int floor = 0;
 
     List<double> diff = [
@@ -287,7 +281,7 @@ class tools {
     return sqrt(dist);
   }
 
- static String angleToClocks(double angle) {
+  static String angleToClocks(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -319,14 +313,14 @@ class tools {
     }
   }
 
-  static String angleToClocks2(double angle) {
+  static String angleToClocks2(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
     }
     String currentDir = UserCredentials().getuserNavigationModeSetting();
     if (angle >= 337.5 || angle <= 22.5) {
       return (currentDir == 'Natural Direction')
-          ? "on your front"
+          ? "on your Front"
           : "on 12 o'clock";
     } else if (angle > 22.5 && angle <= 67.5) {
       return (currentDir == 'Natural Direction')
@@ -342,7 +336,7 @@ class tools {
           : "on 4-5 o'clock";
     } else if (angle > 157.5 && angle <= 202.5) {
       return (currentDir == 'Natural Direction')
-          ? "on your back"
+          ? "on your Back"
           : "on 6 o'clock";
     } else if (angle > 202.5 && angle <= 247.5) {
       return (currentDir == 'Natural Direction')
@@ -361,7 +355,7 @@ class tools {
     }
   }
 
-  static String angleToClocks3(double angle) {
+  static String angleToClocks3(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -381,7 +375,7 @@ class tools {
     }
   }
 
-  static String angleToClocksForNearestLandmarkToBeacon(double angle) {
+  static String angleToClocksForNearestLandmarkToBeacon(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -430,101 +424,59 @@ class tools {
     return angle;
   }
 
-  static double calculateAngleBetweenVectors(double latA, double lonA, double latB, double lonB, double angle) {
-    Map<String, double> c = computeNewPosition(latA, lonA, angle, 3);
-    // Convert all latitudes and longitudes from degrees to radians
-    latA = degreesToRadians(latA);
-    lonA = degreesToRadians(lonA);
-    latB = degreesToRadians(latB);
-    lonB = degreesToRadians(lonB);
-    double latC = degreesToRadians(c['latitude']!);
-    double lonC = degreesToRadians(c['longitude']!);
-
-    // Convert lat/lon to Cartesian coordinates (X, Y, Z)
-    var ax = cos(latA) * cos(lonA);
-    var ay = cos(latA) * sin(lonA);
-    var az = sin(latA);
-
-    var bx = cos(latB) * cos(lonB);
-    var by = cos(latB) * sin(lonB);
-    var bz = sin(latB);
-
-    var cx = cos(latC) * cos(lonC);
-    var cy = cos(latC) * sin(lonC);
-    var cz = sin(latC);
-
-    // Compute vector AB and AC
-    var abx = bx - ax;
-    var aby = by - ay;
-    var abz = bz - az;
-
-    var acx = cx - ax;
-    var acy = cy - ay;
-    var acz = cz - az;
-
-    // Compute the cross product of vectors AB and AC
-    var crossProductX = aby * acz - abz * acy;
-    var crossProductY = abz * acx - abx * acz;
-    var crossProductZ = abx * acy - aby * acx;
-
-    // Compute the dot product of vectors AB and AC
-    var dotProduct = abx * acx + aby * acy + abz * acz;
-
-    // Compute the magnitudes of vectors AB and AC
-    var magnitudeAB = sqrt(abx * abx + aby * aby + abz * abz);
-    var magnitudeAC = sqrt(acx * acx + acy * acy + acz * acz);
-
-    // Compute the angle between vectors AB and AC
-    var angleRadians = atan2(sqrt(crossProductX * crossProductX + crossProductY * crossProductY + crossProductZ * crossProductZ), dotProduct);
-
-    // Convert the angle from radians to degrees
-    var angleDegrees = radiansToDegrees(angleRadians);
-
-    // Ensure the angle is between 0 and 360 degrees
-    if (crossProductZ < 0) {
-      angleDegrees = 360 - angleDegrees;
-    }
-
-    return angleDegrees;
-  }
-
-
-  static double calculateAnglefifthForMultiBuilding(Cell node1, List<int> node2, Cell node3) {
-    List<int> a = [node1.x , node1.y];
-    List<int> b = node2;
-    List<int> c = [node3.x , node3.y];
-
-    print("AA $a");
-    print("B $b");
-    print("C $c");
-
-    List<int> ab = [b[0] - a[0], b[1] - a[1]];
-    List<int> ac = [c[0] - a[0], c[1] - a[1]];
-
-
-    // Calculate the angle between the two vectors in radians
-    double angleInRadians = atan2(ac[1], ac[0]) - atan2(ab[1], ab[0]);
-
-    // Convert radians to degrees
-    double angleInDegrees = angleInRadians * 180 / pi;
-
-    // Ensure the angle is within [0, 360] degrees
-    if (angleInDegrees < 0) {
-      angleInDegrees += 360;
-    }
-
-    return angleInDegrees;
-  }
-
   static double toRadians(double degree) {
     return degree * pi / 180.0;
   }
 
+
+  // static double calculateBearing(List<double> pointA, List<double> pointB) {
+  //   double lat1 = toRadians(pointA[0]);
+  //   double lon1 = toRadians(pointA[1]);
+  //   double lat2 = toRadians(pointB[0]);
+  //   double lon2 = toRadians(pointB[1]);
+  //
+  //   double dLon = lon2 - lon1;
+  //
+  //   // Debugging prints
+  //   print("Original dLon: $dLon");
+  //
+  //   // Adjust dLon for wrap-around at the International Date Line
+  //   if (dLon > pi) {
+  //     dLon -= 2 * pi;
+  //   } else if (dLon < -pi) {
+  //     dLon += 2 * pi;
+  //   }
+  //
+  //   // Debugging prints
+  //   print("Adjusted dLon: $dLon");
+  //
+  //   double x = sin(dLon) * cos(lat2);
+  //   double y = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
+  //
+  //   double bearingRadians = atan2(x, y);
+  //   double bearingDegrees = bearingRadians * 180.0 / pi;
+  //
+  //   // Normalize the bearing to be within the range 0° to 360°
+  //   bearingDegrees = (bearingDegrees + 360) % 360;
+  //
+  //   // Debugging prints
+  //   print("Point A: (${pointA[0]}, ${pointA[1]})");
+  //   print("Point B: (${pointB[0]}, ${pointB[1]})");
+  //   print("x: $x, y: $y");
+  //   print("Bearing (Radians): $bearingRadians");
+  //   print("Bearing (Degrees): $bearingDegrees");
+  //
+  //   return bearingDegrees;
+  // }
+
+
+
+
   static double calculateBearing(List<double> pointA, List<double> pointB) {
-    double lat1 = toRadians(pointA[0]);
-    double lon1 = toRadians(pointA[1]);
-    double lat2 = toRadians(pointB[0]);
-    double lon2 = toRadians(pointB[1]);
+    double lat1 = toRadians(pointA[0]); //user
+    double lon1 = toRadians(pointA[1]); //user
+    double lat2 = toRadians(pointB[0]); //path next point
+    double lon2 = toRadians(pointB[1]); //path next point
 
     double dLon = lon2 - lon1;
 
@@ -541,9 +493,9 @@ class tools {
 
 
   static double calculateAngleSecond(List<int> a, List<int> b, List<int> c) {
-    // print("AAAAAA $a");
-    // print("B $b");
-    // print("C $c");
+    print("AAAAAA $a");
+    print("B $b");
+    print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -594,6 +546,14 @@ class tools {
     }
 
     return angleInDegrees;
+  }
+
+  static void setBuildingAngle(String angle){
+    AngleBetweenBuildingandGlobalNorth = double.parse(angle);
+    AngleBetweenBuildingandGlobalNorth = AngleBetweenBuildingandGlobalNorth + 90;
+    if(AngleBetweenBuildingandGlobalNorth>360){
+      AngleBetweenBuildingandGlobalNorth=AngleBetweenBuildingandGlobalNorth-360;
+    }
   }
 
 
@@ -665,21 +625,51 @@ class tools {
     return crossProduct != 0;
   }
 
+  static bool isCellTurn(Cell prev, Cell currentCoordinate, Cell next) {
+    if (prev == null || next == null) {
+      return false;  // Not enough data to determine if it's a turn.
+    }
+
+    // Extracting coordinates
+    int prevX = prev.x;
+    int prevY = prev.y;
+    int currentX = currentCoordinate.x;
+    int currentY = currentCoordinate.y;
+    int nextX = next.x;
+    int nextY = next.y;
+
+    // Calculate the vectors from prev to current and from current to next
+    int vector1X = currentX - prevX;
+    int vector1Y = currentY - prevY;
+    int vector2X = nextX - currentX;
+    int vector2Y = nextY - currentY;
+
+    // Calculate the cross product of vector1 and vector2
+    int crossProduct = vector1X * vector2Y - vector1Y * vector2X;
+
+    // A cross product of zero means the points are collinear (no turn).
+    // Cross product != 0 means there is a turn.
+    return crossProduct != 0;
+  }
+
 
   static double calculateAngleBWUserandCellPath(Cell user, Cell node , int cols,double theta) {
     List<int> a = [user.x, user.y];
     List<int> tval = user.move(theta);
-
     if(user.move == tools.twocelltransitionhorizontal || user.move == tools.twocelltransitionvertical){
       tval = tools.fourcelltransition(theta);
+    }else if(user.move == tools.eightcelltransitionforTurns){
+      tval = tools.eightcelltransition(theta);
     }
     List<int> b = [user.x+tval[0], user.y+tval[1]];
     List<int> c = [node.x , node.y];
 
-    // //print("AA $a");
-    // //print("BB $b");
-    // //print("CC $c");
-    // //print("DD ${node.move.toString()}");
+
+    // print("AA $a");
+    // print("BB $b");
+    // print("CC $c");
+    // print("theta $theta");
+    // print("DD ${user.move.toString()}");
     // //print("EE ${theta}");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
@@ -717,10 +707,10 @@ class tools {
 
 
 
-  static double calculateAngleThird(List<int> a, Cell node2 , Cell node3) {
+  static double calculateAngleThird(List<int> a, int node2 , int node3 , int cols) {
 
-    List<int> b = [node2.x , node2.y];
-    List<int> c = [node3.x , node3.y];
+    List<int> b = [node2 % cols , node2 ~/cols];
+    List<int> c = [node3 % cols , node3 ~/cols];
 
     // //print("A $a");
     // //print("B $b");
@@ -798,7 +788,7 @@ class tools {
     return angleInDegrees;
   }
 
-  static List<direction> getDirections(List<int> path, int columns,Map<int,Landmarks> associateTurnWithLandmark,int floor, String Bid, pathState PathState) {
+  static List<direction> getDirections(List<int> path, int columns,Map<int,Landmarks> associateTurnWithLandmark,int floor, String Bid, pathState PathState,context) {
     List<int> turns = tools.getTurnpoints(path, columns);
     turns.insert(0, path[0]);
     turns.add(path.last);
@@ -809,7 +799,7 @@ class tools {
       double Nextdistance = tools.calculateDistance([turns[i]%columns,turns[i]~/columns], [turns[i+1]%columns,turns[i+1]~/columns]);
       double Prevdistance = tools.calculateDistance([turns[i]%columns,turns[i]~/columns], [turns[i-1]%columns,turns[i-1]~/columns]);
       double angle = tools.calculateAnglefifth(path[index-1], path[index], path[index+1], columns);
-      String direc = tools.angleToClocks(angle);
+      String direc = tools.angleToClocks(angle,context);
       Directions.add(direction(turns[i], direc, associateTurnWithLandmark[turns[i]], Nextdistance, Prevdistance,turns[i]%columns,turns[i]~/columns,floor,Bid,numCols:columns));
     }
     return Directions;
@@ -1040,68 +1030,7 @@ class tools {
     return sqrt(pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2));
   }
 
-  static void setBuildingAngle(String angle){
-    AngleBetweenBuildingandGlobalNorth = double.parse(angle);
-    AngleBetweenBuildingandGlobalNorth = AngleBetweenBuildingandGlobalNorth + 90;
-    if(AngleBetweenBuildingandGlobalNorth>360){
-      AngleBetweenBuildingandGlobalNorth=AngleBetweenBuildingandGlobalNorth-360;
-    }
-  }
 
-  // static double
-  // (String Bid) {
-  //   // Assuming corners is a list of Point objects representing coordinates of the building corners
-  //
-  //   int i = 0;
-  //   int j = 1;
-  //   if(Bid  == "65d8825cdb333f89456d0562"){
-
-  //     i = 2;
-  //     j = 3;
-  //   }else if(Bid == "65d8833adb333f89456e6519"){
-  //     i=2;
-  //     j=3;
-  //   }else if(Bid == "65d8835adb333f89456e687f"){
-  //     i = 2;
-  //     j = 3;
-
-  //   }else if(Bid == "66794105b80a6778c53c4856"){
-  //     //0,1
-  //     //1,2
-  //     //2,3
-  //     //1,3
-  //     //2,1
-  //     i=0;
-  //     j=1;
-  //   }else if(Bid == "6675792ca3119bff0e732f61"){
-  //     i=2;
-  //     j=3;
-  //   }
-  //
-  //   // Choose two adjacent corners
-  //   Point<double> corner1 = corners[i]; //0 for RNI   2 for Ashoka
-  //   Point<double> corner2 = corners[j]; //1 for RNI   3 for Ashoka
-  //
-  //   // Calculate the slope
-  //   double slope = (corner2.y - corner1.y) / (corner2.x - corner1.x);
-  //
-  //   // Calculate the angle in radians
-  //   double angleRad = atan(slope);
-  //
-  //   // Convert angle to degrees
-  //   double angleDeg = angleRad * (180 / pi);
-  //
-  //   // Adjust for the correct quadrant
-  //   if (angleDeg < 0) {
-  //     angleDeg += 360;
-  //   }
-  //
-
-  //   AngleBetweenBuildingandGlobalNorth = angleDeg;
-  //   print("buildingAngle set to $angleDeg");
-
-  //   return angleDeg;
-  // }
 
   static List<int> analyzeCell(List<Cell> path, Cell targetCell) {
     int targetIndex = path.indexOf(targetCell);
@@ -1143,7 +1072,6 @@ class tools {
     // //print("angleee-----${angle}");
     // //print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
-    print("angle is this $AngleBetweenBuildingandGlobalNorth");
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -1434,8 +1362,6 @@ class tools {
       if(land != null){
         ls[turn] = land!;
       }
-
-
     });
 
     // landmarks.forEach((element) {
@@ -1498,46 +1424,6 @@ class tools {
     }
     return res;
   }
-
-  static List<int> getTurnpointsForMultiBuilding(List<List<Cell>> pathNodes){
-    List<int> res=[];
-
-
-    for(int j=0;j<pathNodes.length;j++){
-      for(int i=1;i<pathNodes[j].length-2;i++){
-        int currPos = pathNodes[j][i].node;
-
-        int x1 = pathNodes[j][i].x;
-        int y1 = pathNodes[j][i].y;
-
-        int x2 = pathNodes[j][i+1].x;
-        int y2 = pathNodes[j][i+1].y;
-
-        int x3 = pathNodes[j][i-1].x;
-        int y3 = pathNodes[j][i-1].y;
-
-        int prevDeltaX=x1-x3;
-        int prevDeltaY=y1-y3;
-        int nextDeltaX=x2-x1;
-        int nextDeltaY=y2-y1;
-
-        if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
-          if(prevDeltaX==0 && nextDeltaX==0){
-
-          }else if(prevDeltaY==0 && nextDeltaY==0){
-
-          }else{
-            res.add(currPos);
-          }
-
-        }
-
-
-      }
-    }
-    return res;
-  }
-
 
   static List<Cell> getCellTurnpoints(List<Cell> pathNodes,int numCols){
     List<Cell> res=[];
@@ -1704,12 +1590,22 @@ class tools {
     return res;
   }
 
-  static int distancebetweennodes(Cell node1, Cell node2, List<Cell> path){
+  static int distancebetweennodes(int node1, int node2, int numCols){
+    print("nextturn $node1 $node2");
+    int x1 = node1 % numCols;
+    int y1 = node1 ~/ numCols;
 
-    int i1 = path.indexWhere((element) => element.node == node1.node);
-    int i2 = path.indexWhere((element) => element.node == node2.node);
+    int x2 = node2 % numCols;
+    int y2 = node2 ~/ numCols;
 
-    return i1-i2;
+    print("nextturn [$x1,$y1] [$x2,$y2]");
+
+
+    // //print("@@@@@ $x1,$y1");
+    // //print("&&&&& $x2,$y2");
+    int rowDifference = x2 - x1;
+    int colDifference = y2 - y1;
+    return sqrt(rowDifference * rowDifference + colDifference * colDifference).toInt();
   }
 
   static bool allElementsAreSame(List list) {
@@ -1723,205 +1619,7 @@ class tools {
     return true;
   }
 
-  static Landmarks? findNearestEntry(List<Landmarks> listOfLandmarks, List<int> place, String placeBid ){
-    double distance = 100000;
-    Landmarks? nearestEntry;
-    for (Landmarks element in listOfLandmarks) {
-      if(element.element!.subType != null &&
-          element.element!.subType == "main entry" &&
-          element.name!.toLowerCase().contains("entry") &&
-          element.buildingID == placeBid){
-        double d = calculateDistance([element.coordinateX!,element.coordinateY!], place);
-        if(d<distance){
-          distance = d;
-          nearestEntry = element;
-        }
-      }
-    }
-    return nearestEntry;
-  }
-
-  static double degreesToRadians(double degrees) {
-    return degrees * pi / 180.0;
-  }
-
-// Function to convert lat/long to Cartesian coordinates
-  static List<double> latLongToCartesian(double lat, double lon) {
-    double latRad = degreesToRadians(lat);
-    double lonRad = degreesToRadians(lon);
-    return [
-      cos(latRad) * cos(lonRad),
-      cos(latRad) * sin(lonRad),
-      sin(latRad)
-    ];
-  }
-
-// Function to calculate the signed angle between two vectors in clockwise direction
-  static double calculateSignedAngle(List<double> v1, List<double> v2) {
-    double dotProduct = v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
-    double crossProductX = v1[1] * v2[2] - v1[2] * v2[1];
-    double crossProductY = v1[2] * v2[0] - v1[0] * v2[2];
-    double crossProductZ = v1[0] * v2[1] - v1[1] * v2[0];
-    double crossProductMagnitude = sqrt(crossProductX * crossProductX + crossProductY * crossProductY + crossProductZ * crossProductZ);
-
-    double angle = atan2(crossProductMagnitude, dotProduct);
-
-    // Determine the sign of the angle
-    if (crossProductZ < 0) {
-      angle = 2 * pi - angle;
-    }
-
-    return angle;
-  }
-
-  static double radiansToDegrees(double radians) {
-    return radians * 180.0 / pi;
-  }
-
-  static Map<String, double> computeNewPosition(double latitude, double longitude, double angle, double distance) {
-    double earthRadius = 20925646.3 ;
-    // Convert latitude and longitude from degrees to radians
-    double latRad = degreesToRadians(latitude);
-    double lonRad = degreesToRadians(longitude);
-    double bearing = degreesToRadians(angle);
-
-    // Calculate the new latitude
-    double newLatRad = asin(sin(latRad) * cos(distance / earthRadius) +
-        cos(latRad) * sin(distance / earthRadius) * cos(bearing));
-
-    // Calculate the new longitude
-    double newLonRad = lonRad + atan2(sin(bearing) * sin(distance / earthRadius) * cos(latRad),
-        cos(distance / earthRadius) - sin(latRad) * sin(newLatRad));
-
-    // Convert the new latitude and longitude from radians to degrees
-    double newLat = radiansToDegrees(newLatRad);
-    double newLon = radiansToDegrees(newLonRad);
-
-    return {'latitude': newLat, 'longitude': newLon};
-  }
-
-  static double calculateDistanceBetweenLatLng(double lat1, double lon1, double lat2, double lon2, {bool inFeet = false}) {
-    double earthRadiusMeters = 6378137.0;
-    if(inFeet){
-      earthRadiusMeters = 20925646.3;
-    }
-    // Convert latitude and longitude from degrees to radians
-    double lat1Rad = degreesToRadians(lat1);
-    double lon1Rad = degreesToRadians(lon1);
-    double lat2Rad = degreesToRadians(lat2);
-    double lon2Rad = degreesToRadians(lon2);
-
-    // Haversine formula
-    double dLat = lat2Rad - lat1Rad;
-    double dLon = lon2Rad - lon1Rad;
-
-    double a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(lat1Rad) * cos(lat2Rad) *
-            sin(dLon / 2) * sin(dLon / 2);
-
-    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-
-    // Distance in meters
-    double distance = earthRadiusMeters * c;
-
-    return distance;
-  }
-
-
-// Function to insert intermediate points between given points
-  static List<List<double>> insertIntermediatePoints(List<List<double>> points, double intervalFeet) {
-    List<List<double>> result = [];
-
-    for (int i = 0; i < points.length - 1; i++) {
-      double lat1 = points[i][1];
-      double lon1 = points[i][0];
-      double lat2 = points[i + 1][1];
-      double lon2 = points[i + 1][0];
-
-      result.add([lat1, lon1]);
-
-      double distance = calculateDistanceBetweenLatLng(lat1, lon1, lat2, lon2,inFeet: true);
-      int numPointsToInsert = (distance / intervalFeet).floor();
-
-      for (int j = 1; j <= numPointsToInsert; j++) {
-        double fraction = j / (numPointsToInsert + 1);
-        double angle = atan2(lon2 - lon1, lat2 - lat1) * 180.0 / pi;
-
-        Map<String, double> newPosition = computeNewPosition(lat1, lon1, angle, fraction * distance);
-
-        result.add([newPosition['latitude']!, newPosition['longitude']!]);
-      }
-    }
-
-    // Add the last point
-    result.add([points.last[1], points.last[0]]);
-
-    return result;
-  }
-
-// Function to find the point with the minimum angle
-  static Landmarks findMinAnglePoint(String sourceid, String destinationid, List<Landmarks> points, int n, {bool ramp = false}) {
-    Landmarks s = points.where((element) => element.properties!.polyId == sourceid).first;
-    Landmarks d = points.where((element) => element.properties!.polyId == destinationid).first;
-    Poi source = Poi(double.parse(s.properties!.latitude!), double.parse(s.properties!.longitude!));
-    Poi destination = Poi(double.parse(d.properties!.latitude!), double.parse(d.properties!.longitude!));
-    List<double> sourceCartesian = latLongToCartesian(source.latitude, source.longitude);
-    List<double> destinationCartesian = latLongToCartesian(destination.latitude, destination.longitude);
-    List<double> sourceToDestination = [
-      destinationCartesian[0] - sourceCartesian[0],
-      destinationCartesian[1] - sourceCartesian[1],
-      destinationCartesian[2] - sourceCartesian[2],
-    ];
-
-    double minAngle = n==1?10000:0;
-    Landmarks? minAnglePoint;
-
-    for (Landmarks point in points) {
-      if(point.element!.subType != null &&
-          point.element!.subType == "main entry" &&
-          point.name!.toLowerCase().contains("entry") &&
-          point.name!.toLowerCase().contains("ramp") == ramp &&
-          point.buildingID == s.buildingID){
-        List<double> pointCartesian = latLongToCartesian(double.parse(point.properties!.latitude!), double.parse(point.properties!.longitude!));
-        List<double> sourceToPoint = [
-          pointCartesian[0] - sourceCartesian[0],
-          pointCartesian[1] - sourceCartesian[1],
-          pointCartesian[2] - sourceCartesian[2],
-        ];
-
-        double angle = calculateSignedAngle(sourceToDestination, sourceToPoint);
-        print("angle for ${point.name} ${point.sId} $angle");
-
-        if(n == 1){
-          if (angle < minAngle) {
-            minAngle = angle;
-            minAnglePoint = point;
-          }
-        }else{
-          if (angle > minAngle) {
-            minAngle = angle;
-            minAnglePoint = point;
-          }
-        }
-
-
-      }
-    }
-
-    return minAnglePoint!;
-  }
-
-
-
 }
-
-class Poi {
-  final double latitude;
-  final double longitude;
-
-  Poi(this.latitude, this.longitude);
-}
-
 class nearestLandInfo{
   Element? element;
   // Properties? properties;
@@ -1984,53 +1682,5 @@ class Element {
     data['type'] = this.type;
     data['subType'] = this.subType;
     return data;
-  }
-}
-
-class CoordinateConverter {
-
-  static Map<List<int>,List<double>> mapping = {};
-
-  // Function to convert local coordinates to global coordinates
-  static Map<String, double> localToGlobal(double localLat, double localLng, Map<dynamic, dynamic> patchData) {
-    List<double> v = mapping[[localLat,localLng]]!;
-    return {'lat': v[0], 'lng': v[1]};
-  }
-
-  // Function to convert global coordinates to local coordinates (reverse)
-  static Map<String, double> globalToLocal(double globalLat, double globalLng,Map<dynamic, dynamic> patchData) {
-    List<Map<dynamic, dynamic>> coordinates = patchData['coordinates'];
-    String buildingAngle = patchData['buildingAngle'];
-
-    double angleRad = _degreesToRadians(double.parse(buildingAngle));
-
-    // Find the translation components
-    var globalRef = coordinates[0]['globalRef'];
-    var localRef = coordinates[0]['localRef'];
-    double originX = double.parse(globalRef['lat']);
-    double originY = double.parse(globalRef['lng']);
-    double localOriginX = double.parse(localRef['lat']);
-    double localOriginY = double.parse(localRef['lng']);
-
-    // Translate global coordinates to the local reference frame
-    double translatedX = globalLat - originX;
-    double translatedY = globalLng - originY;
-
-    // Apply inverse rotation
-    double rotatedX = translatedX * cos(angleRad) + translatedY * sin(angleRad);
-    double rotatedY = -translatedX * sin(angleRad) + translatedY * cos(angleRad);
-
-    // Convert to local coordinates
-    double localX = rotatedX + localOriginX;
-    double localY = rotatedY + localOriginY;
-
-    mapping[[(1000000000+(localX*-1)).round().toInt(),(1000000000+(localY*-1)).round().toInt()]] = [globalLat,globalLng];
-
-    return {'lat': 1000000000+(localX*-1), 'lng': 1000000000+(localY*-1)};
-  }
-
-  // Helper function to convert degrees to radians
-  static double _degreesToRadians(double degrees) {
-    return degrees * pi / 180.0;
   }
 }
