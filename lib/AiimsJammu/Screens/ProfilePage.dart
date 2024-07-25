@@ -111,6 +111,17 @@ class _ProfilePageState extends State<ProfilePage> {
       // Handle errors
     }
   }
+  void navigateToEditProfile() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => EditProfile()),
+    );
+
+    if (result != null && result['shouldRefresh'] == true) {
+      getUserDetails();
+
+    }
+  }
   Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
     final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
 
@@ -237,11 +248,13 @@ class _ProfilePageState extends State<ProfilePage> {
             label: "",
             child: InkWell(
               onTap: (){
-                Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>EditProfile()),
-              );},
+                navigateToEditProfile();
+              //   Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //       builder: (context) =>EditProfile()),
+              // );
+                },
               child: Container(
                 width: MediaQuery.sizeOf(context).width,
                 height: 50,

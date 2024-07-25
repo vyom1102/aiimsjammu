@@ -44,8 +44,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool isConnectedToInternet =true;
-  StreamSubscription? _internetConnection;
+  // bool isConnectedToInternet =true;
+  // StreamSubscription? _internetConnection;
   List<dynamic> carouselImages = [];
   // List<AnnouncementAData> AnnounceData = [];
   List<dynamic> announcements = [];
@@ -57,9 +57,13 @@ class _HomePageState extends State<HomePage> {
   List<dynamic> _pharmacyfilteredServices = [];
   List<dynamic> _countersfilteredServices = [];
   List<dynamic> _cafeteriafilteredServices = [];
+  List<dynamic> _emergencyfilteredService =[];
   List<dynamic> _otherservices = [];
   List<dynamic>   _otherfilteredServices = [];
-
+  String twitter = "https://x.com/AiimsJammu";
+  String facebook = "https://www.facebook.com/aiimsvijaypur";
+  String youtube = "https://www.youtube.com/channel/UC0V4753jPLDzPmlypa1xDiQ/playlists";
+  String instagram = "https://www.instagram.com/aiims_vijaypurjmu/";
 
   int _currentPage = 0;
   String token = "";
@@ -79,36 +83,38 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentPage);
-    _internetConnection = InternetConnection().onStatusChange.listen((event) {
-      switch(event){
-        case InternetStatus.disconnected:
-          _showNoInternetSnackbar();
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //   SnackBar(content: Text('No Internet Connection')),
-          // );
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => NoInternetConnection(),
-          //   ),
-          // );
-        case InternetStatus.connected:
-          break;
-        default:
-          setState(() {
-            isConnectedToInternet = true;
-          });
-          break;
-      }
-    });
+    // _internetConnection = InternetConnection().onStatusChange.listen((event) {
+    //   switch(event){
+    //     case InternetStatus.disconnected:
+    //       _showNoInternetSnackbar();
+    //       // ScaffoldMessenger.of(context).showSnackBar(
+    //       //   SnackBar(content: Text('No Internet Connection')),
+    //       // );
+    //       // Navigator.push(
+    //       //   context,
+    //       //   MaterialPageRoute(
+    //       //     builder: (context) => NoInternetConnection(),
+    //       //   ),
+    //       // );
+    //     case InternetStatus.connected:
+    //       break;
+    //     default:
+    //       setState(() {
+    //         isConnectedToInternet = true;
+    //       });
+    //       break;
+    //   }
+    // });
     // Battery Consuming
     // startAutoAnimation();
     // _fetchHospitalData();
-    _loadImageCorousalFromAPI();
+    // _loadImageCorousalFromAPI();
 
-    _loadServicesFromAPI();
-    _loadAnnouncementsFromAPI();
+    // _loadServicesFromAPI();
+    // _loadAnnouncementsFromAPI();
     getUserDataFromHive();
+    checkForReload();
+
     versionApiCall();
 
 
@@ -199,12 +205,90 @@ class _HomePageState extends State<HomePage> {
 
     }
   }
+  var DashboardListBox = Hive.box('DashboardList');
 
+  void checkForReload(){
+    if(DashboardListBox.containsKey('carouselImages')){
+      carouselImages = DashboardListBox.get('carouselImages');
+      print('_loadImageCorousalFromAPI FROM DATABASE');
+
+    }else{
+      _loadImageCorousalFromAPI();
+      print('_loadImageCorousalFromAPI API CALL');
+    }
+
+    if(DashboardListBox.containsKey('_services')){
+      _services = DashboardListBox.get('_services');
+      // _pharmacyfilteredServices = DashboardListBox.get('_pharmacyfilteredServices');
+      print('_loadServicesFromAPI FROM DATABASE');
+
+    }else{
+      _loadServicesFromAPI();
+      print('_loadServicesFromAPI API CALL');
+    }
+    if(DashboardListBox.containsKey('_pharmacyfilteredServices')){
+      // _services = DashboardListBox.get('_services');
+      _pharmacyfilteredServices = DashboardListBox.get('_pharmacyfilteredServices');
+      print(_pharmacyfilteredServices);
+      print('_pharmacyfilteredServices FROM DATABASE');
+
+    }else{
+      _loadServicesFromAPI();
+      print('_pharmacyfilteredServices API CALL');
+    }
+    if(DashboardListBox.containsKey('_emergencyfilteredService')){
+      // _services = DashboardListBox.get('_services');
+      _emergencyfilteredService = DashboardListBox.get('_emergencyfilteredService');
+      print('_emergencyfilteredService FROM DATABASE');
+
+    }else{
+      _loadServicesFromAPI();
+      print('_emergencyfilteredService API CALL');
+    }
+    ////
+    if(DashboardListBox.containsKey('_atmfilteredServices')){
+      // _services = DashboardListBox.get('_services');
+      _atmfilteredServices = DashboardListBox.get('_atmfilteredServices');
+      print('_atmfilteredServices FROM DATABASE');
+
+    }else{
+      _loadServicesFromAPI();
+      print('_atmfilteredServices API CALL');
+    }
+    if(DashboardListBox.containsKey('_countersfilteredServices')){
+      // _services = DashboardListBox.get('_services');
+      _countersfilteredServices = DashboardListBox.get('_countersfilteredServices');
+      print('_countersfilteredServices FROM DATABASE');
+
+    }else{
+      _loadServicesFromAPI();
+      print('_countersfilteredServices API CALL');
+    }
+    if(DashboardListBox.containsKey('_cafeteriafilteredServices')){
+      // _services = DashboardListBox.get('_services');
+      _cafeteriafilteredServices = DashboardListBox.get('_cafeteriafilteredServices');
+      print('_cafeteriafilteredServices FROM DATABASE');
+
+    }else{
+      _loadServicesFromAPI();
+      print('_cafeteriafilteredServices API CALL');
+    }
+    /////
+    if(DashboardListBox.containsKey('announcements')){
+      announcements = DashboardListBox.get('announcements');
+      print('_loadAnnouncementsFromAPI FROM DATABASE');
+    }else{
+      _loadAnnouncementsFromAPI();
+      print('_loadAnnouncementsFromAPI API CALL');
+
+    }
+
+  }
   @override
   void dispose() {
     _pageController.dispose();
     _scrollController.dispose();
-    _internetConnection?.cancel();
+    // _internetConnection?.cancel();
     super.dispose();
   }
   // Future<void> checkConnectivity() async {
@@ -260,7 +344,7 @@ class _HomePageState extends State<HomePage> {
   }
   void _showNoInternetSnackbar() {
     setState(() {
-      isConnectedToInternet = false;
+      // isConnectedToInternet = false;
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -283,7 +367,7 @@ class _HomePageState extends State<HomePage> {
 
   void _hideNoInternetSnackbar() {
     setState(() {
-      isConnectedToInternet = true;
+      // isConnectedToInternet = true;
     });
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
@@ -296,7 +380,7 @@ class _HomePageState extends State<HomePage> {
       _showNoInternetSnackbar();
     }
   }
-  void _loadImageCorousalFromAPI() async {
+  Future<void> _loadImageCorousalFromAPI() async {
     try {
       await guestApi().guestlogin().then((value) {
         if (value.accessToken != null) {
@@ -320,7 +404,7 @@ class _HomePageState extends State<HomePage> {
           setState(() {
 
             carouselImages = responseData['data'];
-
+            DashboardListBox.put("carouselImages",responseData['data']);
 
           });
 
@@ -376,7 +460,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _loadAnnouncementsFromAPI() async {
+  Future<void> _loadAnnouncementsFromAPI() async {
     try {
       await guestApi().guestlogin().then((value) {
         if (value.accessToken != null) {
@@ -397,7 +481,7 @@ class _HomePageState extends State<HomePage> {
         if (responseData['status'] == true && responseData.containsKey('data') && responseData['data'] is List) {
           setState(() {
             announcements = responseData['data'];
-
+            DashboardListBox.put('announcements', responseData['data']);
           });
           print(announcements);
         } else {
@@ -413,7 +497,7 @@ class _HomePageState extends State<HomePage> {
   }
 
 
-  void _loadServicesFromAPI() async {
+  Future<void> _loadServicesFromAPI() async {
     try {
       await guestApi().guestlogin().then((value) {
         if (value.accessToken != null) {
@@ -441,7 +525,13 @@ class _HomePageState extends State<HomePage> {
             _atmfilteredServices = _services.where((service) => service['type'] == 'ATM').toList();
             _countersfilteredServices = _services.where((service) => service['type'] == 'Counters').toList();
             _cafeteriafilteredServices = _services.where((service) => service['type'] == 'Cafeteria').toList();
-
+            _emergencyfilteredService = _services.where((service) => service['type'] == 'Ambulance' || service['type'] == 'BloodBank').toList();
+            DashboardListBox.put('_services', responseData['data']);
+            DashboardListBox.put('_pharmacyfilteredServices', _services.where((service) => service['type'] == 'Pharmacy').toList());
+            DashboardListBox.put('_atmfilteredServices', _services.where((service) => service['type'] == 'ATM').toList());
+            DashboardListBox.put('_countersfilteredServices', _services.where((service) => service['type'] == 'Counters').toList());
+            DashboardListBox.put('_cafeteriafilteredServices', _services.where((service) => service['type'] == 'Cafeteria').toList());
+            DashboardListBox.put('_emergencyfilteredService', _services.where((service) => service['type'] == 'Ambulance' || service['type'] == 'BloodBank').toList());
 
 
           });
@@ -462,7 +552,26 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _refresh() async {
+    setState(() {
 
+      carouselImages.clear();
+      _services.clear();
+      _filteredServices.clear();
+      announcements.clear();
+      // news.clear();
+      DashboardListBox.clear();
+
+    });
+    print("refreshed");
+    await _loadImageCorousalFromAPI();
+    await _loadServicesFromAPI();
+    await _loadAnnouncementsFromAPI();
+    // await _loadNewsFromAPI();
+    versionApiCall();
+    checkForReload();
+
+  }
 
   void animateToNextPage() {
     if (_currentPage < 4) {
@@ -552,491 +661,496 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        toolbarHeight: 120,
-        automaticallyImplyLeading: false,
+    return RefreshIndicator(
+      onRefresh: _refresh,
+
+      child: Scaffold(
         backgroundColor: Colors.white,
-        elevation: 0,
-        title: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                          children: [
-                            TranslatorWidget("Hello ,"),
-                            nameLoading
-                                ? CircularProgressIndicator()
-                                : TranslatorWidget(
-                                                  "$userName",
-                                                  style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xff18181b),
-                            height: 26 / 20,
-                                                  ),
-                                                  textAlign: TextAlign.left,
-                                                ),
-                          ],
-                        ),
-                    TranslatorWidget(
-                      "How can we help you today?",
-                      style: TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xff5e5e5f),
-                        height: 20 / 14,
-                      ),
-                      textAlign: TextAlign.left,
-                    )
-                  ],
-                ),
-                Spacer(),
-                IconButton(
-                  icon: Icon(Icons.notifications_none_outlined),
-                  color: Color(0xff18181b),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => NotificationScreen(),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            SizedBox(height: 10,),
-            Container(
-              padding: EdgeInsets.only(left: 16, right: 8),
-              decoration: BoxDecoration(
-                // color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(10),
-                border:
-                Border.all(color: Color(0xFFE0E0E0), width: 1),
-              ),
-              child: Row(
+        appBar: AppBar(
+          toolbarHeight: 120,
+          automaticallyImplyLeading: false,
+          backgroundColor: Colors.white,
+          elevation: 0,
+          title: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    child: SvgPicture.asset(
-                        'assets/images/searchicon.svg'),
-                  ),
-                  // Icon(Icons.search),
-                  SizedBox(width: 16),
-                  // Semantics(
-                  //   header: true,
-                  //   // label: "Search Bar",
-                  //   child: GestureDetector(
-                  //     onTap: (){
-                  //       Navigator.push(
-                  //         context,
-                  //         MaterialPageRoute(
-                  //             builder: (context) => DestinationSearchPage(voiceInputEnabled: false)),
-                  //       );
-                  //     },
-                  //     child: Container(
-                  //       width: MediaQuery.sizeOf(context).width * 0.67,
-                  //       child: TextField(
-                  //         decoration: InputDecoration(
-                  //           hintText: 'Doctor, services..',
-                  //           border: InputBorder.none,
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                  Semantics(
-                    header: true,
-                    // label: "Search Bar",
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DestinationSearchPage(voiceInputEnabled: false),
-                          ),
-                        ).then((value) => PassLocationId(context, value));
-                      },
-                      child: Container(
-                          padding: EdgeInsets.only(top: 8),
-                          width: MediaQuery.of(context).size.width * 0.67,
-                          height: 40,
-                          child: TranslatorWidget(
-                            "Doctor, services,",
-                            style: const TextStyle(
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                            children: [
+                              TranslatorWidget("Hello ,"),
+                              nameLoading
+                                  ? CircularProgressIndicator()
+                                  : TranslatorWidget(
+                                                    "$userName",
+                                                    style: const TextStyle(
                               fontFamily: "Roboto",
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xff535353),
-
-                            ),
-                            textAlign: TextAlign.left,
-                          )
-                      ),
-                    ),
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xff18181b),
+                              height: 26 / 20,
+                                                    ),
+                                                    textAlign: TextAlign.left,
+                                                  ),
+                            ],
+                          ),
+                      TranslatorWidget(
+                        "How can we help you today?",
+                        style: TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xff5e5e5f),
+                          height: 20 / 14,
+                        ),
+                        textAlign: TextAlign.left,
+                      )
+                    ],
                   ),
-
-                  // SizedBox(width: 26,),
-                  // Spacer(),
-                  // Semantics(
-                  //   label: "Microphone",
-                  //   child: Icon(
-                  //     Icons.mic_none_outlined,
-                  //     color: Color(0xff8E8C8C),
-                  //   ),
-                  // ),
+                  Spacer(),
+                  IconButton(
+                    icon: Icon(Icons.notifications_none_outlined),
+                    color: Color(0xff18181b),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NotificationScreen(),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
-            ),
-            SizedBox(height: 10,),
-
-          ],
-        ),
-      ),
-      body: isOnline?Stack(
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              children: [
-
-                Column(
+              SizedBox(height: 10,),
+              Container(
+                padding: EdgeInsets.only(left: 16, right: 8),
+                decoration: BoxDecoration(
+                  // color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(10),
+                  border:
+                  Border.all(color: Color(0xFFE0E0E0), width: 1),
+                ),
+                child: Row(
                   children: [
-
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 16),
-                      child:ImageCarouselWidget(
-                        imagesWithText: carouselImages.map((item) => ImageTextPair(
-                          webUrl: item['webUrl'],
-                          image: item['image'],
-                          text: item['text'],
-                          subText: item['subText'],
-                        )).toList(),
-                      ),
-                          // ImageCarouselWidget(imagesWithText: carouselImages),
-
-                    ),
-
                     SizedBox(
-                      height: 10,
+                      child: SvgPicture.asset(
+                          'assets/images/searchicon.svg'),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0, bottom: 12),
-                      child: Row(
-                        children: [
-                          Semantics(
-                            header: true,
+                    // Icon(Icons.search),
+                    SizedBox(width: 16),
+                    // Semantics(
+                    //   header: true,
+                    //   // label: "Search Bar",
+                    //   child: GestureDetector(
+                    //     onTap: (){
+                    //       Navigator.push(
+                    //         context,
+                    //         MaterialPageRoute(
+                    //             builder: (context) => DestinationSearchPage(voiceInputEnabled: false)),
+                    //       );
+                    //     },
+                    //     child: Container(
+                    //       width: MediaQuery.sizeOf(context).width * 0.67,
+                    //       child: TextField(
+                    //         decoration: InputDecoration(
+                    //           hintText: 'Doctor, services..',
+                    //           border: InputBorder.none,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
+                    Semantics(
+                      header: true,
+                      // label: "Search Bar",
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DestinationSearchPage(voiceInputEnabled: false),
+                            ),
+                          ).then((value) => PassLocationId(context, value));
+                        },
+                        child: Container(
+                            padding: EdgeInsets.only(top: 8),
+                            width: MediaQuery.of(context).size.width * 0.67,
+                            height: 40,
                             child: TranslatorWidget(
-                              "Categories",
-                              style: TextStyle(
+                              "Doctor, services,",
+                              style: const TextStyle(
                                 fontFamily: "Roboto",
                                 fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xff18181b),
-                                height: 23 / 16,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xff535353),
+
                               ),
                               textAlign: TextAlign.left,
-                            ),
-                          ),
-                        ],
+                            )
+                        ),
                       ),
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
+
+                    // SizedBox(width: 26,),
+                    // Spacer(),
+                    // Semantics(
+                    //   label: "Microphone",
+                    //   child: Icon(
+                    //     Icons.mic_none_outlined,
+                    //     color: Color(0xff8E8C8C),
+                    //   ),
+                    // ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10,),
+
+            ],
+          ),
+        ),
+        body: isOnline?Stack(
+          children: [
+            SingleChildScrollView(
+              child: Column(
+                children: [
+
+                  Column(
+                    children: [
+
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 16),
+                        child:ImageCarouselWidget(
+                          imagesWithText: carouselImages.map((item) => ImageTextPair(
+                            webUrl: item['webUrl'],
+                            image: item['image'],
+                            text: item['text'],
+                            subText: item['subText'],
+                          )).toList(),
+                        ),
+                            // ImageCarouselWidget(imagesWithText: carouselImages),
+
                       ),
-                      height: 100,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          SizedBox(
-                            width: 16,
-                          ),
-                          GestureDetector(
+
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16.0, bottom: 12),
+                        child: Row(
+                          children: [
+                            Semantics(
+                              header: true,
+                              child: TranslatorWidget(
+                                "Categories",
+                                style: TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xff18181b),
+                                  height: 23 / 16,
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        height: 100,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            SizedBox(
+                              width: 16,
+                            ),
+                            GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => DoctorListScreen()),
+                                  );
+                                },
+                                child: _buildCard(
+                                    'assets/images/Doctor.svg', 'Doctor')),
+                            if(_pharmacyfilteredServices.isNotEmpty)
+                            SizedBox(width: 12),
+
+                            if(_pharmacyfilteredServices.isNotEmpty)
+                            GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => PharmacyScreen()),
+                                  );
+                                },child: _buildCard('assets/images/Pharmacy.svg', 'Pharmacy')),
+
+                            if(_emergencyfilteredService.isNotEmpty)
+                              SizedBox(width: 12),
+                            if(_emergencyfilteredService.isNotEmpty)
+                            GestureDetector(
                               onTap: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => DoctorListScreen()),
+                                      builder: (context) => EmergencyScreen()),
                                 );
                               },
                               child: _buildCard(
-                                  'assets/images/Doctor.svg', 'Doctor')),
-                          if(_pharmacyfilteredServices.isNotEmpty)
-                          SizedBox(width: 12),
-
-                          if(_pharmacyfilteredServices.isNotEmpty)
-                          GestureDetector(
+                                  'assets/images/Doctor (1).svg', 'Emergency'),
+                            ),
+                            if(_atmfilteredServices.isNotEmpty)
+                            SizedBox(width: 12),
+                            if(_atmfilteredServices.isNotEmpty)
+                            GestureDetector(
                               onTap: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => PharmacyScreen()),
-                                );
-                              },child: _buildCard('assets/images/Pharmacy.svg', 'Pharmacy')),
-
-
-                          SizedBox(width: 12),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => EmergencyScreen()),
-                              );
-                            },
-                            child: _buildCard(
-                                'assets/images/Doctor (1).svg', 'Emergency'),
-                          ),
-                          if(_atmfilteredServices.isNotEmpty)
-                          SizedBox(width: 12),
-                          if(_atmfilteredServices.isNotEmpty)
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ATMScreen()),
-                              );
-                            },
-                            child: _buildCard(
-                                'assets/images/Atm.svg', 'ATM'),
-                          ),
-                          if(_cafeteriafilteredServices.isNotEmpty)
-                          SizedBox(width: 12),
-                          if(_cafeteriafilteredServices.isNotEmpty)
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => CafeteriaScreen()),
-                              );
-                            },
-                            child: _buildCard(
-                                'assets/images/Cafetaria.svg', 'Cafeteria'),
-                          ),
-                          if(_countersfilteredServices.isNotEmpty)
-                          SizedBox(width: 12),
-                          if(_countersfilteredServices.isNotEmpty)
-                          GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => CountersScreen()),
+                                      builder: (context) => ATMScreen()),
                                 );
                               },
-
-                              child: _buildCard('assets/images/counter.svg', 'Counters')),
-                          if(_otherfilteredServices.isNotEmpty)
-                          SizedBox(width: 12),
-                          if(_otherfilteredServices.isNotEmpty)
-                          GestureDetector(
+                              child: _buildCard(
+                                  'assets/images/Atm.svg', 'ATM'),
+                            ),
+                            if(_cafeteriafilteredServices.isNotEmpty)
+                            SizedBox(width: 12),
+                            if(_cafeteriafilteredServices.isNotEmpty)
+                            GestureDetector(
                               onTap: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => OtherServiceScreen()),
+                                      builder: (context) => CafeteriaScreen()),
                                 );
                               },
-
-                              child: _buildCard('assets/images/cat.svg', 'Others')),
-                          SizedBox(
-                            width: 12,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 16),
-                      child: Row(
-                        children: [
-                          Semantics(
-                            header: true,
-                            child: TranslatorWidget(
-                              "Nearby Services",
-                              style: TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xff18181b),
-                                height: 23 / 16,
-                              ),
-                              textAlign: TextAlign.left,
+                              child: _buildCard(
+                                  'assets/images/Cafetaria.svg', 'Cafeteria'),
                             ),
-                          ),
-                          Spacer(),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ServiceListScreen()),
-                              );
-                            },
-                            child: TranslatorWidget(
-                              "View all",
-                              style: TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xff000000),
-                                height: 20 / 14,
-                              ),
-                              textAlign: TextAlign.left,
+                            if(_countersfilteredServices.isNotEmpty)
+                            SizedBox(width: 12),
+                            if(_countersfilteredServices.isNotEmpty)
+                            GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => CountersScreen()),
+                                  );
+                                },
+
+                                child: _buildCard('assets/images/counter.svg', 'Counters')),
+                            if(_otherfilteredServices.isNotEmpty)
+                            SizedBox(width: 12),
+                            if(_otherfilteredServices.isNotEmpty)
+                            GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => OtherServiceScreen()),
+                                  );
+                                },
+
+                                child: _buildCard('assets/images/cat.svg', 'Others')),
+                            SizedBox(
+                              width: 12,
                             ),
-                          )
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-
-
-
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      height: 270,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: _services.map<Widget>((service) {
-                          return Padding(
-                            padding: const EdgeInsets.only(left: 12.0),
-                            child: GestureDetector(
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 16),
+                        child: Row(
+                          children: [
+                            Semantics(
+                              header: true,
+                              child: TranslatorWidget(
+                                "Nearby Services",
+                                style: TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xff18181b),
+                                  height: 23 / 16,
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                            Spacer(),
+                            GestureDetector(
                               onTap: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => ServiceInfo(
-                                      imagePath:  '${service['image']}',
-                                      name: '${service['name']}',
-                                      location: '${service['locationName']}',
-                                      accessibility: '${service['accessibility']}',
-                                      locationId: '${service['locationId']}',
-                                      type: '${service['type']}',
-                                      startTime: '${service['startTime']}',
-                                      endTime: '${service['endTime']}',
-                                      contact: '${service['contact']}',
-                                      about: '${service['about']}',
-                                      id: '${service['_id']}',
+                                      builder: (context) => ServiceListScreen()),
+                                );
+                              },
+                              child: TranslatorWidget(
+                                "View all",
+                                style: TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xff000000),
+                                  height: 20 / 14,
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+
+
+
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        height: 270,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: _services.map<Widget>((service) {
+                            return Padding(
+                              padding: const EdgeInsets.only(left: 12.0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ServiceInfo(
+                                        imagePath:  '${service['image']}',
+                                        name: '${service['name']}',
+                                        location: '${service['locationName']}',
+                                        accessibility: '${service['accessibility']}',
+                                        locationId: '${service['locationId']}',
+                                        type: '${service['type']}',
+                                        startTime: '${service['startTime']}',
+                                        endTime: '${service['endTime']}',
+                                        contact: '${service['contact']}',
+                                        about: '${service['about']}',
+                                        id: '${service['_id']}',
+                                      ),
                                     ),
+                                  );
+                                },
+                                child: SizedBox(
+                                  child: NearbyServiceWidget(
+                                    id: '${service['_id']}',
+                                    imagePath:
+                                    '${service['image']}',
+                                    name:
+                                    '${service['name']}',
+                                    location:
+                                    '${service['locationName']}',
+                                    locationId:
+                                    '${service['locationId']}',
+                                    type:
+                                    '${service['type']}',
+                                    startTime:
+                                    '${service['startTime']}',
+                                    endTime:
+                                    '${service['endTime']}',
+                                    accessibility:
+                                    '${service['accessibility']}',
+                                    contact: '${service['contact']}',
+                                    about: '${service['about']}',
+                                    weekDays:
+                                    List<String>.from(service['weekDays']),
+                                    // '${service['locationId']}',
                                   ),
-                                );
-                              },
-                              child: SizedBox(
-                                child: NearbyServiceWidget(
-                                  id: '${service['_id']}',
-                                  imagePath:
-                                  '${service['image']}',
-                                  name:
-                                  '${service['name']}',
-                                  location:
-                                  '${service['locationName']}',
-                                  locationId:
-                                  '${service['locationId']}',
-                                  type:
-                                  '${service['type']}',
-                                  startTime:
-                                  '${service['startTime']}',
-                                  endTime:
-                                  '${service['endTime']}',
-                                  accessibility:
-                                  '${service['accessibility']}',
-                                  contact: '${service['contact']}',
-                                  about: '${service['about']}',
-                                  weekDays:
-                                  List<String>.from(service['weekDays']),
-                                  // '${service['locationId']}',
                                 ),
                               ),
-                            ),
-                          );
-                        }).toList(),
+                            );
+                          }).toList(),
+                        ),
                       ),
-                    ),
-                    
 
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16,right: 16,top: 16,bottom: 8),
-                      child: Row(
-                        children: [
-                          Semantics(
-                            header:true,
-                            child: TranslatorWidget(
-                              "Announcements",
-                              style: TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xff18181b),
+
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16,right: 16,top: 16,bottom: 8),
+                        child: Row(
+                          children: [
+                            Semantics(
+                              header:true,
+                              child: TranslatorWidget(
+                                "Announcements",
+                                style: TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xff18181b),
+                                ),
+                                textAlign: TextAlign.left,
                               ),
-                              textAlign: TextAlign.left,
                             ),
-                          ),
-                          Spacer(),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => AllAnnouncementScreen()),
-                              );
-                            },
-                            child: TranslatorWidget(
-                              "View all",
-                              style: TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xff000000),
+                            Spacer(),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => AllAnnouncementScreen()),
+                                );
+                              },
+                              child: TranslatorWidget(
+                                "View all",
+                                style: TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xff000000),
 
+                                ),
+                                textAlign: TextAlign.left,
                               ),
-                              textAlign: TextAlign.left,
-                            ),
-                          )
-                        ],
+                            )
+                          ],
+                        ),
                       ),
-                    ),
 
-                    Container(
-                      height: 140,
-                      child: ListView.builder(
-                        controller: _scrollController,
-                        scrollDirection: Axis.vertical,
-                        itemCount: announcements.length,
-                        itemBuilder: (BuildContext context, int index) {
-                           final announcement = announcements[index];
-                          return AnnouncementCard(
-                            image: announcement['image']??"",
-                            title: announcement['title']??"",
-                            department: announcement['department']?? "",
-                            dateTime: announcement['dateTime']??"",
-                            article: announcement['article']??"",
+                      Container(
+                        height: 140,
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          scrollDirection: Axis.vertical,
+                          itemCount: announcements.length,
+                          itemBuilder: (BuildContext context, int index) {
+                             final announcement = announcements[index];
+                            return AnnouncementCard(
+                              image: announcement['image']??"",
+                              title: announcement['title']??"",
+                              department: announcement['department']?? "",
+                              dateTime: announcement['dateTime']??"",
+                              article: announcement['article']??"",
 
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                      height: 16,
-                    )
-                  ],
-                ),
-              ],
+                      SizedBox(
+                        height: 16,
+                      )
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ):TranslatorWidget("Offline"),
+          ],
+        ):TranslatorWidget("Offline"),
+      ),
     );
   }
 }

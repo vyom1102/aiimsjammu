@@ -7880,6 +7880,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     }
     compassSubscription.cancel();
     flutterTts.cancelHandler;
+    flutterTts.stop();
     _timer?.cancel();
     btadapter.stopScanning();
     _messageTimer?.cancel();

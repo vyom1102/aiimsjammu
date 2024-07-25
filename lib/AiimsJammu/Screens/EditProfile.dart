@@ -219,7 +219,9 @@ class _EditProfileState extends State<EditProfile> {
           confirmBtnText: 'OK',
           onConfirmBtnTap: () {
             Navigator.pop(context);
-            Navigator.pop(context);
+            Navigator.of(context).pop({
+              'shouldRefresh': true
+            });
           },
         );
       } else if (response.statusCode == 403) {

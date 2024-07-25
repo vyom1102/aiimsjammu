@@ -228,7 +228,7 @@ class _SignUpState extends State<SignUp> {
     };
     var request = http.Request(
         'POST', Uri.parse('https://dev.iwayplus.in/auth/username'));
-    request.body = json.encode({"username": username});
+    request.body = json.encode({"username": username,"appId":"com.iwayplus.aiimsjammu"});
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();

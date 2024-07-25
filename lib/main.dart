@@ -51,7 +51,9 @@ Future<void> main() async {
 
   // await Firebase.initializeApp();
 
-  await Hive.openBox('Favourites');
+  // await Hive.openBox('Favourites');
+  await Hive.openBox('DashboardList');
+
   await Hive.openBox('Filters');
   await Hive.openBox('SignInDatabase');
   await Hive.openBox('LocationPermission');
@@ -71,26 +73,6 @@ class _MyAppState extends State<MyApp> {
   late String googleSignInUserName='';
   final FlutterLocalization localization = FlutterLocalization.instance;
 
-
-  // Future<bool> _isUserAuthenticated() async {
-  //   // Check if the user is already signed in with Google
-  //   User? user = FirebaseAuth.instance.currentUser;
-  //
-  //   // If the user is signed in, return true
-  //   if (user != null) {
-  //     googleSignInUserName = user.displayName!;
-  //     print(user.metadata);
-  //     print(user.emailVerified);
-  //     print(user.phoneNumber);
-  //     print(user.photoURL);
-  //     print(user.tenantId);
-  //     print(user.refreshToken);
-  //
-  //     return true;
-  //   }
-  //   // If the user is not signed in, return false
-  //   return false;
-  // }
 
   @override
   void initState() {

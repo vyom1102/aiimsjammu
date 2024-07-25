@@ -43,7 +43,7 @@ import 'package:hive/hive.dart';
     userInformationBox.put('UserOrentationSetting', userOrentationSetting);
   }
   String getUserOrentationSetting(){
-    UserOrentationSetting = userInformationBox.get('UserOrentationSetting');
+    UserOrentationSetting = userInformationBox.get('UserOrentationSetting')??"Focus Mode";
     return UserOrentationSetting;
   }
 
@@ -51,7 +51,7 @@ import 'package:hive/hive.dart';
     userInformationBox.put('UserPathDetails', userUserPathDetails);
   }
    String getUserPathDetails(){
-     UserPathDetails = userInformationBox.get('UserPathDetails');
+     UserPathDetails = userInformationBox.get('UserPathDetails')??"Distance in meters";
      return UserPathDetails;
    }
 

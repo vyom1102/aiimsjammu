@@ -236,10 +236,12 @@
 //     ),
 //   );
 // }
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shimmer/shimmer.dart';
 import '/AiimsJammu/Screens/ServiceInfo.dart';
 
 import 'CalculateDistance.dart';
@@ -314,12 +316,27 @@ class NearbyServiceWidget extends StatelessWidget {
                 children: [
                   Stack(
                     children: [
-                      Image.network(
-                        'https://dev.iwayplus.in/uploads/$imagePath',
-                        width: 250,
-                        height: 140,
-                        fit: BoxFit.cover,
+                      CachedNetworkImage(
+                        imageUrl: 'https://dev.iwayplus.in/uploads/${imagePath}',
+                        placeholder: (context, url) => Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                            color: Colors.white,
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Image.asset(
+                          'assets/images/DefaultCorousalImage.png',
+                          fit: BoxFit.cover,
+                        ),
+                        fit: BoxFit.fill,
                       ),
+                      // Image.network(
+                      //   'https://dev.iwayplus.in/uploads/$imagePath',
+                      //   width: 250,
+                      //   height: 140,
+                      //   fit: BoxFit.cover,
+                      // ),
                       Positioned(
                         top: 0,
                         right: 0,
