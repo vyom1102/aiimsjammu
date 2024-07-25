@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -125,6 +125,11 @@ class _HomePageState extends State<HomePage> {
     //   _scrollToNext();
     // });
 
+  }
+  Future<void> _launchInWebView(Uri url) async {
+    if (!await launchUrl(url, mode: LaunchMode.inAppBrowserView)) {
+      throw Exception('Could not launch $url');
+    }
   }
   void loadInfoToFile(){
     var infoBox=Hive.box('SignInDatabase');
@@ -1153,7 +1158,116 @@ class _HomePageState extends State<HomePage> {
                       ),
                       SizedBox(
                         height: 16,
-                      )
+                      ),
+                      Padding(
+                        padding:
+                        const EdgeInsets.only(left: 16, right: 16, bottom: 8),
+                        child: Row(
+                          children: [
+                            TranslatorWidget(
+                              'Connect with us',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+
+                            ),
+
+                          ],
+                        ),
+                      ),
+
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: 16,
+                          ),
+                          InkWell(
+                            onTap: () {
+                              _launchInWebView(Uri.parse(twitter));
+                            },
+                            child: Container(
+                              height: 40,
+                              width: 40,
+                              child: Padding(
+                                padding: const EdgeInsets.all(6.0),
+                                child: Container(
+                                  height: 24,
+                                  width: 24,
+                                  child: SvgPicture.asset(
+                                      "assets/images/twitter.svg"),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 8,
+                          ),
+                          InkWell(
+                            onTap: () {
+                              _launchInWebView(Uri.parse(youtube));
+                            },
+                            child: Container(
+                              height: 40,
+                              width: 40,
+                              child: Padding(
+                                padding: const EdgeInsets.all(6.0),
+                                child: Container(
+                                    height: 24,
+                                    width: 24,
+                                    child: SvgPicture.asset(
+                                        "assets/images/youtube.svg")),
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(
+                            width: 8,
+                          ),
+                          InkWell(
+                            onTap: () {
+                              _launchInWebView(Uri.parse(facebook));
+                            },
+                            child: Container(
+                              height: 40,
+                              width: 40,
+                              child: Padding(
+                                padding: const EdgeInsets.all(6.0),
+                                child: Container(
+                                  height: 24,
+                                  width: 24,
+                                  child: SvgPicture.asset(
+                                      "assets/images/facebook.svg"),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(
+                            width: 8,
+                          ),
+                          InkWell(
+                            onTap: () {
+                              _launchInWebView(Uri.parse(instagram));
+                            },
+                            child: Container(
+                              height: 40,
+                              width: 40,
+                              child: Padding(
+                                padding: const EdgeInsets.all(6.0),
+                                child: Container(
+                                    height: 24,
+                                    width: 24,
+                                    child: SvgPicture.asset(
+                                        "assets/images/instagram.svg")),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 16,
+                      ),
                     ],
                   ),
                 ],
