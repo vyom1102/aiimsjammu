@@ -5,7 +5,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '/localization/locales.dart';
+import '../localization/locales.dart';
+
 
 class directionInstruction extends StatefulWidget {
   String direction;

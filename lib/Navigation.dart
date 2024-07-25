@@ -16,11 +16,13 @@ import 'package:flutter_beep/flutter_beep.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:http/http.dart';
+import 'package:iwaymaps/API/RatingsaveAPI.dart';
 import 'package:iwaymaps/API/waypoint.dart';
 import 'package:iwaymaps/DebugToggle.dart';
 import 'package:iwaymaps/Elements/DirectionHeader.dart';
 import 'package:iwaymaps/Elements/ExploreModeWidget.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/Elements/UserCredential.dart';
 import 'package:iwaymaps/VenueSelectionScreen.dart';
 import 'package:iwaymaps/wayPointPath.dart';
 import 'package:iwaymaps/waypoint.dart';
@@ -30,9 +32,10 @@ import 'API/outBuilding.dart';
 import 'APIMODELS/outdoormodel.dart';
 import 'CLUSTERING/MapHelper.dart';
 import 'CLUSTERING/MapMarkers.dart';
-import 'localization/locales.dart';
+import 'MainScreen.dart';
 import 'UserExperienceRatingScreen.dart';
 import 'directionClass.dart';
+import 'localization/locales.dart';
 import 'localizedData.dart';
 
 import 'package:chips_choice/chips_choice.dart';
@@ -628,9 +631,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       fontSize: 16.0,
     );
   }
-
+bool disposed=false;
   Future<void> speak(String msg, String lngcode,
       {bool prevpause = false}) async {
+    if(disposed)return;
     if (prevpause) {
       await flutterTts.pause();
     }
@@ -641,6 +645,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     } else {
       await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
     }
+    await flutterTts.stop();
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
@@ -1678,6 +1683,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       print(isBlueToothLoading);
     });
     print("Circular progress stop");
+    print("shift to feedbackpannel after debug");
+    print(UserCredentials().getUserId());
+
   }
 
   void _updateCircle(double lat, double lng) {
@@ -5042,13 +5050,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                     // user.ListofPaths = PathState.listofPaths;
                                                     // user.patchData = building.patchData;
                                                     // user.buildingNumber = PathState.listofPaths.length-1;
-                                                    UserState.reroute = reroute;
-                                                    UserState.closeNavigation = closeNavigation;
-                                                    UserState.AlignMapToPath = alignMapToPath;
-                                                    UserState.startOnPath = startOnPath;
-                                                    UserState.speak = speak;
-                                                    UserState.paintMarker = paintMarker;
-                                                    UserState.createCircle = updateCircle;
                                                     buildingAllApi.selectedID =
                                                         PathState.sourceBid;
                                                     buildingAllApi
@@ -5068,6 +5069,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                                             .sourceFloor]![1];
                                                     user.Bid =
                                                         PathState.sourceBid;
+                                                    UserState.reroute = reroute;
+                                                    UserState.closeNavigation = closeNavigation;
+                                                    UserState.AlignMapToPath = alignMapToPath;
+                                                    UserState.startOnPath = startOnPath;
+                                                    UserState.speak = speak;
+                                                    UserState.paintMarker = paintMarker;
+                                                    UserState.createCircle = updateCircle;
                                                     //user.realWorldCoordinates = PathState.realWorldCoordinates;
                                                     user.floor =
                                                         PathState.sourceFloor;
@@ -5433,14 +5441,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
 
   Widget feedbackPanel(BuildContext context) {
-
     return Visibility(
       visible: showFeedback,
       child: Semantics(
         excludeSemantics: true,
         child: SlidingUpPanel(
             controller: _feedbackController,
-            minHeight: MediaQuery.of(context).size.height/2,
+            minHeight: MediaQuery.of(context).size.height/2.5,
             maxHeight: MediaQuery.of(context).size.height,
             snapPoint: 0.9,
             borderRadius: BorderRadius.all(Radius.circular(24.0)),
@@ -5523,11 +5530,36 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                       onPressed: (_rating > 0 && (_rating >= 4 || _feedback.split(' ').where((w) => w.isNotEmpty).length >= 5)) ? () {
                         // TODO: Submit feedback
                         print('Rating: $_rating');
+                        var signInBox = Hive.box('UserInformation');
+                        print(signInBox.keys);
+                        var infoBox=Hive.box('SignInDatabase');
+                        String accessToken = infoBox.get('accessToken');
+                        //print('loadInfoToFile');
+                        print(infoBox.get('userId'));
+                        //String userId = signInBox.get("sId");
+                        //String username = signInBox.get("username");
+
+
+
+
+
+                        RatingsaveAPI().saveRating(_feedback, _rating,UserCredentials().getUserId(), UserCredentials().getuserName(), PathState.sourcePolyID, PathState.destinationPolyID,"com.iwayplus.navigation");
+                        
                         if (_feedback.isNotEmpty) {
                           print('Feedback: $_feedback');
                         }
                         showFeedback= false;
                         _feedbackController.hide();
+                        print("_feedbackTextController.clear()");
+                        print(_feedbackTextController.text);
+                        _feedbackTextController.clear();
+                        print(_feedbackTextController.text);
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => MainScreen(initialIndex: 0)),
+                              (Route<dynamic> route) => false,
+                        );
+
                       }
                           : null,
                       child: Padding(
@@ -5874,6 +5906,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
                                   });
                                   print("feedbackTextController.value.text");
                                   print(_feedbackTextController.value.text);
+
+
 
 
                                 },
@@ -7630,6 +7664,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     showFeedback = true;
     Future.delayed(Duration(seconds: 5));
     _feedbackController.open();
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => MainScreen(initialIndex: 0)),
+          (Route<dynamic> route) => false,
+    );
 
 
   }
@@ -7874,13 +7913,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    disposed=true;
+    flutterTts.stop();
     _googleMapController.dispose();
     for (final subscription in _streamSubscriptions) {
       subscription.cancel();
     }
     compassSubscription.cancel();
     flutterTts.cancelHandler;
-    flutterTts.stop();
     _timer?.cancel();
     btadapter.stopScanning();
     _messageTimer?.cancel();

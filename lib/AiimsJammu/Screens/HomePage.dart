@@ -13,6 +13,7 @@ import 'package:iwaymaps/API/DataVersionApi.dart';
 import 'package:iwaymaps/API/buildingAllApi.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/NoInternetConnection.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/OpeningClosingStatus.dart';
+import '../../API/UsergetAPI.dart';
 import '../../APIMODELS/DataVersion.dart';
 import '../../VersioInfo.dart';
 import '../Widgets/Translator.dart';
@@ -125,6 +126,15 @@ class _HomePageState extends State<HomePage> {
     // });
 
   }
+  void loadInfoToFile(){
+    var infoBox=Hive.box('SignInDatabase');
+    String accessToken = infoBox.get('accessToken');
+    print('loadInfoToFile');
+    print(infoBox.get('userId'));
+
+    UsergetAPI().getUserDetailsApi(infoBox.get('userId'));
+
+  }
   var versionBox = Hive.box('VersionData');
   void versionApiCall() async{
     try {
@@ -201,6 +211,7 @@ class _HomePageState extends State<HomePage> {
         versionBox.put("updatedAt", dataVersion.versionData!.updatedAt);
         versionBox.put("buildingID", dataVersion.versionData!.buildingID);
       }
+      loadInfoToFile();
     }catch(e){
 
     }

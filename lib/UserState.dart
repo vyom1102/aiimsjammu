@@ -191,11 +191,8 @@ class UserState{
 
       //destination check
       print("angleeeeeeeee ${tools.calculateDistance([showcoordX,showcoordY], [pathobj.destinationX,pathobj.destinationY])}");
-      print("angleeeeeeeee ${floor}     ${pathobj.destinationFloor}");
-      print("angleeeeeeeee ${Bid}     ${pathobj.destinationBid }");
       if(floor == pathobj.destinationFloor && Bid == pathobj.destinationBid && tools.calculateDistance([showcoordX,showcoordY], [pathobj.destinationX,pathobj.destinationY]) < 6 ){
-        print("angleeeeeeeee inside");
-        //createCircle(lat,lng);
+        createCircle(lat,lng);
         closeNavigation();
       }
 

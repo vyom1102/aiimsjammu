@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 
 import 'package:flutter/cupertino.dart';
@@ -19,7 +20,7 @@ import '../directionClass.dart';
 import '../directionClass.dart' as dc;
 import '../directionClass.dart';
 import '../Navigation.dart';
-import '/localization/locales.dart';
+import '../localization/locales.dart';
 
 
 class DirectionHeader extends StatefulWidget {
@@ -66,15 +67,32 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   List<Widget> DirectionWidgetList = [];
   late FlutterLocalization _flutterLocalization;
   late String _currentLocale = '';
+  bool disposed=false;
 
 
   Map<String, double> ShowsumMap = Map();
   int DirectionIndex = 1;
   int nextTurnIndex = 0;
-  
+  bool isSpeaking=false;
+
+  void initTts() {
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        isSpeaking = false;
+      });
+    });
+  }
+
+
+
+
+
+
   @override
   void initState() {
     super.initState();
+
+   // initTts();
 
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
@@ -179,6 +197,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
   @override
   void dispose() {
+    disposed=true;
+    flutterTts.stop();
     _timer.cancel();
     super.dispose();
   }
@@ -402,20 +422,38 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   }
 
 
-  FlutterTts flutterTts = FlutterTts() ;
+  FlutterTts flutterTts = FlutterTts();
   Future<void> speak(String msg,String lngcode,{bool prevpause = false}) async {
+if(disposed)return;
+
+    // if (isSpeaking) {
+    //   await flutterTts.stop();
+    // }
+    // setState(() {
+    //   isSpeaking = true;
+    // });
     if(prevpause){
       await flutterTts.pause();
     }
-    print(await flutterTts.getDefaultVoice);
-    if(lngcode == "hi"){
-      await flutterTts.setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
-    }else{
-      await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
+    if(Platform.isAndroid)
+      {
+        if(lngcode == "hi"){
+          await flutterTts.setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
+        }else{
+          await flutterTts.setVoice({"name": "en-US-language", "locale": "en-US"});
+        }
+      }
+    if(isSpeaking){
+      await flutterTts.stop();
     }
+
     await flutterTts.setSpeechRate(0.8);
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
+
+    setState(() {
+      isSpeaking =!isSpeaking;
+    });
   }
 
   int findNextTurn(List<int> turns, List<int> path) {
@@ -442,7 +480,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       if (lngcode == 'en') {
         return msg;
       } else {
-
         return "${LocaleData.getProperty5(direction, widget.context)} मुड़ें";
       }
     }else if(msg=="Use this lift and go to ${tools.numericalToAlphabetical(widget.user.pathobj.destinationFloor)} floor"){
@@ -597,6 +634,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                       direc,
                       nextTurn,""),
                   _currentLocale);
+              return;
               //widget.user.pathobj.associateTurnWithLandmark.remove(nextTurn);
             }else{
               speak(
@@ -604,7 +642,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                       _currentLocale, '',direc, nextTurn,""),
                   _currentLocale);
               widget.user.move(widget.context);
+              return;
             }
+
+
           }
         }
 
@@ -856,19 +897,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             ),
           ):Container(),
 
-          Container(
-            width: 300,
-            height: 100,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(ShowsumMap.toString()),
-                ],
-              ),
-            ),
-          ),
+          // Container(
+          //   width: 300,
+          //   height: 100,
+          //   child: SingleChildScrollView(
+          //     scrollDirection: Axis.horizontal,
+          //     child: Column(
+          //       crossAxisAlignment: CrossAxisAlignment.start,
+          //       children: [
+          //         Text(ShowsumMap.toString()),
+          //       ],
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
