@@ -55,7 +55,7 @@ class patchAPI {
 
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = json.decode(response.body);
-      print(responseBody);
+
       final patchData = PatchAPIModel(responseBody: responseBody);
       PatchBox.put(patchDataModel.fromJson(responseBody).patchData!.buildingID,patchData);
       patchData.save();

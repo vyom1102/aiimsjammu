@@ -127,6 +127,8 @@ mixin LocaleData {
   static const String none='None';
   static const String ttsgostraight='ttsGoStraight';
   static const String upToDate ='upToDate';
+  static const String waytogo="Where you want to go?";
+
 
 
   static Map<String, String> get properties => {
@@ -352,8 +354,10 @@ mixin LocaleData {
     'ttsUTurn':'U Turn',
     'ttsGoStraight':'Go Straight',
     'upToDate':'Up to date',
+    'Where you want to go?':'Where you want to go?'
 
-};
+
+  };
 
   static const Map<String, dynamic> HI = {
     'title': 'सेटिंग्स',
@@ -470,6 +474,8 @@ mixin LocaleData {
     'ttsUTurn':'यू टर्न',
     'ttsGoStraight':'सीधे चले लगभग',
     'upToDate':'अप टू डेट',
+    'Where you want to go?':'आप कहाँ जाना चाहते हैं?'
+
 
   };
 
@@ -598,6 +604,8 @@ mixin LocaleData {
   '5 to 6 Feet': '५ देखि ६ फिट',
   '> 6 Feet': '> ६ फिट',
     'upToDate':'अप टू डेट',
+    'Where you want to go?':'आप कहाँ जाना चाहते हैं?'
+
 
   };
 
