@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -325,12 +326,34 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                               children: [
                                 Stack(
                                   children: [
-                                    Image.network(
-                                      // 'https://dev.iwayplus.in/uploads/$service['image']',
-                                      'https://dev.iwayplus.in/uploads/${service['image']}',
+                                    // Image.network(
+                                    //   // 'https://dev.iwayplus.in/uploads/$service['image']',
+                                    //   'https://dev.iwayplus.in/uploads/${service['image']}',
+                                    //   width: cardWidth,
+                                    //   height: 140,
+                                    //   fit: BoxFit.cover,
+                                    // ),
+                                    CachedNetworkImage(
+                                      imageUrl: 'https://dev.iwayplus.in/uploads/${service['image']}',
                                       width: cardWidth,
                                       height: 140,
-                                      fit: BoxFit.cover,
+                                      fit: BoxFit.fill,
+                                      placeholder: (context, url) => Shimmer.fromColors(
+                                        baseColor: Colors.grey[300]!,
+                                        highlightColor: Colors.grey[100]!,
+                                        child: Container(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) => Container(
+                                        width: 250,
+                                        height: 140,
+                                        color: Colors.grey[200],
+                                        child:Image.asset(
+                                          'assets/images/placeholder.png',
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
                                     ),
                                     Positioned(
                                       top: 0,

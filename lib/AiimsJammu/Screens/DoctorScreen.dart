@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -348,14 +349,43 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                                                   CrossAxisAlignment.center,
                                               children: [
 
+                                                // Container(
+                                                //   width: 90,
+                                                //   height: 90,
+                                                //   decoration: BoxDecoration(
+                                                //     shape: BoxShape.circle,
+                                                //     image: DecorationImage(
+                                                //       image: NetworkImage('https://dev.iwayplus.in/uploads/${doctor['imageUrl']}'),
+                                                //       fit: BoxFit.cover,
+                                                //     ),
+                                                //   ),
+                                                // ),
                                                 Container(
                                                   width: 90,
                                                   height: 90,
                                                   decoration: BoxDecoration(
                                                     shape: BoxShape.circle,
-                                                    image: DecorationImage(
-                                                      image: NetworkImage('https://dev.iwayplus.in/uploads/${doctor['imageUrl']}'),
-                                                      fit: BoxFit.cover,
+                                                  ),
+                                                  child: ClipOval(
+                                                    child: CachedNetworkImage(
+                                                      imageUrl: 'https://dev.iwayplus.in/uploads/${doctor['imageUrl']}',
+                                                      placeholder: (context, url) => Shimmer.fromColors(
+                                                        baseColor: Colors.grey[300]!,
+                                                        highlightColor: Colors.grey[100]!,
+                                                        child: Container(
+                                                          color: Colors.white,
+                                                        ),
+                                                      ),
+                                                      errorWidget: (context, url, error) => Container(
+                                                        width: 250,
+                                                        height: 140,
+                                                        color: Colors.grey[200],
+                                                        child:Image.asset(
+                                                          'assets/images/placeholder.png',
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      ),
+                                                      fit: BoxFit.fill,
                                                     ),
                                                   ),
                                                 ),
