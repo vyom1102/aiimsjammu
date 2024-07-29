@@ -68,15 +68,20 @@ class _ProfilePageState extends State<ProfilePage> {
   }
   Future<void> getUserDataFromHive() async {
     final signInBox = await Hive.openBox('SignInDatabase');
+    final userlistBox = await Hive.openBox('user');
+
     setState(() {
       userId = signInBox.get("userId");
       accessToken = signInBox.get("accessToken");
       refreshToken = signInBox.get("refreshToken");
+      name = userlistBox.get("name");
+      username = userlistBox.get("username");
     });
-
+    if (name == null) {
     if (userId != null && accessToken != null && refreshToken != null) {
       // If user ID, access token, and refresh token are available, call API
       getUserDetails();
+    }
     } else {
       // Handle case where user ID, access token, or refresh token is missing
     }
@@ -224,7 +229,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             padding: const EdgeInsets.symmetric(horizontal: 8.0),
                             child: TranslatorWidget(
 
-                              username??"loading..",
+                              username??"Not Available",
                               style: TextStyle(
 
                                 color: Color(0xFF8D8C8C),

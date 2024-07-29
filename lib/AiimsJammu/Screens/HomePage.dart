@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -113,7 +115,7 @@ class _HomePageState extends State<HomePage> {
 
     // _loadServicesFromAPI();
     // _loadAnnouncementsFromAPI();
-    getUserDataFromHive();
+    // getUserDataFromHive();
     checkForReload();
 
     versionApiCall();
@@ -222,8 +224,25 @@ class _HomePageState extends State<HomePage> {
     }
   }
   var DashboardListBox = Hive.box('DashboardList');
+  var userListBox = Hive.box('user');
 
   void checkForReload(){
+    if(userListBox.containsKey('name')){
+      userName = userListBox.get('name');
+      print('name from database');
+    }else{
+      // getUserDetails();
+      getUserDataFromHive();
+      print("name from api");
+    }
+    if(userListBox.containsKey('username')){
+      emailAddress = userListBox.get('username');
+      print('username from database');
+    }else{
+      // getUserDetails();
+      getUserDataFromHive();
+      print("username from api");
+    }
     if(DashboardListBox.containsKey('carouselImages')){
       carouselImages = DashboardListBox.get('carouselImages');
       print('_loadImageCorousalFromAPI FROM DATABASE');
@@ -568,26 +587,40 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+
   Future<void> _refresh() async {
-    setState(() {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    print("Connectivity Result: $connectivityResult");
 
-      carouselImages.clear();
-      _services.clear();
-      _filteredServices.clear();
-      announcements.clear();
-      // news.clear();
-      DashboardListBox.clear();
+    // Check if the result contains wifi or mobile connectivity
+    if (connectivityResult.contains(ConnectivityResult.mobile) || connectivityResult.contains(ConnectivityResult.wifi)) {
+      setState(() {
+        carouselImages.clear();
+        _services.clear();
+        _filteredServices.clear();
+        announcements.clear();
+        // news.clear();
+        DashboardListBox.clear();
+      });
+      print("Refreshed");
 
-    });
-    print("refreshed");
-    await _loadImageCorousalFromAPI();
-    await _loadServicesFromAPI();
-    await _loadAnnouncementsFromAPI();
-    // await _loadNewsFromAPI();
-    versionApiCall();
-    checkForReload();
-
+      await _loadImageCorousalFromAPI();
+      await _loadServicesFromAPI();
+      await _loadAnnouncementsFromAPI();
+      // await _loadNewsFromAPI();
+      versionApiCall();
+      checkForReload();
+    } else {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'No Internet Connection',
+        text: 'Please check your internet connection and try again.',
+      );
+    }
   }
+
+
 
   void animateToNextPage() {
     if (_currentPage < 4) {
@@ -657,6 +690,8 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           userName = responseBody["name"];
           emailAddress = responseBody["email"];
+          userListBox.put('name', userName);
+          userListBox.put('username',responseBody['username']);
         });
       } else if (response.statusCode == 403) {
         await refreshTokenAndRetryForGetUserDetails(baseUrl);

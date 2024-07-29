@@ -37,6 +37,7 @@ class _EditProfileState extends State<EditProfile> {
     // Retrieve user ID from Hive
     getUserIDFromHive();
   }
+  var userListBox = Hive.box('user');
 
   Future<void> getUserIDFromHive() async {
     final signInBox = await Hive.openBox('SignInDatabase');
@@ -47,10 +48,16 @@ class _EditProfileState extends State<EditProfile> {
       userId = signInBox.get("userId");
       accessToken = signInBox.get('accessToken');
       refreshToken = signInBox.get('refreshToken');
+      _nameController.text = userListBox.get('name');
+      _emailController.text = userListBox.get('username');
     });
 
     if (userId != null) {
+      if(_nameController.text.isEmpty  ) {
       getUserDetails();
+      }else{
+        print("name and email from database");
+      }
     } else {
       print("User id is null");
     }
@@ -79,6 +86,11 @@ class _EditProfileState extends State<EditProfile> {
 
         print("originalName");
         print(originalName);
+        setState(() {
+          // originalName = responseBody["name"];
+          _emailController.text = responseBody["username"]??"Not Available";
+          _nameController.text = responseBody["name"]??"User";
+        });
         _nameController.text = originalName!;
       } else if (response.statusCode == 403) {
         // Access token expired, refresh token and retry the call
@@ -218,6 +230,8 @@ class _EditProfileState extends State<EditProfile> {
           text: 'Name updated successfully',
           confirmBtnText: 'OK',
           onConfirmBtnTap: () {
+            userListBox.put('name', _nameController.text);
+
             Navigator.pop(context);
             Navigator.of(context).pop({
               'shouldRefresh': true

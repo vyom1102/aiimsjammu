@@ -46,7 +46,7 @@ class NotificationScreen extends StatelessWidget {
                 height: 8,
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.only(top: 8.0,right: 8,left: 16),
                 child: TranslatorWidget(
                   'We’ll let you know when there will be something to update you.',
                   textAlign: TextAlign.center,

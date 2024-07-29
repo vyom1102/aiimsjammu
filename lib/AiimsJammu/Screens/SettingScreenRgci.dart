@@ -5,6 +5,7 @@ import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive/hive.dart';
 import 'package:new_version_plus/new_version_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../Elements/UserCredential.dart';
 import '../../MainScreen.dart';
@@ -359,13 +360,26 @@ class _SettingScreenState extends State<SettingScreen> {
                           valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0B6B94)),
                         )
                       else if (_updateAvailable)
-                        Text(
-                          LocaleData.updateAvailable.getString(context),
-                          style: TextStyle(
-                            color: Color(0xFF0B6B94),
-                            fontSize: 14,
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w400,
+                        InkWell(
+                          onTap: () async {
+                            final url = Theme.of(context).platform == TargetPlatform.iOS
+                                ? 'https://apps.apple.com/in/app/rgci-navigation/id6505062168'
+                                : 'https://play.google.com/store/apps/details?id=com.iwayplus.aiimsjammu';
+                            if (await canLaunch(url)) {
+                              await launch(url);
+                            } else {
+                              // Handle the error if the URL can't be launched
+                              print('Could not launch $url');
+                            }
+                          },
+                          child: Text(
+                            LocaleData.updateAvailable.getString(context),
+                            style: TextStyle(
+                              color: Color(0xFF0B6B94),
+                              fontSize: 14,
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
                         )
                       else

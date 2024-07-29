@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/AiimsJammu/Widgets/Translator.dart';
 
@@ -18,13 +19,25 @@ class AllAnnouncementScreen extends StatefulWidget {
 class _AllAnnouncementScreenState extends State<AllAnnouncementScreen> {
   List<dynamic> _announcement=[];
   String token = "";
+  var DashboardListBox = Hive.box('DashboardList');
 
   @override
 
   void initState() {
     super.initState();
     // _loadServices();
-    _loadAnnouncementFromAPI();
+    // _loadAnnouncementFromAPI();
+    checkForReload();
+  }
+  void checkForReload(){
+    if(DashboardListBox.containsKey('_announcement')){
+      _announcement = DashboardListBox.get('_announcement');
+      print('_announcement FROM DATABASE');
+
+    }else{
+      _loadAnnouncementFromAPI();
+      print('_announcement API CALL');
+    }
   }
   void _loadAnnouncementFromAPI() async {
 
@@ -49,6 +62,7 @@ class _AllAnnouncementScreenState extends State<AllAnnouncementScreen> {
         if (responseData.containsKey('data') && responseData['data'] is List) {
           setState(() {
             _announcement = responseData['data'];
+            DashboardListBox.put('_announcement', responseData['data']);
             // _filteredServices = _services;
             // _isLoading = false;
           });

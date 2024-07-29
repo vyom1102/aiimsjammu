@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hive/hive.dart';
 import '../Widgets/Translator.dart';
 import '/AiimsJammu/Data/ServicesDemoData.dart';
 import 'package:share_plus/share_plus.dart';
@@ -28,15 +29,30 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
   List<String> _selectedServices = [];
   bool _isLoading = true;
   String token = "";
-
+  var DashboardListBox = Hive.box('DashboardList');
   TextEditingController _searchController = TextEditingController();
   @override
   void initState() {
     super.initState();
     // _loadServices();
-    _loadServicesFromAPI();
-  }
+    // _loadServicesFromAPI();
+    checkForReload();
 
+  }
+  void checkForReload(){
+    if(DashboardListBox.containsKey('_services')){
+      _services = DashboardListBox.get('_services');
+      setState(() {
+        _filteredServices = _services;
+        _isLoading = false;
+      });
+      print('_loadServicesFromAPI FROM DATABASE');
+
+    }else{
+      _loadServicesFromAPI();
+      print('_loadServicesFromAPI API CALL');
+    }
+  }
 
   void _loadServicesFromAPI() async {
 
@@ -63,6 +79,8 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
             _services = responseData['data'];
             _filteredServices = _services;
             _isLoading = false;
+            DashboardListBox.put('_services', responseData['data']);
+
           });
         } else {
           throw Exception('Response data does not contain the expected list of doctors under the "ServiceData" key');

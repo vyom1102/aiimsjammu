@@ -1,10 +1,12 @@
 
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hive/hive.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -27,15 +29,31 @@ class _CountersScreenState extends State<CountersScreen> {
   List<String> _selectedServices = [];
   bool _isLoading = true;
   String token = "";
+  var DashboardListBox = Hive.box('DashboardList');
 
   TextEditingController _searchController = TextEditingController();
   @override
   void initState() {
     super.initState();
     // _loadServices();
-    _loadPharmacyServicesFromAPI();
-  }
+    // _loadPharmacyServicesFromAPI();
+    checkForReload();
 
+  }
+  void checkForReload(){
+    if(DashboardListBox.containsKey('_services')){
+      _services = DashboardListBox.get('_services');
+      setState(() {
+        _filteredServices = _services.where((service) => service['type'] == 'Counters').toList();
+        _isLoading = false;
+      });
+      print('atm FROM DATABASE');
+
+    }else{
+      _loadPharmacyServicesFromAPI();
+      print('atm API CALL');
+    }
+  }
 
   void _loadPharmacyServicesFromAPI() async {
 
@@ -62,6 +80,7 @@ class _CountersScreenState extends State<CountersScreen> {
             _services = responseData['data'];
             // _filteredServices = _services;
             _filteredServices = _services.where((service) => service['type'] == 'Counters').toList();
+            DashboardListBox.put('_services', responseData['data']);
 
             _isLoading = false;
           });
@@ -181,11 +200,33 @@ class _CountersScreenState extends State<CountersScreen> {
                               children: [
                                 Stack(
                                   children: [
-                                    Image.network(
-                                      'https://dev.iwayplus.in/uploads/${service['image']}',
+                                    // Image.network(
+                                    //   'https://dev.iwayplus.in/uploads/${service['image']}',
+                                    //   width: cardWidth,
+                                    //   height: 140,
+                                    //   fit: BoxFit.cover,
+                                    // ),
+                                    CachedNetworkImage(
+                                      imageUrl: 'https://dev.iwayplus.in/uploads/${service['image']}',
                                       width: cardWidth,
                                       height: 140,
-                                      fit: BoxFit.cover,
+                                      fit: BoxFit.fill,
+                                      placeholder: (context, url) => Shimmer.fromColors(
+                                        baseColor: Colors.grey[300]!,
+                                        highlightColor: Colors.grey[100]!,
+                                        child: Container(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) => Container(
+                                        width: 250,
+                                        height: 140,
+                                        color: Colors.grey[200],
+                                        child:Image.asset(
+                                          'assets/images/DefaultCorousalImage.png',
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
                                     ),
                                     Positioned(
                                       top: 0,

@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hive/hive.dart';
 
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
@@ -28,16 +29,32 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
   List<String> _selectedServices = [];
   bool _isLoading = true;
   String token = "";
+  var DashboardListBox = Hive.box('DashboardList');
 
   TextEditingController _searchController = TextEditingController();
   @override
   void initState() {
     super.initState();
     // _loadServices();
-    _loadPharmacyServicesFromAPI();
+    // _loadPharmacyServicesFromAPI();
+    checkForReload();
+
   }
 
+  void checkForReload(){
+    if(DashboardListBox.containsKey('_services')){
+      _services = DashboardListBox.get('_services');
+      setState(() {
+        _filteredServices = _services.where((service) => service['type'] == 'Cafeteria').toList();
+        _isLoading = false;
+      });
+      print('atm FROM DATABASE');
 
+    }else{
+      _loadPharmacyServicesFromAPI();
+      print('atm API CALL');
+    }
+  }
   void _loadPharmacyServicesFromAPI() async {
 
     try {
@@ -63,6 +80,7 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
             _services = responseData['data'];
             // _filteredServices = _services;
             _filteredServices = _services.where((service) => service['type'] == 'Cafeteria').toList();
+            DashboardListBox.put('_services', responseData['data']);
 
             _isLoading = false;
           });

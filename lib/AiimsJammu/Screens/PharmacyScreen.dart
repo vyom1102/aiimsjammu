@@ -1,10 +1,12 @@
 
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hive/hive.dart';
 import '../Widgets/Translator.dart';
 import '/AiimsJammu/Data/ServicesDemoData.dart';
 import 'package:share_plus/share_plus.dart';
@@ -28,15 +30,31 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
   List<String> _selectedServices = [];
   bool _isLoading = true;
   String token = "";
+  var DashboardListBox = Hive.box('DashboardList');
 
   TextEditingController _searchController = TextEditingController();
   @override
   void initState() {
     super.initState();
     // _loadServices();
-    _loadPharmacyServicesFromAPI();
-  }
+    // _loadPharmacyServicesFromAPI();
+    checkForReload();
 
+  }
+  void checkForReload(){
+    if(DashboardListBox.containsKey('_services')){
+      _services = DashboardListBox.get('_services');
+      setState(() {
+        _filteredServices = _services.where((service) => service['type'] == 'Pharmacy').toList();
+        _isLoading = false;
+      });
+      print('pharmacy FROM DATABASE');
+
+    }else{
+      _loadPharmacyServicesFromAPI();
+      print('pharmacy API CALL');
+    }
+  }
 
   void _loadPharmacyServicesFromAPI() async {
 
@@ -63,6 +81,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
             _services = responseData['data'];
             // _filteredServices = _services;
             _filteredServices = _services.where((service) => service['type'] == 'Pharmacy').toList();
+            DashboardListBox.put('_services', responseData['data']);
 
             _isLoading = false;
           });
@@ -144,105 +163,6 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
           :Column(
         children: [
 
-          // Semantics(
-          //   label: "Services",
-          //   header: true,
-          //   child: SizedBox(
-          //
-          //     height: 60,
-          //     child: ListView.builder(
-          //       scrollDirection: Axis.horizontal,
-          //       itemCount: specialities.length + 1,
-          //       itemBuilder: (context, index) {
-          //         if (index == 0) {
-          //           return Padding(
-          //             padding: const EdgeInsets.only(left: 8.0,right: 4),
-          //             child: FilterChip(
-          //               disabledColor: Colors.white,
-          //               label: Text(
-          //                 'All',
-          //                 style: TextStyle(
-          //                   color: _selectedServices.isEmpty ? Colors.white : Color(0xFF1C2A3A),
-          //                 ),
-          //               ),
-          //               showCheckmark: false,
-          //               selectedColor: Color(0xFF1C2A3A),
-          //               backgroundColor: Colors.white,
-          //               selected: _selectedServices.isEmpty,
-          //               // backgroundColor: _selectedSpecialities.isEmpty ? Color(0xFF1C2A3A) : Colors.transparent,
-          //               onSelected: (value) {
-          //                 setState(() {
-          //                   _selectedServices.clear();
-          //                   _filterServices();
-          //                 });
-          //               },
-          //               shape: RoundedRectangleBorder(
-          //                 borderRadius: BorderRadius.circular(20),
-          //               ),
-          //             ),
-          //           );
-          //         } else {
-          //           final speciality = specialities[index - 1];
-          //           return Padding(
-          //             padding: const EdgeInsets.all(4.0),
-          //             child: FilterChip(
-          //               label: Text(
-          //                 speciality,
-          //                 style: TextStyle(
-          //                   color: _selectedServices.contains(speciality) ? Colors.white : Color(0xFF1C2A3A),
-          //                 ),
-          //               ),
-          //               selectedColor: Color(0xFF1C2A3A),
-          //
-          //               showCheckmark: false,
-          //               selected: _selectedServices.contains(speciality),
-          //               // backgroundColor: _selectedSpecialities.contains(speciality) ? Color(0xFF1C2A3A) : Colors.transparent,
-          //               onSelected: (value) {
-          //                 setState(() {
-          //                   if (value) {
-          //
-          //                     _selectedServices.add(speciality);
-          //
-          //                   } else {
-          //                     _selectedServices.remove(speciality);
-          //                   }
-          //                   _filterServices();
-          //                 });
-          //               },
-          //               shape: RoundedRectangleBorder(
-          //                 borderRadius: BorderRadius.circular(20),
-          //               ),
-          //             ),
-          //           );
-          //         }
-          //       },
-          //     ),
-          //   ),
-          // ),
-
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
-          //   child: Row(
-          //     children: [
-          //       Semantics(
-          //         header:true,
-          //         child: Container(
-          //           height: 16,
-          //           child: Text(
-          //             'Nearby Services',
-          //             style: TextStyle(
-          //               color: Color(0xFF18181B),
-          //               fontSize: 16,
-          //               fontFamily: 'Roboto',
-          //               fontWeight: FontWeight.w500,
-          //               height: 0.09,
-          //             ),
-          //           ),
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // ),
           SizedBox(
             height: 4,
           ),
@@ -303,12 +223,34 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                               children: [
                                 Stack(
                                   children: [
-                                    Image.network(
-                                      // 'https://dev.iwayplus.in/uploads/$service['image']',
-                                      'https://dev.iwayplus.in/uploads/${service['image']}',
+                                    // Image.network(
+                                    //   // 'https://dev.iwayplus.in/uploads/$service['image']',
+                                    //   'https://dev.iwayplus.in/uploads/${service['image']}',
+                                    //   width: cardWidth,
+                                    //   height: 140,
+                                    //   fit: BoxFit.cover,
+                                    // ),
+                                    CachedNetworkImage(
+                                      imageUrl: 'https://dev.iwayplus.in/uploads/${service['image']}',
                                       width: cardWidth,
                                       height: 140,
-                                      fit: BoxFit.cover,
+                                      fit: BoxFit.fill,
+                                      placeholder: (context, url) => Shimmer.fromColors(
+                                        baseColor: Colors.grey[300]!,
+                                        highlightColor: Colors.grey[100]!,
+                                        child: Container(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) => Container(
+                                        width: 250,
+                                        height: 140,
+                                        color: Colors.grey[200],
+                                        child:Image.asset(
+                                          'assets/images/DefaultCorousalImage.png',
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
                                     ),
                                     Positioned(
                                       top: 0,
