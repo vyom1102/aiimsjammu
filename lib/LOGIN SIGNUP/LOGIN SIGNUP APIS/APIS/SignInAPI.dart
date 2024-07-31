@@ -87,7 +87,7 @@ class SignInAPI{
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request(
         'POST', Uri.parse('https://dev.iwayplus.in/auth/otp/username'));
-    request.body = json.encode({"username": user, "digits":4,});
+    request.body = json.encode({"username": user, "digits":4,"appId":"com.iwayplus.aiimsjammu"});
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();
@@ -109,7 +109,8 @@ class SignInAPI{
     request.body = json.encode({
       "username": "$user",
       "password": "$pass",
-      "otp": "$otp"
+      "otp": "$otp",
+      "appId":"com.iwayplus.aiimsjammu"
     });
     request.headers.addAll(headers);
 
