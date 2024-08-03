@@ -318,6 +318,8 @@ class NearbyServiceWidget extends StatelessWidget {
                     children: [
                       CachedNetworkImage(
                         imageUrl: 'https://dev.iwayplus.in/uploads/${imagePath}',
+                        width: 250,
+                          height: 140,
                         placeholder: (context, url) => Shimmer.fromColors(
                           baseColor: Colors.grey[300]!,
                           highlightColor: Colors.grey[100]!,

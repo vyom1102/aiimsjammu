@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -28,6 +29,7 @@ class _FavouriteDoctorState extends State<FavouriteDoctor> {
   List<String> doctorSpeciality = [];
   List<String> FdoctorId = [];
   List<bool> favoriteStates = [];
+  bool _isConnected = false;
 
   List<String> doctorLocationId = [];
   bool isFavorite = true;
@@ -219,8 +221,44 @@ class _FavouriteDoctorState extends State<FavouriteDoctor> {
 
   @override
   void initState() {
+    _checkConnectivity();
+
     getUserDataFromHive();
     super.initState();
+  }
+  Future<void> _checkConnectivity() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult.contains(ConnectivityResult.mobile) || connectivityResult.contains(ConnectivityResult.wifi)) {
+      setState(() {
+        _isConnected = true;
+      });
+    }
+  }
+  Widget _buildNoNetworkState() {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.7,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/no-connection 1.png',
+              width: 100,
+              height: 100,
+            ),
+            TranslatorWidget(
+              'No Internet Connection',
+              style: TextStyle(
+                color: Color(0xFF18181B),
+                fontSize: 18,
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -246,8 +284,9 @@ class _FavouriteDoctorState extends State<FavouriteDoctor> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              if (doctorNames.isEmpty)
+              if (!_isConnected)
+                _buildNoNetworkState()
+              else if (doctorNames.isEmpty)
               Container(
                 height: MediaQuery.sizeOf(context).height*0.7,
                 child: Center(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
 import 'package:new_version_plus/new_version_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -19,7 +20,7 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
-  bool NotificationswitchValue = true;
+  bool NotificationswitchValue = false;
   bool DisabilityswitchValue = false;
   bool ColorContrastswitchValue = false;
   // bool isNaturalDirectionSelected = true;
@@ -30,6 +31,7 @@ class _SettingScreenState extends State<SettingScreen> {
   late bool isDistanceinM;
   bool _updateAvailable = false;
   bool _checkingForUpdate = true;
+  String? currentVersion ="";
   // String? selectedLanguage = 'English';
   late FlutterLocalization _flutterLocalization;
   late String _currentLocale = '';
@@ -62,7 +64,17 @@ class _SettingScreenState extends State<SettingScreen> {
     }
     super.initState();
   }
-
+  void showToast(String mssg) {
+    Fluttertoast.showToast(
+      msg: mssg,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.grey,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  }
   void _toggleSelection() {
     setState(() {
       isNaturalDirectionSelected = !isNaturalDirectionSelected;
@@ -94,7 +106,7 @@ class _SettingScreenState extends State<SettingScreen> {
     print(UserCredentials().getUserPathDetails());
   }
   Future<void> checkForUpdate() async {
-
+      print("checking update");
     final newVersion = NewVersionPlus(
       androidId: 'com.iwayplus.aiimsjammu',
       // iOSId: 'com.iwayplus.rgcinavigation',
@@ -103,8 +115,9 @@ class _SettingScreenState extends State<SettingScreen> {
     try {
       final status = await newVersion.getVersionStatus();
       print("status");
-      print(status);
+      print(status?.localVersion);
       setState(() {
+        currentVersion = status?.localVersion;
         _updateAvailable = status != null && status.canUpdate;
         _checkingForUpdate = false;
       });
@@ -319,8 +332,9 @@ class _SettingScreenState extends State<SettingScreen> {
                             activeTrackColor: Color(0xff0B6B94),
                             value: NotificationswitchValue,
                             onChanged: (bool value) {
+                              showToast("Feature Coming Soon");
                               setState(() {
-                                NotificationswitchValue = value;
+                                NotificationswitchValue = false;
                               });
                             },
                           )),
@@ -383,16 +397,24 @@ class _SettingScreenState extends State<SettingScreen> {
                           ),
                         )
                       else
-                        Text(
+                        Row(
+                          children: [
+                            Text(
 
-                          LocaleData.upToDate.getString(context),
-                          style: TextStyle(
-                            color: Colors.green,
-                            fontSize: 14,
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w400,
-                            height: 0.10,
-                          ),
+                              LocaleData.upToDate.getString(context),
+                              style: TextStyle(
+                                color: Colors.green,
+                                fontSize: 14,
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.w400,
+                                height: 0.10,
+                              ),
+                            ),
+                            SizedBox(width: 5,),
+                            Text("(${currentVersion!})",style: TextStyle(
+                              color: Colors.grey,
+                            ),),
+                          ],
                         ),
                       // Text(
                       //   // 'Update Available',
@@ -472,8 +494,9 @@ class _SettingScreenState extends State<SettingScreen> {
                             activeTrackColor: Color(0xff0B6B94),
                             value: ColorContrastswitchValue,
                             onChanged: (bool value) {
+                              showToast("Feature Coming Soon");
                               setState(() {
-                                ColorContrastswitchValue = value;
+                                ColorContrastswitchValue = false;
                               });
                             },
                           )),

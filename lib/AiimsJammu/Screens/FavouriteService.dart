@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
@@ -28,6 +29,7 @@ class _FavouriteServiceState extends State<FavouriteService> {
   List<String> doctorLocations = [];
   List<String> doctorSpeciality = [];
   List<String> FserviceId = [];
+  bool _isConnected = false;
 
   List<String> doctorLocationId = [];
   List<bool> favoriteStates = [];
@@ -209,10 +211,44 @@ class _FavouriteServiceState extends State<FavouriteService> {
 
   @override
   void initState() {
+    _checkConnectivity();
     getUserDataFromHive();
     super.initState();
   }
-
+  Future<void> _checkConnectivity() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult.contains(ConnectivityResult.mobile) || connectivityResult.contains(ConnectivityResult.wifi)) {
+      setState(() {
+        _isConnected = true;
+      });
+    }
+  }
+  Widget _buildNoNetworkState() {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.7,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/no-connection 1.png',
+              width: 100,
+              height: 100,
+            ),
+            TranslatorWidget(
+              'No Internet Connection',
+              style: TextStyle(
+                color: Color(0xFF18181B),
+                fontSize: 18,
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -235,8 +271,9 @@ class _FavouriteServiceState extends State<FavouriteService> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              if (ServiceNames.isEmpty)
+              if (!_isConnected)
+                _buildNoNetworkState()
+              else if (ServiceNames.isEmpty)
                 Container(
                   height: MediaQuery.sizeOf(context).height*0.7,
                   child: Center(

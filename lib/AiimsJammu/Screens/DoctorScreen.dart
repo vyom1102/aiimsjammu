@@ -366,27 +366,25 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                                                   decoration: BoxDecoration(
                                                     shape: BoxShape.circle,
                                                   ),
-                                                  child: ClipOval(
-                                                    child: CachedNetworkImage(
-                                                      imageUrl: 'https://dev.iwayplus.in/uploads/${doctor['imageUrl']}',
-                                                      placeholder: (context, url) => Shimmer.fromColors(
-                                                        baseColor: Colors.grey[300]!,
-                                                        highlightColor: Colors.grey[100]!,
-                                                        child: Container(
-                                                          color: Colors.white,
-                                                        ),
+                                                  child: CachedNetworkImage(
+                                                    imageUrl: 'https://dev.iwayplus.in/uploads/${doctor['imageUrl']}',
+                                                    placeholder: (context, url) => Shimmer.fromColors(
+                                                      baseColor: Colors.grey[300]!,
+                                                      highlightColor: Colors.grey[100]!,
+                                                      child: Container(
+                                                        color: Colors.white,
                                                       ),
-                                                      errorWidget: (context, url, error) => Container(
-                                                        width: 250,
-                                                        height: 140,
-                                                        color: Colors.grey[200],
-                                                        child:Image.asset(
-                                                          'assets/images/placeholder.png',
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                      ),
-                                                      fit: BoxFit.fill,
                                                     ),
+                                                    errorWidget: (context, url, error) => Container(
+                                                      width: 250,
+                                                      height: 140,
+                                                      color: Colors.grey[200],
+                                                      child:Image.asset(
+                                                        'assets/images/Demo doctor.png',
+                                                        fit: BoxFit.cover,
+                                                      ),
+                                                    ),
+                                                    fit: BoxFit.fill,
                                                   ),
                                                 ),
                                                 SizedBox(width: 12),
@@ -713,10 +711,27 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                                                     height: 90,
                                                     decoration: BoxDecoration(
                                                       shape: BoxShape.circle,
-                                                      image: DecorationImage(
-                                                        image: NetworkImage('https://dev.iwayplus.in/uploads/${doctor['imageUrl']}'),
-                                                        fit: BoxFit.cover,
+
+                                                    ),
+                                                    child:  CachedNetworkImage(
+                                                      imageUrl: 'https://dev.iwayplus.in/uploads/${doctor['imageUrl']}',
+                                                      placeholder: (context, url) => Shimmer.fromColors(
+                                                        baseColor: Colors.grey[300]!,
+                                                        highlightColor: Colors.grey[100]!,
+                                                        child: Container(
+                                                          color: Colors.white,
+                                                        ),
                                                       ),
+                                                      errorWidget: (context, url, error) => Container(
+                                                        width: 250,
+                                                        height: 140,
+                                                        color: Colors.grey[200],
+                                                        child:Image.asset(
+                                                          'assets/images/Demo doctor.png',
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      ),
+                                                      fit: BoxFit.fill,
                                                     ),
                                                   ),
                                                   SizedBox(width: 12),

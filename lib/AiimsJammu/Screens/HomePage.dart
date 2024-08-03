@@ -81,7 +81,8 @@ class _HomePageState extends State<HomePage> {
   String? emailAddress;
   bool nameLoading= false;
   bool isOnline = true;
-
+  List<dynamic> _doctors = [];
+  List<dynamic> _filteredDoctors = [];
   @override
   void initState() {
     super.initState();
@@ -317,6 +318,17 @@ class _HomePageState extends State<HomePage> {
       print('_loadAnnouncementsFromAPI API CALL');
 
     }
+    if(DashboardListBox.containsKey('_doctors')){
+      _doctors = DashboardListBox.get('_doctors');
+      setState(() {
+        _filteredDoctors = _doctors;
+      });
+      print('_doctors FROM DATABASE');
+
+    }else{
+      _loadDoctorsFromAPI();
+      print('_doctors from api');
+    }
 
   }
   @override
@@ -332,6 +344,45 @@ class _HomePageState extends State<HomePage> {
   //     isOnline = connectivityResult != ConnectivityResult.none;
   //   });
   // }
+  Future<void> _loadDoctorsFromAPI() async {
+    try {
+      await guestApi().guestlogin().then((value){
+        if(value.accessToken != null){
+          token = value.accessToken!;
+        }
+      });
+      print('trying');
+      final response = await http.get(
+
+        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-doctors/6673e7a3b92e69bc7f4b40ae"),
+        headers: {
+          'Content-Type': 'application/json',
+          "x-access-token": token,
+        },);
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        // print(responseData);
+
+        if (responseData.containsKey('data') && responseData['data'] is List) {
+          setState(() {
+            _doctors = responseData['data'];
+            _filteredDoctors = _doctors;
+            DashboardListBox.put('_doctors', responseData['data']);
+
+          });
+        } else {
+          throw Exception('Response data does not contain the expected list of doctors under the "DoctorData" key');
+        }
+      } else {
+        print("nope");
+        throw Exception('Failed to load data: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      // Handle error
+    }
+  }
   void _loadOtherServicesFromAPI() async {
 
     try {
@@ -733,7 +784,7 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       Row(
                             children: [
-                              TranslatorWidget("Hello ,"),
+                              TranslatorWidget("Hello, "),
                               nameLoading
                                   ? CircularProgressIndicator()
                                   : TranslatorWidget(
@@ -833,7 +884,7 @@ class _HomePageState extends State<HomePage> {
                             width: MediaQuery.of(context).size.width * 0.67,
                             height: 40,
                             child: TranslatorWidget(
-                              "Doctor, services,",
+                              "Where do you want to go?",
                               style: const TextStyle(
                                 fontFamily: "Roboto",
                                 fontSize: 16,

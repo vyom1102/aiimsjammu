@@ -352,28 +352,28 @@ class _EditProfileState extends State<EditProfile> {
                     height: 150,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.lightBlue,
+                      // color: Colors.lightBlue,
                       image: DecorationImage(
-                        image: AssetImage('assets/profilePageAssets/User image.png'),
+                        image: AssetImage('assets/images/Group 4343.png'),
                         fit: BoxFit.cover,
                       ),
                     ),
                   ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        shape: BoxShape.circle,
-                      ),
-                      child:
-                      IconButton(
-                        icon: Icon(Icons.camera_alt,color: Colors.white,),
-                        onPressed: null,
-                      ),
-                    ),
-                  ),
+                  // Positioned(
+                  //   bottom: 0,
+                  //   right: 0,
+                  //   child: Container(
+                  //     decoration: BoxDecoration(
+                  //       color: Colors.black,
+                  //       shape: BoxShape.circle,
+                  //     ),
+                  //     child:
+                  //     IconButton(
+                  //       icon: Icon(Icons.camera_alt,color: Colors.white,),
+                  //       onPressed: null,
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
               SizedBox(height: 20),

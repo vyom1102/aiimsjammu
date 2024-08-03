@@ -30,13 +30,13 @@ class _AllAnnouncementScreenState extends State<AllAnnouncementScreen> {
     checkForReload();
   }
   void checkForReload(){
-    if(DashboardListBox.containsKey('_announcement')){
-      _announcement = DashboardListBox.get('_announcement');
-      print('_announcement FROM DATABASE');
+    if(DashboardListBox.containsKey('announcements')){
+      _announcement = DashboardListBox.get('announcements');
+      print('announcements FROM DATABASE');
 
     }else{
       _loadAnnouncementFromAPI();
-      print('_announcement API CALL');
+      print('announcements API CALL');
     }
   }
   void _loadAnnouncementFromAPI() async {
@@ -62,7 +62,7 @@ class _AllAnnouncementScreenState extends State<AllAnnouncementScreen> {
         if (responseData.containsKey('data') && responseData['data'] is List) {
           setState(() {
             _announcement = responseData['data'];
-            DashboardListBox.put('_announcement', responseData['data']);
+            DashboardListBox.put('announcements', responseData['data']);
             // _filteredServices = _services;
             // _isLoading = false;
           });
