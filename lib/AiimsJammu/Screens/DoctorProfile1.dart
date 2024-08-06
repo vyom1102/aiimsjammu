@@ -12,22 +12,23 @@ import 'package:url_launcher/url_launcher.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/Translator.dart';
 
-class DoctorProfile extends StatefulWidget {
-  final Map<String, dynamic> doctor;
+class DoctorProfile1 extends StatefulWidget {
+  // final Map<String, dynamic> doctor;
   final String docId;
 
-  DoctorProfile({required this.doctor, required this.docId});
+  DoctorProfile1({ required this.docId});
 
   @override
-  _DoctorProfileState createState() => _DoctorProfileState();
+  _DoctorProfile1State createState() => _DoctorProfile1State();
 }
 
-class _DoctorProfileState extends State<DoctorProfile> {
+class _DoctorProfile1State extends State<DoctorProfile1> {
   bool isFavorite = false;
   String? userId;
   String? accessToken;
   String? refreshToken;
   bool isLoading = false;
+  Map<dynamic, dynamic> doctor={};
 
   TextEditingController _emailController = TextEditingController();
   TextEditingController _nameController = TextEditingController();
@@ -36,7 +37,68 @@ class _DoctorProfileState extends State<DoctorProfile> {
   @override
   void initState() {
     getUserIDFromHive();
+    getDoctorDetails(widget.docId);
     super.initState();
+  }
+  Future<void> getDoctorDetails(String doctorId) async {
+    final String doctorUrl =
+        "https://dev.iwayplus.in/secured/hospital/get-doctor/$doctorId";
+
+    try {
+      isLoading =true;
+      final response = await http.get(
+        Uri.parse(doctorUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': '$accessToken',
+        },
+      );
+      print(response.statusCode);
+      if (response.statusCode == 200) {
+        print("getting single doctor detail");
+        Map<dynamic, dynamic> doctorDetails = json.decode(response.body);
+        print(doctorDetails);
+        setState(() {
+          doctor =doctorDetails["data"];
+          isLoading =false;
+
+        });
+      } else if (response.statusCode == 403) {
+        await refreshTokenAndRetryForDoctor(doctorId);
+      }else {
+        // Handle error
+      }
+    } catch (e) {
+      // Handle error
+    }
+  }
+  Future<void> refreshTokenAndRetryForDoctor(String docId) async {
+    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+
+    try {
+      final response = await http.post(
+        Uri.parse(refreshTokenUrl),
+        body: json.encode({
+          "refreshToken": refreshToken,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final newAccessToken = json.decode(response.body)["accessToken"];
+        setState(() {
+          accessToken = newAccessToken;
+        });
+
+        await getDoctorDetails(docId);
+      } else {
+        // Handle token refresh failure
+      }
+    } catch (e) {
+      // Handle errors
+    }
   }
 
   Future<void> getUserIDFromHive() async {
@@ -176,9 +238,6 @@ class _DoctorProfileState extends State<DoctorProfile> {
       // Handle errors
     }
   }
-  Future<void> _shareContent(String text) async {
-    await Share.share(text);
-  }
 
   Future<void> getUserDetailsWithNewToken(String baseUrl) async {
     try {
@@ -263,10 +322,17 @@ class _DoctorProfileState extends State<DoctorProfile> {
       print('Failed to add doctor to favorites: ${response.statusCode}');
     }
   }
-
+  Future<void> _shareContent(String text) async {
+    await Share.share(text);
+  }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return isLoading?Center(
+      child: Container(
+          height: 40,
+          width: 40,
+          child: CircularProgressIndicator()),
+    ):Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -309,14 +375,14 @@ class _DoctorProfileState extends State<DoctorProfile> {
                     children: [
                       CircleAvatar(
                         backgroundImage:
-                        NetworkImage('https://dev.iwayplus.in/uploads/${widget.doctor['imageUrl']}'),
+                        NetworkImage('https://dev.iwayplus.in/uploads/${doctor['imageUrl']}'),
                         // AssetImage(widget.doctor[
                         //     'imageUrl']),
                         radius: 73,
                       ),
                       SizedBox(height: 20),
                       TranslatorWidget(
-                        widget.doctor['name'],
+                        doctor['name'],
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Color(0xFF18181B),
@@ -328,7 +394,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                       ),
                       SizedBox(height: 24),
                       TranslatorWidget(
-                        widget.doctor['speciality'],
+                        doctor['speciality'],
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Color(0xFFA1A1AA),
@@ -349,7 +415,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
             Divider(
               color: Color(0xffF3F4F6),
             ),
-        
+
             Container(
               height: 120,
               // color:Colors.black,
@@ -377,7 +443,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                         ),
                         SizedBox(height: 10),
                         TranslatorWidget(
-                          widget.doctor['experience'].toString(),
+                          doctor['experience'].toString(),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -402,7 +468,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                   Container(
                     // width: 150,
                     height: 200,
-        
+
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -421,7 +487,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                         ),
                         SizedBox(height: 10),
                         TranslatorWidget(
-                          widget.doctor['publications'].toString(),
+                          doctor['publications'].toString(),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -446,7 +512,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                   Container(
                     // width: 150,
                     height: 200,
-        
+
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -465,7 +531,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                         ),
                         SizedBox(height: 10),
                         TranslatorWidget(
-                          widget.doctor['awards'].toString(),
+                          doctor['awards'].toString(),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -512,7 +578,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0, right: 16, left: 16),
                   child: TranslatorWidget(
-                    widget.doctor['about'],
+                    doctor['about'],
                     style: TextStyle(
                       color: Color(0xFF3F3F46),
                       fontSize: 16,
@@ -526,7 +592,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                   children: [
                     TextButton(
                       onPressed: () {
-                        _launchInWebView(Uri.parse(widget.doctor['profile']));
+                        _launchInWebView(Uri.parse(doctor['profile']));
                       },
                       child: TranslatorWidget(
                         'View profile',
@@ -559,7 +625,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
 
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: widget.doctor['workingDays'].map<Widget>((day) {
+              children:doctor['workingDays'].map<Widget>((day) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 16),
                   child: TranslatorWidget(
@@ -582,7 +648,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
         color: Colors.white,
         child: OutlinedButton(
           onPressed: () {
-            PassLocationId(context,widget.doctor['locationId']);
+            PassLocationId(context,doctor['locationId']);
           },
           style: OutlinedButton.styleFrom(
             padding: EdgeInsets.symmetric(vertical: 12),

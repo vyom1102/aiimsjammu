@@ -271,6 +271,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
             }
           }
           searcCategoryhResults.clear();
+          // here
           landmarkData.landmarksMap!.forEach((key, value) {
             if (searcCategoryhResults.length < 10) {
               if (value.name != null && value.element!.subType != "beacons") {
@@ -307,6 +308,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
           category = false;
           vall = -1;
           searchResults.clear();
+          // here
           landmarkData.landmarksMap!.forEach((key, value) {
             if (searchResults.length < 10) {
               if (value.name != null && value.element!.subType != "beacon" && value.buildingID == buildingAllApi.selectedBuildingID) {

@@ -16,40 +16,19 @@ import 'package:http/http.dart' as http;
 import 'package:hive/hive.dart';
 
 import '../Widgets/Translator.dart';
-class ServiceInfo extends StatefulWidget {
+class ServiceInfo1 extends StatefulWidget {
   final String id;
-  final String imagePath;
-  final String name;
-  final String location;
-  final String accessibility;
-  final String locationId;
-  final String type;
-  final String contact;
-  final String about;
 
-  final String startTime;
-  final String endTime;
-
-  const ServiceInfo({
+  const ServiceInfo1({
     required this.id,
-    required this.imagePath,
-    required this.name,
-    required this.location,
-    required this.accessibility,
-    required this.locationId,
-    required this.type,
-    required this.contact,
 
-    required this.about,
-    required this.startTime,
-    required this.endTime,
   });
 
   @override
-  State<ServiceInfo> createState() => _ServiceInfoState();
+  State<ServiceInfo1> createState() => _ServiceInfo1State();
 }
 
-class _ServiceInfoState extends State<ServiceInfo> {
+class _ServiceInfo1State extends State<ServiceInfo1> {
   // final String phoneNumber = contact;
   final String shareText = 'https://play.google.com/store/apps/details?id=com.iwayplus.rgcinavigation';
   bool isFavorite=false;
@@ -57,6 +36,9 @@ class _ServiceInfoState extends State<ServiceInfo> {
   String? accessToken;
   String? refreshToken;
   List<String>? favoriteServiceIds;
+  Map<dynamic, dynamic> service={};
+  bool isLoading = true;
+  bool _isConnected = false;
   Future<void> getUserDetails() async {
     final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
 
@@ -113,6 +95,67 @@ class _ServiceInfoState extends State<ServiceInfo> {
     }
 
   }
+  Future<void> getServiceDetails(String serviceId) async {
+    final String serviceUrl =
+        "https://dev.iwayplus.in/secured/hospital/get-service/${serviceId}";
+
+    try {
+      isLoading =true;
+      final response = await http.get(
+        Uri.parse(serviceUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': '$accessToken',
+        },
+      );
+      print(response.statusCode);
+      if (response.statusCode == 200) {
+        print("getting single doctor detail");
+        Map<dynamic, dynamic> serviceDetails = json.decode(response.body);
+        print(serviceDetails);
+        setState(() {
+          service =serviceDetails;
+          isLoading =false;
+
+        });
+      } else if (response.statusCode == 403) {
+        await refreshTokenAndRetryForService(serviceId);
+      }else {
+        // Handle error
+      }
+    } catch (e) {
+      // Handle error
+    }
+  }
+  Future<void> refreshTokenAndRetryForService(String serviceId) async {
+    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+
+    try {
+      final response = await http.post(
+        Uri.parse(refreshTokenUrl),
+        body: json.encode({
+          "refreshToken": refreshToken,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final newAccessToken = json.decode(response.body)["accessToken"];
+        setState(() {
+          accessToken = newAccessToken;
+        });
+
+        await getServiceDetails(serviceId);
+      } else {
+        // Handle token refresh failure
+      }
+    } catch (e) {
+      // Handle errors
+    }
+  }
+
   Future<void> updateUserFavorites() async {
 
     String baseUrl = "https://dev.iwayplus.in/secured/user/toggle-favourites";
@@ -253,7 +296,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                   //   fit: BoxFit.cover,
                   // ),
                   CachedNetworkImage(
-                    imageUrl: 'https://dev.iwayplus.in/uploads/${widget.imagePath}',
+                    imageUrl: 'https://dev.iwayplus.in/uploads/${service["data"]["image"]}',
                     width: MediaQuery.of(context).size.width,
                     height: 200,
                     fit: BoxFit.fill,
@@ -303,7 +346,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           TranslatorWidget(
-                            widget.type,
+                            service["data"]["type"],
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 12,
@@ -325,7 +368,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                     width: 12,
                   ),
                   TranslatorWidget(
-                    widget.name,
+                    service["data"]["name"],
                     style: const TextStyle(
                       fontFamily: "Roboto",
                       fontSize: 16,
@@ -336,7 +379,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                     textAlign: TextAlign.left,
                   ),
 
-                  if(widget.accessibility!='NO')
+                  if(service["data"]["accessibility"]!='NO')
                     Padding(
                       padding: const EdgeInsets.only(left: 8.0),
                       child: Image.asset('assets/images/accessible.png',scale: 4,),
@@ -360,7 +403,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                     width: 8,
                   ),
                   TranslatorWidget(
-                    widget.location,
+                    service["data"]["locationName"]??"",
                     style: const TextStyle(
                       fontFamily: "Roboto",
                       fontSize: 14,
@@ -390,7 +433,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                   ),
 
                   FutureBuilder<double>(
-                    future: calculateDistance(widget.locationId),
+                    future: calculateDistance(service["data"]["locationId"]),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return SizedBox(
@@ -426,7 +469,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                   SizedBox(width: 12,),
                   Container(
                     // height: 20,
-                      child: OpeningClosingStatus(startTime: widget.startTime, endTime: widget.endTime,)),
+                      child: OpeningClosingStatus(startTime: service["data"]["startTime"], endTime: service["data"]["endTime"],)),
                 ],
               ),
               SizedBox(height: 16,),
@@ -447,16 +490,28 @@ class _ServiceInfoState extends State<ServiceInfo> {
                   ],
                 ),
               ),
+              // Padding(
+              //   padding: EdgeInsets.only(top: 12.0,right: 16,left: 16,bottom: 16),
+              //   child: TranslatorWidget('Designing the operation hours section for a mobile app involves displaying the opening and closing hours of a business ',
+              //     style: TextStyle(
+              //       color: Color(0xFF595967),
+              //       fontSize: 14,
+              //       fontFamily: 'Roboto',
+              //       fontWeight: FontWeight.w400,
+              //
+              //     ),
+              //   ),
+              // ),
               Padding(
                 padding: EdgeInsets.only(top: 12.0,right: 16,left: 16,bottom: 16),
-                child: TranslatorWidget('Designing the operation hours section for a mobile app involves displaying the opening and closing hours of a business ',
-                style: TextStyle(
-                  color: Color(0xFF595967),
+                child: TranslatorWidget(
+                  service["data"]["about"],
+                  style:TextStyle(color: Color(0xFF595967),
                   fontSize: 14,
                   fontFamily: 'Roboto',
                   fontWeight: FontWeight.w400,
+                  )
 
-                ),
                 ),
               ),
               SizedBox(height: 16,),
@@ -477,36 +532,36 @@ class _ServiceInfoState extends State<ServiceInfo> {
                   ],
                 ),
               ),
-              if(widget.contact!="null" && widget.contact.isNotEmpty)
+              if(service["data"]["contact"]!="null" && service["data"]["contact"].isNotEmpty)
 
                 SizedBox(height: 16,),
 
-              if(widget.contact != "null" && widget.contact.isNotEmpty)
+              if(service["data"]["contact"]!= "null" && service["data"]["contact"].isNotEmpty)
                 InkWell(
                   onTap: (){
-                    _makePhoneCall(widget.contact);
+                    _makePhoneCall(service["data"]["contact"]);
 
                   },
 
                   child: Padding(
-                  padding: EdgeInsets.only(left: 16),
-                  child: Row(
-                    children: [
-                      Icon(Icons.phone),
-                      SizedBox(width: 8,),
-                      TranslatorWidget(
-                        widget.contact,
-                        style: TextStyle(
-                          color: Color(0xFF595967),
-                          fontSize: 14,
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w400,
+                    padding: EdgeInsets.only(left: 16),
+                    child: Row(
+                      children: [
+                        Icon(Icons.phone),
+                        SizedBox(width: 8,),
+                        TranslatorWidget(
+                          service["data"]["contact"],
+                          style: TextStyle(
+                            color: Color(0xFF595967),
+                            fontSize: 14,
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w400,
 
-                        ),
-                      )
-                    ],
+                          ),
+                        )
+                      ],
+                    ),
                   ),
-                                ),
                 ),
               SizedBox(height: 16,),
               Padding(
@@ -547,7 +602,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                             ),
                             SizedBox(height: 4,),
                             TranslatorWidget(
-                              '     ${widget.startTime} Am - ${widget.endTime} Pm',
+                              '     ${service["data"]["startTime"]} Am - ${service["data"]["endTime"]} Pm',
                               style: TextStyle(
                                 color: Color(0xFF595967),
                                 fontSize: 14,
@@ -577,7 +632,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
               child: ElevatedButton(
                 onPressed: () {
                   print('called');
-                  PassLocationId(context,widget.locationId);
+                  PassLocationId(context,service["data"]["locationId"]);
                 },
                 style: ElevatedButton
                     .styleFrom(
@@ -687,63 +742,63 @@ class _ServiceInfoState extends State<ServiceInfo> {
               ),
             ),
             SizedBox(width: 8,),
-            if(widget.contact!="null" && widget.contact.isNotEmpty)
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () {
-                  _makePhoneCall(widget.contact);
-                },
-                style: OutlinedButton
-                    .styleFrom(
-                  padding: EdgeInsets
-                      .symmetric(
-                      vertical: 12),
-                  shape:
-                  RoundedRectangleBorder(
-                    borderRadius:
-                    BorderRadius
-                        .circular(4),
+            if(service["data"]["contact"]!="null" && service["data"]["contact"].isNotEmpty)
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    _makePhoneCall(service["data"]["contact"]);
+                  },
+                  style: OutlinedButton
+                      .styleFrom(
+                    padding: EdgeInsets
+                        .symmetric(
+                        vertical: 12),
+                    shape:
+                    RoundedRectangleBorder(
+                      borderRadius:
+                      BorderRadius
+                          .circular(4),
+                    ),
+                    side: BorderSide(
+                        color: Color(
+                            0xFF0B6B94)),
                   ),
-                  side: BorderSide(
-                      color: Color(
-                          0xFF0B6B94)),
-                ),
-                child: Row(
-                  mainAxisSize:
-                  MainAxisSize.min,
-                  mainAxisAlignment:
-                  MainAxisAlignment
-                      .center,
-                  crossAxisAlignment:
-                  CrossAxisAlignment
-                      .center,
-                  children: [
+                  child: Row(
+                    mainAxisSize:
+                    MainAxisSize.min,
+                    mainAxisAlignment:
+                    MainAxisAlignment
+                        .center,
+                    crossAxisAlignment:
+                    CrossAxisAlignment
+                        .center,
+                    children: [
 
-                    Icon(
-                      Icons
-                          .call,
-                      color: Color(
-                          0xFF0B6B94),
-                      size: 18,
-                    ),
-                    SizedBox(width: 8),
-                    TranslatorWidget(
-                      'Call',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 14,
-                        fontFamily:
-                        'Roboto',
-                        fontWeight:
-                        FontWeight
-                            .w500,
+                      Icon(
+                        Icons
+                            .call,
+                        color: Color(
+                            0xFF0B6B94),
+                        size: 18,
                       ),
-                    ),
+                      SizedBox(width: 8),
+                      TranslatorWidget(
+                        'Call',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                          fontFamily:
+                          'Roboto',
+                          fontWeight:
+                          FontWeight
+                              .w500,
+                        ),
+                      ),
 
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
 
           ],
         ),

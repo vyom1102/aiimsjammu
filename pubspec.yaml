@@ -100,6 +100,7 @@ dependencies:
   new_version_plus: ^0.0.11
   cached_network_image: ^3.3.1
   loading_animation_widget: ^1.2.1
+  app_links: ^6.1.1
 
 
 

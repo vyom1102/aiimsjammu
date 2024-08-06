@@ -42,14 +42,14 @@ class _AnnouncementDetailsPageState extends State<AnnouncementDetailsPage> {
           //     color: isFavorite ? Colors.red : null,
           //   ),
           // ),
-          IconButton(
-            onPressed: () {
-
-            },
-            icon: Icon(
-              Icons.share
-            ),
-          ),
+          // IconButton(
+          //   onPressed: () {
+          //
+          //   },
+          //   icon: Icon(
+          //     Icons.share
+          //   ),
+          // ),
 
         ],
       ),

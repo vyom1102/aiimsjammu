@@ -319,298 +319,311 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                                 itemCount: doctorsOfSpeciality.length,
                                 itemBuilder: (context, index) {
                                   final doctor = doctorsOfSpeciality[index];
-                                  return Container(
-                                    height: 179,
-                                    margin: EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.2),
-                                          blurRadius: 4,
-                                          offset: Offset(0, 2),
+                                  return InkWell(
+                                    onTap: (){
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => DoctorProfile(
+                                            docId: doctor['_id'],
+                                            doctor: doctor,
+                                          ),
                                         ),
-                                      ],
-                                    ),
-                                    child: Stack(
-                                      children: [
-                                        Positioned(
-                                          left: 12,
-                                          top: 12,
-                                          child: Container(
-                                            width: 302,
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
+                                      );
+                                    },
+                                    child: Container(
+                                      height: 179,
+                                      margin: EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.2),
+                                            blurRadius: 4,
+                                            offset: Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          Positioned(
+                                            left: 12,
+                                            top: 12,
+                                            child: Container(
+                                              width: 302,
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
 
-                                                // Container(
-                                                //   width: 90,
-                                                //   height: 90,
-                                                //   decoration: BoxDecoration(
-                                                //     shape: BoxShape.circle,
-                                                //     image: DecorationImage(
-                                                //       image: NetworkImage('https://dev.iwayplus.in/uploads/${doctor['imageUrl']}'),
-                                                //       fit: BoxFit.cover,
-                                                //     ),
-                                                //   ),
-                                                // ),
-                                                Container(
-                                                  width: 90,
-                                                  height: 90,
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                  ),
-                                                  child: CachedNetworkImage(
-                                                    imageUrl: 'https://dev.iwayplus.in/uploads/${doctor['imageUrl']}',
-                                                    placeholder: (context, url) => Shimmer.fromColors(
-                                                      baseColor: Colors.grey[300]!,
-                                                      highlightColor: Colors.grey[100]!,
-                                                      child: Container(
-                                                        color: Colors.white,
-                                                      ),
+                                                  // Container(
+                                                  //   width: 90,
+                                                  //   height: 90,
+                                                  //   decoration: BoxDecoration(
+                                                  //     shape: BoxShape.circle,
+                                                  //     image: DecorationImage(
+                                                  //       image: NetworkImage('https://dev.iwayplus.in/uploads/${doctor['imageUrl']}'),
+                                                  //       fit: BoxFit.cover,
+                                                  //     ),
+                                                  //   ),
+                                                  // ),
+                                                  Container(
+                                                    width: 90,
+                                                    height: 90,
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
                                                     ),
-                                                    errorWidget: (context, url, error) => Container(
-                                                      width: 250,
-                                                      height: 140,
-                                                      color: Colors.grey[200],
-                                                      child:Image.asset(
-                                                        'assets/images/Demo doctor.png',
-                                                        fit: BoxFit.cover,
+                                                    child: CachedNetworkImage(
+                                                      imageUrl: 'https://dev.iwayplus.in/uploads/${doctor['imageUrl']}',
+                                                      placeholder: (context, url) => Shimmer.fromColors(
+                                                        baseColor: Colors.grey[300]!,
+                                                        highlightColor: Colors.grey[100]!,
+                                                        child: Container(
+                                                          color: Colors.white,
+                                                        ),
                                                       ),
+                                                      errorWidget: (context, url, error) => Container(
+                                                        width: 250,
+                                                        height: 140,
+                                                        color: Colors.grey[200],
+                                                        child:Image.asset(
+                                                          'assets/images/Demo doctor.png',
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      ),
+                                                      fit: BoxFit.fill,
                                                     ),
-                                                    fit: BoxFit.fill,
                                                   ),
-                                                ),
-                                                SizedBox(width: 12),
-                                                Expanded(
-                                                  child: Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
+                                                  SizedBox(width: 12),
+                                                  Expanded(
+                                                    child: Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment.start,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment.start,
+                                                      children: [
+                                                        Semantics(
+                                                          label: "Name",
+                                                          child: TranslatorWidget(
+                                                            doctor['name'],
+                                                            style: TextStyle(
+                                                              color:
+                                                                  Color(0xFF18181B),
+                                                              fontSize: 16,
+                                                              fontFamily: 'Roboto',
+                                                              fontWeight:
+                                                                  FontWeight.w500,
+                                                            ),
+                                                          ),
+                                                        ),
+
+                                                        SizedBox(height: 8),
+                                                        Row(
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .start,
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .center,
+                                                          children: [
+                                                            Icon(
+                                                              Icons.location_on,
+                                                              color:
+                                                                  Color(0xFF8D8C8C),
+                                                              size: 16,
+                                                            ),
+                                                            SizedBox(width: 4),
+
+                                                            Semantics(
+                                                              label: "locationName",
+                                                              child: TranslatorWidget(
+
+                                                                // doctor['locationName'].split(' ').first,
+                                                                // doctor['locationName'].split(' ').take(2).join(' '),
+                                                                doctor['locationName'].split(' ').isEmpty || !RegExp(r'^\d+$').hasMatch(doctor['locationName'].split(' ').first)
+                                                                    ? doctor['locationName'].split(' ').take(2).join(' ')
+                                                                    : doctor['locationName'].split(' ').first,
+                                                                style: TextStyle(
+                                                                  color: Color(
+                                                                      0xFF8D8C8C),
+                                                                  fontSize: 14,
+                                                                  fontFamily:
+                                                                      'Roboto',
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          Positioned(
+                                            left: 0,
+                                            right: 0,
+                                            bottom: 12,
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 12),
+                                              child: Column(
+                                                children: [
+                                                  Container(
+                                                    height: 1,
+                                                    color: Color(0xffEBEBEB),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 7,
+                                                  ),
+                                                  Row(
+                                                    mainAxisSize: MainAxisSize.min,
                                                     mainAxisAlignment:
                                                         MainAxisAlignment.start,
                                                     crossAxisAlignment:
                                                         CrossAxisAlignment.start,
                                                     children: [
-                                                      Semantics(
-                                                        label: "Name",
-                                                        child: TranslatorWidget(
-                                                          doctor['name'],
-                                                          style: TextStyle(
-                                                            color:
-                                                                Color(0xFF18181B),
-                                                            fontSize: 16,
-                                                            fontFamily: 'Roboto',
-                                                            fontWeight:
-                                                                FontWeight.w500,
+                                                      Expanded(
+                                                        child: OutlinedButton(
+                                                          onPressed: () {
+                                                            Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                builder: (context) => DoctorProfile(
+                                                                  docId: doctor['_id'],
+                                                                  doctor: doctor,
+                                                                ),
+                                                              ),
+                                                            );
+                                                          },
+                                                          style: OutlinedButton
+                                                              .styleFrom(
+                                                            padding: EdgeInsets
+                                                                .symmetric(
+                                                                    vertical: 12),
+                                                            shape:
+                                                                RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(4),
+                                                            ),
+                                                            side: BorderSide(
+                                                                color: Color(
+                                                                    0xFF0B6B94)),
+                                                          ),
+                                                          child: Row(
+                                                            mainAxisSize:
+                                                                MainAxisSize.min,
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              TranslatorWidget(
+                                                                'View Profile',
+                                                                style: TextStyle(
+                                                                  color: Color(
+                                                                      0xFF0B6B94),
+                                                                  fontSize: 14,
+                                                                  fontFamily:
+                                                                      'Roboto',
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                              ),
+                                                              SizedBox(width: 8),
+                                                              Icon(
+                                                                Icons
+                                                                    .arrow_outward_outlined,
+                                                                color: Color(
+                                                                    0xFF0B6B94),
+                                                                size: 18,
+                                                              ),
+                                                            ],
                                                           ),
                                                         ),
                                                       ),
-
-                                                      SizedBox(height: 8),
-                                                      Row(
-                                                        mainAxisSize:
-                                                            MainAxisSize.min,
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .start,
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          Icon(
-                                                            Icons.location_on,
-                                                            color:
-                                                                Color(0xFF8D8C8C),
-                                                            size: 16,
-                                                          ),
-                                                          SizedBox(width: 4),
-
-                                                          Semantics(
-                                                            label: "locationName",
-                                                            child: TranslatorWidget(
-
-                                                              // doctor['locationName'].split(' ').first,
-                                                              // doctor['locationName'].split(' ').take(2).join(' '),
-                                                              doctor['locationName'].split(' ').isEmpty || !RegExp(r'^\d+$').hasMatch(doctor['locationName'].split(' ').first)
-                                                                  ? doctor['locationName'].split(' ').take(2).join(' ')
-                                                                  : doctor['locationName'].split(' ').first,
-                                                              style: TextStyle(
-                                                                color: Color(
-                                                                    0xFF8D8C8C),
-                                                                fontSize: 14,
-                                                                fontFamily:
-                                                                    'Roboto',
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w400,
-                                                              ),
+                                                      SizedBox(width: 12),
+                                                      Expanded(
+                                                        child: ElevatedButton(
+                                                          onPressed: () {
+                                                            print('called');
+                                                            PassLocationId(context,doctor['locationId']);
+                                                          },
+                                                          style: ElevatedButton
+                                                              .styleFrom(
+                                                            backgroundColor:
+                                                                Color(0xFF0B6B94),
+                                                            padding: EdgeInsets
+                                                                .symmetric(
+                                                                    vertical: 12),
+                                                            shape:
+                                                                RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(4),
                                                             ),
                                                           ),
-                                                        ],
+                                                          child: Row(
+                                                            mainAxisSize:
+                                                                MainAxisSize.min,
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              Transform.rotate(
+                                                                angle: 180 * 3.1415926535 / 180,
+                                                                child: Icon(
+                                                                  Icons.subdirectory_arrow_left_outlined,
+                                                                  color: Colors.white,
+                                                                  size: 18,
+                                                                ),
+                                                              ),
+                                                              SizedBox(width: 8),
+                                                              TranslatorWidget(
+                                                                'Directions',
+                                                                style: TextStyle(
+                                                                  color:
+                                                                      Colors.white,
+                                                                  fontSize: 14,
+                                                                  fontFamily:
+                                                                      'Roboto',
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
                                                       ),
                                                     ],
                                                   ),
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        Positioned(
-                                          left: 0,
-                                          right: 0,
-                                          bottom: 12,
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 12),
-                                            child: Column(
-                                              children: [
-                                                Container(
-                                                  height: 1,
-                                                  color: Color(0xffEBEBEB),
-                                                ),
-                                                SizedBox(
-                                                  height: 7,
-                                                ),
-                                                Row(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.start,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Expanded(
-                                                      child: OutlinedButton(
-                                                        onPressed: () {
-                                                          Navigator.push(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                              builder: (context) => DoctorProfile(
-                                                                docId: doctor['_id'],
-                                                                doctor: doctor,
-                                                              ),
-                                                            ),
-                                                          );
-                                                        },
-                                                        style: OutlinedButton
-                                                            .styleFrom(
-                                                          padding: EdgeInsets
-                                                              .symmetric(
-                                                                  vertical: 12),
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(4),
-                                                          ),
-                                                          side: BorderSide(
-                                                              color: Color(
-                                                                  0xFF0B6B94)),
-                                                        ),
-                                                        child: Row(
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            TranslatorWidget(
-                                                              'View Profile',
-                                                              style: TextStyle(
-                                                                color: Color(
-                                                                    0xFF0B6B94),
-                                                                fontSize: 14,
-                                                                fontFamily:
-                                                                    'Roboto',
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500,
-                                                              ),
-                                                            ),
-                                                            SizedBox(width: 8),
-                                                            Icon(
-                                                              Icons
-                                                                  .arrow_outward_outlined,
-                                                              color: Color(
-                                                                  0xFF0B6B94),
-                                                              size: 18,
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(width: 12),
-                                                    Expanded(
-                                                      child: ElevatedButton(
-                                                        onPressed: () {
-                                                          print('called');
-                                                          PassLocationId(context,doctor['locationId']);
-                                                        },
-                                                        style: ElevatedButton
-                                                            .styleFrom(
-                                                          backgroundColor:
-                                                              Color(0xFF0B6B94),
-                                                          padding: EdgeInsets
-                                                              .symmetric(
-                                                                  vertical: 12),
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(4),
-                                                          ),
-                                                        ),
-                                                        child: Row(
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Transform.rotate(
-                                                              angle: 180 * 3.1415926535 / 180,
-                                                              child: Icon(
-                                                                Icons.subdirectory_arrow_left_outlined,
-                                                                color: Colors.white,
-                                                                size: 18,
-                                                              ),
-                                                            ),
-                                                            SizedBox(width: 8),
-                                                            TranslatorWidget(
-                                                              'Directions',
-                                                              style: TextStyle(
-                                                                color:
-                                                                    Colors.white,
-                                                                fontSize: 14,
-                                                                fontFamily:
-                                                                    'Roboto',
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   );
                                 },
@@ -679,240 +692,253 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                                 scrollDirection: Axis.horizontal,
                                 child: Row(
                                   children: doctorsOfSpeciality.map((doctor) {
-                                    return Padding(
-                                      padding: const EdgeInsets.only(bottom: 18.0),
-                                      child: Container(
-                                        width: MediaQuery.sizeOf(context).width*0.78,
-                                        height: 170,
-                                        margin: EdgeInsets.only(
-                                            top: 8, bottom: 8,left: 16),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(8),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withOpacity(0.2),
-                                              blurRadius: 4,
-                                              offset: Offset(0, 2),
+                                    return InkWell(
+                                      onTap: (){
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => DoctorProfile(
+                                              docId: doctor['_id'],
+                                              doctor: doctor,
                                             ),
-                                          ],
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(left: 12.0,top: 12),
-                                              child: Row(
-                                                children: [
+                                          ),
+                                        );
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(bottom: 18.0),
+                                        child: Container(
+                                          width: MediaQuery.sizeOf(context).width*0.78,
+                                          height: 170,
+                                          margin: EdgeInsets.only(
+                                              top: 8, bottom: 8,left: 16),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(8),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withOpacity(0.2),
+                                                blurRadius: 4,
+                                                offset: Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(left: 12.0,top: 12),
+                                                child: Row(
+                                                  children: [
 
-                                                  Container(
-                                                    width: 90,
-                                                    height: 90,
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
+                                                    Container(
+                                                      width: 90,
+                                                      height: 90,
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
 
-                                                    ),
-                                                    child:  CachedNetworkImage(
-                                                      imageUrl: 'https://dev.iwayplus.in/uploads/${doctor['imageUrl']}',
-                                                      placeholder: (context, url) => Shimmer.fromColors(
-                                                        baseColor: Colors.grey[300]!,
-                                                        highlightColor: Colors.grey[100]!,
-                                                        child: Container(
-                                                          color: Colors.white,
-                                                        ),
                                                       ),
-                                                      errorWidget: (context, url, error) => Container(
-                                                        width: 250,
-                                                        height: 140,
-                                                        color: Colors.grey[200],
-                                                        child:Image.asset(
-                                                          'assets/images/Demo doctor.png',
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                      ),
-                                                      fit: BoxFit.fill,
-                                                    ),
-                                                  ),
-                                                  SizedBox(width: 12),
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment.start,
-                                                      children: [
-                                                        TranslatorWidget(
-                                                          doctor['name'],
-                                                          style: TextStyle(
-                                                            color:
-                                                                Color(0xFF18181B),
-                                                            fontSize: 16,
-                                                            fontFamily: 'Roboto',
-                                                            fontWeight:
-                                                                FontWeight.w500,
+                                                      child:  CachedNetworkImage(
+                                                        imageUrl: 'https://dev.iwayplus.in/uploads/${doctor['imageUrl']}',
+                                                        placeholder: (context, url) => Shimmer.fromColors(
+                                                          baseColor: Colors.grey[300]!,
+                                                          highlightColor: Colors.grey[100]!,
+                                                          child: Container(
+                                                            color: Colors.white,
                                                           ),
                                                         ),
-                                                        SizedBox(height: 4),
-
-                                                        Row(
-                                                          children: [
-                                                            Icon(
-                                                              Icons.location_on,
+                                                        errorWidget: (context, url, error) => Container(
+                                                          width: 250,
+                                                          height: 140,
+                                                          color: Colors.grey[200],
+                                                          child:Image.asset(
+                                                            'assets/images/Demo doctor.png',
+                                                            fit: BoxFit.cover,
+                                                          ),
+                                                        ),
+                                                        fit: BoxFit.fill,
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 12),
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment.start,
+                                                        children: [
+                                                          TranslatorWidget(
+                                                            doctor['name'],
+                                                            style: TextStyle(
                                                               color:
-                                                                  Color(0xFF8D8C8C),
-                                                              size: 16,
+                                                                  Color(0xFF18181B),
+                                                              fontSize: 16,
+                                                              fontFamily: 'Roboto',
+                                                              fontWeight:
+                                                                  FontWeight.w500,
                                                             ),
-                                                            SizedBox(width: 4),
-                                                            TranslatorWidget(
-                                                              // doctor['locationName'].split(' ').first,
-                                                              doctor['locationName'].split(' ').isEmpty || !RegExp(r'^\d+$').hasMatch(doctor['locationName'].split(' ').first)
-                                                                  ? doctor['locationName'].split(' ').take(2).join(' ')
-                                                                  : doctor['locationName'].split(' ').first,
-                                                              style: TextStyle(
-                                                                color: Color(
-                                                                    0xFF8D8C8C),
-                                                                fontSize: 14,
-                                                                fontFamily:
-                                                                    'Roboto',
-                                                                fontWeight:
-                                                                    FontWeight.w400,
+                                                          ),
+                                                          SizedBox(height: 4),
+
+                                                          Row(
+                                                            children: [
+                                                              Icon(
+                                                                Icons.location_on,
+                                                                color:
+                                                                    Color(0xFF8D8C8C),
+                                                                size: 16,
+                                                              ),
+                                                              SizedBox(width: 4),
+                                                              TranslatorWidget(
+                                                                // doctor['locationName'].split(' ').first,
+                                                                doctor['locationName'].split(' ').isEmpty || !RegExp(r'^\d+$').hasMatch(doctor['locationName'].split(' ').first)
+                                                                    ? doctor['locationName'].split(' ').take(2).join(' ')
+                                                                    : doctor['locationName'].split(' ').first,
+                                                                style: TextStyle(
+                                                                  color: Color(
+                                                                      0xFF8D8C8C),
+                                                                  fontSize: 14,
+                                                                  fontFamily:
+                                                                      'Roboto',
+                                                                  fontWeight:
+                                                                      FontWeight.w400,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.symmetric(
+                                                    horizontal: 12),
+                                                child: Column(
+                                                  children: [
+                                                    SizedBox(height: 7,),
+                                                    Container(
+                                                        height: 1,
+                                                        color: Color(0xffEBEBEB)),
+                                                    SizedBox(height: 7),
+                                                    Row(
+                                                      children: [
+                                                        Expanded(
+                                                          child: OutlinedButton(
+                                                            onPressed: () {
+
+                                                              Navigator.push(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                  builder: (context) => DoctorProfile(
+                                                                    docId: doctor['_id'],
+                                                                    doctor: doctor,
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            },
+                                                            style: OutlinedButton
+                                                                .styleFrom(
+                                                              padding: EdgeInsets
+                                                                  .symmetric(
+                                                                      vertical: 6),
+                                                              shape:
+                                                                  RoundedRectangleBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(4),
+                                                              ),
+                                                              side: BorderSide(
+                                                                  color: Color(
+                                                                      0xFF0B6B94)),
+                                                            ),
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                TranslatorWidget(
+                                                                  'View Profile',
+                                                                  style: TextStyle(
+                                                                    color: Color(
+                                                                        0xFF0B6B94),
+                                                                    fontSize: 14,
+                                                                    fontFamily:
+                                                                        'Roboto',
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                  ),
+                                                                ),
+                                                                SizedBox(width: 8),
+                                                                Icon(
+                                                                  Icons
+                                                                      .arrow_outward_outlined,
+                                                                  color: Color(
+                                                                      0xFF0B6B94),
+                                                                  size: 18,
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        SizedBox(width: 12),
+                                                        Expanded(
+                                                          child: ElevatedButton(
+                                                            onPressed: () {
+                                                              PassLocationId(context,doctor['locationId']);
+                                                            },
+                                                            style: ElevatedButton
+                                                                .styleFrom(
+                                                              backgroundColor:
+                                                                  Color(0xFF0B6B94),
+                                                              padding: EdgeInsets
+                                                                  .symmetric(
+                                                                      vertical: 6),
+                                                              shape:
+                                                                  RoundedRectangleBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(4),
                                                               ),
                                                             ),
-                                                          ],
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                Transform.rotate(
+                                                                  angle: 180 * 3.1415926535 / 180,
+                                                                  child: Icon(
+                                                                    Icons.subdirectory_arrow_left_outlined,
+                                                                    color: Colors.white,
+                                                                    size: 18,
+                                                                  ),
+                                                                ),
+                                                                SizedBox(width: 8),
+                                                                TranslatorWidget(
+                                                                  'Directions',
+                                                                  style: TextStyle(
+                                                                    color:
+                                                                        Colors.white,
+                                                                    fontSize: 14,
+                                                                    fontFamily:
+                                                                        'Roboto',
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
                                                         ),
                                                       ],
                                                     ),
-                                                  ),
-                                                ],
+                                                  ],
+                                                ),
                                               ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.symmetric(
-                                                  horizontal: 12),
-                                              child: Column(
-                                                children: [
-                                                  SizedBox(height: 7,),
-                                                  Container(
-                                                      height: 1,
-                                                      color: Color(0xffEBEBEB)),
-                                                  SizedBox(height: 7),
-                                                  Row(
-                                                    children: [
-                                                      Expanded(
-                                                        child: OutlinedButton(
-                                                          onPressed: () {
-
-                                                            Navigator.push(
-                                                              context,
-                                                              MaterialPageRoute(
-                                                                builder: (context) => DoctorProfile(
-                                                                  docId: doctor['_id'],
-                                                                  doctor: doctor,
-                                                                ),
-                                                              ),
-                                                            );
-                                                          },
-                                                          style: OutlinedButton
-                                                              .styleFrom(
-                                                            padding: EdgeInsets
-                                                                .symmetric(
-                                                                    vertical: 6),
-                                                            shape:
-                                                                RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(4),
-                                                            ),
-                                                            side: BorderSide(
-                                                                color: Color(
-                                                                    0xFF0B6B94)),
-                                                          ),
-                                                          child: Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .center,
-                                                            children: [
-                                                              TranslatorWidget(
-                                                                'View Profile',
-                                                                style: TextStyle(
-                                                                  color: Color(
-                                                                      0xFF0B6B94),
-                                                                  fontSize: 14,
-                                                                  fontFamily:
-                                                                      'Roboto',
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                ),
-                                                              ),
-                                                              SizedBox(width: 8),
-                                                              Icon(
-                                                                Icons
-                                                                    .arrow_outward_outlined,
-                                                                color: Color(
-                                                                    0xFF0B6B94),
-                                                                size: 18,
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      SizedBox(width: 12),
-                                                      Expanded(
-                                                        child: ElevatedButton(
-                                                          onPressed: () {
-                                                            PassLocationId(context,doctor['locationId']);
-                                                          },
-                                                          style: ElevatedButton
-                                                              .styleFrom(
-                                                            backgroundColor:
-                                                                Color(0xFF0B6B94),
-                                                            padding: EdgeInsets
-                                                                .symmetric(
-                                                                    vertical: 6),
-                                                            shape:
-                                                                RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(4),
-                                                            ),
-                                                          ),
-                                                          child: Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .center,
-                                                            children: [
-                                                              Transform.rotate(
-                                                                angle: 180 * 3.1415926535 / 180,
-                                                                child: Icon(
-                                                                  Icons.subdirectory_arrow_left_outlined,
-                                                                  color: Colors.white,
-                                                                  size: 18,
-                                                                ),
-                                                              ),
-                                                              SizedBox(width: 8),
-                                                              TranslatorWidget(
-                                                                'Directions',
-                                                                style: TextStyle(
-                                                                  color:
-                                                                      Colors.white,
-                                                                  fontSize: 14,
-                                                                  fontFamily:
-                                                                      'Roboto',
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     );
