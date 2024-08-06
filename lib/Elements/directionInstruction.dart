@@ -7,7 +7,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../localization/locales.dart';
 
-
 class directionInstruction extends StatefulWidget {
   String direction;
   String distance;

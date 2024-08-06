@@ -11,7 +11,7 @@ const List<MapLocale> LOCALES=[
 ];
 
 mixin LocaleData {
-
+  static const String iss = "iss";
   static const String title = 'title';
   static const String generalSettings = 'generalSettings';
   static const String language = 'language';
@@ -39,7 +39,7 @@ mixin LocaleData {
   static const String less5Feet = '< 5 Feet';
   static const String between56Feet = '5 to 6 Feet';
   static const String more6Feet = '> 6 Feet';
-  static const String random = 'Random';
+
   static const String straight='Straight';
   static const String right='Right';
   static const String tright='tRight';
@@ -126,8 +126,10 @@ mixin LocaleData {
   static const String location='Location';
   static const String none='None';
   static const String ttsgostraight='ttsGoStraight';
-  static const String upToDate ='upToDate';
   static const String waytogo="Where you want to go?";
+  static const String scanQr="Scan nearby QR to know your location";
+  static const String reroute="You are going away from the path. Rerouting you to the destination";
+  static const String upToDate ='upToDate';
 
 
 
@@ -222,7 +224,11 @@ mixin LocaleData {
 
 
   static String getProperty5(String propertyName,context) {
+
+
+
     if(properties5[propertyName]!=null){
+      print("property5 ${properties5[propertyName]!.getString(context)}");
       return properties5[propertyName]!.getString(context);
     }
     return propertyName;
@@ -242,7 +248,10 @@ mixin LocaleData {
   }
 
 
+
+
   static const Map<String, dynamic> EN = {
+    'iss': 'is',
     'title': 'Settings',
     'generalSettings': 'General Settings',
     'language': 'Language',
@@ -270,7 +279,6 @@ mixin LocaleData {
     '< 5 Feet':'< 5 Feet',
     '5 to 6 Feet':'5 to 6 Feet',
     '> 6 Feet':'> 6 Feet',
-    'random':'random',
     'Straight':'Straight',
 
     'Right':'Right',
@@ -353,13 +361,20 @@ mixin LocaleData {
     'ttsSharpLeft':'Sharp Left',
     'ttsUTurn':'U Turn',
     'ttsGoStraight':'Go Straight',
+    'Where you want to go?':'Where you want to go?',
+    'Scan nearby QR to know your location':'Scan nearby QR to know your location',
+    'You are going away from the path. Rerouting you to the destination':'You are going away from the path. Rerouting you to the destination',
     'upToDate':'Up to date',
-    'Where you want to go?':'Where you want to go?'
+
+
+
+
 
 
   };
 
   static const Map<String, dynamic> HI = {
+    'iss':'',
     'title': 'सेटिंग्स',
     'generalSettings': 'सामान्य सेटिंग्स',
     'language': 'भाषा',
@@ -387,7 +402,6 @@ mixin LocaleData {
     '< 5 Feet': '< 5 फीट',
     '5 to 6 Feet': '5 से 6 फीट',
     '> 6 Feet': '> 6 फीट',
-    'random':'random',
     'Straight': 'सीधे',
     'Right': '',
     'U Turn': 'यू टर्न',
@@ -473,9 +487,10 @@ mixin LocaleData {
     'ttsSharpLeft':'तीव्र लेफ्ट',
     'ttsUTurn':'यू टर्न',
     'ttsGoStraight':'सीधे चले लगभग',
+    'Where you want to go?':'आप कहाँ जाना चाहते हैं?',
+    'Scan nearby QR to know your location':'अपना स्थान जानने के लिए नजदिकी QR को स्कैन करें',
+    'You are going away from the path. Rerouting you to the destination':'आप रास्ते से दूर जा रहे हैं। आपको आपकी मंजिल की दिशा में रीरूट किया जाया जा रहा है',
     'upToDate':'अप टू डेट',
-    'Where you want to go?':'आप कहाँ जाना चाहते हैं?'
-
 
   };
 
@@ -507,9 +522,6 @@ mixin LocaleData {
     '< 5 Feet': '< 5 அடி',
     '5 to 6 Feet': '5 முதல் 6 அடி',
     '> 6 Feet': '> 6 அடி',
-    'random':'random',
-    'upToDate':'अप टू डेट',
-
   };
 
   static const Map<String, dynamic> TE = {
@@ -539,9 +551,7 @@ mixin LocaleData {
     'userHeight': 'వాడుకరి ఎత్తు',
     '< 5 Feet': '< 5 అడుగులు',
     '5 to 6 Feet': '5 నుండి 6 అడుగులు',
-    '> 6 Feet': '> 6 అడుగులు',
-    'upToDate':'अप टू डेट',
-
+    '> 6 Feet': '> 6 అడుగులు'
   };
 
   static const Map<String, dynamic> PA = {
@@ -572,8 +582,6 @@ mixin LocaleData {
     '< 5 Feet': '< 5 ਫੁੱਟ',
     '5 to 6 Feet': '5 ਤੋਂ 6 ਫੁੱਟ',
     '> 6 Feet': '> 6 ਫੁੱਟ',
-    'upToDate':'अप टू डेट',
-
   };
   static const Map<String, dynamic> NE = {
     'title': 'सेटिङहरू',
@@ -602,11 +610,7 @@ mixin LocaleData {
     'userHeight': 'प्रयोगकर्ता उचाइ',
     '< 5 Feet': '< ५ फिट',
     '5 to 6 Feet': '५ देखि ६ फिट',
-    '> 6 Feet': '> ६ फिट',
-    'upToDate':'अप टू डेट',
-    'Where you want to go?':'आप कहाँ जाना चाहते हैं?'
-
-
+    '> 6 Feet': '> ६ फिट'
   };
 
 }
