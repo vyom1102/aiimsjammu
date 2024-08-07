@@ -1,11 +1,16 @@
 
 import 'dart:convert';
+import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -322,8 +327,63 @@ class _DoctorProfile1State extends State<DoctorProfile1> {
       print('Failed to add doctor to favorites: ${response.statusCode}');
     }
   }
+  // Future<void> _shareContent(String text) async {
+  //   await Share.share(text);
+  // }
   Future<void> _shareContent(String text) async {
-    await Share.share(text);
+    try {
+      final qrValidationResult = QrValidator.validate(
+        data: text,
+        version: QrVersions.auto,
+        errorCorrectionLevel: QrErrorCorrectLevel.L,
+      );
+      if (qrValidationResult.status != QrValidationStatus.valid) {
+        throw Exception('QR code generation failed');
+      }
+      final qrCode = qrValidationResult.qrCode;
+
+      final ByteData imageData = await rootBundle.load('assets/images/qrlogo.png');
+      final ui.Codec codec = await ui.instantiateImageCodec(imageData.buffer.asUint8List());
+      final ui.FrameInfo fi = await codec.getNextFrame();
+      final ui.Image image = fi.image;
+
+      final painter = QrPainter.withQr(
+        qr: qrCode!,
+        color: const Color(0xFF0B6B94),
+        emptyColor: const Color(0xFFFFFFFF),
+        gapless: true,
+        embeddedImage: image,
+        embeddedImageStyle: QrEmbeddedImageStyle(
+          size: Size(300, 300),
+        ),
+      );
+
+      final int qrSize = 2048;
+      final int padding = 100;
+      final int totalSize = qrSize + (2 * padding);
+
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+
+      canvas.drawColor(Colors.white, BlendMode.src);
+
+      canvas.translate(padding.toDouble(), padding.toDouble());
+      painter.paint(canvas, Size(qrSize.toDouble(), qrSize.toDouble()));
+
+      final picture = recorder.endRecording();
+      final img = await picture.toImage(totalSize, totalSize);
+      final pngBytes = await img.toByteData(format: ui.ImageByteFormat.png);
+
+      final buffer = pngBytes!.buffer.asUint8List();
+
+      final tempDir = await getTemporaryDirectory();
+      final tempPath = '${tempDir.path}/doctor_share.png';
+      final file = await File(tempPath).writeAsBytes(buffer);
+
+      await Share.shareXFiles([XFile(file.path)], text: text);
+    } catch (e) {
+      print('Error sharing content: $e');
+    }
   }
   @override
   Widget build(BuildContext context) {
@@ -349,7 +409,9 @@ class _DoctorProfile1State extends State<DoctorProfile1> {
         ),
         actions: [
           IconButton(onPressed: (){
-            _shareContent("iwayplus://aiimsj.com/doctor?docId=${widget.docId}");
+            _shareContent("https://dev.iwayplus.in/#/iway-apps/aiimsj.com/doctor?docId=${widget.docId}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
+
+            // _shareContent("iwayplus://aiimsj.com/doctor?docId=${widget.docId}");
           }, icon: Icon(Icons.share_outlined)),
           IconButton(
             onPressed: () async {

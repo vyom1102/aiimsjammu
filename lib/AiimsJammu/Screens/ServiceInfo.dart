@@ -1,10 +1,15 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -201,9 +206,65 @@ class _ServiceInfoState extends State<ServiceInfo> {
     await launch(launchUri.toString());
   }
 
+  // Future<void> _shareContent(String text) async {
+  //   await Share.share(text);
+  // }
   Future<void> _shareContent(String text) async {
-    await Share.share(text);
+    try {
+      final qrValidationResult = QrValidator.validate(
+        data: text,
+        version: QrVersions.auto,
+        errorCorrectionLevel: QrErrorCorrectLevel.L,
+      );
+      if (qrValidationResult.status != QrValidationStatus.valid) {
+        throw Exception('QR code generation failed');
+      }
+      final qrCode = qrValidationResult.qrCode;
+
+      final ByteData imageData = await rootBundle.load('assets/images/qrlogo.png');
+      final ui.Codec codec = await ui.instantiateImageCodec(imageData.buffer.asUint8List());
+      final ui.FrameInfo fi = await codec.getNextFrame();
+      final ui.Image image = fi.image;
+
+      final painter = QrPainter.withQr(
+        qr: qrCode!,
+        color: const Color(0xFF0B6B94),
+        emptyColor: const Color(0xFFFFFFFF),
+        gapless: true,
+        embeddedImage: image,
+        embeddedImageStyle: QrEmbeddedImageStyle(
+          size: Size(300, 300),
+        ),
+      );
+
+      final int qrSize = 2048;
+      final int padding = 100;
+      final int totalSize = qrSize + (2 * padding);
+
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+
+      canvas.drawColor(Colors.white, BlendMode.src);
+
+      canvas.translate(padding.toDouble(), padding.toDouble());
+      painter.paint(canvas, Size(qrSize.toDouble(), qrSize.toDouble()));
+
+      final picture = recorder.endRecording();
+      final img = await picture.toImage(totalSize, totalSize);
+      final pngBytes = await img.toByteData(format: ui.ImageByteFormat.png);
+
+      final buffer = pngBytes!.buffer.asUint8List();
+
+      final tempDir = await getTemporaryDirectory();
+      final tempPath = '${tempDir.path}/service_share.png';
+      final file = await File(tempPath).writeAsBytes(buffer);
+
+      await Share.shareXFiles([XFile(file.path)], text: text);
+    } catch (e) {
+      print('Error sharing content: $e');
+    }
   }
+
   @override
   void initState() {
     getUserIDFromHive();
@@ -633,7 +694,9 @@ class _ServiceInfoState extends State<ServiceInfo> {
             Expanded(
               child: OutlinedButton(
                 onPressed: () {
-                  _shareContent("iwayplus://aiimsj.com/service?serviceId=${widget.id}");
+                  _shareContent("https://dev.iwayplus.in/#/iway-apps/aiimsj.com/service?serviceId=${widget.id}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
+
+                  // _shareContent("iwayplus://aiimsj.com/service?serviceId=${widget.id}");
                 },
                 style: OutlinedButton
                     .styleFrom(
