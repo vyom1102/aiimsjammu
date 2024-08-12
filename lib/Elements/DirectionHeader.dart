@@ -115,8 +115,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         });
       }
     }
-    btadapter.startthescan(Building.apibeaconmap,diff: 5);
-    _timer = Timer.periodic(Duration(milliseconds: 2500), (timer) {
+    btadapter.startScanning(Building.apibeaconmap);
+    _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
       //print("Pathposition");
       //print(widget.user.path);
       // //print("listen to bin :${listenToBin()}");
@@ -169,7 +169,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           widget.direction = "Go Straight";
 
           speak(
-              "${LocaleData.getProperty6('Go Straight', widget.context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
+              "${LocaleData.getProperty6('Go Straight', widget.context)} ${tools.convertFeet(widget.distance,widget.context)}}",
                 _currentLocale,prevpause: true);
         }else{
           print("look here $angle      ${widget.direction}          ${"Turn ${LocaleData.getProperty5(widget.direction, widget.context)}"}");
@@ -179,7 +179,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               "${widget.direction}",
               _currentLocale,prevpause: true);
         widget.getSemanticValue =
-        "Turn ${widget.direction}, and Go Straight ${(widget.distance / UserState.stepSize).ceil()} steps";
+        "Turn ${widget.direction}, and Go Straight ${tools.convertFeet(widget.distance,widget.context)}";
 
         }
       });
@@ -334,7 +334,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           else if (widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
 
-              highestweight >= 2.6) {
+              highestweight >= 1.3) {
 
             widget.user.onConnection = false;
             //print("workingg user floor ${widget.user.floor}");
@@ -371,13 +371,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               DirectionIndex = 1;
               return false; //away from path
             } else {
+              double dis = tools.calculateDistance([widget.user.showcoordX,widget.user.showcoordY], beaconcoord);
               print("workingg 4");
               widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
               speak(
-                  "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
+                  "${widget.direction} ${tools.convertFeet(widget.distance,widget.context)}",
                   _currentLocale
               );
-              widget.user.moveToPointOnPath(indexOnPath!);
+              widget.user.moveToPointOnPath(indexOnPath!,onTurn: dis<20);
               widget.moveUser();
               DirectionIndex = nextTurnIndex;
               return true; //moved on path
@@ -648,7 +649,7 @@ if(disposed)return;
           Vibration.vibrate();
 
           speak(
-              "${LocaleData.getProperty6('Go Straight', context)} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
+              "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance,context)}}",
               _currentLocale,prevpause: true);
         }
       }
@@ -657,7 +658,7 @@ if(disposed)return;
           double angle = tools.calculateAngleThird([widget.user.pathobj.destinationX,widget.user.pathobj.destinationY], widget.user.path[widget.user.pathobj.index+1], widget.user.path[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
           speak("${widget.direction} ${widget.distance} steps. ${widget.user.pathobj.destinationName} will be ${tools.angleToClocks2(angle,widget.context)}",_currentLocale);
           widget.user.move(context);
-        }else if(nextTurn != turnPoints.last && widget.user.pathobj.connections[widget.user.Bid]?[widget.user.floor] != nextTurn && (widget.distance/UserState.stepSize).ceil() == 7){
+        }else if(nextTurn != turnPoints.last && widget.user.pathobj.connections[widget.user.Bid]?[widget.user.floor] != nextTurn && (widget.distance/UserState.stepSize).ceil() == 10){
           if(!direc.contains("slight") && widget.user.pathobj.index > 4){
 
             if(widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null){
@@ -896,7 +897,7 @@ if(disposed)return;
                   });}, icon: Icon(Icons.arrow_back_ios_new,color: DirectionIndex - 1 >=1?Colors.white:Colors.grey,)),
                 ),
                 const SizedBox(width: 8,),
-                scrollableDirection("${widget.direction}", '${(widget.distance/UserState.stepSize).ceil()}', getCustomIcon(widget.direction),DirectionIndex,nextTurnIndex,widget.user.pathobj.directions,widget.user,widget.context),
+                scrollableDirection("${widget.direction}", '${tools.convertFeet(widget.distance,widget.context)}', getCustomIcon(widget.direction),DirectionIndex,nextTurnIndex,widget.user.pathobj.directions,widget.user,widget.context),
                 const SizedBox(width: 8,),
                 Container(
                   width: 44,
@@ -1060,12 +1061,10 @@ class scrollableDirection extends StatelessWidget {
         if (listOfDirections[DirectionIndex].isDestination) {
           return "";
         } else if (DirectionIndex == nextTurnIndex) {
-          return '$steps ${LocaleData.steps.getString(context)}';
+          return '$steps';
         } else {
-          return '${((listOfDirections[DirectionIndex].distanceToNextTurn ??
-              1) /
-              UserState.stepSize).ceil()} ${LocaleData.steps.getString(
-              context)}';
+          return '${tools.convertFeet((listOfDirections[DirectionIndex].distanceToNextTurn ??
+              1).toInt(),context)}';
         }
       } else {
         return "";

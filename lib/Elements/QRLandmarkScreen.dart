@@ -154,11 +154,12 @@ class _QRViewExampleState extends State<QRViewExample> {
       print("result");
       print(result!.code);
       if(result != null){
-        String polyValue = result!.code!.replaceAll("https://dev.iwayplus.in/iwaymaps/", "");
+        String polyValue = HelperClass.extractLandmark(result!.code!);
+        print("polyValue $polyValue");
         if(polyValue != ""){
           Navigator.pop(context,polyValue);
         }else{
-          HelperClass.showToast("QR Expired !!");
+          HelperClass.showToast("Invalid QR");
         }
       }
     });

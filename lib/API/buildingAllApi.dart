@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:geodesy/geodesy.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
+import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
+
 import '../APIMODELS/buildingAll.dart';
 
 import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
@@ -19,7 +21,7 @@ class buildingAllApi {
   static String selectedID="66794105b80a6778c53c4856";//66794105b80a6778c53c4856
   static String selectedBuildingID="66794105b80a6778c53c4856";
   static String selectedVenue="";
-  static Map<String,LatLng> allBuildingID = {"66794105b80a6778c53c4856": LatLng(32.564752072362936, 75.03653526306154),
+  static Map<String,g.LatLng> allBuildingID = {"66794105b80a6778c53c4856": g.LatLng(32.564752072362936, 75.03653526306154),
   };
   static String outdoorID = "";
 
@@ -100,11 +102,11 @@ class buildingAllApi {
     return selectedID;
   }
 
-  static void setStoredAllBuildingID(HashMap<String,LatLng> value){
+  static void setStoredAllBuildingID(HashMap<String,g.LatLng> value){
     allBuildingID = value;
   }
 
-  static Map<String,LatLng> getStoredAllBuildingID(){
+  static Map<String,g.LatLng> getStoredAllBuildingID(){
     return allBuildingID;
   }
 

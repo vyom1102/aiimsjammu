@@ -308,7 +308,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
 
                                     buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
-                                    buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                                    // buildingAllApi.setStoredAllBuildingID(allBuildingID);
                                     // while({
                                     //
                                     // }
@@ -700,7 +700,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                 IconButton(onPressed: (){
                   buildingAllApi.setStoredString(currentData.sId!);
                   buildingAllApi.setSelectedBuildingID(currentData.sId!);
-                  buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                  // buildingAllApi.setStoredAllBuildingID(allBuildingID);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
