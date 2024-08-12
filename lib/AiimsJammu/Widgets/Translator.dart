@@ -1,4 +1,5 @@
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:translator/translator.dart';
@@ -21,12 +22,27 @@ class TranslatorWidget extends StatefulWidget {
 class _TranslatorWidgetState extends State<TranslatorWidget> {
   late FlutterLocalization _flutterLocalization;
   late String _currentLocale;
-
+  bool _isConnected = true;
   @override
   void initState() {
     super.initState();
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale?.languageCode ?? 'en';
+    checkconnectivity();
+  }
+
+
+  Future <void> checkconnectivity()async{
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult.contains(ConnectivityResult.mobile) || connectivityResult.contains(ConnectivityResult.wifi)) {
+      setState(() {
+        _isConnected = true;
+      });
+    }else{
+      setState(() {
+        _isConnected = false;
+      });
+    }
   }
 
   Future<String> _translateText() async {
@@ -38,13 +54,14 @@ class _TranslatorWidgetState extends State<TranslatorWidget> {
       );
       return translation.text;
     } catch (e) {
+
       return 'Error: Unable to translate';
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_currentLocale == 'en') {
+    if (_currentLocale == 'en' || _isConnected == false) {
       return Text(
         widget.text,
         style: widget.style,

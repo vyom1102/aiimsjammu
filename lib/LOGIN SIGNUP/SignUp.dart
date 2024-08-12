@@ -281,6 +281,18 @@ class _SignUpState extends State<SignUp> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      height: 70,
+                                      // width:100,
+                                      margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                      child: Image.asset(
+                                        // scale: 10,
+                                          'assets/images/signinlogo.png'),
+                                    ),
+                                  ],
+                                ),
                                 Container(
                                   margin: EdgeInsets.fromLTRB(16, 11, 0, 0),
                                   width: double.infinity,
