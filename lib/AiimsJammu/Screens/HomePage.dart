@@ -15,6 +15,7 @@ import 'package:iwaymaps/API/DataVersionApi.dart';
 import 'package:iwaymaps/API/buildingAllApi.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/NoInternetConnection.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/OpeningClosingStatus.dart';
+import '../../API/RefreshTokenAPI.dart';
 import '../../API/UsergetAPI.dart';
 import '../../APIMODELS/DataVersion.dart';
 import '../../VersioInfo.dart';
@@ -60,6 +61,8 @@ class _HomePageState extends State<HomePage> {
   List<dynamic> _pharmacyfilteredServices = [];
   List<dynamic> _countersfilteredServices = [];
   List<dynamic> _cafeteriafilteredServices = [];
+  String? accessTokenN;
+  String? refreshTokenN;
   List<dynamic> _emergencyfilteredService =[];
   List<dynamic> _otherservices = [];
   List<dynamic>   _otherfilteredServices = [];
@@ -67,7 +70,10 @@ class _HomePageState extends State<HomePage> {
   String facebook = "https://www.facebook.com/aiimsvijaypur";
   String youtube = "https://www.youtube.com/channel/UC0V4753jPLDzPmlypa1xDiQ/playlists";
   String instagram = "https://www.instagram.com/aiims_vijaypurjmu/";
-
+  int doctorVersion = 0;
+  int serviceVersion = 0;
+  int corousalVersion = 0;
+  int announcementVersion = 0;
   int _currentPage = 0;
   String token = "";
   late int index;
@@ -87,48 +93,108 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentPage);
-    // _internetConnection = InternetConnection().onStatusChange.listen((event) {
-    //   switch(event){
-    //     case InternetStatus.disconnected:
-    //       _showNoInternetSnackbar();
-    //       // ScaffoldMessenger.of(context).showSnackBar(
-    //       //   SnackBar(content: Text('No Internet Connection')),
-    //       // );
-    //       // Navigator.push(
-    //       //   context,
-    //       //   MaterialPageRoute(
-    //       //     builder: (context) => NoInternetConnection(),
-    //       //   ),
-    //       // );
-    //     case InternetStatus.connected:
-    //       break;
-    //     default:
-    //       setState(() {
-    //         isConnectedToInternet = true;
-    //       });
-    //       break;
-    //   }
-    // });
-    // Battery Consuming
-    // startAutoAnimation();
-    // _fetchHospitalData();
-    // _loadImageCorousalFromAPI();
-
-    // _loadServicesFromAPI();
-    // _loadAnnouncementsFromAPI();
-    // getUserDataFromHive();
+    versionApiCheck();
     checkForReload();
-
     versionApiCall();
-
-
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
-    // _timer = Timer.periodic(Duration(seconds: 10), (timer) {
-    //   _scrollToNext();
-    // });
 
   }
+  Future<void> versionApiCheck() async {
+    try {
+      final dashboarddataversion = await Hive.openBox("dashboardDataVersion");
+      final signInBox = await Hive.openBox('SignInDatabase');
+      accessTokenN = signInBox.get("accessToken");
+      refreshTokenN = signInBox.get("refreshToken");
+
+      final response = await http.post(
+        Uri.parse("https://dev.iwayplus.in/secured/data-version1"),
+        body: json.encode({
+          "id": "6673e7a3b92e69bc7f4b40ae",
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+          "x-access-token": accessTokenN ?? "",
+        },
+      );
+
+      print("code");
+      print(response.statusCode);
+
+      if (response.statusCode == 200) {
+        print("Version API call success");
+        print(response.body);
+
+        final responseData = json.decode(response.body);
+
+        if (responseData['status'] == true) {
+          int newDoctorVersion = responseData['versionData']['doctorDataVersion'] ?? 0;
+          int newServiceVersion = responseData['versionData']['serviceDataVersion'] ?? 0;
+          int newCorousalVersion = responseData['versionData']['corousalDataVersion'] ?? 0;
+          int newAnnouncementVersion = responseData['versionData']['announcementDataVersion'] ?? 0;
+
+          // Update the state with the new version values
+          setState(() {
+            doctorVersion = newDoctorVersion;
+            serviceVersion = newServiceVersion;
+            corousalVersion = newCorousalVersion;
+            announcementVersion = newAnnouncementVersion;
+          });
+
+          if (dashboarddataversion.get('doctorVersion') != doctorVersion) {
+            print("Updating doctor data...");
+            _doctors.clear();
+            await _loadDoctorsFromAPI();
+            print("Doctor data updated");
+            dashboarddataversion.put('doctorVersion', doctorVersion);
+          } else {
+            print("No updates for doctor data");
+          }
+
+          // Handle service data updates
+          if (dashboarddataversion.get('serviceVersion') != serviceVersion) {
+            print("Updating service data...");
+            _services.clear();
+            await _loadServicesFromAPI();
+            print("Service data updated");
+            dashboarddataversion.put('serviceVersion', serviceVersion);
+          } else {
+            print("No updates for service data");
+          }
+
+          // Handle corousal data updates
+          if (dashboarddataversion.get('corousalVersion') != corousalVersion) {
+            print("Updating corousal data...");
+            carouselImages.clear();
+            await _loadImageCorousalFromAPI();
+            print("Corousal data updated");
+            dashboarddataversion.put('corousalVersion', corousalVersion);
+          } else {
+            print("No updates for corousal data");
+          }
+
+          // Handle announcement data updates
+          if (dashboarddataversion.get('announcementVersion') != announcementVersion) {
+            print("Updating announcement data...");
+            announcements.clear();
+            await _loadAnnouncementsFromAPI();
+            print("Announcement data updated");
+            dashboarddataversion.put('announcementVersion', announcementVersion);
+          } else {
+            print("No updates for announcement data");
+          }
+        }
+      } else if (response.statusCode == 403) {
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        print('Refresh done');
+        accessTokenN = newAccessToken;
+        versionApiCheck(); // Retry with the new token
+      }
+    } catch (e) {
+      print("Error during version API call: $e");
+    }
+  }
+
   Future<void> _launchInWebView(Uri url) async {
     if (!await launchUrl(url, mode: LaunchMode.inAppBrowserView)) {
       throw Exception('Could not launch $url');

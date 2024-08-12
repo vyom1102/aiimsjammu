@@ -444,7 +444,7 @@ class _DoctorProfile1State extends State<DoctorProfile1> {
                       ),
                       SizedBox(height: 20),
                       TranslatorWidget(
-                        doctor['name'],
+                        doctor['name']??"Loading",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Color(0xFF18181B),
