@@ -835,7 +835,7 @@ bool disposed=false;
 
   Future<void> paintMarker(LatLng Location) async {
     final Uint8List userloc =
-        await getImagesFromMarker('assets/userloc0.png', 80);
+        await getImagesFromMarker('assets/userloc0.png', 130);
     final Uint8List userlocdebug =
         await getImagesFromMarker('assets/tealtorch.png', 35);
 
@@ -995,7 +995,7 @@ bool disposed=false;
         print("userLandmark: ${userSetLocation.name}");
       });
       final Uint8List userloc =
-      await getImagesFromMarker('assets/userloc0.png', 80);
+      await getImagesFromMarker('assets/userloc0.png', 130);
       final Uint8List userlocdebug =
       await getImagesFromMarker('assets/tealtorch.png', 35);
 
@@ -1311,7 +1311,7 @@ bool disposed=false;
 
 
       final Uint8List userloc =
-      await getImagesFromMarker('assets/userloc0.png', 80);
+      await getImagesFromMarker('assets/userloc0.png', 130);
       final Uint8List userlocdebug =
       await getImagesFromMarker('assets/tealtorch.png', 35);
 
@@ -1832,7 +1832,7 @@ bool disposed=false;
   void moveUser() async {
     print("User is moving");
     final Uint8List userloc =
-        await getImagesFromMarker('assets/userloc0.png', 80);
+        await getImagesFromMarker('assets/userloc0.png', 130);
     final Uint8List userlocdebug =
         await getImagesFromMarker('assets/tealtorch.png', 35);
 
@@ -6029,7 +6029,7 @@ bool disposed=false;
                                                       final Uint8List userloc =
                                                           await getImagesFromMarker(
                                                               'assets/userloc0.png',
-                                                              80);
+                                                              130);
                                                       final Uint8List
                                                           userlocdebug =
                                                           await getImagesFromMarker(
