@@ -1784,6 +1784,7 @@ bool disposed=false;
                             isBlueToothLoading = false;
                           });
                           paintUser(null,polyID: value);
+                          Navigator.of(context).pop();
                         });
                         //Navigator.of(context).pop();
                         // if (result != null) {
@@ -4148,7 +4149,8 @@ bool disposed=false;
                         Container(
                           margin:EdgeInsets.only(top:8,right: 16),
                             child: IconButton(onPressed: (){
-                              HelperClass.shareContent("https://dev.iwayplus.in/#/iway-apps/iwaymaps.com/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${building.selectedLandmarkID!}&appStore=rgci-navigation/id6505062168&playStore=com.iwayplus.rgcinavigation");
+                              // HelperClass.shareContent("https://dev.iwayplus.in/#/iway-apps/aiimsj.com/landmark?bid=66794105b80a6778c53c4856&landmark=a040fba-864b-ad8f-cf62-7e1758026fc4&source=a040fba-864b-ad8f-cf62-7e1758026fc4&appStore=rgci-navigation/id650506216&playStore=com.iwayplus.aiimsjammu");
+                              HelperClass.shareContent("https://dev.iwayplus.in/#/iway-apps/aiimsj.com/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${building.selectedLandmarkID!}&appStore=rgci-navigation/id6505062169&playStore=com.iwayplus.aiimsjammu");
                             }, icon: Icon(Icons.share)))
                       ],),
 

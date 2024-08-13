@@ -56,6 +56,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="iwayplus" android:host="aiimsj.com" android:pathPrefix="/doctor"/>
                 <data android:scheme="iwayplus" android:host="aiimsj.com" android:pathPrefix="/service"/>
+                <data android:scheme="iwayplus" android:host="aiimsj.com" android:pathPrefix="/landmark"/>
 
             </intent-filter>
 

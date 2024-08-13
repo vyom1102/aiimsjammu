@@ -127,37 +127,45 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     }
 
     try {
-      final buildings = await buildingAllApi().fetchBuildingAllData();
+      if(bid == "66794105b80a6778c53c4856" || bid =="6675792ca3119bff0e732f61") {
+        final buildings = await buildingAllApi().fetchBuildingAllData();
 
-      print("Fetched buildings: $buildings");
+        print("Fetched buildings: $buildings");
 
-      final venue = buildings.firstWhere(
-            (building) => building.sId == bid,
-        orElse: () => throw Exception("Building not found."),
-      ).venueName;
+        final venue = buildings
+            .firstWhere(
+              (building) => building.sId == bid,
+          orElse: () => throw Exception("Building not found."),
+        )
+            .venueName;
 
-      final venueMap = await HelperClass.groupBuildings(buildings);
-      final allBuildingMap = await HelperClass.createAllbuildingMap(venueMap, venue!);
+        final venueMap = await HelperClass.groupBuildings(buildings);
+        final allBuildingMap = await HelperClass.createAllbuildingMap(
+            venueMap, venue!);
 
-      buildingAllApi.allBuildingID = allBuildingMap;
-      buildingAllApi.selectedBuildingID = bid!;
-      buildingAllApi.selectedID = bid!;
-      buildingAllApi.selectedVenue = venue;
+        buildingAllApi.allBuildingID = allBuildingMap;
+        buildingAllApi.selectedBuildingID = bid!;
+        buildingAllApi.selectedID = bid!;
+        buildingAllApi.selectedVenue = venue;
 
-      if (source != null) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Navigation(directsourceID: source ?? ""),
-          ),
-        );
-      } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Navigation(directLandID: landmarkID ?? ""),
-          ),
-        );
+        if (source != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Navigation(directsourceID: source ?? ""),
+            ),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Navigation(directLandID: landmarkID ?? ""),
+            ),
+          );
+        }
+      }
+      else{
+        HelperClass.showToast("Invalid qr");
       }
     } catch (e) {
       print("Error handling deep link: $e");
@@ -212,7 +220,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         _isDeepLinkHandled = true;
         try {
           final uri = Uri.parse(scanData.code ?? '');
-          iwaymapsDeepLink(uri, context, "rgci.com");
+          iwaymapsDeepLink(uri, context, "aiimsj.com");
           controller.stopCamera();
         } catch (e) {
           print('Error parsing URL: $e');

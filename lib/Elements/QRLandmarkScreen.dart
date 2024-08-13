@@ -18,6 +18,7 @@ class _QRViewExampleState extends State<QRViewExample> {
   Barcode? result;
   QRViewController? controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  bool _isDeepLinkHandled = false;
 
   // In order to get hot reload to work we need to pause the camera if the platform
   // is android, or resume the camera if the platform is iOS.
@@ -148,18 +149,21 @@ class _QRViewExampleState extends State<QRViewExample> {
       this.controller = controller;
     });
     controller.scannedDataStream.listen((scanData) {
-      setState(() {
-        result = scanData;
-      });
-      print("result");
-      print(result!.code);
-      if(result != null){
-        String polyValue = HelperClass.extractLandmark(result!.code!);
-        print("polyValue $polyValue");
-        if(polyValue != ""){
-          Navigator.pop(context,polyValue);
-        }else{
-          HelperClass.showToast("Invalid QR");
+      if (!_isDeepLinkHandled) {
+        _isDeepLinkHandled = true;
+        setState(() {
+          result = scanData;
+        });
+        print("result");
+        print(result!.code);
+        if (result != null) {
+          String polyValue = HelperClass.extractLandmark(result!.code!);
+          print("polyValue $polyValue");
+          if (polyValue != "") {
+            Navigator.pop(context, polyValue);
+          } else {
+            HelperClass.showToast("Invalid QR");
+          }
         }
       }
     });
