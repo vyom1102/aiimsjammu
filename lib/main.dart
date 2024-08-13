@@ -20,6 +20,7 @@ import 'DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/SignINAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/WayPointModel.dart';
+import 'Elements/deeplinks.dart';
 import 'LOGIN SIGNUP/SignIn.dart';
 import 'MainScreen.dart';
 
@@ -84,32 +85,44 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     configureLocalization();
-    _initDeepLinkListener();
+    // _initDeepLinkListener();
 
     super.initState();
   }
-  void _initDeepLinkListener() async {
+  // void _initDeepLinkListener() async {
+  //   _appLinks = AppLinks();
+  //   _appLinks.uriLinkStream.listen((Uri? uri) {
+  //     if (uri != null) {
+  //       print('Received deep link: $uri');
+  //       if (uri.toString().contains("iwayplus://aiimsj.com/doctor")) {
+  //         final docId = uri.queryParameters['docId'];
+  //         if (docId != null) {
+  //           setState(() {
+  //             initialDocId = docId;
+  //           });
+  //         }
+  //       } else if (uri.toString().contains("iwayplus://aiimsj.com/service")) {
+  //         final serviceId = uri.queryParameters['serviceId'];
+  //         if (serviceId != null) {
+  //           setState(() {
+  //             initialServiceId = serviceId;
+  //           });
+  //         }
+  //       }
+  //
+  //     }
+  //   });
+  // }
+  void _initDeepLinkListener(BuildContext c) async {
     _appLinks = AppLinks();
     _appLinks.uriLinkStream.listen((Uri? uri) {
-      if (uri != null) {
-        print('Received deep link: $uri');
-        if (uri.toString().contains("iwayplus://aiimsj.com/doctor")) {
-          final docId = uri.queryParameters['docId'];
-          if (docId != null) {
-            setState(() {
-              initialDocId = docId;
-            });
-          }
-        } else if (uri.toString().contains("iwayplus://aiimsj.com/service")) {
-          final serviceId = uri.queryParameters['serviceId'];
-          if (serviceId != null) {
-            setState(() {
-              initialServiceId = serviceId;
-            });
-          }
-        }
-
-      }
+      Deeplink.deeplinkConditions(uri, c).then((v){
+        setState(() {
+          initialDocId = Deeplink.initialDocId;
+          initialServiceId=Deeplink.initialServiceId;
+          _accessToken=Deeplink.accessToken;
+        });
+      });
     });
   }
   void configureLocalization(){
@@ -145,7 +158,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    bool isIOS = Platform.isIOS; // Check if the current platform is iOS
+    bool isIOS = Platform.isIOS;
     bool isAndroid = Platform.isAndroid;
     if(isIOS){
       print("IOS");
@@ -175,25 +188,12 @@ class _MyAppState extends State<MyApp> {
 
           final bool isUserAuthenticated = snapshot.data ?? false;
 
-          // if (!isUserAuthenticated) {
-          //   var SignInDatabasebox = Hive.box('SignInDatabase');
-          //   print("SignInDatabasebox.containsKey(accessToken)");
-          //   print(SignInDatabasebox.containsKey("accessToken"));
-          //   if(!SignInDatabasebox.containsKey("accessToken")){
-          //     return SignIn();
-          //   }else{
-          //     return MainScreen(initialIndex: 0);
-          //   } // Redirect to Sign-In screen if user is not authenticated
-          // } else {
-          //   print("googleSignInUserName");
-          //   print(googleSignInUserName);
-          //   return MainScreen(initialIndex: 0); // Redirect to MainScreen if user is authenticated
-          // }
           if (!isUserAuthenticated) {
             var signInDatabaseBox = Hive.box('SignInDatabase');
             if (!signInDatabaseBox.containsKey("accessToken")) {
               return SignIn();
             } else {
+              _initDeepLinkListener(context);
               if (initialDocId != null) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   Navigator.pushNamed(context, '/doctor/$initialDocId');
@@ -209,6 +209,8 @@ class _MyAppState extends State<MyApp> {
               }
             }
           } else {
+            _initDeepLinkListener(context);
+
             if (initialDocId != null) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 Navigator.pushNamed(context, '/doctor/$initialDocId');

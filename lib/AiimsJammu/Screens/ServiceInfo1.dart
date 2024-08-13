@@ -456,7 +456,7 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
                       width: 12,
                     ),
                     TranslatorWidget(
-                      service["data"]["name"],
+                      service["data"]["name"]??"Loading",
                       style: const TextStyle(
                         fontFamily: "Roboto",
                         fontSize: 16,
