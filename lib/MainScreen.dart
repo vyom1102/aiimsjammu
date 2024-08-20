@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/UserState.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 import '/MapScreen.dart';
@@ -26,6 +30,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
 
   late int index;
+  bool isLocating=false;
   final screens = [
     HomePage(),
     Navigation(),
@@ -37,7 +42,40 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     index = widget.initialIndex;
+    getLocs();
     print(index);
+  }
+
+  Position? userLoc;
+  void getLocs()async{
+    setState(() {
+      isLocating=true;
+    });
+    userLoc= await getUsersCurrentLatLng();
+    if(mounted){
+      setState(() {
+        isLocating=false;
+      });
+    }
+
+print("userLoc");
+    print(userLoc);
+    UserState.geoFenced=await HelperClass.getGeoFenced("AIIMSJAMMU", userLoc!);
+
+  }
+
+  Future<Position?> getUsersCurrentLatLng()async{
+
+    if (await Permission.location.isGranted) {
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      return position;
+
+    }
+    else{
+      Position pos=Position(longitude: 77.1852061, latitude:  28.5436197, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
+      return pos;
+    }
+
   }
 
 
@@ -79,7 +117,12 @@ class _MainScreenState extends State<MainScreen> {
             selectedIndex: index,
             onDestinationSelected: (index)=>setState(() {
               if (index==1 ){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => Navigation()));
+                if(UserState.geoFenced!=3){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => Navigation()));
+                }else{
+                  HelperClass.showToast("This map preview is not available at your location");
+                }
+
               } else {
 
                 this.index = index;

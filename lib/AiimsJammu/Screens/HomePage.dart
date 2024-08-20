@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -89,6 +91,8 @@ class _HomePageState extends State<HomePage> {
   bool isOnline = true;
   List<dynamic> _doctors = [];
   List<dynamic> _filteredDoctors = [];
+
+
   @override
   void initState() {
     super.initState();
@@ -96,10 +100,14 @@ class _HomePageState extends State<HomePage> {
     versionApiCheck();
     checkForReload();
     versionApiCall();
+
+
+
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
 
   }
+
   Future<void> versionApiCheck() async {
     try {
       final dashboarddataversion = await Hive.openBox("dashboardDataVersion");
@@ -194,6 +202,28 @@ class _HomePageState extends State<HomePage> {
       print("Error during version API call: $e");
     }
   }
+
+  Future<bool> requestLocationPermission() async {
+    final status = await Permission.location.request();
+    print(status);
+
+
+    if (status.isGranted) {
+
+      print('location permission granted');
+    return true;
+
+
+    } else if(status.isPermanentlyDenied) {
+      print('location permission is permanently granted');
+      return false;
+
+    }else{
+      print("location permission is granted");
+      return false;
+    }
+  }
+
 
   Future<void> _launchInWebView(Uri url) async {
     if (!await launchUrl(url, mode: LaunchMode.inAppBrowserView)) {

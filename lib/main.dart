@@ -3,7 +3,10 @@ import 'dart:io' show Platform;
 
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
+import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/UserState.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -81,6 +84,7 @@ class _MyAppState extends State<MyApp> {
   String? _accessToken;
   String? initialDocId;
   String? initialServiceId;
+  bool isLocating=false;
 
   @override
   void initState() {
@@ -136,13 +140,14 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+
   var locBox=Hive.box('LocationPermission');
   Future<void> requestLocationPermission() async {
     final status = await Permission.location.request();
     print(status);
 
     await locBox.put('location', (status.isGranted)?true:false);
-    if (status.isGranted) {
+    if (status.isGranted){
 
       print('location permission granted');
 

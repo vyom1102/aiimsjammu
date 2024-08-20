@@ -38,6 +38,7 @@ class UserState {
   bool onConnection = false;
   bool temporaryExit = false;
   b.Building? building;
+  static int geoFenced=0;
   static int xdiff = 0;
   static int ydiff = 0;
   static bool isRelocalizeAroundLift = false;
