@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:iwaymaps/LOGIN%20SIGNUP/SignIn.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
@@ -101,11 +102,29 @@ class _HomePageState extends State<HomePage> {
     checkForReload();
     versionApiCall();
 
+    isUserValid();
 
 
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
 
+  }
+  Future<void> isUserValid() async{
+    try{
+      print("aaya");
+     String refreshToken1= await RefreshTokenAPI.refresh();
+     print(refreshToken1);
+     if(refreshToken1=="400"){
+       Navigator.pushAndRemoveUntil(
+         context,
+         MaterialPageRoute(builder: (context) => SignIn()),
+             (route) => false,
+       );
+     }
+    }
+    catch(e){
+
+    }
   }
 
   Future<void> versionApiCheck() async {
