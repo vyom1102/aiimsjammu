@@ -868,6 +868,7 @@ class _HomePageState extends State<HomePage> {
           toolbarHeight: 120,
           automaticallyImplyLeading: false,
           backgroundColor: Colors.white,
+          scrolledUnderElevation: 0,
           elevation: 0,
           title: Column(
             children: [
@@ -910,18 +911,18 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                   Spacer(),
-                  IconButton(
-                    icon: Icon(Icons.notifications_none_outlined),
-                    color: Color(0xff18181b),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => NotificationScreen(),
-                        ),
-                      );
-                    },
-                  ),
+                  // IconButton(
+                  //   icon: Icon(Icons.notifications_none_outlined),
+                  //   color: Color(0xff18181b),
+                  //   onPressed: () {
+                  //     Navigator.push(
+                  //       context,
+                  //       MaterialPageRoute(
+                  //         builder: (context) => NotificationScreen(),
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
                 ],
               ),
               SizedBox(height: 10,),
