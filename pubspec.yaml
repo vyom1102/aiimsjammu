@@ -102,6 +102,8 @@ dependencies:
   loading_animation_widget: ^1.2.1
   app_links: ^6.1.1
   qr_flutter: ^4.1.0
+  widget_to_marker:
+  app_settings: ^5.1.1
 
 
 

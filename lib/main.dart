@@ -16,6 +16,7 @@ import 'AiimsJammu/Screens/ServiceInfo1.dart';
 import 'DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
 import 'DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
 import 'DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import 'DATABASE/DATABASEMODEL/OutDoorModel.dart';
@@ -52,6 +53,8 @@ Future<void> main() async {
   await Hive.openBox<OutDoorModel>('OutDoorModelFile');
   Hive.registerAdapter(WayPointModelAdapter());
   await Hive.openBox<WayPointModel>('WayPointModelFile');
+  Hive.registerAdapter(DataVersionLocalModelAdapter());
+  await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
 
   await Hive.openBox('Favourites');
   await Hive.openBox('UserInformation');

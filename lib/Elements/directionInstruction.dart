@@ -7,11 +7,55 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../localization/locales.dart';
 
+
 class directionInstruction extends StatefulWidget {
   String direction;
   String distance;
   BuildContext context;
   directionInstruction({required this.direction, required this.distance,required this.context});
+
+  static IconData getCustomIcon(String direction,context) {
+
+
+
+    if (direction ==  LocaleData.gostraight.getString(context)) {
+      return
+        Icons.straight;
+    } else if (direction.contains(LocaleData.slightright.getString(context))) {
+      return
+        Icons.turn_slight_right;
+    } else if (direction.contains(LocaleData.sharpright.getString(context))) {
+      return
+        Icons.turn_sharp_right;
+    } else if (direction.contains(LocaleData.tright.getString(context))) {
+      return
+        Icons.turn_right;
+    }  else if (direction.contains(LocaleData.uturn.getString(context))) {
+      return
+        Icons.u_turn_right;
+    } else if (direction.contains(LocaleData.sharpleft.getString(context))) {
+      return
+        Icons.turn_sharp_left;
+    } else if (direction.contains(LocaleData.slightleft.getString(context))) {
+      return
+        Icons.turn_slight_left;
+
+    } else if (direction.contains(LocaleData.tleft.getString(context))) {
+      return
+        Icons.turn_left;
+    }
+    // else if(direction.substring(0,4)=="Take"){
+    //   return Icon(
+    //     Icons.abc,
+    //     color: Colors.black,
+    //     size: 32,
+    //   );
+    // }
+
+    else {
+      return Icons.check_box_outline_blank;
+    }
+  }
 
   @override
   State<directionInstruction> createState() => _directionInstructionState();
@@ -33,8 +77,7 @@ class _directionInstructionState extends State<directionInstruction> {
 
   Widget getCustomIcon(String direction,context) {
 
-    print('directionnnn');
-    print(direction);
+
 
     if (direction ==  LocaleData.gostraight.getString(context)) {
       return Icon(

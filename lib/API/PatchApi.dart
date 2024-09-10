@@ -24,15 +24,14 @@ class patchAPI {
 
 
   Future<patchDataModel> fetchPatchData({String? id = null}) async {
-    print("checking data");
+    print("checking data ${id??buildingAllApi.getStoredString()}");
     print(accessToken);
     print(refreshToken);
-
 
     accessToken = signInBox.get("accessToken");
 
     final PatchBox = PatchAPIModelBox.getData();
-    if(PatchBox.containsKey(id??buildingAllApi.getStoredString())){
+    if(PatchBox.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingPatchDataVersionUpdate.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingPatchDataVersionUpdate[id??buildingAllApi.getStoredString()]! == false){
       print("PATCH API DATA FROM DATABASE");
       print(PatchBox.get(buildingAllApi.getStoredString())!.responseBody);
       Map<String, dynamic> responseBody = PatchBox.get(id??buildingAllApi.getStoredString())!.responseBody;
@@ -93,7 +92,7 @@ class patchAPI {
     } else {
       print("PATCH API in else error");
       print(Exception);
-      throw Exception('Failed to load data');
+      throw Exception('Failed to load data ${id??buildingAllApi.getStoredString()} ${response.statusCode} ${response.body}');
     }
   }
 
