@@ -37,7 +37,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     checkForReload();
-    // getUserDataFromHive();
+    getUserDataFromHive();
   }
   var userListBox = Hive.box('user');
 
@@ -80,7 +80,7 @@ class _ProfilePageState extends State<ProfilePage> {
           'Content-Type': 'application/json',
         },
       );
-
+      print(refreshToken);
       if (response.statusCode == 200) {
         final signInBox = await Hive.openBox('SignInDatabase');
         await signInBox.clear();
@@ -107,6 +107,8 @@ class _ProfilePageState extends State<ProfilePage> {
       refreshToken = signInBox.get("refreshToken");
       name = userlistBox.get("name");
       username = userlistBox.get("username");
+      print("tokenrr");
+      print(refreshToken);
     });
     if (name == null) {
     if (userId != null && accessToken != null && refreshToken != null) {
