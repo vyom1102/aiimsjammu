@@ -316,22 +316,28 @@ class NearbyServiceWidget extends StatelessWidget {
                 children: [
                   Stack(
                     children: [
-                      CachedNetworkImage(
-                        imageUrl: 'https://dev.iwayplus.in/uploads/${imagePath}',
-                        width: 250,
-                          height: 140,
-                        placeholder: (context, url) => Shimmer.fromColors(
-                          baseColor: Colors.grey[300]!,
-                          highlightColor: Colors.grey[100]!,
-                          child: Container(
-                            color: Colors.white,
+                      ClipRRect(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(8),
+                          topRight: Radius.circular(8),
+                        ),
+                        child: CachedNetworkImage(
+                          imageUrl: 'https://dev.iwayplus.in/uploads/${imagePath}',
+                          width: 250,
+                            height: 140,
+                          placeholder: (context, url) => Shimmer.fromColors(
+                            baseColor: Colors.grey[300]!,
+                            highlightColor: Colors.grey[100]!,
+                            child: Container(
+                              color: Colors.white,
+                            ),
                           ),
+                          errorWidget: (context, url, error) => Image.asset(
+                            'assets/images/DefaultCorousalImage.png',
+                            fit: BoxFit.cover,
+                          ),
+                          fit: BoxFit.fill,
                         ),
-                        errorWidget: (context, url, error) => Image.asset(
-                          'assets/images/DefaultCorousalImage.png',
-                          fit: BoxFit.cover,
-                        ),
-                        fit: BoxFit.fill,
                       ),
                       // Image.network(
                       //   'https://dev.iwayplus.in/uploads/$imagePath',
@@ -348,7 +354,7 @@ class NearbyServiceWidget extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: Color(0xFF05AF9A),
                             borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(0),
+                              topRight: Radius.circular(8),
                               bottomLeft: Radius.circular(8),
                             ),
                             boxShadow: [
