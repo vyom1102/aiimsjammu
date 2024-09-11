@@ -231,6 +231,8 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
                             type: service['type'],
                             startTime: service['startTime'],
                             endTime: service['endTime'],
+                            latitude:service['latitude'],
+                            longitude:service['longitude'],
                           ),
                         ),
                       );

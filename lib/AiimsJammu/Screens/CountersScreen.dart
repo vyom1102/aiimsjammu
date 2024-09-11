@@ -30,6 +30,7 @@ class _CountersScreenState extends State<CountersScreen> {
   bool _isLoading = true;
   String token = "";
   var DashboardListBox = Hive.box('DashboardList');
+  double? _distanceFuture;
 
   TextEditingController _searchController = TextEditingController();
   @override
@@ -38,7 +39,24 @@ class _CountersScreenState extends State<CountersScreen> {
     // _loadServices();
     // _loadPharmacyServicesFromAPI();
     checkForReload();
+    _updateDistances();
 
+  }
+  Future<void> _updateDistances() async {
+    for (var service in _services) {
+      double distance = await calculateDistance(
+        service['latitude'].toString(),
+        service['longitude'].toString(),
+      );
+      if (distance>=1000){
+        service['distance'] =  '${(distance / 1000).toStringAsFixed(0)} km';
+      }else{
+        service['distance'] =  '${distance.toStringAsFixed(0)} m';
+
+      }
+
+    }
+    setState(() {});
   }
   void checkForReload(){
     if(DashboardListBox.containsKey('_services')){
@@ -175,6 +193,8 @@ class _CountersScreenState extends State<CountersScreen> {
                             type: service['type'],
                             startTime: service['startTime'],
                             endTime: service['endTime'],
+                            latitude:service['latitude'],
+                            longitude:service['longitude'],
                           ),
                         ),
                       );
@@ -335,34 +355,16 @@ class _CountersScreenState extends State<CountersScreen> {
                                     SizedBox(
                                       width: 8,
                                     ),
-                                    FutureBuilder<double>(
-                                      future: calculateDistance(service['locationId']),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState == ConnectionState.waiting) {
-                                          return SizedBox(
-                                            width: 25,
-                                            height: 25, // Adjust width as needed
-                                            child: CircularProgressIndicator(),
-                                          );
-                                        } else if (snapshot.hasError) {
-                                          return Text(
-                                            'Error',
-                                            style: TextStyle(color: Colors.red),
-                                          );
-                                        } else {
-                                          return Text(
-                                            '${snapshot.data!.toStringAsFixed(2)} m',
-                                            style: TextStyle(
-                                              color: Color(0xFF8D8C8C),
-                                              fontSize: 14,
-                                              fontFamily: 'Roboto',
-                                              fontWeight: FontWeight.w400,
-                                              height: 0.10,
-                                            ),
-                                          );
-                                        }
-                                      },
-                                    ),
+                                    Semantics(
+                                      label: "Distance",
+                                      child: TranslatorWidget(
+                                        service['distance'] ?? "50 m",
+                                        style: TextStyle(
+                                            color: Color(0xFF8D8C8C)
+                                        ),
+
+                                      ),
+                                    )
                                   ],
                                 ),
                                 SizedBox(height: 12),

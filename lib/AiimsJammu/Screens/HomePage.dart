@@ -111,9 +111,7 @@ class _HomePageState extends State<HomePage> {
   }
   Future<void> isUserValid() async{
     try{
-      print("aaya");
      String refreshToken1= await RefreshTokenAPI.refresh();
-     print(refreshToken1);
      if(refreshToken1=="400"){
        Navigator.pushAndRemoveUntil(
          context,
@@ -145,8 +143,6 @@ class _HomePageState extends State<HomePage> {
         },
       );
 
-      print("code");
-      print(response.statusCode);
 
       if (response.statusCode == 200) {
         print("Version API call success");
@@ -169,7 +165,6 @@ class _HomePageState extends State<HomePage> {
           });
 
           if (dashboarddataversion.get('doctorVersion') != doctorVersion) {
-            print("Updating doctor data...");
             _doctors.clear();
             await _loadDoctorsFromAPI();
             print("Doctor data updated");
@@ -447,7 +442,7 @@ class _HomePageState extends State<HomePage> {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        print(responseData);
+        // print(responseData);
         if (responseData.containsKey('data') && responseData['data'] is List) {
 
           setState(() {
@@ -529,7 +524,7 @@ class _HomePageState extends State<HomePage> {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        print(responseData);
+        // print(responseData);
         if (responseData.containsKey('data') &&
             responseData['data'] is List) {
           setState(() {
@@ -614,7 +609,7 @@ class _HomePageState extends State<HomePage> {
             announcements = responseData['data'];
             DashboardListBox.put('announcements', responseData['data']);
           });
-          print(announcements);
+          // print(announcements);
         } else {
           throw Exception('Response data does not contain the expected list of announcements');
         }
@@ -646,7 +641,7 @@ class _HomePageState extends State<HomePage> {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        print(responseData);
+        // print(responseData);
         if (responseData.containsKey('data') &&
             responseData['data'] is List) {
           setState(() {
@@ -1190,6 +1185,8 @@ class _HomePageState extends State<HomePage> {
                                         contact: '${service['contact']}',
                                         about: '${service['about']}',
                                         id: '${service['_id']}',
+                                        longitude: '${service['longitude']}',
+                                        latitude: '${service['latitude']}',
                                       ),
                                     ),
                                   );
@@ -1217,6 +1214,8 @@ class _HomePageState extends State<HomePage> {
                                     about: '${service['about']}',
                                     weekDays:
                                     List<String>.from(service['weekDays']),
+                                    longitude: '${service['longitude']}',
+                                    latitude: '${service['latitude']}',
                                     // '${service['locationId']}',
                                   ),
                                 ),
@@ -1473,225 +1472,6 @@ Widget _buildImpNote(
         ),
       ],
       // ),
-    ),
-  );
-}
-
-Widget _buildNearbyService(String imagePath, String name, String Location,
-    String locationId, String type,String startTime, String endTime,String accessibility,List<String> weekDays) {
-
-  return Container(
-    color: Colors.white,
-    child: GestureDetector(
-
-      // onTap: () {
-      //   // PassLocationId(locationId);
-      //
-      //
-      // },
-      child: Card(
-        shadowColor: Color(0xff000000).withOpacity(0.25),
-        color: Colors.white,
-        elevation: 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Color(0xFFE0E0E0), width: 1),
-          ),
-          width: 250,
-          child: Stack(children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Stack(
-                  children: [
-
-                    Image.network(
-                      'https://dev.iwayplus.in/uploads/${imagePath}',
-                      width: 250,
-                      height: 140,
-                      fit: BoxFit.cover,
-                    ),
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      // child: Container(
-                      //   height: 40,
-                      //   decoration: BoxDecoration(
-                      //     shape: BoxShape.circle,
-                      //     color: Colors.transparent.withOpacity(
-                      //         0.2),
-                      //   ),
-                      //   child: IconButton(
-                      //     disabledColor: Colors.grey,
-                      //     onPressed: () {},
-                      //     icon: Icon(
-                      //       isFavorite ? Icons.favorite : Icons.favorite_border,
-                      //       color: isFavorite ? Colors.red : null,
-                      //     ),
-                      //     color: Colors.white,
-                      //   ),
-                      // ),
-                      child: Container(
-                        // width: 73,
-                        height: 26,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Color(0xFF05AF9A),
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(8),
-                            bottomLeft: Radius.circular(8),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0x3F000000),
-                              blurRadius: 4,
-                              offset: Offset(0, 0),
-                              spreadRadius: 0,
-                            )
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            TranslatorWidget(
-                              type,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontFamily: 'Roboto',
-                                fontWeight: FontWeight.w400,
-                                height: 0.12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 12),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 12,
-                    ),
-                    TranslatorWidget(
-                      name,
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xff18181b),
-
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-
-                    if(accessibility!='NO')
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Image.asset('assets/images/accessible.png',scale: 4,),
-                      )
-                  ],
-                ),
-                SizedBox(
-                  height: 4,
-                ),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Icon(
-                      Icons.location_on_outlined,
-                      color: Color(0xFF8D8C8C),
-                      size: 16,
-                    ),
-                    SizedBox(
-                      width: 8,
-                    ),
-                    TranslatorWidget(
-                      Location,
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF8D8C8C),
-
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 4,
-                ),
-
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 12,
-                    ),
-                    SizedBox(
-                      child: SvgPicture.asset('assets/images/routing.svg'),
-
-                    ),
-                    SizedBox(
-                      width: 8,
-                    ),
-
-                    FutureBuilder<double>(
-                      future: calculateDistance(locationId),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return SizedBox(
-                            width: 25,
-                            height: 25,// Adjust width as needed
-                            child: CircularProgressIndicator(),
-                          );
-                        } else if (snapshot.hasError) {
-                          return TranslatorWidget(
-                            'Error',
-                            style: TextStyle(color: Colors.red),
-                          );
-                        } else {
-                          return Text(
-                            '${snapshot.data!.toStringAsFixed(2)} m',
-                            style: TextStyle(
-                              color: Color(0xFF8D8C8C),
-                              fontSize: 14,
-                              fontFamily: 'Roboto',
-                              fontWeight: FontWeight.w400,
-                              height: 0.10,
-                            ),
-                          );
-                        }
-                      },
-                    ),
-
-                  ],
-                ),
-                SizedBox(height: 12,),
-                Row(
-                  children: [
-                    SizedBox(width: 12,),
-                    Container(
-                      // height: 20,
-                        child: OpeningClosingStatus(startTime: startTime, endTime: endTime,)),
-                  ],
-                ),
-                SizedBox(height: 5,)
-              ],
-            ),
-          ]),
-        ),
-      ),
     ),
   );
 }

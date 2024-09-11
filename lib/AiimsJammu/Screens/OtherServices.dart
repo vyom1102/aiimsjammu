@@ -227,6 +227,8 @@ class _OtherServiceScreenState extends State<OtherServiceScreen> {
                           type: service['type'],
                           startTime: service['startTime'],
                           endTime: service['endTime'],
+                          latitude:service['latitude'],
+                          longitude:service['longitude'],
                         ),
                       ),
                     );

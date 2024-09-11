@@ -46,6 +46,10 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
   Map<dynamic, dynamic> service={};
   bool isLoading = true;
   bool _isConnected = false;
+  double? _distanceFuture;
+
+
+
   Future<void> _checkConnectivity() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult.contains(ConnectivityResult.mobile) || connectivityResult.contains(ConnectivityResult.wifi)) {
@@ -325,12 +329,20 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
       print('Error sharing content: $e');
     }
   }
+  void distance() async{
+    calculateDistance(service['latitude'], service['longitude']).then((value){
+      setState(() {
+        _distanceFuture = value;
+      });
+    });
+  }
   @override
   void initState() {
     _checkConnectivity();
     getServiceDetails(widget.id);
 
     getUserIDFromHive();
+    distance();
     super.initState();
   }
   @override
@@ -521,33 +533,48 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
                     ),
 
                     FutureBuilder<double>(
-                      future: calculateDistance(service["data"]["locationId"]),
+                      future: null,
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return SizedBox(
                             width: 25,
-                            height: 25,// Adjust width as needed
+                            height: 25,
                             child: CircularProgressIndicator(),
                           );
                         } else if (snapshot.hasError) {
-                          return Text(
+                          return TranslatorWidget(
                             'Error',
                             style: TextStyle(color: Colors.red),
                           );
                         } else {
-                          return Text(
-                            '${snapshot.data!.toStringAsFixed(2)} m',
-                            style: TextStyle(
-                              color: Color(0xFF8D8C8C),
-                              fontSize: 14,
-                              fontFamily: 'Roboto',
-                              fontWeight: FontWeight.w400,
-                              height: 0.10,
-                            ),
-                          );
+                          double distance = _distanceFuture ?? 0;
+                          if (distance >= 1000) {
+                            return TranslatorWidget(
+                              '${(distance / 1000).toStringAsFixed(0)} km',
+                              style: TextStyle(
+                                color: Color(0xFF8D8C8C),
+                                fontSize: 14,
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.w400,
+                                height: 0.10,
+                              ),
+                            );
+                          } else {
+                            return TranslatorWidget(
+                              '${distance.toStringAsFixed(0)} m',
+                              style: TextStyle(
+                                color: Color(0xFF8D8C8C),
+                                fontSize: 14,
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.w400,
+                                height: 0.10,
+                              ),
+                            );
+                          }
                         }
                       },
-                    ),
+                    )
 
                   ],
                 ),

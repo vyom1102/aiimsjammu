@@ -34,6 +34,8 @@ class ServiceInfo extends StatefulWidget {
 
   final String startTime;
   final String endTime;
+  final String latitude;
+  final String longitude;
 
   const ServiceInfo({
     required this.id,
@@ -48,6 +50,8 @@ class ServiceInfo extends StatefulWidget {
     required this.about,
     required this.startTime,
     required this.endTime,
+    required this.latitude,
+    required this.longitude,
   });
 
   @override
@@ -56,12 +60,14 @@ class ServiceInfo extends StatefulWidget {
 
 class _ServiceInfoState extends State<ServiceInfo> {
   // final String phoneNumber = contact;
-  final String shareText = 'https://play.google.com/store/apps/details?id=com.iwayplus.rgcinavigation';
+  // final String shareText = 'https://play.google.com/store/apps/details?id=com.iwayplus.rgcinavigation';
   bool isFavorite=false;
   String? userId;
   String? accessToken;
   String? refreshToken;
   List<String>? favoriteServiceIds;
+  double? _distanceFuture;
+
   Future<void> getUserDetails() async {
     final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
 
@@ -269,6 +275,16 @@ class _ServiceInfoState extends State<ServiceInfo> {
   void initState() {
     getUserIDFromHive();
     super.initState();
+    distance();
+
+  }
+
+  void distance() async{
+    calculateDistance(widget.latitude, widget.longitude).then((value){
+      setState(() {
+        _distanceFuture = value;
+      });
+    });
   }
   @override
   Widget build(BuildContext context) {
@@ -451,33 +467,48 @@ class _ServiceInfoState extends State<ServiceInfo> {
                   ),
 
                   FutureBuilder<double>(
-                    future: calculateDistance(widget.locationId),
+                    future: null,
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
+                      if (snapshot.connectionState ==
+                          ConnectionState.waiting) {
                         return SizedBox(
                           width: 25,
-                          height: 25,// Adjust width as needed
+                          height: 25,
                           child: CircularProgressIndicator(),
                         );
                       } else if (snapshot.hasError) {
-                        return Text(
+                        return TranslatorWidget(
                           'Error',
                           style: TextStyle(color: Colors.red),
                         );
                       } else {
-                        return Text(
-                          '${snapshot.data!.toStringAsFixed(2)} m',
-                          style: TextStyle(
-                            color: Color(0xFF8D8C8C),
-                            fontSize: 14,
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w400,
-                            height: 0.10,
-                          ),
-                        );
+                        double distance = _distanceFuture ?? 0;
+                        if (distance >= 1000) {
+                          return TranslatorWidget(
+                            '${(distance / 1000).toStringAsFixed(0)} km',
+                            style: TextStyle(
+                              color: Color(0xFF8D8C8C),
+                              fontSize: 14,
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w400,
+                              height: 0.10,
+                            ),
+                          );
+                        } else {
+                          return TranslatorWidget(
+                            '${distance.toStringAsFixed(0)} m',
+                            style: TextStyle(
+                              color: Color(0xFF8D8C8C),
+                              fontSize: 14,
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w400,
+                              height: 0.10,
+                            ),
+                          );
+                        }
                       }
                     },
-                  ),
+                  )
 
                 ],
               ),
