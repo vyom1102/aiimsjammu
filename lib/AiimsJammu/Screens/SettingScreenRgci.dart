@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -37,6 +39,7 @@ class _SettingScreenState extends State<SettingScreen> {
   void initState() {
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
+    if(Platform.isAndroid)
     checkForUpdate();
     if(UserCredentials().getUserPersonWithDisability()>0){
       _selectedDisability[UserCredentials().getUserPersonWithDisability()-1]=true;
@@ -111,6 +114,9 @@ class _SettingScreenState extends State<SettingScreen> {
     );
 
     try {
+      if(Platform.isIOS){
+        _checkingForUpdate=false;
+      }
       final status = await newVersion.getVersionStatus();
       print("status");
       print(status?.localVersion);
@@ -367,7 +373,8 @@ class _SettingScreenState extends State<SettingScreen> {
                         ),
                       ),
                       Spacer(),
-                      if (_checkingForUpdate)
+
+                      if (_checkingForUpdate && Platform.isAndroid)
                         CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0B6B94)),

@@ -41,7 +41,6 @@ class _FavouriteDoctorState extends State<FavouriteDoctor> {
   bool isFavorite = true;
 
 
-  final String shareText = 'https://play.google.com/store/apps/details?id=com.iwayplus.rgcinavigation';
   Future<void> getUserDataFromHive() async {
     final signInBox = await Hive.openBox('SignInDatabase');
     setState(() {
