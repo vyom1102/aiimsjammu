@@ -52,6 +52,7 @@ dependencies:
   flutter_animate: ^4.5.0 #animations
   flutter_staggered_animations:
   vibration: ^1.8.4
+  wakelock_plus:
 
   shared_preferences: ^2.2.2
   easter_egg_trigger: ^1.0.1
