@@ -1,17 +1,25 @@
 
 import 'dart:convert';
+import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../config.dart';
 import '../Widgets/LocationIdFunction.dart';
+import '../Widgets/Translator.dart';
 
 class DoctorProfile extends StatefulWidget {
-  final Map<String, dynamic> doctor;
+  final Map<dynamic, dynamic> doctor;
   final String docId;
 
   DoctorProfile({required this.doctor, required this.docId});
@@ -55,7 +63,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
   //   setState(() {
   //     isLoading = true;
   //   });
-  //   final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+  //   final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
   //
   //   try {
   //     final response = await http.post(
@@ -100,7 +108,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
     setState(() {
       isLoading = true;
     });
-    final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
 
     try {
       final response = await http.post(
@@ -147,7 +155,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
   }
 
   Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -174,6 +182,63 @@ class _DoctorProfileState extends State<DoctorProfile> {
       // Handle errors
     }
   }
+
+  Future<void> _shareContent(String text) async {
+    try {
+      final qrValidationResult = QrValidator.validate(
+        data: text,
+        version: QrVersions.auto,
+        errorCorrectionLevel: QrErrorCorrectLevel.L,
+      );
+      if (qrValidationResult.status != QrValidationStatus.valid) {
+        throw Exception('QR code generation failed');
+      }
+      final qrCode = qrValidationResult.qrCode;
+
+      final ByteData imageData = await rootBundle.load('assets/images/qrlogo.png');
+      final ui.Codec codec = await ui.instantiateImageCodec(imageData.buffer.asUint8List());
+      final ui.FrameInfo fi = await codec.getNextFrame();
+      final ui.Image image = fi.image;
+
+      final painter = QrPainter.withQr(
+        qr: qrCode!,
+        color: const Color(0xFF0B6B94),
+        emptyColor: const Color(0xFFFFFFFF),
+        gapless: true,
+        embeddedImage: image,
+        embeddedImageStyle: QrEmbeddedImageStyle(
+          size: Size(300, 300),
+        ),
+      );
+
+      final int qrSize = 2048;
+      final int padding = 100;
+      final int totalSize = qrSize + (2 * padding);
+
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+
+      canvas.drawColor(Colors.white, BlendMode.src);
+
+      canvas.translate(padding.toDouble(), padding.toDouble());
+      painter.paint(canvas, Size(qrSize.toDouble(), qrSize.toDouble()));
+
+      final picture = recorder.endRecording();
+      final img = await picture.toImage(totalSize, totalSize);
+      final pngBytes = await img.toByteData(format: ui.ImageByteFormat.png);
+
+      final buffer = pngBytes!.buffer.asUint8List();
+
+      final tempDir = await getTemporaryDirectory();
+      final tempPath = '${tempDir.path}/doctor_share.png';
+      final file = await File(tempPath).writeAsBytes(buffer);
+
+      await Share.shareXFiles([XFile(file.path)], text: text);
+    } catch (e) {
+      print('Error sharing content: $e');
+    }
+  }
+
 
   Future<void> getUserDetailsWithNewToken(String baseUrl) async {
     try {
@@ -210,7 +275,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
   }
 
   Future<void> updateUserFavorites() async {
-    String baseUrl = "https://dev.iwayplus.in/secured/user/toggle-favourites";
+    String baseUrl = "${AppConfig.baseUrl}/secured/user/toggle-favourites";
 
     Map<String, String> headers = {
       'Content-Type': 'application/json',
@@ -266,7 +331,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         centerTitle: true,
-        title: Text(
+        title: TranslatorWidget(
           'Doctor Details',
           style: TextStyle(
             color: Color(0xFF3F3F46),
@@ -277,6 +342,11 @@ class _DoctorProfileState extends State<DoctorProfile> {
           ),
         ),
         actions: [
+          IconButton(onPressed: (){
+            _shareContent("${AppConfig.baseUrl}/#/iway-apps/aiimsj.com/doctor?docId=${widget.docId}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
+
+            // _shareContent("iwayplus://aiimsj.com/doctor?docId=${widget.docId}");
+          }, icon: Icon(Icons.share_outlined)),
           IconButton(
             onPressed: () async {
               await updateUserFavorites();
@@ -301,13 +371,13 @@ class _DoctorProfileState extends State<DoctorProfile> {
                     children: [
                       CircleAvatar(
                         backgroundImage:
-                        NetworkImage('https://dev.iwayplus.in/uploads/${widget.doctor['imageUrl']}'),
+                        NetworkImage('${AppConfig.baseUrl}/uploads/${widget.doctor['imageUrl']}'),
                         // AssetImage(widget.doctor[
                         //     'imageUrl']),
                         radius: 73,
                       ),
                       SizedBox(height: 20),
-                      Text(
+                      TranslatorWidget(
                         widget.doctor['name'],
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -319,7 +389,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                         ),
                       ),
                       SizedBox(height: 24),
-                      Text(
+                      TranslatorWidget(
                         widget.doctor['speciality'],
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -368,7 +438,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                           height: 60,
                         ),
                         SizedBox(height: 10),
-                        Text(
+                        TranslatorWidget(
                           widget.doctor['experience'].toString(),
                           style: TextStyle(
                             fontSize: 16,
@@ -378,7 +448,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                         SizedBox(
                           height: 10,
                         ),
-                        Text(
+                        TranslatorWidget(
                           'Experience',
                           style: TextStyle(
                             color: Color(0xFFA1A1AA),
@@ -412,7 +482,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                           height: 60,
                         ),
                         SizedBox(height: 10),
-                        Text(
+                        TranslatorWidget(
                           widget.doctor['publications'].toString(),
                           style: TextStyle(
                             fontSize: 16,
@@ -422,7 +492,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                         SizedBox(
                           height: 10,
                         ),
-                        Text(
+                        TranslatorWidget(
                           'Publication',
                           style: TextStyle(
                             color: Color(0xFFA1A1AA),
@@ -456,7 +526,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                           height: 60,
                         ),
                         SizedBox(height: 10),
-                        Text(
+                        TranslatorWidget(
                           widget.doctor['awards'].toString(),
                           style: TextStyle(
                             fontSize: 16,
@@ -466,7 +536,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                         SizedBox(
                           height: 10,
                         ),
-                        Text(
+                        TranslatorWidget(
                           'Award',
                           style: TextStyle(
                             color: Color(0xFFA1A1AA),
@@ -488,7 +558,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
-              child: Text(
+              child: TranslatorWidget(
                 'About',
                 style: TextStyle(
                   color: Color(0xFF18181B),
@@ -503,7 +573,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0, right: 16, left: 16),
-                  child: Text(
+                  child: TranslatorWidget(
                     widget.doctor['about'],
                     style: TextStyle(
                       color: Color(0xFF3F3F46),
@@ -520,7 +590,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                       onPressed: () {
                         _launchInWebView(Uri.parse(widget.doctor['profile']));
                       },
-                      child: Text(
+                      child: TranslatorWidget(
                         'View profile',
                         style: TextStyle(
                           color: Color(0xFF0B6B94),
@@ -537,7 +607,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16),
-              child: Text(
+              child: TranslatorWidget(
                 'Working Time',
                 style: TextStyle(
                   color: Color(0xFF18181B),
@@ -554,7 +624,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
               children: widget.doctor['workingDays'].map<Widget>((day) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 16),
-                  child: Text(
+                  child: TranslatorWidget(
                     '${day['day']} - ${day['openingTime']} AM - ${day['closingTime']} PM',
                     style: TextStyle(
                       color: Color(0xFF6B7280),
@@ -588,7 +658,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
+              TranslatorWidget(
                 'Direction',
                 style: TextStyle(
                   color: Color(0xFF0B6B94),

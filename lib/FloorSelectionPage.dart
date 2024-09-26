@@ -12,12 +12,12 @@ import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import '/API/buildingAllApi.dart';
-import '/API/ladmarkApi.dart';
-import '/APIMODELS/buildingAll.dart';
-import '/Elements/HelperClass.dart';
-import '/Elements/SearchNearby.dart';
-import '/Elements/SearchpageRecents.dart';
+import 'package:iwaymaps/API/buildingAllApi.dart';
+import 'package:iwaymaps/API/ladmarkApi.dart';
+import 'package:iwaymaps/APIMODELS/buildingAll.dart';
+import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/Elements/SearchNearby.dart';
+import 'package:iwaymaps/Elements/SearchpageRecents.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
@@ -110,6 +110,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
   void fetchandBuild()async{
     await fetchlist();
     if(widget.filterName.isNotEmpty && widget.filterBuildingName.isNotEmpty){
+      print("fetchandbuild debug ${[int.parse(widget.floors[0])]}");
       search(widget.filterName, widget.filterBuildingName,[int.parse(widget.floors[0])]);
     }
   }
@@ -240,9 +241,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
     // }
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 0,
-        ),
         body: Container(
           color: Colors.white,
           child: Column(
@@ -452,10 +450,10 @@ class _DestinationPageChipsWidgetForFloorSelectionPageState extends State<Destin
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(left: 4),
-                child: Icon(Icons.wallet_giftcard_outlined, size: 18, color: widget.selected? Colors.white: Colors.black,),
-              ),
+              // Container(
+              //   margin: EdgeInsets.only(left: 4),
+              //   child: Icon(Icons.wallet_giftcard_outlined, size: 18, color: widget.selected? Colors.white: Colors.black,),
+              // ),
               Semantics(
                 excludeSemantics: true,
                 child: Container(

@@ -11,8 +11,8 @@ class DebugToggle extends StatefulWidget {
 }
 
 class _DebugToggleState extends State<DebugToggle> {
-  bool Slider = false;
-  bool StepButton = false;
+  bool Slider = true;
+  bool StepButton = true;
   bool PDRIcon = false;
 
 

@@ -50,7 +50,6 @@ class land {
       for (var landmark in landmarksList) {
         if (landmark.properties!.polyId != null) {
           landmarksMap![landmark.properties!.polyId!] = landmark;
-
         }
         if (landmark.name != null) {
           landmarkNames ??= [];
@@ -70,6 +69,7 @@ class Landmarks {
   Element? element;
   Properties? properties;
   String? sId;
+  int? priority;
   String? buildingID;
   int? coordinateX;
   int? coordinateY;
@@ -93,6 +93,7 @@ class Landmarks {
   Landmarks(
       {this.element,
         this.properties,
+        this.priority,
         this.sId,
         this.buildingID,
         this.coordinateX,
@@ -136,6 +137,9 @@ class Landmarks {
     floor = json['floor'];
     geometryType = json['geometryType'];
     name = json['name'];
+    if(name == null && element!.subType!=null && element!.type != "Floor" && element!.subType != "beacons"){
+      name = element!.subType;
+    }
     if (json['lifts'] != null) {
       lifts = <Lifts>[];
       json['lifts'].forEach((v) {
@@ -157,6 +161,7 @@ class Landmarks {
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
+    priority = json['priority'];
     buildingName = json['buildingName'];
     venueName = json['venueName'];
   }
@@ -192,6 +197,7 @@ class Landmarks {
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
+    data['priority'] = this.priority;
     data['buildingName'] = this.buildingName;
     data['venueName'] = this.venueName;
     return data;
@@ -506,15 +512,16 @@ class Lifts {
     return data;
   }
 }
-class CommonLifts {
+class CommonConnection {
   String? name;
-  int? distance;
+  int? d1;
+  int? d2;
   int? x1;
   int? x2;
   int? y1;
   int? y2;
 
-  CommonLifts({this.name, this.distance, this.x1, this.y1,this.x2,this.y2});
+  CommonConnection({this.name, this.x1, this.y1,this.x2,this.y2,this.d1, this.d2});
 
 }
 class CommonStairs {
@@ -566,18 +573,24 @@ class Stairs {
 class Others {
   String? name;
   int? distance;
+  int? x;
+  int? y;
 
-  Others({this.name, this.distance});
+  Others({this.name, this.distance, this.x, this.y});
 
   Others.fromJson(Map<dynamic, dynamic> json) {
     name = json['name'];
     distance = json['distance'];
+    x = json['x'].toInt();
+    y = json['y'].toInt();
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['name'] = this.name;
     data['distance'] = this.distance;
+    data['x'] = this.x;
+    data['y'] = this.y;
     return data;
   }
 }

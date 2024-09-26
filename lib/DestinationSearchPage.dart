@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
@@ -19,8 +20,11 @@ import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/Elements/SearchNearby.dart';
 import 'package:iwaymaps/Elements/SearchpageRecents.dart';
 import 'package:iwaymaps/UserState.dart';
+import 'package:iwaymaps/pathState.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'package:test/expect.dart';
+import 'package:test/scaffolding.dart';
 
 import 'APIMODELS/landmark.dart';
 import 'Elements/DestinationPageChipsWidget.dart';
@@ -28,16 +32,19 @@ import 'Elements/HomepageFilter.dart';
 
 import 'Elements/SearchpageCategoryResult.dart';
 import 'Elements/SearchpageResults.dart';
+import 'package:iwaymaps/buildingState.dart';
+
 
 class DestinationSearchPage extends StatefulWidget {
   String hintText;
   String previousFilter;
   bool voiceInputEnabled;
+  String userLocalized;
 
   DestinationSearchPage(
       {this.hintText = "",
-      this.previousFilter = "",
-      required this.voiceInputEnabled});
+        this.previousFilter = "",
+        required this.voiceInputEnabled,this.userLocalized = ""});
 
   @override
   State<DestinationSearchPage> createState() => _DestinationSearchPageState();
@@ -45,14 +52,17 @@ class DestinationSearchPage extends StatefulWidget {
 
 class _DestinationSearchPageState extends State<DestinationSearchPage> {
   land landmarkData = land();
+  List<String> landmarkFuzzyNameList = [];
 
   List<Widget> searchResults = [];
 
   List<Widget> recentResults = [];
+  List<Widget> topSearches=[];
 
   List<dynamic> recent = [];
 
   TextEditingController _controller = TextEditingController();
+  Timer? _searchDebounce;
 
   final SpeechToText speetchText = SpeechToText();
   bool speechEnabled = false;
@@ -65,7 +75,15 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   @override
   void initState() {
     super.initState();
-    print("In search page");
+    fetchandBuild();
+    _controller.addListener(_onSearchChanged);
+    // //optionListItemBuildingNameNew.clear();
+    // print("optionListItemBuildingNameNew");
+    // print(optionListItemBuildingNameNew);
+    // Building.buildingData?.forEach((key, value) {
+    //   optionListItemBuildingNameNew.add(value!);
+    // });
+    // print(optionListItemBuildingNameNew);
     for (int i = 0; i < optionListForUI.length; i++) {
       if (optionListForUI[i].toLowerCase() ==
           widget.previousFilter.toLowerCase()) {
@@ -92,7 +110,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     setState(() {
       searchHintString = widget.hintText;
     });
-    fetchandBuild();
+
     fetchRecents();
     recentResults.add(Container(
       margin: EdgeInsets.only(left: 16, right: 16, top: 8),
@@ -136,6 +154,109 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       ),
     ));
   }
+  String name = "";
+  String floor = "";
+  String polyID = "";
+  String buildingID = "";
+  String finalName = "";
+  bool promptLoader = false;
+  Set<String> optionListItemBuildingNameNew = {};
+
+
+
+  void _onSearchChanged() {
+    List<String> promptArray = ["navigate to","take me to"];
+    String userInput = _controller.text.toLowerCase();
+    String stringToRemove = "";
+    bool containsPrompt = promptArray.any((element) {
+      if(userInput.contains(element)){
+        stringToRemove = element;
+        return true;
+      }else{
+        return false;
+      }
+    });
+    if(containsPrompt){
+      if (_searchDebounce?.isActive ?? false) _searchDebounce!.cancel();
+
+      _searchDebounce = Timer(Duration(seconds: 3), () {
+        setState(() {
+          promptLoader = true;
+        });
+
+        // Perform search
+        //_performSearch(_controller.text);
+
+        String modifiedString = _controller.text.replaceAll(stringToRemove, "");
+        if(modifiedString.trim().length>0){
+          final fuse = Fuzzy(
+            landmarkData.landmarkNames,
+            options: FuzzyOptions(
+              findAllMatches: true,
+              tokenize: true,
+              threshold: 0.7,
+            ),
+          );
+          final outputresult = fuse.search(modifiedString.toLowerCase());
+          // Assuming `result` is a List<FuseResult<dynamic>>
+          outputresult.forEach((fuseResult) {
+            // Access the item property of the result to get the matched value
+            String matchedName = fuseResult.item;
+            fuseResult.matches.length;
+
+            // Access the score of the match
+            double score = fuseResult.score;
+
+            // Do something with the matchedName or score
+            // score == 0.0
+            //     ? print('Matched Name: $matchedName, Score: $score')
+            //     : print("");
+            if (score <= 0.3) { //0.5 for normal
+              finalName = fuseResult.item;
+            }
+          });
+
+          landmarkData.landmarksMap!.forEach((key, value) {
+            if (value.name != null && value.element!.subType != "beacons") {
+              if (value.name!.toLowerCase().contains(finalName.toLowerCase())) {
+                name = value.name!;
+                floor = value.name!;
+                polyID = value.properties!.polyId!;
+                buildingID = value.buildingID!;
+              }else{
+                print("nooo${value.name!.toLowerCase()} ----- ${finalName.toLowerCase()}");
+              }
+            }
+          });
+
+          if(landmarkData.landmarkNames!.contains(finalName)){
+            //onVenueClicked(name, floor, polyID, buildingID);
+            if(polyID.isNotEmpty){
+              HelperClass.showToast("Navigating to ${finalName}");
+              setState(() {
+                promptLoader = false;
+              });
+              //Future.delayed(Duration(seconds: 2));
+              Navigator.pop(context, polyID);
+            }else{
+            }
+          }
+          
+        }else{
+          HelperClass.showToast("Provide a Landmark name !!");
+        }
+
+
+
+
+      });
+    }else{
+      print("Prompt not used");
+    }
+
+  }
+
+
 
   void initSpeech() async {
     speechEnabled = await speetchText.initialize();
@@ -160,27 +281,28 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     await Future.delayed(Duration(seconds: 5));
     micColor = Colors.black;
     setState(() {});
-    print("In initSpeech");
   }
 
   void onSpeechResult(result) {
     setState(() {
       print("Listening from mic");
 
-      print(result.recognizedWords);
       setState(() {
         _controller.text = result.recognizedWords;
         search(result.recognizedWords);
-        print(_controller.text);
+        // print(_controller.text);
       });
       wordsSpoken = "${result.recognizedWords}";
-      if (result.recognizedWords == null) {
-        setState(() {
-          searchHintString = widget.hintText;
-        });
-      }
+
+      // if (result.recognizedWords == null) {
+      //   print("result.recognizedWords");
+      //
+      //
+      //   setState(() {
+      //     searchHintString = widget.hintText;
+      //   });
+      // }
     });
-    print("In onSpeechResult");
   }
 
   void stopListening() async {
@@ -200,7 +322,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       if (_controller.text.isNotEmpty) {
         search(_controller.text);
       } else {
-        print("Filter cleared");
+        // print("Filter cleared");
+        topSearchesFunc();
         searchResults = [];
         searcCategoryhResults = [];
         vall = -1;
@@ -212,8 +335,12 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
       await landmarkApi().fetchLandmarkData(id: key).then((value) {
         landmarkData.mergeLandmarks(value.landmarks);
+        optionListItemBuildingNameNew.add(value.landmarks!.first.buildingName!);
+        print("optionListItemBuildingNameNew${optionListItemBuildingNameNew}");
       });
     });
+
+
   }
 
   void addtoRecents(String name, String location, String ID, String bid) async {
@@ -222,7 +349,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       recent.add([name, location, ID, bid]);
       await prefs.setString('recents', jsonEncode(recent)).then((value) {
-        print("saved $name");
+        //print("saved $name");
       });
     }
   }
@@ -233,21 +360,41 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   }
 
   bool category = false;
+  bool topCategory=false;
   Set<String> cardSet = Set();
   // HashMap<String,Landmarks> cardSet = HashMap();
+  int selectedChipIndex = -1; // Track selected chip index
+
   List<String> optionList = [
     'washroom',
+    'cafeteria',
+    'drinking water',
+    'atm',
     'entry',
-    'reception',
     'lift',
+    'reception',
+
+
   ];
   List<String> optionListForUI = [
     'Washroom',
+    'Cafeteria',
+    'Drinking water',
+    'ATM',
     'Entry',
-    'Reception',
     'Lift',
+    'Reception',
+
+
   ];
 
+
+
+  void onChipSelected(int index) {
+    setState(() {
+      selectedChipIndex = index;
+    });
+  }
   Set<String> optionListItemBuildingName = {};
   List<Widget> searcCategoryhResults = [];
   FlutterTts flutterTts  = FlutterTts();
@@ -259,86 +406,122 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   }
 
 
-  void search(String searchText) {
+  void search(String searchText,{String wantToFilter=''}) {
     setState(() {
-      if (searchText.isNotEmpty) {
-        if (optionList.contains(searchText.toLowerCase())) {
-          category = true;
-          for(int i=0 ; i<optionList.length ; i++){
-            if(optionList[i] == searchText.toLowerCase()){
-              vall = i;
-            }
-          }
-          searcCategoryhResults.clear();
+      if (searchText.isEmpty) {
+        return;
+      }
+
+      searchText = searchText.toLowerCase();
+      searchResults.clear();
+      searcCategoryhResults.clear();
+      optionListItemBuildingName.clear();
+
+      if (optionList.contains(searchText)) {
+        category = true;
+        topCategory=false;
+        vall = optionList.indexOf(searchText);
+
+        if (landmarkData.landmarksMap != null) {
           landmarkData.landmarksMap!.forEach((key, value) {
-            if (searcCategoryhResults.length < 10) {
-              if (value.name != null && value.element!.subType != "beacons") {
-                if (value.name!.toLowerCase() == searchText.toLowerCase()) {
-                  optionListItemBuildingName.add(value.buildingName!);
-                  searcCategoryhResults.clear();
-                  optionListItemBuildingName.forEach((element) {
-                    searcCategoryhResults.add(SearchpageCategoryResults(
-                      name: searchText,
-                      buildingName: element,
-                      onClicked: onVenueClicked,
-                    ));
-                  });
-                }
-                if (value.name!
-                    .toLowerCase()
-                    .contains(searchText.toLowerCase())) {
-                  optionListItemBuildingName.add(value.buildingName!);
-                  searcCategoryhResults.clear();
-                  optionListItemBuildingName.forEach((element) {
-                    searcCategoryhResults.add(SearchpageCategoryResults(
-                      name: searchText,
-                      buildingName: element,
-                      onClicked: onVenueClicked,
-                    ));
-                  });
-                }
+            if (value.name != null && value.element!.subType != "beacons") {
+              final lowerCaseName = value.name!.toLowerCase();
+              if(searchText.toLowerCase().contains("entry") && value.element!.subType == "main entry"){
+                optionListItemBuildingName.add(value.buildingName!);
+              }else if (lowerCaseName == searchText || lowerCaseName.contains(searchText)) {
+                optionListItemBuildingName.add(value.buildingName!);
               }
-            } else {
-              return;
             }
           });
-        } else {
-          category = false;
-          vall = -1;
-          searchResults.clear();
+
+          optionListItemBuildingName.forEach((element) {
+            searcCategoryhResults.add(
+              SearchpageCategoryResults(
+                name: searchText,
+                buildingName: element,
+                onClicked: onVenueClicked,
+              ),
+            );
+          });
+        }
+      } else {
+        category = false;
+        vall = -1;
+        topCategory=false;
+        if (landmarkData.landmarksMap != null) {
+          String normalizedSearchText = normalizeText(searchText);
+
           landmarkData.landmarksMap!.forEach((key, value) {
-            if (searchResults.length < 10) {
-              if (value.name != null && value.element!.subType != "beacons" && value.buildingID == buildingAllApi.selectedBuildingID) {
-                if (value.name!
-                    .toLowerCase()
-                    .contains(searchText.toLowerCase())) {
-                  final nameList = [value.name!.toLowerCase()];
-                  final fuse = Fuzzy(
-                    nameList,
-                    options: FuzzyOptions(
-                      findAllMatches: true,
-                      tokenize: true,
-                      threshold: 0.5,
-                    ),
-                  );
-                  final result = fuse.search(searchText.toLowerCase());
-                  // Assuming `result` is a List<FuseResult<dynamic>>
-                  result.forEach((fuseResult) {
-                    // Access the item property of the result to get the matched value
-                    String matchedName = fuseResult.item;
+            if (searchResults.length >= 25 || value.name == null || value.element!.subType == "beacon") {
+              return;
+            }
 
-                    // Access the score of the match
-                    double score = fuseResult.score;
+            String normalizedValueName = normalizeText(value.name!);
 
-                    // Do something with the matchedName or score
-                    score == 0.0
-                        ? print('Matched Name: $matchedName, Score: $score')
-                        : print("");
-                  });
+            if(searchText.toLowerCase() == ("entry")){
+              final fuse = Fuzzy(
+                [normalizedValueName],
+                options: FuzzyOptions(
+                  findAllMatches: true,
+                  tokenize: true,
+                  threshold: 0.5,
+                ),
+              );
+
+              final result = fuse.search(normalizedSearchText);
+
+              result.forEach((fuseResult) {
+                print("fuseResult");
+                print(fuseResult);
+                if (fuseResult.score < 0.2) {
+
+                  if(wantToFilter.isNotEmpty && value.buildingName == wantToFilter){
+                    print('In--IF');
+                    searchResults.add(SearchpageResults(
+                      name: value.name!,
+                      location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
+                      onClicked: onVenueClicked,
+                      ID: value.properties!.polyId!,
+                      bid: value.buildingID!,
+                      floor: value.floor!,
+                      coordX: value.coordinateX!,
+                      coordY: value.coordinateY!,
+                    ));
+                  }else{
+                    print('In--ELSE');
+                    searchResults.add(SearchpageResults(
+                      name: value.name!,
+                      location: "Floor ${value.floor}, ${value
+                          .buildingName}, ${value.venueName}",
+                      onClicked: onVenueClicked,
+                      ID: value.properties!.polyId!,
+                      bid: value.buildingID!,
+                      floor: value.floor!,
+                      coordX: value.coordinateX!,
+                      coordY: value.coordinateY!,
+                    ));
+                  }
+                }
+              });
+            }else if (normalizedValueName.contains(normalizedSearchText)) {
+              final fuse = Fuzzy(
+                [normalizedValueName],
+                options: FuzzyOptions(
+                  findAllMatches: true,
+                  tokenize: true,
+                  threshold: 0.5,
+                ),
+              );
+
+              final result = fuse.search(normalizedSearchText);
+              print("fuseresult");
+              print(result);
+
+              result.forEach((fuseResult) {
+                if (fuseResult.score < 0.2) {
                   searchResults.add(SearchpageResults(
-                    name: "${value.name}",
-                    location:
-                        "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
+                    name: value.name!,
+                    location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
                     onClicked: onVenueClicked,
                     ID: value.properties!.polyId!,
                     bid: value.buildingID!,
@@ -347,14 +530,58 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     coordY: value.coordinateY!,
                   ));
                 }
-              }
-            } else {
-              return;
+              });
             }
           });
         }
       }
     });
+  }
+  void topSearchesFunc(){
+    setState(() {
+      topSearches.add(Container(margin:EdgeInsets.only(left: 26,top: 12,bottom: 12),child: Row(
+        children: [
+          Icon(Icons.search_sharp),
+          SizedBox(width: 26,),
+          Text(
+            "Top Searches",
+            style: const TextStyle(
+              fontFamily: "Roboto",
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Color(0xff000000),
+              height: 24/18,
+            ),
+            textAlign: TextAlign.left,
+          )
+        ],
+      ),));
+      landmarkData.landmarksMap!.forEach((key, value) {
+        if (value.name != null && value.element!.subType != "beacon") {
+          if(value.priority!=null && value.priority!>1){
+            topCategory = true;
+            topSearches.add(SearchpageResults(
+              name: "${value.name}",
+              location:
+              "Floor ${value.floor}, ${value
+                  .buildingName}, ${value.venueName}",
+              onClicked: onVenueClicked,
+              ID: value.properties!.polyId!,
+              bid: value.buildingID!,
+              floor: value.floor!,
+              coordX: value.coordinateX!,
+              coordY: value.coordinateY!,
+            ));
+          }
+
+        }
+      });
+    });
+  }
+
+
+  String normalizeText(String text) {
+    return text.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toLowerCase();
   }
 
   void onVenueClicked(String name, String location, String ID, String bid) {
@@ -395,6 +622,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   Color micColor = Colors.black;
   bool micselected = false;
   int vall = -1;
+  int newvall = -1;
   int lastval =-1;
 
 
@@ -421,9 +649,10 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         ),
         body: Container(
           color: Colors.white,
-          child: Column(
+          child: !promptLoader? Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+
               Container(
                   width: screenWidth - 32,
                   height: 48,
@@ -433,13 +662,14 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color:
-                          containerBoxColor, // You can customize the border color
+                      containerBoxColor, // You can customize the border color
                       width: 1.0, // You can customize the border width
                     ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
+                      SizedBox(width: 6,),
                       Container(
                         width: 48,
                         height: 48,
@@ -460,38 +690,40 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                           child: Focus(
                             child: Container(
                                 child: TextField(
-                              autofocus: true,
-                              controller: _controller,
-                              decoration: InputDecoration(
-                                hintText: "${searchHintString}",
-                                border: InputBorder.none, // Remove default border
-                              ),
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xff18181b),
-                                height: 25 / 16,
-                              ),
-                              onTap: () {
-                                if (containerBoxColor == Color(0xffA1A1AA)) {
-                                  containerBoxColor = Color(0xff24B9B0);
-                                } else {
-                                  containerBoxColor = Color(0xffA1A1AA);
-                                }
-                                print("Final Set");
-                              },
-                              onSubmitted: (value) {
-                                // print("Final Set");
-                                print(value);
-                                search(value);
-                              },
-                              onChanged: (value) {
-                                search(value);
-                                // print("Final Set");
-                                print(cardSet);
-                              },
-                            )),
+                                  autofocus: true,
+                                  controller: _controller,
+                                  decoration: InputDecoration(
+                                    hintText: "${searchHintString}",
+                                    border: InputBorder.none, // Remove default border
+                                  ),
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff18181b),
+                                    height: 25 / 16,
+                                  ),
+                                  onTap: () {
+                                    if (containerBoxColor == Color(0xffA1A1AA)) {
+                                      containerBoxColor = Color(0xff24B9B0);
+                                    } else {
+                                      containerBoxColor = Color(0xffA1A1AA);
+                                    }
+                                  },
+                                  onSubmitted: (value) {
+
+                                    search(value);
+                                  },
+                                  onChanged: (value) {
+                                    search(value);
+                                    if(_controller.text.isEmpty){
+                                      topSearches.clear();
+                                      topSearchesFunc();
+                                    }
+                                    // print("Final Set");
+                                    // print(cardSet);
+                                  },
+                                )),
                           ),
                         ),
                       ),
@@ -502,44 +734,75 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                         child: Center(
                           child: _controller.text.isNotEmpty
                               ? IconButton(
-                                  onPressed: () {
-                                    _controller.text = "";
-                                    setState(() {
-                                      vall = -1;
-                                      search(_controller.text);
-                                      recentResults = [];
-                                      searcCategoryhResults = [];
-                                    });
-                                  },
-                                  icon: Semantics(
-                                      label: "Close", child: Icon(Icons.close)))
+                              onPressed: (){
+                                _controller.text = "";
+                                setState((){
+                                  vall = -1;
+                                  search(_controller.text);
+                                  recentResults = [];
+                                  searcCategoryhResults = [];
+                                  category=false;
+                                  topSearches.clear();
+                                  topSearchesFunc();
+                                });
+                              },
+                              icon: Semantics(
+                                  label: "Close", child: Icon(Icons.close)))
                               : IconButton(
-                                  onPressed: () {
-                                    initSpeech();
-                                    setState(() {
-                                      speetchText.isListening
-                                          ? stopListening()
-                                          : startListening();
-                                    });
-                                    if (!micselected) {
-                                      micColor = Color(0xff24B9B0);
-                                    }
+                            onPressed: () {
+                              initSpeech();
+                              setState(() {
+                                speetchText.isListening
+                                    ? stopListening()
+                                    : startListening();
+                              });
+                              if (!micselected) {
+                                micColor = Color(0xff24B9B0);
+                              }
 
-                                    setState(() {});
-                                  },
-                                  icon: Semantics(
-                                    label: "Voice Search",
-                                    child: Icon(
-                                      Icons.mic,
-                                      color: micColor,
-                                    ),
-                                  ),
-                                ),
+                              setState(() {});
+                            },
+                            icon: Semantics(
+                              label: "Voice Search",
+                              child: Icon(
+                                Icons.mic,
+                                color: micColor,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   )),
+              (searchHintString.toLowerCase().contains("source") && widget.userLocalized != "")?InkWell(
+                onTap: (){
+                  Navigator.pop(context, widget.userLocalized);
+                },
+                child: Container(
+                  margin: EdgeInsets.only(top:24,left: 17,right: 17,bottom: 8),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          SizedBox(width: 16,),
+                          Image.asset("assets/rw.png"),
+                          SizedBox(width: 24,),
+                          Text(style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xff000000),
+                          ),"Your Current Location")
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ):Container(),
+              searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
               Container(
+                margin: EdgeInsets.only(left: 7,top: 4),
                 width: screenWidth,
                 child: ChipsChoice<int>.single(
                   value: vall,
@@ -552,8 +815,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     selectedButton = optionListForUI[val];
                     setState(() => vall = val);
                     lastval = val;
-                    print("wilsonchecker");
-                    print(val);
+
 
                     _controller.text = optionListForUI[val];
                     search(optionListForUI[val]);
@@ -578,6 +840,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                         if (Text.isNotEmpty) {
                           search(Text);
                         } else {
+                          search(Text);
+                          _controller.text="";
                           searchResults = [];
                           searcCategoryhResults = [];
                           vall = -1;
@@ -588,22 +852,121 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                   direction: Axis.horizontal,
                 ),
               ),
+              !category && _controller.text.isNotEmpty ? Container(
+                margin: EdgeInsets.only(left: 7,top: 4),
+                width: screenWidth,
+                child: ChipsChoice<int>.single(
+                  value: newvall,
+                  onChanged: (val) {
+
+                    // if(HelperClass.SemanticEnabled) {
+                    //   speak("${optionListItemBuildingName.toList()[val]} selected");
+                    // }
+                    //
+                    // selectedButton = optionListItemBuildingName.toList()[val];
+                    setState(() => newvall = val);
+                    //
+                    //
+                    // //_controller.text = optionListItemBuildingName.toList()[val];
+                    // search(optionListItemBuildingName.toList()[val]);
+                  },
+                  choiceItems: C2Choice.listFrom<int, String>(
+                    source: optionListItemBuildingNameNew.toList(),
+                    value: (i, v) => i,
+                    label: (i, v) => v,
+                  ),
+
+                  choiceBuilder: (item, i) {
+                    if(!item.selected){
+                      newvall = -1;
+                    }
+                    return DestinationPageChipsWidget(
+                      svgPath: '',
+                      text: optionListItemBuildingNameNew.toList()[i],
+                      onSelect: item.select!,
+                      selected: item.selected,
+
+                      onTap: (String Text) {
+                        print("tapped$Text");
+
+                        if (Text.isNotEmpty) {
+                          search(_controller.text,wantToFilter: Text);
+                        }
+                        // else {
+                        //   search(Text,wantToFilter: optionListItemBuildingName.toList()[i]);
+                        //   _controller.text="";
+                        //   searchResults = [];
+                        //   searcCategoryhResults = [];
+                        //   newvall = -1;
+                        // }
+                      },
+                    );
+                  },
+                  direction: Axis.horizontal,
+                ),
+              ) : Container(),
+
+              SizedBox(height: 4,),
+              Divider(thickness: 6,color: Color(0xfff2f3f5)),
               Flexible(
                   flex: 1,
                   child: SingleChildScrollView(
                       child: Column(
-                    children: category ? searcCategoryhResults : searchResults,
-                  ))),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: (!category && topCategory)? topSearches:(category)?searcCategoryhResults:searchResults,
+
+                      ),
+                  )),
+              if (_controller.text.isNotEmpty && searchResults.isEmpty && (category ? searcCategoryhResults : (!category && topCategory ? topSearches : [])).isEmpty)
+
+                Column(
+                 children: [
+                   SizedBox(height: 16,),
+                   Padding(
+                     padding: const EdgeInsets.all(8.0),
+                     child: Image.asset('assets/noResults.png'),
+                   ),
+                   Text(
+                     'Sorry, No Results Found',
+                     textAlign: TextAlign.center,
+                     style: TextStyle(
+                       color: Colors.black,
+                       fontSize: 16,
+                       fontFamily: 'Roboto',
+                       fontWeight: FontWeight.w500,
+                     ),
+                   ),
+                   Text(
+                     ' Try something new  with different keywords',
+                     textAlign: TextAlign.center,
+                     style: TextStyle(
+                       color: Color(0xFFA1A1AA),
+                       fontSize: 14,
+                       fontFamily: 'Roboto',
+                       fontWeight: FontWeight.w400,
+                     ),
+                   )
+                 ]
+                )
+
             ],
+          ) : Center(
+            child: CircularProgressIndicator(
+              color: Colors.red,
+            ),
           ),
         ),
       ),
     );
   }
 
+
+
   @override
   void dispose() {
+    _controller.removeListener(_onSearchChanged);
     _controller.dispose();
+    _searchDebounce?.cancel();
     super.dispose();
   }
 }
@@ -613,4 +976,59 @@ class SetInfo {
   String SetInfoBuildingName;
   SetInfo(
       {required this.SetInfoBuildingName, required this.SetInfoLandmarkName});
+}
+class ChipFilterWidget extends StatefulWidget {
+  final List<String> options;
+  final Function(String) onSelected;
+
+  ChipFilterWidget({required this.options, required this.onSelected});
+
+  @override
+  _ChipFilterWidgetState createState() => _ChipFilterWidgetState();
+}
+
+class _ChipFilterWidgetState extends State<ChipFilterWidget> {
+  String? _selectedOption;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 4.0,
+      runSpacing: 8.0,
+      children: widget.options.map((option) {
+        return ChoiceChip(
+          label: Text(
+            option,
+            style: const TextStyle(
+              fontFamily: "Roboto",
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              height: 20/14,
+            ),
+            textAlign: TextAlign.left,
+          ),
+          selected: _selectedOption == option,
+          onSelected: (selected) {
+            setState(() {
+              _selectedOption = selected ? option : null;
+            });
+            widget.onSelected(option);
+          },
+          showCheckmark: false,
+          selectedColor: Colors.green,
+          backgroundColor: Colors.white,
+          labelStyle: TextStyle(
+            color: _selectedOption == option ? Colors.white : Colors.black,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22.0), // Adjust the radius as needed
+            side: BorderSide(
+              color: _selectedOption == option ? Colors.green : Colors.black,
+              width: 1.0, // Adjust the border width as needed
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
 }

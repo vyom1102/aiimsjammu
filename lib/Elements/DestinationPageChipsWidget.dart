@@ -35,7 +35,7 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
     return Semantics(
       label: widget.text + (widget.selected?"selected":""),
       child: AnimatedContainer(
-        margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 7),
+        margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 7),
         padding: EdgeInsets.all(8),
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
@@ -68,10 +68,10 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(left: 4),
-                child: Icon(Icons.wallet_giftcard_outlined, size: 18, color: widget.selected? Colors.white: Colors.black,),
-              ),
+              // Container(
+              //   margin: EdgeInsets.only(left: 4),
+              //   child: Icon(Icons.wallet_giftcard_outlined, size: 18, color: widget.selected? Colors.white: Colors.black,),
+              // ),
               Semantics(
                 excludeSemantics: true,
                 child: Container(
@@ -89,9 +89,17 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
                   ),
                 ),
               ),
-              widget.selected? Container(
-                margin: EdgeInsets.only(left: 4),
-                child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,),
+              widget.selected? InkWell(
+                onTap: (){
+                  setState(() {
+                    widget.selected=!widget.selected;
+                    widget.onTap("");
+                  });
+                },
+                child: Container(
+                  margin: EdgeInsets.only(left: 4),
+                  child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,),
+                ),
               ) : Container()
 
 

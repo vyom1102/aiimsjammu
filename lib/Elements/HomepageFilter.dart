@@ -55,10 +55,10 @@ class _HomepageFilterState extends State<HomepageFilter> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Container(
-              margin: EdgeInsets.only(left: 4),
-              child: Icon(Icons.wallet_giftcard_outlined, size: 18),
-            ),
+            // Container(
+            //   margin: EdgeInsets.only(left: 4),
+            //   child: Icon(Icons.wallet_giftcard_outlined, size: 18),
+            // ),
             Container(
               margin: EdgeInsets.only(left: 8, right: 4),
               child: Text(

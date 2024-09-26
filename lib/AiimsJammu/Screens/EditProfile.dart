@@ -1,15 +1,22 @@
 
 
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:hive/hive.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../API/DeleteApi.dart';
 import '../../LOGIN SIGNUP/SignIn.dart';
+import '../../config.dart';
+import '../Widgets/Translator.dart';
 import 'ChangePassword.dart';
 
 class EditProfile extends StatefulWidget {
@@ -26,16 +33,98 @@ class _EditProfileState extends State<EditProfile> {
   String? accessToken;
   String? refreshToken;
   String? originalName;
-
+  String? photoUrl;
+  File? _selectedImage;
+  String? uploadedimage;
   bool isLoading = false;
 
 
+  Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile
+        != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+
+      });
+      await uploadImage();
+    }
+  }
+  Future<void> uploadImage() async {
+    final String uploadUrl = "${AppConfig.baseUrl}/secured/upload";
+
+    try {
+      final request = http.MultipartRequest('POST', Uri.parse(uploadUrl));
+      request.headers['x-access-token'] = '$accessToken';
+      request.files.add(await http.MultipartFile.fromPath('image', _selectedImage!.path));
+
+      final response = await request.send();
+      print("responsecode while uploading image");
+      print(response.statusCode);
+      if (response.statusCode == 200) {
+        final responseBody = await response.stream.bytesToString();
+        final responseData = json.decode(responseBody);
+        print(responseData);
+        if (responseData['status']) {
+          setState(() {
+            photoUrl = responseData['filename'];
+          });
+
+          userListBox.put('photo', photoUrl);
+
+          await updateUser(context);
+        } else {
+          print("Failed to upload image: ${responseData['message']}");
+        }
+      } else if (response.statusCode == 403) {
+        await refreshTokenAndRetryUpload();
+      } else {
+        print("Failed to upload image. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error while uploading the file: $e");
+    }
+  }
+  Future<void> refreshTokenAndRetryUpload() async {
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
+
+    try {
+      final response = await http.post(
+        Uri.parse(refreshTokenUrl),
+        body: json.encode({
+          "refreshToken": refreshToken,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final newAccessToken = json.decode(response.body)["accessToken"];
+        setState(() {
+          accessToken = newAccessToken;
+        });
+
+        // Update the access token in the local database
+        final signInBox = await Hive.openBox('SignInDatabase');
+        signInBox.put('accessToken', accessToken);
+
+        // Retry the image upload with the new token
+        await uploadImage();
+      } else {
+        print("Failed to refresh token. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error while refreshing the token: $e");
+    }
+  }
   @override
   void initState() {
     super.initState();
     // Retrieve user ID from Hive
     getUserIDFromHive();
   }
+  var userListBox = Hive.box('user');
 
   Future<void> getUserIDFromHive() async {
     final signInBox = await Hive.openBox('SignInDatabase');
@@ -46,10 +135,18 @@ class _EditProfileState extends State<EditProfile> {
       userId = signInBox.get("userId");
       accessToken = signInBox.get('accessToken');
       refreshToken = signInBox.get('refreshToken');
+      _nameController.text = userListBox.get('name');
+      _emailController.text = userListBox.get('username');
+      uploadedimage = userListBox.get("photo");
+
     });
 
     if (userId != null) {
+      if(_nameController.text.isEmpty || uploadedimage==null ) {
       getUserDetails();
+      }else{
+        print("name and email from database");
+      }
     } else {
       print("User id is null");
     }
@@ -58,7 +155,7 @@ class _EditProfileState extends State<EditProfile> {
     setState(() {
       isLoading = true;
     });
-    final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
 
     try {
       final response = await http.post(
@@ -78,6 +175,13 @@ class _EditProfileState extends State<EditProfile> {
 
         print("originalName");
         print(originalName);
+        setState(() {
+          // originalName = responseBody["name"];
+          _emailController.text = responseBody["username"]??"Not Available";
+          _nameController.text = responseBody["name"]??"User";
+          uploadedimage = responseBody["photo"]??"not available";
+
+        });
         _nameController.text = originalName!;
       } else if (response.statusCode == 403) {
         // Access token expired, refresh token and retry the call
@@ -95,7 +199,7 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -139,6 +243,8 @@ class _EditProfileState extends State<EditProfile> {
         _emailController.text = responseBody["email"];
         originalName = responseBody["name"];
         _nameController.text = originalName!;
+        uploadedimage = responseBody["photo"]??"not available";
+
       } else {
         // Handle other status codes after token refresh
       }
@@ -150,7 +256,7 @@ class _EditProfileState extends State<EditProfile> {
 
 
   // Future<void> updateUser() async {
-  //   final String updateUrl = "https://dev.iwayplus.in/secured/user/update/$userId";
+  //   final String updateUrl = "${AppConfig.baseUrl}/secured/user/update/$userId";
   //
   //   try {
   //     final response = await http.put(
@@ -182,7 +288,7 @@ class _EditProfileState extends State<EditProfile> {
   //   }
   // }
   Future<void> updateUser(BuildContext context) async {
-    final String updateUrl = "https://dev.iwayplus.in/secured/user/update/$userId";
+    final String updateUrl = "${AppConfig.baseUrl}/secured/user/update/$userId";
 
     // Show a loading indicator
     QuickAlert.show(
@@ -217,8 +323,12 @@ class _EditProfileState extends State<EditProfile> {
           text: 'Name updated successfully',
           confirmBtnText: 'OK',
           onConfirmBtnTap: () {
+            userListBox.put('name', _nameController.text);
+
             Navigator.pop(context);
-            Navigator.pop(context);
+            Navigator.of(context).pop({
+              'shouldRefresh': true
+            });
           },
         );
       } else if (response.statusCode == 403) {
@@ -248,7 +358,7 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future<void> refreshTokenAndRetry(String updateUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -296,7 +406,7 @@ class _EditProfileState extends State<EditProfile> {
       if (response.statusCode == 200) {
         // Handle successful update after token refresh
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Name updated successfully')),
+          SnackBar(content: TranslatorWidget('Name updated successfully')),
         );
       } else {
         // Handle other status codes after token refresh
@@ -311,7 +421,7 @@ class _EditProfileState extends State<EditProfile> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: TranslatorWidget(
           'My Profile',
           style: TextStyle(
             color: Color(0xFF374151),
@@ -330,15 +440,50 @@ class _EditProfileState extends State<EditProfile> {
             children: [
               Stack(
                 children: [
+                  // Container(
+                  //   width: 150,
+                  //   height: 150,
+                  //   decoration: BoxDecoration(
+                  //     shape: BoxShape.circle,
+                  //     // color: Colors.lightBlue,
+                  //     image: DecorationImage(
+                  //       image: AssetImage('assets/images/Group 4343.png'),
+                  //       fit: BoxFit.cover,
+                  //     ),
+                  //   ),
+                  // ),
                   Container(
                     width: 150,
                     height: 150,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.lightBlue,
-                      image: DecorationImage(
-                        image: AssetImage('assets/profilePageAssets/User image.png'),
-                        fit: BoxFit.cover,
+                      border: Border.all(
+                        color: Colors.grey, // Grey border
+                        width: 2.0, // Border width
+                      ),
+                    ),
+                    child: ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: '${AppConfig.baseUrl}/uploads/$uploadedimage',
+                        width: 150,
+                        height: 150,
+                        fit: BoxFit.contain,
+                        placeholder: (context, url) => Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                            color: Colors.white,
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          width: 150,
+                          height: 150,
+                          color: Colors.grey[200],
+                          child: Image.asset(
+                            'assets/images/Group 4343.png',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -353,7 +498,7 @@ class _EditProfileState extends State<EditProfile> {
                       child:
                       IconButton(
                         icon: Icon(Icons.camera_alt,color: Colors.white,),
-                        onPressed: null,
+                        onPressed: _pickImage,
                       ),
                     ),
                   ),
@@ -399,7 +544,7 @@ class _EditProfileState extends State<EditProfile> {
                             builder: (context) => ChangePasswordScreen(email: _emailController.text,)),
                       );
                     },
-                    child: Text(
+                    child: TranslatorWidget(
                       'Change password',
                       style: TextStyle(
                         color: Color(0xFF0B6B94),
@@ -426,7 +571,7 @@ class _EditProfileState extends State<EditProfile> {
                   //       signInBox.clear();
                   //       print("Localdatabase cleared");
                   //       print(signInBox.keys);
-                  //       Future<bool> response = DeleteApi.fetchPatchData();
+                  //       Future<bool> response = DeleteApi..deleteDataa();
                   //       if(await response){
                   //         signInBox.clear();
                   //         print("Localdatabase cleared");
@@ -480,7 +625,7 @@ class _EditProfileState extends State<EditProfile> {
                   print("Local database cleared");
                   print(signInBox.keys);
 
-                  Future<bool> response = DeleteApi.fetchPatchData();
+                  Future<bool> response = DeleteApi.deleteData();
                   if (await response) {
                     signInBox.clear();
                     print("Local database cleared");
@@ -505,7 +650,7 @@ class _EditProfileState extends State<EditProfile> {
                 },
               );
             },
-            child: Text(
+            child: TranslatorWidget(
               'Delete Profile',
               style: TextStyle(
                 color: Colors.red,
@@ -577,7 +722,7 @@ class _EditProfileState extends State<EditProfile> {
                         ),
                         side: BorderSide(color: Color(0xFF0B6B94)),
                       ),
-                      child: Text(
+                      child: TranslatorWidget(
                         'Save changes',
                         style: TextStyle(
                           color: Color(0xFF0B6B94),

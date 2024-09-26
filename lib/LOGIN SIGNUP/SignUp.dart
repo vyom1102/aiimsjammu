@@ -228,7 +228,7 @@ class _SignUpState extends State<SignUp> {
     };
     var request = http.Request(
         'POST', Uri.parse('https://dev.iwayplus.in/auth/username'));
-    request.body = json.encode({"username": username});
+    request.body = json.encode({"username": username,"appId":"com.iwayplus.aiimsjammu"});
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();
@@ -281,6 +281,18 @@ class _SignUpState extends State<SignUp> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      height: 70,
+                                      // width:100,
+                                      margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                      child: Image.asset(
+                                        // scale: 10,
+                                          'assets/images/signinlogo.png'),
+                                    ),
+                                  ],
+                                ),
                                 Container(
                                   margin: EdgeInsets.fromLTRB(16, 11, 0, 0),
                                   width: double.infinity,
@@ -689,7 +701,7 @@ class _SignUpState extends State<SignUp> {
 
 
                                                 bool userExists = await checkUserExists(finalMailEditingController);
-                                                if(userExists){
+                                                if(!userExists){
                                                   bool otpSent = await SendOTPAPI().sendOTP(finalMailEditingController);
                                                   if (!otpSent) {
                                                     HelperClass.showToast("Invalid email");

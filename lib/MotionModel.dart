@@ -5,13 +5,23 @@ import 'buildingState.dart';
 
 class MotionModel{
 
+  static int stuckCount = 0;
+
   static bool isValidStep(UserState user, int cols, int rows, List<int> nonWalkable, Function reroute){
+    if(user.pathobj.index+1 > user.Cellpath.length-1){
+      UserState.closeNavigation();
+    }
+    if(user.onConnection || user.temporaryExit){
+      return false;
+    }
     List<int> transitionValue = tools.eightcelltransition(user.theta);
     if(user.isnavigating){
       transitionValue = user.Cellpath[user.pathobj.index+1].move(user.theta);
     }
     int newX = user.coordX + transitionValue[0];
     int newY = user.coordY + transitionValue[1];
+
+    print("newxnewy $newX,$newY");
 
 
 
@@ -20,12 +30,29 @@ class MotionModel{
     }
 
     if(nonWalkable.contains((newY*cols)+newX)){
+      stuckCount++;
+      if(stuckCount==5){
+        user.moveToPointOnPath((user.pathobj.index+(stuckCount*UserState.stepSize)-1).toInt());
+        stuckCount = 0;
+      }
       return false;
     }
 
-    if(tools.calculateDistance([user.coordX,user.coordY], [user.showcoordX,user.showcoordY])>10){
-       reroute();
+    try{
+      if(user.Cellpath[user.pathobj.index+1].move == tools.twocelltransitionhorizontal || user.Cellpath[user.pathobj.index+1].move == tools.twocelltransitionvertical){
+        if(tools.calculateDistance([user.coordX,user.coordY], [user.showcoordX,user.showcoordY])>20){
+          reroute();
+        }
+      }else{
+        if(tools.calculateDistance([user.coordX,user.coordY], [user.showcoordX,user.showcoordY])>20){
+          reroute();
+        }
+      }
+    }catch(e){
+
     }
+
+
 
     return true;
   }

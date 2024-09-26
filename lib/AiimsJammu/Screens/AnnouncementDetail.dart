@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../config.dart';
+import '../Widgets/Translator.dart';
+
 class AnnouncementDetailsPage extends StatefulWidget {
   final String image;
   final String title;
@@ -40,14 +43,14 @@ class _AnnouncementDetailsPageState extends State<AnnouncementDetailsPage> {
           //     color: isFavorite ? Colors.red : null,
           //   ),
           // ),
-          IconButton(
-            onPressed: () {
-
-            },
-            icon: Icon(
-              Icons.share
-            ),
-          ),
+          // IconButton(
+          //   onPressed: () {
+          //
+          //   },
+          //   icon: Icon(
+          //     Icons.share
+          //   ),
+          // ),
 
         ],
       ),
@@ -58,7 +61,7 @@ class _AnnouncementDetailsPageState extends State<AnnouncementDetailsPage> {
           children: [
             if(widget.image.isNotEmpty)
               Image.network(
-                'https://dev.iwayplus.in/uploads/${widget.image}',
+                '${AppConfig.baseUrl}/uploads/${widget.image}',
                 // width: 250,
                 height: 140,
                 fit: BoxFit.fitWidth,
@@ -66,7 +69,7 @@ class _AnnouncementDetailsPageState extends State<AnnouncementDetailsPage> {
             if(widget.image.isNotEmpty)
             SizedBox(height: 8,),
 
-            Text(
+            TranslatorWidget(
               widget.title,
               style: TextStyle(
                 color: Color(0xFF18181B),
@@ -82,7 +85,7 @@ class _AnnouncementDetailsPageState extends State<AnnouncementDetailsPage> {
             Row(
               children: [
 
-                Text(
+                TranslatorWidget(
                   widget.department,
                   style: TextStyle(
                     color: Color(0xff0B6B94),
@@ -92,7 +95,7 @@ class _AnnouncementDetailsPageState extends State<AnnouncementDetailsPage> {
                   ),
                 ),
                 SizedBox(width: 8,),
-                Text(
+                TranslatorWidget(
                   widget.dateTime,
                   style: TextStyle(
                     color: Color(0xFFA1A1AA),
@@ -108,7 +111,7 @@ class _AnnouncementDetailsPageState extends State<AnnouncementDetailsPage> {
 
             Expanded(
               child: SingleChildScrollView(
-                child: Text(
+                child: TranslatorWidget(
                   widget.article,
                   style: TextStyle(
                     color: Color(0xFF595967),

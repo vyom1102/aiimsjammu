@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
+import '../Widgets/Translator.dart';
+
 class NoInternetConnection extends StatefulWidget {
   const NoInternetConnection({super.key});
 
@@ -61,7 +63,7 @@ class _NoInternetConnectionState extends State<NoInternetConnection> {
                 height: 70,
               ),
               SizedBox(height: 20,),
-              Text(
+              TranslatorWidget(
                 'No Internet connection',
                 style: TextStyle(
                   color: Colors.black,
@@ -73,7 +75,7 @@ class _NoInternetConnectionState extends State<NoInternetConnection> {
 
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 60),
-                child: Text(
+                child: TranslatorWidget(
                   'Please check your internet connection and try again',
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -102,7 +104,7 @@ class _NoInternetConnectionState extends State<NoInternetConnection> {
                     ),
                   ),
                   onPressed:_showProgressIndicator
-                  , child: Text(
+                  , child: TranslatorWidget(
                 'Try again',
                 textAlign: TextAlign.center,
                 style: TextStyle(

@@ -44,64 +44,50 @@ class MapHelper {
   /// Then it will convert the canvas to an image and generate the [BitmapDescriptor]
   /// to be used on the cluster marker icons.
 
+  static Future<ui.Image> loadImage(Uint8List imgBytes) async {
+    final Completer<ui.Image> completer = Completer();
+    ui.decodeImageFromList(imgBytes, (ui.Image img) {
+      completer.complete(img);
+    });
+    return completer.future;
+  }
+
   static Future<BitmapDescriptor> _getClusterMarker(
       int clusterSize,
       Color clusterColor,
       Color textColor,
       int width,
-      String venueText,
+      String iconPath, // Path to the icon image in assets
       ) async {
     final PictureRecorder pictureRecorder = PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
     final Paint circlePaint = Paint()..color = clusterColor;
-    final Paint rectanglePaint = Paint()..color = Colors.black26; // Background color of the rectangle
     final TextPainter textPainter = TextPainter(
       textDirection: TextDirection.ltr,
     );
-
     final double radius = width / 2;
-    final double rectWidth = 80 * 2;
-    final double rectHeight = 80; // Height of the rectangle, adjust as needed
-    final double spacing = 15; // Spacing between the circle and rectangle
+
+    // Load icon image
+    final ByteData byteData = await rootBundle.load(iconPath);
+    final Uint8List iconBytes = byteData.buffer.asUint8List();
+    final ui.Image iconImage = await loadImage(iconBytes);
+    final double iconSize = radius * 2.5; // Adjust the size as needed
+    final double iconX = radius - iconSize / 2 ;
+    final double iconY = radius - iconSize / 2;
 
     // Draw circle
+
+
+    // Draw the icon image
+    paintImage(
+      canvas: canvas,
+      image: iconImage,
+      rect: Rect.fromLTWH(iconX, iconY-1, iconSize, iconSize+18),
+    );
     canvas.drawCircle(
-      Offset(radius, radius),
-      radius,
+      Offset(radius, radius-6),
+      radius-12,
       circlePaint,
-    );
-
-    // Draw rectangle
-    final double rectX = radius * 2 + spacing; // Position the rectangle to the right of the circle
-    final double rectY = radius - rectHeight / 2;
-    final double borderRadius = 10; // Adjust the border radius as needed
-    canvas.drawRRect(
-      RRect.fromLTRBR(
-        rectX,
-        rectY,
-        rectX + rectWidth,
-        rectY + rectHeight,
-        Radius.circular(borderRadius),
-      ),
-      rectanglePaint,
-    );
-
-    // Draw venue text inside rectangle
-    textPainter.text = TextSpan(
-      text: venueText,
-      style: TextStyle(
-        fontFamily: "Roboto",
-        fontSize: 34,
-        fontWeight: FontWeight.w400,
-        color: Color(0xffFFFFFF),
-        height: 20/14,
-      ),
-    );
-
-    textPainter.layout();
-    textPainter.paint(
-      canvas,
-      Offset(rectX + (rectWidth - textPainter.width) / 2, rectY + (rectHeight - textPainter.height) / 2),
     );
 
     // Draw cluster size text inside circle
@@ -109,22 +95,22 @@ class MapHelper {
       text: clusterSize.toString(),
       style: TextStyle(
         fontFamily: "Roboto",
-        fontSize: radius - 5,
+        fontSize: radius ,
         fontWeight: FontWeight.w400,
-        color: Color(0xffFFFFFF),
-        height: 20/14,
+        color: Color(0xff000000),
+        height: 20 / 14,
       ),
     );
 
     textPainter.layout();
     textPainter.paint(
       canvas,
-      Offset(radius - textPainter.width / 2, radius - textPainter.height / 2),
+      Offset(radius - textPainter.width / 2, radius - textPainter.height / 2 -8),
     );
 
     final image = await pictureRecorder.endRecording().toImage(
-      (radius * 2 + rectWidth + spacing).toInt(), // Adjust width to accommodate circle and rectangle
-      (radius * 2).toInt(),
+      (radius * 2).toInt(), // Adjust width to accommodate circle
+      (radius*2 + 15).toInt(),
     );
     final data = await image.toByteData(format: ImageByteFormat.png);
 
@@ -162,6 +148,7 @@ class MapHelper {
       List<MapMarker> markers,
       int minZoom,
       int maxZoom,
+      GoogleMapController? mapController,
       ) async {
     return Fluster<MapMarker>(
       minZoom: minZoom,
@@ -181,7 +168,8 @@ class MapHelper {
             isCluster: cluster.isCluster,
             clusterId: cluster.id,
             pointsSize: cluster.pointsSize,
-            childMarkerId: cluster.childMarkerId, icon: null,
+            childMarkerId: cluster.childMarkerId, icon: null, Landmarkname: '',
+            mapController: mapController,
           ),
     );
   }
@@ -194,6 +182,7 @@ class MapHelper {
       Color clusterColor,
       Color clusterTextColor,
       int clusterWidth,
+      GoogleMapController? mapController,
       ) {
     if (clusterManager == null) return Future.value([]);
 
@@ -201,15 +190,18 @@ class MapHelper {
       [-180, -85, 180, 85],
       currentZoom.toInt(),
     ).map((mapMarker) async {
+
       if (mapMarker.isCluster!) {
         mapMarker.icon = await _getClusterMarker(
           mapMarker.pointsSize!,
           clusterColor,
           clusterTextColor,
           clusterWidth,
-          "Venues",
+          'assets/pyramids.png',
         );
       }
+      mapMarker.mapController = mapController;
+
 
       return mapMarker.toMarker();
     }).toList());

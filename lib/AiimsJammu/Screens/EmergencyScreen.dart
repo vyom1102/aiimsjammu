@@ -4,9 +4,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hive/hive.dart';
+import 'package:iwaymaps/AiimsJammu/Widgets/Translator.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../config.dart';
 import '../Data/DoctorDemoData.dart';
 import 'package:http/http.dart' as http;
 import '../../API/guestloginapi.dart';
@@ -25,15 +28,30 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
   List<String> _selectedServices = [];
   bool _isLoading = true;
   String token = "";
+  var DashboardListBox = Hive.box('DashboardList');
 
   TextEditingController _searchController = TextEditingController();
   @override
   void initState() {
     super.initState();
     // _loadServices();
-    _loadPharmacyServicesFromAPI();
-  }
+    // _loadPharmacyServicesFromAPI();
+    checkForReload();
 
+  }
+  void checkForReload(){
+    if(DashboardListBox.containsKey('_services')){
+      _services = DashboardListBox.get('_services');
+      setState(() {
+        _filteredServices = _services.where((service) => service['type'] == 'Ambulance' || service['type'] == 'BloodBank').toList();        _isLoading = false;
+      });
+      print('emrg FROM DATABASE');
+
+    }else{
+      _loadPharmacyServicesFromAPI();
+      print('emrg API CALL');
+    }
+  }
   Future<void> _makePhoneCall(String phoneNumber) async {
     final Uri launchUri = Uri(
       scheme: 'tel',
@@ -54,7 +72,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
       print('trying');
       final response = await http.get(
 
-        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": token,
@@ -68,6 +86,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
             _services = responseData['data'];
             // _filteredServices = _services;
             _filteredServices = _services.where((service) => service['type'] == 'Ambulance' || service['type'] == 'BloodBank').toList();
+            DashboardListBox.put('_services', responseData['data']);
 
             _isLoading = false;
           });
@@ -116,7 +135,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: TranslatorWidget(
           'Emergency Services',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -158,7 +177,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
             child: Row(
               children: [
                 SizedBox(width: 22,),
-                Text(
+                TranslatorWidget(
                   'Help Center',
                   textAlign: TextAlign.center,
                   style: TextStyle(
@@ -170,7 +189,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text(
+                TranslatorWidget(
                   '24/7',
                   style: TextStyle(
                     color: Colors.black,
@@ -213,6 +232,8 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
                             type: service['type'],
                             startTime: service['startTime'],
                             endTime: service['endTime'],
+                            latitude:service['latitude'],
+                            longitude:service['longitude'],
                           ),
                         ),
                       );
@@ -235,7 +256,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
+                              TranslatorWidget(
                                 service['name'],
                                 style: const TextStyle(
                                   fontFamily: "Roboto",

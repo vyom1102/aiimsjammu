@@ -11,7 +11,7 @@ import '../../../Elements/UserCredential.dart';
 
 class SignInAPI{
 
-  final String baseUrl = "https://dev.iwayplus.in/auth/signin";
+  final String baseUrl = "https://dev.iwayplus.in/auth/signin2";
 
   Future<SignInApiModel?> signIN(String username, String password) async {
     //final signindataBox = FavouriteDataBaseModelBox.getData();
@@ -20,6 +20,7 @@ class SignInAPI{
     final Map<String, dynamic> data = {
       "username": username,
       "password": password,
+      "appId":"com.iwayplus.aiimsjammu"
     };
 
     final response = await http.post(
@@ -73,7 +74,7 @@ class SignInAPI{
     } else {
       if (response.statusCode == 403) {
         print("In response.statusCode == 403");
-        RefreshTokenAPI.fetchPatchData();
+        RefreshTokenAPI.refresh();
         return SignInAPI().signIN(username,password);
       }
       print("Code is ${response.statusCode}");
@@ -81,10 +82,12 @@ class SignInAPI{
     }
   }
   static Future<int> sendOtpForgetPassword(String user) async {
+    print("user");
+    print(user);
     var headers = {'Content-Type': 'application/json'};
     var request = http.Request(
         'POST', Uri.parse('https://dev.iwayplus.in/auth/otp/username'));
-    request.body = json.encode({"username": "${user}", "digits":4,});
+    request.body = json.encode({"username": user, "digits":4,"appId":"com.iwayplus.aiimsjammu"});
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();
@@ -94,7 +97,7 @@ class SignInAPI{
       return 1;
     } else {
       print("response.reasonPhrase");
-      print(response.reasonPhrase);
+      print(response.statusCode);
       return 0;
     }
   }
@@ -106,7 +109,8 @@ class SignInAPI{
     request.body = json.encode({
       "username": "$user",
       "password": "$pass",
-      "otp": "$otp"
+      "otp": "$otp",
+      "appId":"com.iwayplus.aiimsjammu"
     });
     request.headers.addAll(headers);
 

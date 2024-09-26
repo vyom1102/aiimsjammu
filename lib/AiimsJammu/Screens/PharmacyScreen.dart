@@ -1,10 +1,14 @@
 
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hive/hive.dart';
+import '../../config.dart';
+import '../Widgets/Translator.dart';
 import '/AiimsJammu/Data/ServicesDemoData.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
@@ -27,15 +31,49 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
   List<String> _selectedServices = [];
   bool _isLoading = true;
   String token = "";
+  var DashboardListBox = Hive.box('DashboardList');
+  double? _distanceFuture;
 
   TextEditingController _searchController = TextEditingController();
   @override
   void initState() {
     super.initState();
     // _loadServices();
-    _loadPharmacyServicesFromAPI();
-  }
+    // _loadPharmacyServicesFromAPI();
+    checkForReload();
+    _updateDistances();
 
+  }
+  Future<void> _updateDistances() async {
+    for (var service in _services) {
+      double distance = await calculateDistance(
+        service['latitude'].toString(),
+        service['longitude'].toString(),
+      );
+      if (distance>=1000){
+        service['distance'] =  '${(distance / 1000).toStringAsFixed(0)} km';
+      }else{
+        service['distance'] =  '${distance.toStringAsFixed(0)} m';
+
+      }
+
+    }
+    setState(() {});
+  }
+  void checkForReload(){
+    if(DashboardListBox.containsKey('_services')){
+      _services = DashboardListBox.get('_services');
+      setState(() {
+        _filteredServices = _services.where((service) => service['type'] == 'Pharmacy').toList();
+        _isLoading = false;
+      });
+      print('pharmacy FROM DATABASE');
+
+    }else{
+      _loadPharmacyServicesFromAPI();
+      print('pharmacy API CALL');
+    }
+  }
 
   void _loadPharmacyServicesFromAPI() async {
 
@@ -48,7 +86,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
       print('trying');
       final response = await http.get(
 
-        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": token,
@@ -62,6 +100,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
             _services = responseData['data'];
             // _filteredServices = _services;
             _filteredServices = _services.where((service) => service['type'] == 'Pharmacy').toList();
+            DashboardListBox.put('_services', responseData['data']);
 
             _isLoading = false;
           });
@@ -110,7 +149,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: TranslatorWidget(
           'Pharmacy',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -143,105 +182,6 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
           :Column(
         children: [
 
-          // Semantics(
-          //   label: "Services",
-          //   header: true,
-          //   child: SizedBox(
-          //
-          //     height: 60,
-          //     child: ListView.builder(
-          //       scrollDirection: Axis.horizontal,
-          //       itemCount: specialities.length + 1,
-          //       itemBuilder: (context, index) {
-          //         if (index == 0) {
-          //           return Padding(
-          //             padding: const EdgeInsets.only(left: 8.0,right: 4),
-          //             child: FilterChip(
-          //               disabledColor: Colors.white,
-          //               label: Text(
-          //                 'All',
-          //                 style: TextStyle(
-          //                   color: _selectedServices.isEmpty ? Colors.white : Color(0xFF1C2A3A),
-          //                 ),
-          //               ),
-          //               showCheckmark: false,
-          //               selectedColor: Color(0xFF1C2A3A),
-          //               backgroundColor: Colors.white,
-          //               selected: _selectedServices.isEmpty,
-          //               // backgroundColor: _selectedSpecialities.isEmpty ? Color(0xFF1C2A3A) : Colors.transparent,
-          //               onSelected: (value) {
-          //                 setState(() {
-          //                   _selectedServices.clear();
-          //                   _filterServices();
-          //                 });
-          //               },
-          //               shape: RoundedRectangleBorder(
-          //                 borderRadius: BorderRadius.circular(20),
-          //               ),
-          //             ),
-          //           );
-          //         } else {
-          //           final speciality = specialities[index - 1];
-          //           return Padding(
-          //             padding: const EdgeInsets.all(4.0),
-          //             child: FilterChip(
-          //               label: Text(
-          //                 speciality,
-          //                 style: TextStyle(
-          //                   color: _selectedServices.contains(speciality) ? Colors.white : Color(0xFF1C2A3A),
-          //                 ),
-          //               ),
-          //               selectedColor: Color(0xFF1C2A3A),
-          //
-          //               showCheckmark: false,
-          //               selected: _selectedServices.contains(speciality),
-          //               // backgroundColor: _selectedSpecialities.contains(speciality) ? Color(0xFF1C2A3A) : Colors.transparent,
-          //               onSelected: (value) {
-          //                 setState(() {
-          //                   if (value) {
-          //
-          //                     _selectedServices.add(speciality);
-          //
-          //                   } else {
-          //                     _selectedServices.remove(speciality);
-          //                   }
-          //                   _filterServices();
-          //                 });
-          //               },
-          //               shape: RoundedRectangleBorder(
-          //                 borderRadius: BorderRadius.circular(20),
-          //               ),
-          //             ),
-          //           );
-          //         }
-          //       },
-          //     ),
-          //   ),
-          // ),
-
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(vertical: 10.0,horizontal: 20),
-          //   child: Row(
-          //     children: [
-          //       Semantics(
-          //         header:true,
-          //         child: Container(
-          //           height: 16,
-          //           child: Text(
-          //             'Nearby Services',
-          //             style: TextStyle(
-          //               color: Color(0xFF18181B),
-          //               fontSize: 16,
-          //               fontFamily: 'Roboto',
-          //               fontWeight: FontWeight.w500,
-          //               height: 0.09,
-          //             ),
-          //           ),
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // ),
           SizedBox(
             height: 4,
           ),
@@ -277,6 +217,8 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                             type: service['type'],
                             startTime: service['startTime'],
                             endTime: service['endTime'],
+                            latitude:service['latitude'],
+                            longitude:service['longitude'],
                           ),
                         ),
                       );
@@ -302,12 +244,34 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                               children: [
                                 Stack(
                                   children: [
-                                    Image.network(
-                                      // 'https://dev.iwayplus.in/uploads/$service['image']',
-                                      'https://dev.iwayplus.in/uploads/${service['image']}',
+                                    // Image.network(
+                                    //   // '${AppConfig.baseUrl}/uploads/$service['image']',
+                                    //   '${AppConfig.baseUrl}/uploads/${service['image']}',
+                                    //   width: cardWidth,
+                                    //   height: 140,
+                                    //   fit: BoxFit.cover,
+                                    // ),
+                                    CachedNetworkImage(
+                                      imageUrl: '${AppConfig.baseUrl}/uploads/${service['image']}',
                                       width: cardWidth,
                                       height: 140,
-                                      fit: BoxFit.cover,
+                                      fit: BoxFit.fill,
+                                      placeholder: (context, url) => Shimmer.fromColors(
+                                        baseColor: Colors.grey[300]!,
+                                        highlightColor: Colors.grey[100]!,
+                                        child: Container(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) => Container(
+                                        width: 250,
+                                        height: 140,
+                                        color: Colors.grey[200],
+                                        child:Image.asset(
+                                          'assets/images/DefaultCorousalImage.png',
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
                                     ),
                                     Positioned(
                                       top: 0,
@@ -335,7 +299,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                                           mainAxisAlignment: MainAxisAlignment.start,
                                           crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
-                                            Text(
+                                            TranslatorWidget(
                                               service['type'],
                                               style: TextStyle(
                                                 color: Colors.white,
@@ -357,7 +321,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                                     SizedBox(
                                       width: 12,
                                     ),
-                                    Text(
+                                    TranslatorWidget(
                                       service['name'],
                                       style: const TextStyle(
                                         fontFamily: "Roboto",
@@ -390,7 +354,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                                     SizedBox(
                                       width: 8,
                                     ),
-                                    Text(
+                                    TranslatorWidget(
                                       service['locationName'],
                                       style: const TextStyle(
                                         fontFamily: "Roboto",
@@ -416,34 +380,16 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                                     SizedBox(
                                       width: 8,
                                     ),
-                                    FutureBuilder<double>(
-                                      future: calculateDistance(service['locationId']),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState == ConnectionState.waiting) {
-                                          return SizedBox(
-                                            width: 25,
-                                            height: 25, // Adjust width as needed
-                                            child: CircularProgressIndicator(),
-                                          );
-                                        } else if (snapshot.hasError) {
-                                          return Text(
-                                            'Error',
-                                            style: TextStyle(color: Colors.red),
-                                          );
-                                        } else {
-                                          return Text(
-                                            '${snapshot.data!.toStringAsFixed(2)} m',
-                                            style: TextStyle(
-                                              color: Color(0xFF8D8C8C),
-                                              fontSize: 14,
-                                              fontFamily: 'Roboto',
-                                              fontWeight: FontWeight.w400,
-                                              height: 0.10,
-                                            ),
-                                          );
-                                        }
-                                      },
-                                    ),
+                                    Semantics(
+                                      label: "Distance",
+                                      child: TranslatorWidget(
+                                        service['distance'] ?? "50 m",
+                                        style: TextStyle(
+                                            color: Color(0xFF8D8C8C)
+                                        ),
+
+                                      ),
+                                    )
                                   ],
                                 ),
                                 SizedBox(height: 12),

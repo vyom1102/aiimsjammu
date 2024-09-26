@@ -1,6 +1,7 @@
 import 'package:chips_choice/chips_choice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 //import 'package:fuzzy/fuzzy.dart';
@@ -14,15 +15,18 @@ import '../APIMODELS/landmark.dart';
 import '../DestinationSearchPage.dart';
 import 'package:animated_checkmark/animated_checkmark.dart';
 
+import '../UserState.dart';
+import '../localization/locales.dart';
 import 'HomepageFilter.dart';
 
 
 
 class HomepageSearch extends StatefulWidget {
   final searchText;
-  final Function(String ID) onVenueClicked;
+  UserState? user;
+  final Function(String ID,{bool DirectlyStartNavigation}) onVenueClicked;
   final Function(List<String>) fromSourceAndDestinationPage;
-  const HomepageSearch({this.searchText = "Search", required this.onVenueClicked, required this.fromSourceAndDestinationPage});
+  HomepageSearch({super.key, this.searchText = "Search", required this.onVenueClicked, required this.fromSourceAndDestinationPage,required this.user});
 
   @override
   State<HomepageSearch> createState() => _HomepageSearchState();
@@ -98,7 +102,8 @@ class _HomepageSearchState extends State<HomepageSearch> {
                     child: Focus(
                       child: Semantics(
                         sortKey: const OrdinalSortKey(0),
-                        label: "Search Bar",
+                        label: "${LocaleData.waytogo.getString(context)}",
+
                         child: InkWell(
                           onTap: (){
                             Navigator.push(
@@ -106,21 +111,25 @@ class _HomepageSearchState extends State<HomepageSearch> {
                                 MaterialPageRoute(
                                     builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
                             ).then((value){
-                              widget.onVenueClicked(value);
+                              print("POP22");
+                              widget.onVenueClicked(value,DirectlyStartNavigation: false);
                             });
                           },
-                          child: Container(
-                              margin: EdgeInsets.only(left: 16),
-                              child: Text(
-                                widget.searchText,
-                                style: const TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xff8e8d8d),
-                                  height: 25 / 16,
-                                ),
-                              )),
+                          child: Semantics(
+                            excludeSemantics: true,
+                            child: Container(
+                                margin: EdgeInsets.only(left: 16),
+                                child: Text(
+                                  "${LocaleData.waytogo.getString(context)}",
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff8e8d8d),
+                                    height: 25 / 16,
+                                  ),
+                                )),
+                          ),
                         ),
                       ),
                     ),
@@ -138,6 +147,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                             MaterialPageRoute(
                                 builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: true,))
                         ).then((value){
+                          print("POPPP");
                           widget.onVenueClicked(value);
                         });
                       },
@@ -172,7 +182,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => SourceAndDestinationPage())
+                                builder: (context) => SourceAndDestinationPage(user: widget.user,))
                         ).then((value){
                           widget.fromSourceAndDestinationPage(value);
                         });

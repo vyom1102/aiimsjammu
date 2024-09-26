@@ -4,6 +4,7 @@ import 'package:iwaymaps/AiimsJammu/Screens/ContactUs.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../Widgets/Translator.dart';
 import 'PrivacyPolicy.dart';
 
 class HelpSupportScreen extends StatefulWidget {
@@ -44,7 +45,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: TranslatorWidget(
           'Help & Support',
           style: TextStyle(
             color: Colors.black,
@@ -85,7 +86,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                       child: SvgPicture.asset('assets/images/call.svg'),
                     ),
                     const SizedBox(width: 12),
-                    Text(
+                    TranslatorWidget(
                       'Contact Us',
                       style: TextStyle(
                         color: Color(0xFF18181B),
@@ -112,7 +113,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             child: InkWell(
               onTap: () {
 
-                _launchURL('https://play.google.com/store/apps/details?id=com.iwayplus.rgcinavigation');
+                _launchURL('https://play.google.com/store/apps/details?id=com.iwayplus.aiimsjammu');
               },
               child: Container(
                 width: MediaQuery.sizeOf(context).width,
@@ -130,7 +131,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                       child: SvgPicture.asset('assets/images/kid_star.svg'),
                     ),
                     const SizedBox(width: 12),
-                    Text(
+                    TranslatorWidget(
                       'Rate this app',
                       style: TextStyle(
                         color: Color(0xFF18181B),
@@ -156,7 +157,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             label:"",
             child: InkWell(
               onTap: (){
-                sendMailto(email: "Support@iwayplus.com");
+                sendMailto(email: "info@aiimsjammu.edu.in");
               },
               child: Container(
                 width: MediaQuery.sizeOf(context).width,
@@ -174,7 +175,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                       child: SvgPicture.asset('assets/images/mail.svg'),
                     ),
                     const SizedBox(width: 12),
-                    Text(
+                    TranslatorWidget(
                       'Send Feedbacks',
                       style: TextStyle(
                         color: Color(0xFF18181B),
@@ -200,7 +201,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             label:"",
             child: InkWell(
               onTap: (){
-                _shareContent("https://play.google.com/store/apps/details?id=com.iwayplus.rgcinavigation");
+                _shareContent("https://play.google.com/store/apps/details?id=com.iwayplus.aiimsjammu");
               },
               child: Container(
                 width: MediaQuery.sizeOf(context).width,
@@ -218,7 +219,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                       child: SvgPicture.asset('assets/images/share.svg'),
                     ),
                     const SizedBox(width: 12),
-                    Text(
+                    TranslatorWidget(
                       'Share this app',
                       style: TextStyle(
                         color: Color(0xFF18181B),
@@ -266,7 +267,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                       child: SvgPicture.asset('assets/profilePageAssets/article.svg'),
                     ),
                     const SizedBox(width: 12),
-                    Text(
+                    TranslatorWidget(
                       'Terms and Privacy Policy',
                       style: TextStyle(
                         color: Color(0xFF18181B),
