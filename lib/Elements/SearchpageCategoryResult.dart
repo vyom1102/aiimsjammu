@@ -22,6 +22,7 @@ class _SearchpageCategoryResultsState extends State<SearchpageCategoryResults> {
   Set<int> floors = {};
   List<String> sortedListString = [];
 
+
   @override
   void initState() {
     super.initState();
@@ -30,7 +31,7 @@ class _SearchpageCategoryResultsState extends State<SearchpageCategoryResults> {
 
   void fetchData() async {
     await fetchlist();
-    await calculateFloor();
+    //await calculateFloor();
     List<int> sortedList = [];
     floors.forEach((element) {
       sortedList.add(element);
@@ -47,17 +48,7 @@ class _SearchpageCategoryResultsState extends State<SearchpageCategoryResults> {
   Future<void> fetchlist()async{
     buildingAllApi.getStoredAllBuildingID().forEach((key, value)async{
       await landmarkApi().fetchLandmarkData(id: key).then((value){
-        landmarkData.mergeLandmarks(value.landmarks);
-      });
-    });
-
-  }
-
-  Future<void> calculateFloor() async{
-    print("In calfloor");
-    setState(() {
-      try{
-        landmarkData.landmarksMap!.forEach((key, value) {
+        value.landmarksMap?.forEach((key, value) {
           if (value.floor != null && value.buildingName == widget.buildingName) {
             floors.add(value.floor!);
             //floors.sort();
@@ -67,9 +58,26 @@ class _SearchpageCategoryResultsState extends State<SearchpageCategoryResults> {
             return;
           }
         });
-      }catch(e){
+        landmarkData.mergeLandmarks(value.landmarks);
+      });
+    });
 
-      }
+  }
+
+  Future<void> calculateFloor() async{
+    print("In calfloor");
+    setState(() {
+
+      landmarkData.landmarksMap!.forEach((key, value) {
+        if (value.floor != null && value.buildingName == widget.buildingName) {
+          floors.add(value.floor!);
+          //floors.sort();
+          print("floors");
+          print(floors);
+        } else {
+          return;
+        }
+      });
     });
   }
 

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -21,47 +23,46 @@ class SettingScreen extends StatefulWidget {
 
 class _SettingScreenState extends State<SettingScreen> {
   bool NotificationswitchValue = false;
-  bool DisabilityswitchValue = false;
+  bool DisabilityswitchValue = !(UserCredentials().getUserPersonWithDisability()==0);
   bool ColorContrastswitchValue = false;
-  // bool isNaturalDirectionSelected = true;
-  // bool isFocusMode = true;
-  // bool isDistanceinM = true;
-  late bool isNaturalDirectionSelected ;
-  late bool isFocusMode;
-  late bool isDistanceinM;
+  bool isNaturalDirectionSelected = true;
+  bool isFocusMode = true;
+  bool isDistanceinM = false;
   bool _updateAvailable = false;
   bool _checkingForUpdate = true;
   String? currentVersion ="";
   // String? selectedLanguage = 'English';
   late FlutterLocalization _flutterLocalization;
   late String _currentLocale = '';
-  late List<bool> _selectedHeight = <bool>[false, false, false];
 
   @override
   void initState() {
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
+    if(Platform.isAndroid)
     checkForUpdate();
-    print(UserCredentials().getuserNavigationModeSetting());
-    String NavigationMode = UserCredentials().getuserNavigationModeSetting();
-    isNaturalDirectionSelected = NavigationMode == 'Natural Direction';
-    print(UserCredentials().getUserOrentationSetting());
-    String Orientation = UserCredentials().getUserOrentationSetting();
-    isFocusMode = Orientation == 'Focus Mode';
-    print(UserCredentials().getUserPathDetails());
-    String Path = UserCredentials().getUserPathDetails();
-    isDistanceinM = Path == 'Distance in meters';
-    String userHeightString = UserCredentials().getUserHeight();
-    // Convert the height string to a double
-    double userHeight = double.tryParse(userHeightString) ?? 0.0;
-    // Determine which height range the user's height falls into
-    if (userHeight < 5.0) {
-      _selectedHeight[0] = true;
-    } else if (userHeight >= 5.0 && userHeight <= 6.0) {
-      _selectedHeight[1] = true;
-    } else if (userHeight > 6.0) {
-      _selectedHeight[2] = true;
+    if(UserCredentials().getUserPersonWithDisability()>0){
+      _selectedDisability[UserCredentials().getUserPersonWithDisability()-1]=true;
     }
+    if(UserCredentials().getUserPathDetails()=='Distance in meters' || UserCredentials().getUserPathDetails()=='मीटर में दूरी' ){
+      isDistanceinM=true;
+    }else{
+      isDistanceinM=false;
+    }
+
+    if(UserCredentials().getuserNavigationModeSetting()=='Natural Direction' || UserCredentials().getuserNavigationModeSetting()=='प्राकृतिक दिशा' ){
+      isNaturalDirectionSelected=true;
+    }else{
+      isNaturalDirectionSelected=false;
+    }
+
+    if(UserCredentials().getUserOrentationSetting()=='Focus Mode' || UserCredentials().getUserPathDetails()=='फोकस मोड' ){
+      isFocusMode=true;
+    }else{
+      isFocusMode=false;
+    }
+
+
     super.initState();
   }
   void showToast(String mssg) {
@@ -106,13 +107,16 @@ class _SettingScreenState extends State<SettingScreen> {
     print(UserCredentials().getUserPathDetails());
   }
   Future<void> checkForUpdate() async {
-      print("checking update");
+    print("checking update");
     final newVersion = NewVersionPlus(
       androidId: 'com.iwayplus.aiimsjammu',
       // iOSId: 'com.iwayplus.rgcinavigation',
     );
 
     try {
+      if(Platform.isIOS){
+        _checkingForUpdate=false;
+      }
       final status = await newVersion.getVersionStatus();
       print("status");
       print(status?.localVersion);
@@ -129,8 +133,9 @@ class _SettingScreenState extends State<SettingScreen> {
     }
   }
 
-  final List<bool> _selectedDisability = <bool>[true, false, false];
-  // final List<bool> _selectedHeight = <bool>[true, false, false];
+  final List<bool> _selectedDisability = <bool>[false, false, false];
+  final List<bool> _selectedHeight = <bool>[true, false, false];
+
   // List<String> StringDisability = ['Blind','Low Vision','Wheelchair','Regular'];
   // List<Widget> disability = <Widget>[
   //   Text(
@@ -368,7 +373,8 @@ class _SettingScreenState extends State<SettingScreen> {
                         ),
                       ),
                       Spacer(),
-                      if (_checkingForUpdate)
+
+                      if (_checkingForUpdate && Platform.isAndroid)
                         CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0B6B94)),
@@ -538,6 +544,14 @@ class _SettingScreenState extends State<SettingScreen> {
                             value: DisabilityswitchValue,
                             onChanged: (bool value) {
                               setState(() {
+                                if(!value){
+                                  UserCredentials().setUserPersonWithDisability(0);
+                                }else{
+                                  UserCredentials().setUserPersonWithDisability(1);
+                                  setState(() {
+                                    _selectedDisability[0]=true;
+                                  });
+                                }
                                 DisabilityswitchValue = value;
                               });
                             },
@@ -571,6 +585,8 @@ class _SettingScreenState extends State<SettingScreen> {
                           _selectedDisability[i] = i == index;
                         }
                       });
+                      UserCredentials().setUserPersonWithDisability(index+1);
+
                     },
                     borderRadius: const BorderRadius.all(Radius.circular(8)),
                     selectedBorderColor: Color(0xff0B6B94),
@@ -766,13 +782,13 @@ class _SettingScreenState extends State<SettingScreen> {
                     // children: disability,
                     children: [
                       Text(
-                        LocaleData.less5Feet.getString(context)
+                          LocaleData.less5Feet.getString(context)
                       ),
                       Text(
-                        LocaleData.between56Feet.getString(context)
+                          LocaleData.between56Feet.getString(context)
                       ),
                       Text(
-                        LocaleData.more6Feet.getString(context)
+                          LocaleData.more6Feet.getString(context)
                       ),
                       // for (int i = 0; i < height.length; i++)
                       //   Row(

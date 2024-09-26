@@ -14,6 +14,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../config.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/Translator.dart';
 
@@ -62,7 +63,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
   //   setState(() {
   //     isLoading = true;
   //   });
-  //   final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+  //   final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
   //
   //   try {
   //     final response = await http.post(
@@ -107,7 +108,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
     setState(() {
       isLoading = true;
     });
-    final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
 
     try {
       final response = await http.post(
@@ -154,7 +155,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
   }
 
   Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -274,7 +275,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
   }
 
   Future<void> updateUserFavorites() async {
-    String baseUrl = "https://dev.iwayplus.in/secured/user/toggle-favourites";
+    String baseUrl = "${AppConfig.baseUrl}/secured/user/toggle-favourites";
 
     Map<String, String> headers = {
       'Content-Type': 'application/json',
@@ -342,7 +343,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
         ),
         actions: [
           IconButton(onPressed: (){
-            _shareContent("https://dev.iwayplus.in/#/iway-apps/aiimsj.com/doctor?docId=${widget.docId}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
+            _shareContent("${AppConfig.baseUrl}/#/iway-apps/aiimsj.com/doctor?docId=${widget.docId}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
 
             // _shareContent("iwayplus://aiimsj.com/doctor?docId=${widget.docId}");
           }, icon: Icon(Icons.share_outlined)),
@@ -370,7 +371,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                     children: [
                       CircleAvatar(
                         backgroundImage:
-                        NetworkImage('https://dev.iwayplus.in/uploads/${widget.doctor['imageUrl']}'),
+                        NetworkImage('${AppConfig.baseUrl}/uploads/${widget.doctor['imageUrl']}'),
                         // AssetImage(widget.doctor[
                         //     'imageUrl']),
                         radius: 73,

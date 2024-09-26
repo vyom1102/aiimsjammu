@@ -29,7 +29,7 @@
 //                   children: [
 //
 //                     Image.network(
-//                       'https://dev.iwayplus.in/uploads/${imagePath}',
+//                       '${AppConfig.baseUrl}/uploads/${imagePath}',
 //                       width: 250,
 //                       height: 140,
 //                       fit: BoxFit.cover,
@@ -241,13 +241,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:iwaymaps/AiimsJammu/Widgets/Translator.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../config.dart';
 import '/AiimsJammu/Screens/ServiceInfo.dart';
 
 import 'CalculateDistance.dart';
 import 'OpeningClosingStatus.dart';
 
-class NearbyServiceWidget extends StatelessWidget {
+class NearbyServiceWidget extends StatefulWidget {
   final String id;
   final String imagePath;
   final String name;
@@ -260,7 +262,8 @@ class NearbyServiceWidget extends StatelessWidget {
   final String contact;
   final String about;
   final List<String> weekDays;
-
+  final String latitude;
+  final String longitude;
 
   const NearbyServiceWidget({
     required this.id,
@@ -275,8 +278,28 @@ class NearbyServiceWidget extends StatelessWidget {
     required this.contact,
     required this.about,
     required this.weekDays,
+    required this.latitude,
+    required this.longitude,
   });
 
+  @override
+  State<NearbyServiceWidget> createState() => _NearbyServiceWidgetState();
+}
+
+class _NearbyServiceWidgetState extends State<NearbyServiceWidget> {
+  double? _distanceFuture;
+  @override
+  void initState() {
+    super.initState();
+    distance();
+  }
+  void distance() async{
+    calculateDistance(widget.latitude, widget.longitude).then((value){
+      setState(() {
+        _distanceFuture = value;
+      });
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -288,17 +311,19 @@ class NearbyServiceWidget extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (context) => ServiceInfo(
-                id: id,
-                contact: contact,
-                about: about,
-                imagePath: imagePath,
-                name: name,
-                location: location,
-                accessibility: accessibility,
-                locationId: locationId,
-                type: type,
-                startTime: startTime,
-                endTime: endTime,
+                id: widget.id,
+                contact: widget.contact,
+                about: widget.about,
+                imagePath: widget.imagePath,
+                name: widget.name,
+                location: widget.location,
+                accessibility: widget.accessibility,
+                locationId: widget.locationId,
+                type: widget.type,
+                startTime: widget.startTime,
+                endTime: widget.endTime,
+                longitude: widget.longitude,
+                latitude: widget.latitude,
               ),
             ),
           );
@@ -316,25 +341,31 @@ class NearbyServiceWidget extends StatelessWidget {
                 children: [
                   Stack(
                     children: [
-                      CachedNetworkImage(
-                        imageUrl: 'https://dev.iwayplus.in/uploads/${imagePath}',
-                        width: 250,
-                          height: 140,
-                        placeholder: (context, url) => Shimmer.fromColors(
-                          baseColor: Colors.grey[300]!,
-                          highlightColor: Colors.grey[100]!,
-                          child: Container(
-                            color: Colors.white,
+                      ClipRRect(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(8),
+                          topRight: Radius.circular(8),
+                        ),
+                        child: CachedNetworkImage(
+                          imageUrl: '${AppConfig.baseUrl}/uploads/${widget.imagePath}',
+                          width: 250,
+                            height: 140,
+                          placeholder: (context, url) => Shimmer.fromColors(
+                            baseColor: Colors.grey[300]!,
+                            highlightColor: Colors.grey[100]!,
+                            child: Container(
+                              color: Colors.white,
+                            ),
                           ),
+                          errorWidget: (context, url, error) => Image.asset(
+                            'assets/images/DefaultCorousalImage.png',
+                            fit: BoxFit.cover,
+                          ),
+                          fit: BoxFit.fill,
                         ),
-                        errorWidget: (context, url, error) => Image.asset(
-                          'assets/images/DefaultCorousalImage.png',
-                          fit: BoxFit.cover,
-                        ),
-                        fit: BoxFit.fill,
                       ),
                       // Image.network(
-                      //   'https://dev.iwayplus.in/uploads/$imagePath',
+                      //   '${AppConfig.baseUrl}/uploads/$imagePath',
                       //   width: 250,
                       //   height: 140,
                       //   fit: BoxFit.cover,
@@ -348,7 +379,7 @@ class NearbyServiceWidget extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: Color(0xFF05AF9A),
                             borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(0),
+                              topRight: Radius.circular(8),
                               bottomLeft: Radius.circular(8),
                             ),
                             boxShadow: [
@@ -366,7 +397,7 @@ class NearbyServiceWidget extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
-                                type,
+                                widget.type,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
@@ -388,7 +419,7 @@ class NearbyServiceWidget extends StatelessWidget {
                         width: 12,
                       ),
                       Text(
-                        name,
+                        widget.name,
                         style: const TextStyle(
                           fontFamily: "Roboto",
                           fontSize: 16,
@@ -397,7 +428,7 @@ class NearbyServiceWidget extends StatelessWidget {
                         ),
                         textAlign: TextAlign.left,
                       ),
-                      if (accessibility != 'NO')
+                      if (widget.accessibility != 'NO')
                         Padding(
                           padding: const EdgeInsets.only(left: 8.0),
                           child: Image.asset('assets/images/accessible.png', scale: 4),
@@ -420,12 +451,12 @@ class NearbyServiceWidget extends StatelessWidget {
                       SizedBox(
                         width: 8,
                       ),
-                      
+
                       Expanded(
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Text(
-                            location,
+                            widget.location,
                             style: const TextStyle(
                               fontFamily: "Roboto",
                               fontSize: 14,
@@ -435,7 +466,7 @@ class NearbyServiceWidget extends StatelessWidget {
                             textAlign: TextAlign.left,
                             overflow: TextOverflow.ellipsis,
                           ),
-                        
+
                         ),
                       ),
                     ],
@@ -455,33 +486,48 @@ class NearbyServiceWidget extends StatelessWidget {
                         width: 8,
                       ),
                       FutureBuilder<double>(
-                        future: calculateDistance(locationId),
+                        future: null,
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
                             return SizedBox(
                               width: 25,
-                              height: 25, // Adjust width as needed
+                              height: 25,
                               child: CircularProgressIndicator(),
                             );
                           } else if (snapshot.hasError) {
-                            return Text(
+                            return TranslatorWidget(
                               'Error',
                               style: TextStyle(color: Colors.red),
                             );
                           } else {
-                            return Text(
-                              '${snapshot.data!.toStringAsFixed(2)} m',
-                              style: TextStyle(
-                                color: Color(0xFF8D8C8C),
-                                fontSize: 14,
-                                fontFamily: 'Roboto',
-                                fontWeight: FontWeight.w400,
-                                height: 0.10,
-                              ),
-                            );
+                            double distance = _distanceFuture ?? 0;
+                            if (distance >= 1000) {
+                              return TranslatorWidget(
+                                '${(distance / 1000).toStringAsFixed(0)} km',
+                                style: TextStyle(
+                                  color: Color(0xFF8D8C8C),
+                                  fontSize: 14,
+                                  fontFamily: 'Roboto',
+                                  fontWeight: FontWeight.w400,
+                                  height: 0.10,
+                                ),
+                              );
+                            } else {
+                              return TranslatorWidget(
+                                '${distance.toStringAsFixed(0)} m',
+                                style: TextStyle(
+                                  color: Color(0xFF8D8C8C),
+                                  fontSize: 14,
+                                  fontFamily: 'Roboto',
+                                  fontWeight: FontWeight.w400,
+                                  height: 0.10,
+                                ),
+                              );
+                            }
                           }
                         },
-                      ),
+                      )
                     ],
                   ),
                   SizedBox(height: 16),
@@ -490,7 +536,7 @@ class NearbyServiceWidget extends StatelessWidget {
                       SizedBox(width: 12),
                       Container(
                         // height: 20,
-                        child: OpeningClosingStatus(startTime: startTime, endTime: endTime),
+                        child: OpeningClosingStatus(startTime: widget.startTime, endTime: widget.endTime),
                       ),
                     ],
                   ),

@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:iwaymaps/AiimsJammu/Widgets/GlobalSearch.dart';
+import 'package:iwaymaps/LOGIN%20SIGNUP/SignIn.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
@@ -21,6 +23,7 @@ import '../../API/RefreshTokenAPI.dart';
 import '../../API/UsergetAPI.dart';
 import '../../APIMODELS/DataVersion.dart';
 import '../../VersioInfo.dart';
+import '../../config.dart';
 import '../Widgets/Translator.dart';
 import '/DestinationSearchPage.dart';
 import '/AiimsJammu/Screens/ATMScreen.dart';
@@ -101,11 +104,27 @@ class _HomePageState extends State<HomePage> {
     checkForReload();
     versionApiCall();
 
+    isUserValid();
 
 
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
 
+  }
+  Future<void> isUserValid() async{
+    try{
+     String refreshToken1= await RefreshTokenAPI.refresh();
+     if(refreshToken1=="400"){
+       Navigator.pushAndRemoveUntil(
+         context,
+         MaterialPageRoute(builder: (context) => SignIn()),
+             (route) => false,
+       );
+     }
+    }
+    catch(e){
+
+    }
   }
 
   Future<void> versionApiCheck() async {
@@ -116,7 +135,7 @@ class _HomePageState extends State<HomePage> {
       refreshTokenN = signInBox.get("refreshToken");
 
       final response = await http.post(
-        Uri.parse("https://dev.iwayplus.in/secured/data-version1"),
+        Uri.parse("${AppConfig.baseUrl}/secured/data-version1"),
         body: json.encode({
           "id": "6673e7a3b92e69bc7f4b40ae",
         }),
@@ -126,8 +145,6 @@ class _HomePageState extends State<HomePage> {
         },
       );
 
-      print("code");
-      print(response.statusCode);
 
       if (response.statusCode == 200) {
         print("Version API call success");
@@ -150,7 +167,6 @@ class _HomePageState extends State<HomePage> {
           });
 
           if (dashboarddataversion.get('doctorVersion') != doctorVersion) {
-            print("Updating doctor data...");
             _doctors.clear();
             await _loadDoctorsFromAPI();
             print("Doctor data updated");
@@ -242,79 +258,9 @@ class _HomePageState extends State<HomePage> {
   var versionBox = Hive.box('VersionData');
   void versionApiCall() async{
     try {
-      DataVersion dataVersion = await DataVersionApi()
+      await DataVersionApi()
           .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
-      if (versionBox.containsKey("buildingID") &&
-          versionBox.get("buildingID") == dataVersion.versionData!.buildingID) {
-        print("Already present");
-        if (dataVersion.versionData!.landmarksDataVersion ==
-            versionBox.get("landmarksDataVersion")) {
-          VersionInfo.landmarksDataVersionUpdate = false;
-          print("LandmarkVersion change: False");
-        } else {
-          versionBox.put("landmarksDataVersion",
-              dataVersion.versionData!.landmarksDataVersion);
 
-          VersionInfo.landmarksDataVersionUpdate = true;
-          print("LandmarkVersion change: True");
-        }
-
-        if (dataVersion.versionData!.polylineDataVersion ==
-            versionBox.get("polylineDataVersion")) {
-          VersionInfo.polylineDataVersionUpdate = false;
-
-          print("PolylineVersion change: False");
-          print(
-              "${dataVersion.versionData!.polylineDataVersion} ${versionBox.get(
-                  "polylineDataVersion")}");
-        } else {
-          VersionInfo.polylineDataVersionUpdate = true;
-          print("PolylineVersion change: True");
-          versionBox.put("polylineDataVersion",
-              dataVersion.versionData!.polylineDataVersion);
-          print(
-              "${dataVersion.versionData!.polylineDataVersion} ${versionBox.get(
-                  "polylineDataVersion")}");
-        }
-
-        if (dataVersion.versionData!.buildingDataVersion ==
-            versionBox.get("buildingDataVersion")) {
-          VersionInfo.buildingDataVersionUpdate = false;
-          print("BuildingDataVersion change: False");
-        } else {
-          VersionInfo.buildingDataVersionUpdate = true;
-          versionBox.put("buildingDataVersion",
-              dataVersion.versionData!.buildingDataVersion);
-          print("BuildingDataVersion change: True");
-        }
-
-        if (dataVersion.versionData!.patchDataVersion ==
-            versionBox.get("patchDataVersion")) {
-          VersionInfo.patchDataVersionUpdate = false;
-          print("PatchDataVersion change: False");
-        } else {
-          VersionInfo.patchDataVersionUpdate = true;
-          versionBox.put(
-              "patchDataVersion", dataVersion.versionData!.patchDataVersion);
-
-          print("PatchDataVersion change: True");
-        }
-      } else {
-        print("Not present");
-        versionBox.put("landmarksDataVersion",
-            dataVersion.versionData!.landmarksDataVersion);
-        versionBox.put("polylineDataVersion",
-            dataVersion.versionData!.polylineDataVersion);
-        versionBox.put("buildingDataVersion",
-            dataVersion.versionData!.buildingDataVersion);
-        versionBox.put(
-            "patchDataVersion", dataVersion.versionData!.patchDataVersion);
-        versionBox.put("sId", dataVersion.versionData!.sId);
-        versionBox.put("iV", dataVersion.versionData!.iV);
-        versionBox.put("createdAt", dataVersion.versionData!.createdAt);
-        versionBox.put("updatedAt", dataVersion.versionData!.updatedAt);
-        versionBox.put("buildingID", dataVersion.versionData!.buildingID);
-      }
       loadInfoToFile();
     }catch(e){
 
@@ -450,7 +396,7 @@ class _HomePageState extends State<HomePage> {
       print('trying');
       final response = await http.get(
 
-        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-doctors/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-doctors/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": token,
@@ -490,7 +436,7 @@ class _HomePageState extends State<HomePage> {
       print('trying');
       final response = await http.get(
 
-        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": token,
@@ -498,7 +444,7 @@ class _HomePageState extends State<HomePage> {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        print(responseData);
+        // print(responseData);
         if (responseData.containsKey('data') && responseData['data'] is List) {
 
           setState(() {
@@ -571,7 +517,7 @@ class _HomePageState extends State<HomePage> {
       });
       print('trying');
       final response = await http.get(
-        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-corousal/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-corousal/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": token,
@@ -580,7 +526,7 @@ class _HomePageState extends State<HomePage> {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        print(responseData);
+        // print(responseData);
         if (responseData.containsKey('data') &&
             responseData['data'] is List) {
           setState(() {
@@ -609,7 +555,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -650,7 +596,7 @@ class _HomePageState extends State<HomePage> {
         }
       });
       final response = await http.get(
-        Uri.parse('https://dev.iwayplus.in/secured/hospital/all-announcement/6673e7a3b92e69bc7f4b40ae'),
+        Uri.parse('${AppConfig.baseUrl}/secured/hospital/all-announcement/6673e7a3b92e69bc7f4b40ae'),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": token,
@@ -665,7 +611,7 @@ class _HomePageState extends State<HomePage> {
             announcements = responseData['data'];
             DashboardListBox.put('announcements', responseData['data']);
           });
-          print(announcements);
+          // print(announcements);
         } else {
           throw Exception('Response data does not contain the expected list of announcements');
         }
@@ -688,7 +634,7 @@ class _HomePageState extends State<HomePage> {
       });
       print('trying');
       final response = await http.get(
-        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": token,
@@ -697,7 +643,7 @@ class _HomePageState extends State<HomePage> {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        print(responseData);
+        // print(responseData);
         if (responseData.containsKey('data') &&
             responseData['data'] is List) {
           setState(() {
@@ -820,7 +766,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       nameLoading = true;
     });
-    final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
 
     try {
       final response = await http.post(
@@ -868,6 +814,7 @@ class _HomePageState extends State<HomePage> {
           toolbarHeight: 120,
           automaticallyImplyLeading: false,
           backgroundColor: Colors.white,
+          scrolledUnderElevation: 0,
           elevation: 0,
           title: Column(
             children: [
@@ -910,18 +857,18 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                   Spacer(),
-                  IconButton(
-                    icon: Icon(Icons.notifications_none_outlined),
-                    color: Color(0xff18181b),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => NotificationScreen(),
-                        ),
-                      );
-                    },
-                  ),
+                  // IconButton(
+                  //   icon: Icon(Icons.notifications_none_outlined),
+                  //   color: Color(0xff18181b),
+                  //   onPressed: () {
+                  //     Navigator.push(
+                  //       context,
+                  //       MaterialPageRoute(
+                  //         builder: (context) => NotificationScreen(),
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
                 ],
               ),
               SizedBox(height: 10,),
@@ -971,7 +918,7 @@ class _HomePageState extends State<HomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => DestinationSearchPage(voiceInputEnabled: false),
+                              builder: (context) => GlobalSearchPage(voiceInputEnabled: false),
                             ),
                           ).then((value) => PassLocationId(context, value));
                         },
@@ -1240,6 +1187,8 @@ class _HomePageState extends State<HomePage> {
                                         contact: '${service['contact']}',
                                         about: '${service['about']}',
                                         id: '${service['_id']}',
+                                        longitude: '${service['longitude']}',
+                                        latitude: '${service['latitude']}',
                                       ),
                                     ),
                                   );
@@ -1267,6 +1216,8 @@ class _HomePageState extends State<HomePage> {
                                     about: '${service['about']}',
                                     weekDays:
                                     List<String>.from(service['weekDays']),
+                                    longitude: '${service['longitude']}',
+                                    latitude: '${service['latitude']}',
                                     // '${service['locationId']}',
                                   ),
                                 ),
@@ -1523,225 +1474,6 @@ Widget _buildImpNote(
         ),
       ],
       // ),
-    ),
-  );
-}
-
-Widget _buildNearbyService(String imagePath, String name, String Location,
-    String locationId, String type,String startTime, String endTime,String accessibility,List<String> weekDays) {
-
-  return Container(
-    color: Colors.white,
-    child: GestureDetector(
-
-      // onTap: () {
-      //   // PassLocationId(locationId);
-      //
-      //
-      // },
-      child: Card(
-        shadowColor: Color(0xff000000).withOpacity(0.25),
-        color: Colors.white,
-        elevation: 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Color(0xFFE0E0E0), width: 1),
-          ),
-          width: 250,
-          child: Stack(children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Stack(
-                  children: [
-
-                    Image.network(
-                      'https://dev.iwayplus.in/uploads/${imagePath}',
-                      width: 250,
-                      height: 140,
-                      fit: BoxFit.cover,
-                    ),
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      // child: Container(
-                      //   height: 40,
-                      //   decoration: BoxDecoration(
-                      //     shape: BoxShape.circle,
-                      //     color: Colors.transparent.withOpacity(
-                      //         0.2),
-                      //   ),
-                      //   child: IconButton(
-                      //     disabledColor: Colors.grey,
-                      //     onPressed: () {},
-                      //     icon: Icon(
-                      //       isFavorite ? Icons.favorite : Icons.favorite_border,
-                      //       color: isFavorite ? Colors.red : null,
-                      //     ),
-                      //     color: Colors.white,
-                      //   ),
-                      // ),
-                      child: Container(
-                        // width: 73,
-                        height: 26,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Color(0xFF05AF9A),
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(8),
-                            bottomLeft: Radius.circular(8),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0x3F000000),
-                              blurRadius: 4,
-                              offset: Offset(0, 0),
-                              spreadRadius: 0,
-                            )
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            TranslatorWidget(
-                              type,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontFamily: 'Roboto',
-                                fontWeight: FontWeight.w400,
-                                height: 0.12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 12),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 12,
-                    ),
-                    TranslatorWidget(
-                      name,
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xff18181b),
-
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-
-                    if(accessibility!='NO')
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Image.asset('assets/images/accessible.png',scale: 4,),
-                      )
-                  ],
-                ),
-                SizedBox(
-                  height: 4,
-                ),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Icon(
-                      Icons.location_on_outlined,
-                      color: Color(0xFF8D8C8C),
-                      size: 16,
-                    ),
-                    SizedBox(
-                      width: 8,
-                    ),
-                    TranslatorWidget(
-                      Location,
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF8D8C8C),
-
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 4,
-                ),
-
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 12,
-                    ),
-                    SizedBox(
-                      child: SvgPicture.asset('assets/images/routing.svg'),
-
-                    ),
-                    SizedBox(
-                      width: 8,
-                    ),
-
-                    FutureBuilder<double>(
-                      future: calculateDistance(locationId),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return SizedBox(
-                            width: 25,
-                            height: 25,// Adjust width as needed
-                            child: CircularProgressIndicator(),
-                          );
-                        } else if (snapshot.hasError) {
-                          return TranslatorWidget(
-                            'Error',
-                            style: TextStyle(color: Colors.red),
-                          );
-                        } else {
-                          return Text(
-                            '${snapshot.data!.toStringAsFixed(2)} m',
-                            style: TextStyle(
-                              color: Color(0xFF8D8C8C),
-                              fontSize: 14,
-                              fontFamily: 'Roboto',
-                              fontWeight: FontWeight.w400,
-                              height: 0.10,
-                            ),
-                          );
-                        }
-                      },
-                    ),
-
-                  ],
-                ),
-                SizedBox(height: 12,),
-                Row(
-                  children: [
-                    SizedBox(width: 12,),
-                    Container(
-                      // height: 20,
-                        child: OpeningClosingStatus(startTime: startTime, endTime: endTime,)),
-                  ],
-                ),
-                SizedBox(height: 5,)
-              ],
-            ),
-          ]),
-        ),
-      ),
     ),
   );
 }

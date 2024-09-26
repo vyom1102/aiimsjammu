@@ -9,6 +9,7 @@ import 'package:iwaymaps/AiimsJammu/Widgets/Translator.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../config.dart';
 import '../Data/DoctorDemoData.dart';
 import 'package:http/http.dart' as http;
 import '../../API/guestloginapi.dart';
@@ -71,7 +72,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
       print('trying');
       final response = await http.get(
 
-        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": token,
@@ -231,6 +232,8 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
                             type: service['type'],
                             startTime: service['startTime'],
                             endTime: service['endTime'],
+                            latitude:service['latitude'],
+                            longitude:service['longitude'],
                           ),
                         ),
                       );

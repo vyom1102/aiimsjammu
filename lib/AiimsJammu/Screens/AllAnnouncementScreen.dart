@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:iwaymaps/AiimsJammu/Widgets/Translator.dart';
 
 import '../../API/guestloginapi.dart';
+import '../../config.dart';
 import '../Widgets/AnouncementCard.dart';
 
 class AllAnnouncementScreen extends StatefulWidget {
@@ -50,7 +51,7 @@ class _AllAnnouncementScreenState extends State<AllAnnouncementScreen> {
       print('trying');
       final response = await http.get(
 
-        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-announcement/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-announcement/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": token,

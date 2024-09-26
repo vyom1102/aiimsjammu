@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hive/hive.dart';
+import '../../config.dart';
 import '../Widgets/Translator.dart';
 import '/AiimsJammu/Data/ServicesDemoData.dart';
 import 'package:share_plus/share_plus.dart';
@@ -30,6 +31,8 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
   List<String> _selectedServices = [];
   bool _isLoading = true;
   String token = "";
+  double? _distanceFuture;
+
   var DashboardListBox = Hive.box('DashboardList');
   TextEditingController _searchController = TextEditingController();
   @override
@@ -38,7 +41,24 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
     // _loadServices();
     // _loadServicesFromAPI();
     checkForReload();
+    _updateDistances();
 
+  }
+  Future<void> _updateDistances() async {
+    for (var service in _services) {
+      double distance = await calculateDistance(
+        service['latitude'].toString(),
+        service['longitude'].toString(),
+      );
+      if (distance>=1000){
+        service['distance'] =  '${(distance / 1000).toStringAsFixed(0)} km';
+      }else{
+        service['distance'] =  '${distance.toStringAsFixed(0)} m';
+
+      }
+
+    }
+    setState(() {});
   }
   void checkForReload(){
     if(DashboardListBox.containsKey('_services')){
@@ -66,7 +86,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
       print('trying');
       final response = await http.get(
 
-        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": token,
@@ -301,6 +321,8 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                             type: service['type'],
                             startTime: service['startTime'],
                             endTime: service['endTime'],
+                            latitude:service['latitude'],
+                            longitude:service['longitude'],
                           ),
                         ),
                       );
@@ -327,14 +349,14 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                                 Stack(
                                   children: [
                                     // Image.network(
-                                    //   // 'https://dev.iwayplus.in/uploads/$service['image']',
-                                    //   'https://dev.iwayplus.in/uploads/${service['image']}',
+                                    //   // '${AppConfig.baseUrl}/uploads/$service['image']',
+                                    //   '${AppConfig.baseUrl}/uploads/${service['image']}',
                                     //   width: cardWidth,
                                     //   height: 140,
                                     //   fit: BoxFit.cover,
                                     // ),
                                     CachedNetworkImage(
-                                      imageUrl: 'https://dev.iwayplus.in/uploads/${service['image']}',
+                                      imageUrl: '${AppConfig.baseUrl}/uploads/${service['image']}',
                                       width: cardWidth,
                                       height: 140,
                                       fit: BoxFit.fill,
@@ -462,34 +484,16 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                                     SizedBox(
                                       width: 8,
                                     ),
-                                    FutureBuilder<double>(
-                                      future: calculateDistance(service['locationId']),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState == ConnectionState.waiting) {
-                                          return SizedBox(
-                                            width: 25,
-                                            height: 25, // Adjust width as needed
-                                            child: CircularProgressIndicator(),
-                                          );
-                                        } else if (snapshot.hasError) {
-                                          return TranslatorWidget(
-                                            'Error',
-                                            style: TextStyle(color: Colors.red),
-                                          );
-                                        } else {
-                                          return Text(
-                                            '${snapshot.data!.toStringAsFixed(2)} m',
-                                            style: TextStyle(
-                                              color: Color(0xFF8D8C8C),
-                                              fontSize: 14,
-                                              fontFamily: 'Roboto',
-                                              fontWeight: FontWeight.w400,
-                                              height: 0.10,
-                                            ),
-                                          );
-                                        }
-                                      },
-                                    ),
+                                    Semantics(
+                                      label: "Distance",
+                                      child: TranslatorWidget(
+                                        service['distance'] ?? "50 m",
+                                        style: TextStyle(
+                                            color: Color(0xFF8D8C8C)
+                                        ),
+
+                                      ),
+                                    )
                                   ],
                                 ),
                                 SizedBox(height: 12),

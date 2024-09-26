@@ -14,6 +14,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../config.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/Translator.dart';
 import 'ServiceInfo1.dart';
@@ -44,7 +45,7 @@ class _FavouriteServiceState extends State<FavouriteService> {
 
 
   Future<void> updateUserFavorites(String id) async {
-    String baseUrl = "https://dev.iwayplus.in/secured/user/toggle-favourites";
+    String baseUrl = "${AppConfig.baseUrl}/secured/user/toggle-favourites";
 
     Map<String, String> headers = {
       'Content-Type': 'application/json',
@@ -162,7 +163,7 @@ class _FavouriteServiceState extends State<FavouriteService> {
   }
 
   Future<void> getUserDetails() async {
-    final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
 
     try {
       final response = await http.post(
@@ -205,7 +206,7 @@ class _FavouriteServiceState extends State<FavouriteService> {
 
   Future<void> getDoctorDetails(String doctorId) async {
     final String doctorUrl =
-        "https://dev.iwayplus.in/secured/hospital/get-service/$doctorId";
+        "${AppConfig.baseUrl}/secured/hospital/get-service/$doctorId";
 
     try {
       final response = await http.get(
@@ -239,7 +240,7 @@ class _FavouriteServiceState extends State<FavouriteService> {
   }
 
   Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -526,7 +527,7 @@ class _FavouriteServiceState extends State<FavouriteService> {
                                     Expanded(
                                       child: OutlinedButton(
                                         onPressed: () {
-                                          _shareContent("https://dev.iwayplus.in/#/iway-apps/aiimsj.com/service?serviceId=${FserviceId[index]}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
+                                          _shareContent("${AppConfig.baseUrl}/#/iway-apps/aiimsj.com/service?serviceId=${FserviceId[index]}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
 
                                           // _shareContent(shareText);
                                         },

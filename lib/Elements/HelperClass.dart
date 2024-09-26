@@ -44,6 +44,9 @@ class HelperClass{
     return Map.fromEntries(sortedEntries);
   }
 
+
+
+
   static Future<void> shareContent(String text) async {
     try {
       final qrValidationResult = QrValidator.validate(
@@ -99,7 +102,7 @@ class HelperClass{
       print('Error sharing content: $e');
     }
   }
-  
+
   static Future<HashMap<String,List<buildingAll>>> groupBuildings(List<buildingAll> data)async{
     HashMap<String,List<buildingAll>> venueMap = HashMap();
     for(buildingAll building in data){
@@ -108,7 +111,7 @@ class HelperClass{
     }
     return venueMap;
   }
-  
+
   static Future<Map<String,g.LatLng>> createAllbuildingMap (HashMap<String,List<buildingAll>> venueMap, String venue)async{
     Map<String,g.LatLng> AllBuildingMap = Map();
     for (var building in venueMap[venue]!) {
@@ -154,8 +157,6 @@ class HelperClass{
     }
     return newList;
   }
-
-
   static Map<String, List<buildingAll>> venueHashMap=new HashMap();
   static List<VenueModel> venueList=[];
   static List<VenueModel> buildingsPos=[];
@@ -178,24 +179,15 @@ class HelperClass{
     for(int i=0;i<buildingList!.length;i++){
       var currentData=buildingList[i];
       if(currentData.geofencing!=null && currentData.geofencing!){
-    //     if(userPos.latitude.toStringAsFixed(2)==(28.54343736711034).toStringAsFixed(2) &&  userPos.longitude.toStringAsFixed(2)==(77.18752205371858).toStringAsFixed(2)){
-    //       return 0;
-    // }
         for(int j=0;j<venueList.length;j++){
           if(userPos.latitude.toStringAsFixed(2)==venueList[j].coordinates[0].toStringAsFixed(2) && userPos.longitude.toStringAsFixed(2)==venueList[j].coordinates[1].toStringAsFixed(2)){
-            //open the map
             return 0;
-          }else{
-            //do not open the map
-            return 3;
           }
         }
       }else{
-        //no geofencing open the map
         return 1;
       }
     }
-    //some random case in working
     return 2;
 
   }

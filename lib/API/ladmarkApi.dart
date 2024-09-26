@@ -20,11 +20,15 @@ class landmarkApi {
 
 
 
-  Future<land> fetchLandmarkData({String? id = null}) async {
+  Future<land> fetchLandmarkData({String? id = null, bool outdoor = false}) async {
     print("landmark");
     accessToken = signInBox.get("accessToken");
     final LandMarkBox = LandMarkApiModelBox.getData();
-    if(LandMarkBox.containsKey(id??buildingAllApi.getStoredString()) ){
+
+    print("version check${VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id)}");
+    print("version check${id}");
+
+    if(LandMarkBox.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingLandmarkDataVersionUpdate[id??buildingAllApi.getStoredString()]! == false){
       print("LANDMARK DATA FORM DATABASE ");
       print(id??buildingAllApi.getStoredString());
       Map<String, dynamic> responseBody = LandMarkBox.get(id??buildingAllApi.getStoredString())!.responseBody;
@@ -32,9 +36,10 @@ class landmarkApi {
       return land.fromJson(responseBody);
     }
 
-
+    print("outdoor boolean $outdoor");
     final Map<String, dynamic> data = {
       "id": id??buildingAllApi.getStoredString(),
+      "outdoor": outdoor
     };
 
     final response = await http.post(

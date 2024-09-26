@@ -15,6 +15,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../MainScreen.dart';
+import '../../config.dart';
 import '../Widgets/CalculateDistance.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/OpeningClosingStatus.dart';
@@ -46,6 +47,10 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
   Map<dynamic, dynamic> service={};
   bool isLoading = true;
   bool _isConnected = false;
+  double? _distanceFuture;
+
+
+
   Future<void> _checkConnectivity() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult.contains(ConnectivityResult.mobile) || connectivityResult.contains(ConnectivityResult.wifi)) {
@@ -55,7 +60,7 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
     }
   }
   Future<void> getUserDetails() async {
-    final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
 
     try {
       final response = await http.post(
@@ -112,7 +117,7 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
   }
   Future<void> getServiceDetails(String serviceId) async {
     final String serviceUrl =
-        "https://dev.iwayplus.in/secured/hospital/get-service/${serviceId}";
+        "${AppConfig.baseUrl}/secured/hospital/get-service/${serviceId}";
 
     try {
       isLoading =true;
@@ -143,7 +148,7 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
     }
   }
   Future<void> refreshTokenAndRetryForService(String serviceId) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -173,7 +178,7 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
 
   Future<void> updateUserFavorites() async {
 
-    String baseUrl = "https://dev.iwayplus.in/secured/user/toggle-favourites";
+    String baseUrl = "${AppConfig.baseUrl}/secured/user/toggle-favourites";
 
     Map<String, String> headers = {
       'Content-Type': 'application/json',
@@ -222,7 +227,7 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
   }
 
   Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -325,12 +330,20 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
       print('Error sharing content: $e');
     }
   }
+  void distance() async{
+    calculateDistance(service['latitude'], service['longitude']).then((value){
+      setState(() {
+        _distanceFuture = value;
+      });
+    });
+  }
   @override
   void initState() {
     _checkConnectivity();
     getServiceDetails(widget.id);
 
     getUserIDFromHive();
+    distance();
     super.initState();
   }
   @override
@@ -377,14 +390,14 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
                   children: [
 
                     // Image.network(
-                    //   'https://dev.iwayplus.in/uploads/${widget.imagePath}',
+                    //   '${AppConfig.baseUrl}/uploads/${widget.imagePath}',
                     //   // width: 250,
                     //   width: MediaQuery.of(context).size.width,
                     //   height: 200,
                     //   fit: BoxFit.cover,
                     // ),
                     CachedNetworkImage(
-                      imageUrl: 'https://dev.iwayplus.in/uploads/${service["data"]["image"]}',
+                      imageUrl: '${AppConfig.baseUrl}/uploads/${service["data"]["image"]}',
                       width: MediaQuery.of(context).size.width,
                       height: 200,
                       fit: BoxFit.fill,
@@ -521,33 +534,48 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
                     ),
 
                     FutureBuilder<double>(
-                      future: calculateDistance(service["data"]["locationId"]),
+                      future: null,
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return SizedBox(
                             width: 25,
-                            height: 25,// Adjust width as needed
+                            height: 25,
                             child: CircularProgressIndicator(),
                           );
                         } else if (snapshot.hasError) {
-                          return Text(
+                          return TranslatorWidget(
                             'Error',
                             style: TextStyle(color: Colors.red),
                           );
                         } else {
-                          return Text(
-                            '${snapshot.data!.toStringAsFixed(2)} m',
-                            style: TextStyle(
-                              color: Color(0xFF8D8C8C),
-                              fontSize: 14,
-                              fontFamily: 'Roboto',
-                              fontWeight: FontWeight.w400,
-                              height: 0.10,
-                            ),
-                          );
+                          double distance = _distanceFuture ?? 0;
+                          if (distance >= 1000) {
+                            return TranslatorWidget(
+                              '${(distance / 1000).toStringAsFixed(0)} km',
+                              style: TextStyle(
+                                color: Color(0xFF8D8C8C),
+                                fontSize: 14,
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.w400,
+                                height: 0.10,
+                              ),
+                            );
+                          } else {
+                            return TranslatorWidget(
+                              '${distance.toStringAsFixed(0)} m',
+                              style: TextStyle(
+                                color: Color(0xFF8D8C8C),
+                                fontSize: 14,
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.w400,
+                                height: 0.10,
+                              ),
+                            );
+                          }
                         }
                       },
-                    ),
+                    )
 
                   ],
                 ),
@@ -776,7 +804,7 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () {
-                    _shareContent("https://dev.iwayplus.in/#/iway-apps/aiimsj.com/service?serviceId=${widget.id}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
+                    _shareContent("${AppConfig.baseUrl}/#/iway-apps/aiimsj.com/service?serviceId=${widget.id}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
 
                     // _shareContent("iwayplus://aiimsj.com/service?serviceId=${widget.id}");
                   },

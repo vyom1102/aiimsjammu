@@ -40,6 +40,10 @@ class RefreshTokenAPI {
 
 
       return newAccessToken;
+      // return "403";
+    }else if (response.statusCode == 400) {
+      print("Refresh token is invalid or expired.");
+      return "400";
     } else {
       print(Exception);
       print(response.statusCode);

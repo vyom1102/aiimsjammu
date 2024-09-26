@@ -1,15 +1,21 @@
 
 
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:hive/hive.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../API/DeleteApi.dart';
 import '../../LOGIN SIGNUP/SignIn.dart';
+import '../../config.dart';
 import '../Widgets/Translator.dart';
 import 'ChangePassword.dart';
 
@@ -27,10 +33,91 @@ class _EditProfileState extends State<EditProfile> {
   String? accessToken;
   String? refreshToken;
   String? originalName;
-
+  String? photoUrl;
+  File? _selectedImage;
+  String? uploadedimage;
   bool isLoading = false;
 
 
+  Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile
+        != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+
+      });
+      await uploadImage();
+    }
+  }
+  Future<void> uploadImage() async {
+    final String uploadUrl = "${AppConfig.baseUrl}/secured/upload";
+
+    try {
+      final request = http.MultipartRequest('POST', Uri.parse(uploadUrl));
+      request.headers['x-access-token'] = '$accessToken';
+      request.files.add(await http.MultipartFile.fromPath('image', _selectedImage!.path));
+
+      final response = await request.send();
+      print("responsecode while uploading image");
+      print(response.statusCode);
+      if (response.statusCode == 200) {
+        final responseBody = await response.stream.bytesToString();
+        final responseData = json.decode(responseBody);
+        print(responseData);
+        if (responseData['status']) {
+          setState(() {
+            photoUrl = responseData['filename'];
+          });
+
+          userListBox.put('photo', photoUrl);
+
+          await updateUser(context);
+        } else {
+          print("Failed to upload image: ${responseData['message']}");
+        }
+      } else if (response.statusCode == 403) {
+        await refreshTokenAndRetryUpload();
+      } else {
+        print("Failed to upload image. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error while uploading the file: $e");
+    }
+  }
+  Future<void> refreshTokenAndRetryUpload() async {
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
+
+    try {
+      final response = await http.post(
+        Uri.parse(refreshTokenUrl),
+        body: json.encode({
+          "refreshToken": refreshToken,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final newAccessToken = json.decode(response.body)["accessToken"];
+        setState(() {
+          accessToken = newAccessToken;
+        });
+
+        // Update the access token in the local database
+        final signInBox = await Hive.openBox('SignInDatabase');
+        signInBox.put('accessToken', accessToken);
+
+        // Retry the image upload with the new token
+        await uploadImage();
+      } else {
+        print("Failed to refresh token. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error while refreshing the token: $e");
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -50,10 +137,12 @@ class _EditProfileState extends State<EditProfile> {
       refreshToken = signInBox.get('refreshToken');
       _nameController.text = userListBox.get('name');
       _emailController.text = userListBox.get('username');
+      uploadedimage = userListBox.get("photo");
+
     });
 
     if (userId != null) {
-      if(_nameController.text.isEmpty  ) {
+      if(_nameController.text.isEmpty || uploadedimage==null ) {
       getUserDetails();
       }else{
         print("name and email from database");
@@ -66,7 +155,7 @@ class _EditProfileState extends State<EditProfile> {
     setState(() {
       isLoading = true;
     });
-    final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
 
     try {
       final response = await http.post(
@@ -90,6 +179,8 @@ class _EditProfileState extends State<EditProfile> {
           // originalName = responseBody["name"];
           _emailController.text = responseBody["username"]??"Not Available";
           _nameController.text = responseBody["name"]??"User";
+          uploadedimage = responseBody["photo"]??"not available";
+
         });
         _nameController.text = originalName!;
       } else if (response.statusCode == 403) {
@@ -108,7 +199,7 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -152,6 +243,8 @@ class _EditProfileState extends State<EditProfile> {
         _emailController.text = responseBody["email"];
         originalName = responseBody["name"];
         _nameController.text = originalName!;
+        uploadedimage = responseBody["photo"]??"not available";
+
       } else {
         // Handle other status codes after token refresh
       }
@@ -163,7 +256,7 @@ class _EditProfileState extends State<EditProfile> {
 
 
   // Future<void> updateUser() async {
-  //   final String updateUrl = "https://dev.iwayplus.in/secured/user/update/$userId";
+  //   final String updateUrl = "${AppConfig.baseUrl}/secured/user/update/$userId";
   //
   //   try {
   //     final response = await http.put(
@@ -195,7 +288,7 @@ class _EditProfileState extends State<EditProfile> {
   //   }
   // }
   Future<void> updateUser(BuildContext context) async {
-    final String updateUrl = "https://dev.iwayplus.in/secured/user/update/$userId";
+    final String updateUrl = "${AppConfig.baseUrl}/secured/user/update/$userId";
 
     // Show a loading indicator
     QuickAlert.show(
@@ -265,7 +358,7 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future<void> refreshTokenAndRetry(String updateUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -347,33 +440,68 @@ class _EditProfileState extends State<EditProfile> {
             children: [
               Stack(
                 children: [
+                  // Container(
+                  //   width: 150,
+                  //   height: 150,
+                  //   decoration: BoxDecoration(
+                  //     shape: BoxShape.circle,
+                  //     // color: Colors.lightBlue,
+                  //     image: DecorationImage(
+                  //       image: AssetImage('assets/images/Group 4343.png'),
+                  //       fit: BoxFit.cover,
+                  //     ),
+                  //   ),
+                  // ),
                   Container(
                     width: 150,
                     height: 150,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      // color: Colors.lightBlue,
-                      image: DecorationImage(
-                        image: AssetImage('assets/images/Group 4343.png'),
-                        fit: BoxFit.cover,
+                      border: Border.all(
+                        color: Colors.grey, // Grey border
+                        width: 2.0, // Border width
+                      ),
+                    ),
+                    child: ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: '${AppConfig.baseUrl}/uploads/$uploadedimage',
+                        width: 150,
+                        height: 150,
+                        fit: BoxFit.contain,
+                        placeholder: (context, url) => Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                            color: Colors.white,
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          width: 150,
+                          height: 150,
+                          color: Colors.grey[200],
+                          child: Image.asset(
+                            'assets/images/Group 4343.png',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                  // Positioned(
-                  //   bottom: 0,
-                  //   right: 0,
-                  //   child: Container(
-                  //     decoration: BoxDecoration(
-                  //       color: Colors.black,
-                  //       shape: BoxShape.circle,
-                  //     ),
-                  //     child:
-                  //     IconButton(
-                  //       icon: Icon(Icons.camera_alt,color: Colors.white,),
-                  //       onPressed: null,
-                  //     ),
-                  //   ),
-                  // ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        shape: BoxShape.circle,
+                      ),
+                      child:
+                      IconButton(
+                        icon: Icon(Icons.camera_alt,color: Colors.white,),
+                        onPressed: _pickImage,
+                      ),
+                    ),
+                  ),
                 ],
               ),
               SizedBox(height: 20),

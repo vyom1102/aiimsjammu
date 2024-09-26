@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../config.dart';
+
 class ImageCarouselWidget extends StatefulWidget {
   final List<ImageTextPair> imagesWithText;
 
@@ -88,7 +90,7 @@ class _ImageCarouselWidgetState extends State<ImageCarouselWidget> {
                   children: [
                     ClipRRect(
                       child: CachedNetworkImage(
-                        imageUrl: 'https://dev.iwayplus.in/uploads/${pair.image}',
+                        imageUrl: '${AppConfig.baseUrl}/uploads/${pair.image}',
                         placeholder: (context, url) => Shimmer.fromColors(
                           baseColor: Colors.grey[300]!,
                           highlightColor: Colors.grey[100]!,
@@ -104,7 +106,7 @@ class _ImageCarouselWidgetState extends State<ImageCarouselWidget> {
                       ),
                       // FadeInImage.assetNetwork(
                       //   placeholder: 'assets/images/DefaultCorousalImage.png',
-                      //   image: 'https://dev.iwayplus.in/uploads/${pair.image}',
+                      //   image: '${AppConfig.baseUrl}/uploads/${pair.image}',
                       //   fit: BoxFit.fill,
                       //   placeholderFit: BoxFit.fill,
                       // ),

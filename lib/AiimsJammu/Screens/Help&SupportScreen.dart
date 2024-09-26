@@ -113,7 +113,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             child: InkWell(
               onTap: () {
 
-                _launchURL('https://play.google.com/store/apps/details?id=com.iwayplus.rgcinavigation');
+                _launchURL('https://play.google.com/store/apps/details?id=com.iwayplus.aiimsjammu');
               },
               child: Container(
                 width: MediaQuery.sizeOf(context).width,
@@ -157,7 +157,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             label:"",
             child: InkWell(
               onTap: (){
-                sendMailto(email: "Support@iwayplus.com");
+                sendMailto(email: "info@aiimsjammu.edu.in");
               },
               child: Container(
                 width: MediaQuery.sizeOf(context).width,
@@ -201,7 +201,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             label:"",
             child: InkWell(
               onTap: (){
-                _shareContent("https://play.google.com/store/apps/details?id=com.iwayplus.rgcinavigation");
+                _shareContent("https://play.google.com/store/apps/details?id=com.iwayplus.aiimsjammu");
               },
               child: Container(
                 width: MediaQuery.sizeOf(context).width,
