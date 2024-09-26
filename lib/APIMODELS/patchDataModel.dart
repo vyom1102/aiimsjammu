@@ -32,6 +32,13 @@ class PatchData {
   List<PickupCoords>? pickupCoords;
   String? createdAt;
   String? updatedAt;
+<<<<<<< Updated upstream
+=======
+  String? buildingAngle;
+  String? buildingName;
+  String? corridorWidth;
+  String? realtimeLocalisationThreshold;
+>>>>>>> Stashed changes
   int? iV;
 
   PatchData(
@@ -45,6 +52,13 @@ class PatchData {
         this.pickupCoords,
         this.createdAt,
         this.updatedAt,
+<<<<<<< Updated upstream
+=======
+        this.buildingAngle,
+        this.buildingName,
+        this.corridorWidth,
+        this.realtimeLocalisationThreshold,
+>>>>>>> Stashed changes
         this.iV});
 
   PatchData.fromJson(Map<dynamic, dynamic> json) {
@@ -73,6 +87,13 @@ class PatchData {
     }
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
+<<<<<<< Updated upstream
+=======
+    buildingAngle = json['buildingAngle'];
+    buildingName = json['buildingName'];
+    corridorWidth = json['corridorWidth'];
+    realtimeLocalisationThreshold = json['realtimeLocalisationThreshold'];
+>>>>>>> Stashed changes
     iV = json['__v'];
   }
 
@@ -96,6 +117,8 @@ class PatchData {
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
+    data['corridorWidth'] = this.corridorWidth;
+    data['realtimeLocalisationThreshold'] = this.realtimeLocalisationThreshold;
     return data;
   }
 }

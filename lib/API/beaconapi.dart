@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/API/buildingAllApi.dart';
@@ -12,6 +13,7 @@ import 'guestloginapi.dart';
 
 
 class beaconapi {
+<<<<<<< Updated upstream
   final String baseUrl = "https://dev.iwayplus.in/secured/building/beacons";
   var signInBox = Hive.box('SignInDatabase');
   String token = "";
@@ -21,6 +23,25 @@ class beaconapi {
     token = signInBox.get("accessToken");
     final BeaconBox = BeaconAPIModelBOX.getData();
     if(BeaconBox.containsKey(id??buildingAllApi.getStoredString())){
+=======
+  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/building/beacons" : "https://maps.iwayplus.in/secured/building/beacons";
+  static var signInBox = Hive.box('SignInDatabase');
+  String accessToken = signInBox.get("accessToken");
+  String refreshToken = signInBox.get("refreshToken");
+
+  Future<List<beacon>> fetchBeaconData(String id) async {
+
+    print("beacon---");
+    print(baseUrl);
+    accessToken = signInBox.get("accessToken");
+    final BeaconBox = BeaconAPIModelBOX.getData();
+
+    print("beaconapi $id");
+    print(BeaconBox.containsKey(id));
+    print(VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id));
+    // print(VersionInfo.buildingLandmarkDataVersionUpdate[id]!);
+    if(VersionInfo.buildingLandmarkDataVersionUpdate.isEmpty || (BeaconBox.containsKey(id) && VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id) && VersionInfo.buildingLandmarkDataVersionUpdate[id]! == false)){
+>>>>>>> Stashed changes
       print("BEACON DATA FROM DATABASE");
       print(BeaconBox.keys);
       print(BeaconBox.values);

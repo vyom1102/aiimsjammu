@@ -1,4 +1,9 @@
 import 'dart:convert';
+<<<<<<< Updated upstream
+=======
+import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
+import 'package:flutter/foundation.dart';
+>>>>>>> Stashed changes
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/API/buildingAllApi.dart';
@@ -15,8 +20,15 @@ import 'guestloginapi.dart';
 class patchAPI {
 
   String token = "";
+<<<<<<< Updated upstream
   final String baseUrl = "https://dev.iwayplus.in/secured/patch/get";
   var signInBox = Hive.box('SignInDatabase');
+=======
+  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/patch/get" : "https://maps.iwayplus.in/secured/patch/get";
+  static var signInBox = Hive.box('SignInDatabase');
+  String accessToken = signInBox.get("accessToken");
+  String refreshToken = signInBox.get("refreshToken");
+>>>>>>> Stashed changes
 
   void checkForUpdate({String? id=null}) async{
     final PatchBox = PatchAPIModelBox.getData();
@@ -68,9 +80,14 @@ class patchAPI {
     token = signInBox.get("accessToken");
     print("patch");
     final PatchBox = PatchAPIModelBox.getData();
+<<<<<<< Updated upstream
     if(PatchBox.containsKey(id??buildingAllApi.getStoredString())){
+=======
+    print("Patch getting for $id");
+    if(PatchBox.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingPatchDataVersionUpdate.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingPatchDataVersionUpdate[id??buildingAllApi.getStoredString()]! == false){
+>>>>>>> Stashed changes
       print("PATCH API DATA FROM DATABASE");
-      print(PatchBox.get(buildingAllApi.getStoredString())!.responseBody);
+      print(PatchBox.get(id?? buildingAllApi.getStoredString())!.responseBody);
       Map<String, dynamic> responseBody = PatchBox.get(id??buildingAllApi.getStoredString())!.responseBody;
       return patchDataModel.fromJson(responseBody);
     }

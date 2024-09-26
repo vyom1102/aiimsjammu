@@ -1,13 +1,23 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
 import '../Elements/HelperClass.dart';
 
 class DeleteApi {
+<<<<<<< Updated upstream
 
   static String refreshToken = "";
   static String baseUrl = "https://dev.iwayplus.in/secured/user/delete";
+=======
+  static String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/user/delete" : "https://maps.iwayplus.in/secured/user/delete";
+  static var signInBox = Hive.box('SignInDatabase');
+  static String accessToken = signInBox.get("accessToken");
+  String refreshToken = signInBox.get("refreshToken");
+
+  static Future<bool> deleteData() async {
+>>>>>>> Stashed changes
 
   static Future<bool> fetchPatchData() async {
     var signInBox = Hive.box('SignInDatabase');

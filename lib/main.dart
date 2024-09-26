@@ -3,6 +3,13 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+<<<<<<< Updated upstream
+=======
+import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/UserState.dart';
+import 'package:iwaymaps/websocket/PushNotifications.dart';
+import 'package:iwaymaps/websocket/UserLog.dart';
+>>>>>>> Stashed changes
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -48,6 +55,14 @@ Future<void> main() async {
   await Hive.openBox('Filters');
   await Hive.openBox('SignInDatabase');
   await Hive.openBox('LocationPermission');
+<<<<<<< Updated upstream
+=======
+  await Hive.openBox('VersionData');
+  await Hive.openBox('user');
+
+  PushNotifications.localNotiInit();
+
+>>>>>>> Stashed changes
   runApp(const MyApp());
 }
 
@@ -61,6 +76,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   late String googleSignInUserName='';
   final FlutterLocalization localization = FlutterLocalization.instance;
+<<<<<<< Updated upstream
 
 
   // Future<bool> _isUserAuthenticated() async {
@@ -82,6 +98,15 @@ class _MyAppState extends State<MyApp> {
   //   // If the user is not signed in, return false
   //   return false;
   // }
+=======
+  late AppLinks _appLinks;
+  String? _accessToken;
+  String? initialDocId;
+  String? initialServiceId;
+  bool isLocating=false;
+  wsocket soc = wsocket("com.iwayplus.aiimsjammu");
+
+>>>>>>> Stashed changes
 
   @override
   void initState() {

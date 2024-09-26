@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:geodesy/geodesy.dart';
 import 'package:hive/hive.dart';
 
@@ -23,7 +24,11 @@ class OutBuildingData{
       'Content-Type': 'application/json',
       'x-access-token':'${token}'
     };
+<<<<<<< Updated upstream
     var request = http.Request('POST', Uri.parse('https://dev.iwayplus.in/secured/google/routing'));
+=======
+    var request = http.Request('POST', Uri.parse(kDebugMode? 'https://dev.iwayplus.in/secured/outdoor-wayfinding/' : 'https://maps.iwayplus.in/secured/outdoor-wayfinding/'));
+>>>>>>> Stashed changes
     request.body = json.encode({
       "source": {
         "lat": latitude1,

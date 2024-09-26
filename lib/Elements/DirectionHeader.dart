@@ -2,6 +2,7 @@ import 'dart:async';
 
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -66,7 +67,26 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   Map<String, double> ShowsumMap = Map();
   int DirectionIndex = 1;
   int nextTurnIndex = 0;
+<<<<<<< Updated upstream
   
+=======
+  bool isSpeaking=false;
+  String? threshold;
+
+  void initTts() {
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        isSpeaking = false;
+      });
+    });
+  }
+
+
+
+
+
+
+>>>>>>> Stashed changes
   @override
   void initState() {
     super.initState();
@@ -87,6 +107,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         });
       }
     }
+<<<<<<< Updated upstream
     // btadapter.startScanning(Building.apibeaconmap);
     // _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
     //   //print("Pathposition");
@@ -103,6 +124,21 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     //
     //
     // });
+=======
+    btadapter.startScanning(Building.apibeaconmap);
+    _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+      //
+      //
+      // //
+      // HelperClass.showToast("Bin cleared");
+      if(widget.user.pathobj.index>1) {
+        listenToBin();
+      }
+
+
+
+    });
+>>>>>>> Stashed changes
 
     btadapter.numberOfSample.clear();
     btadapter.rs.clear();
@@ -112,6 +148,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
       turnPoints = tools.getTurnpoints(widget.user.path, widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
+<<<<<<< Updated upstream
       (widget.user.path.length%2==0)? turnPoints.add(widget.user.path[widget.user.path.length-2]):turnPoints.add(widget.user.path[widget.user.path.length-1]);
       //  btadapter.startScanning(Building.apibeaconmap);
       // _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
@@ -122,11 +159,30 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       List<int> remainingPath = widget.user.path.sublist(widget.user.pathobj.index+1);
       int nextTurn = findNextTurn(turnPoints, remainingPath);
       widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+=======
+    if(widget.user.floor!=widget.user.pathobj.destinationFloor &&  widget.user.pathobj.connections[widget.user.Bid]?[widget.user.floor] == (widget.user.showcoordY*UserState.cols + widget.user.showcoordX)){
+      speak(convertTolng(
+          "Use this lift and go to ${tools.numericalToAlphabetical(
+              widget.user.pathobj.destinationFloor)} floor",_currentLocale, "", "", 0, "")
+          , _currentLocale, prevpause:true);
+    }else if(widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor] != null){
+
+      turnPoints = tools.getTurnpoints_inCell(widget.user.Cellpath);
+      turnPoints.add(widget.user.Cellpath.last);
+
+      
+
+      (widget.user.Cellpath.length%2==0)? turnPoints.add(widget.user.Cellpath[widget.user.Cellpath.length-2]):turnPoints.add(widget.user.Cellpath[widget.user.Cellpath.length-1]);
+
+      List<Cell> remainingPath = widget.user.Cellpath.sublist(widget.user.pathobj.index+1);
+      Cell nextTurn = findNextTurn(turnPoints, remainingPath);
+        widget.distance = tools.distancebetweennodes_inCell(nextTurn, widget.user.Cellpath[widget.user.pathobj.index]);
+>>>>>>> Stashed changes
       double angle = 0.0;
       if(widget.user.pathobj.index<widget.user.path.length-1){
-        //print("p1 $angle");
+        //
         angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
-        //print("p2 $angle");
+        //
       }
 
       //print("angleeeeee $angle")  ;
@@ -137,10 +193,22 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           
           speak("Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
         }else{
+<<<<<<< Updated upstream
           widget.direction = "Turn ${widget.direction}, and Go Straight";
          
           speak("${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} steps");
           widget.getSemanticValue="${widget.direction} ${(widget.distance/UserState.stepSize).ceil()} steps";
+=======
+          
+          widget.direction = convertTolng("Turn ${LocaleData.getProperty5(widget.direction, widget.context)}", _currentLocale, widget.direction,"",0, "");
+         if(!UserState.ttsOnlyTurns) {
+            speak(
+                "${widget.direction}",
+                _currentLocale, prevpause: true);
+          }
+        widget.getSemanticValue =
+        "Turn ${widget.direction}, and Go Straight ${tools.convertFeet(widget.distance,widget.context)}";
+>>>>>>> Stashed changes
 
         }
       });
@@ -174,8 +242,15 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     String nearestBeacon = "";
     sumMap.clear();
     sumMap = btadapter.calculateAverage();
+<<<<<<< Updated upstream
+=======
+    print("threshold");
+    threshold=(widget.user.building!.patchData[widget.user.Bid]!.patchData!.realtimeLocalisationThreshold!=null)?widget.user.building!.patchData[widget.user.Bid]!.patchData!.realtimeLocalisationThreshold!:'5';
+    print(threshold);
+    //
+>>>>>>> Stashed changes
     sortedsumMap.clear();
-    //print("sortedsumMapcleared $sortedsumMap");
+    //
 
 
     sumMap.forEach((key, value) {
@@ -199,23 +274,23 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     //     highestweight = element.value;
     //   }
     // });
-    // //print("-90---   ${sumMap.length}");
-    // //print("checkingavgmap   ${sumMap}");
+    // //
+    // //
 
 
     // for (int i = 0; i < btadapter.BIN.length; i++) {
     //   if (btadapter.BIN[i]!.isNotEmpty) {
     //
     //     btadapter.BIN[i]!.forEach((key, value) {
-    //       //print("Wilsonchecker");
-    //       //print(value.toString());
-    //       //print(key);
+    //       //
+    //       //
+    //       //
     //
     //       setState(() {
     //             widget.direction = "${widget.direction}$key   $value\n";
     //           });
     //
-    //       //print("-90-   $key   $value");
+    //       //
     //
     //       if (value > highestweight) {
     //         highestweight = value;
@@ -235,7 +310,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     //     widget.direction = "${widget.direction}$key   $value\n";
     //   });
     //
-    //   //print("-90-   $key   $value");
+    //   //
     //
     //   if(value>highestweight){
     //     highestweight =  value;
@@ -250,8 +325,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     });
 
-    ////print("$nearestBeacon   $highestweight");
+    ////
 
+<<<<<<< Updated upstream
   //print("nearest${nearestBeacon}");
     if(nearestBeacon !=""){
 
@@ -260,6 +336,23 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           if (widget.user.floor != Building.apibeaconmap[nearestBeacon]!.floor) {
 
             //print("workingg 5");
+=======
+  // 
+    if(nearestBeacon !=""){
+      
+
+      if(widget.user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] != null) {
+        
+        
+        
+        if (widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId) {
+          
+
+          //widget.user.pathobj.destinationFloor
+          if (widget.user.floor != widget.user.pathobj.destinationFloor && widget.user.pathobj.destinationFloor!=widget.user.pathobj.sourceFloor && widget.user.pathobj.destinationFloor == Building.apibeaconmap[nearestBeacon]!.floor) {
+            widget.user.onConnection = false;
+            
+>>>>>>> Stashed changes
             widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
             speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
             widget.paint(nearestBeacon,render: false);
@@ -269,7 +362,14 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               Building.apibeaconmap[nearestBeacon]!.floor &&
               highestweight >= 1.2) {
 
+<<<<<<< Updated upstream
             //print("workingg user floor ${widget.user.floor}");
+=======
+              highestweight >=int.parse(threshold!)) {
+
+            widget.user.onConnection = false;
+            //
+>>>>>>> Stashed changes
             List<int> beaconcoord = [
               Building.apibeaconmap[nearestBeacon]!.coordinateX!,
               Building.apibeaconmap[nearestBeacon]!.coordinateY!
@@ -279,6 +379,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               widget.user.showcoordY
             ];
             double d = tools.calculateDistance(beaconcoord, usercoord);
+<<<<<<< Updated upstream
             if (d < 5) {
               //print("workingg 1");
               //near to user so nothing to do
@@ -300,6 +401,43 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                   //print(indexOnPath);
                 }
               });
+=======
+            int distanceFromPath = 100000000;
+            int? indexOnPath = null;
+            int numCols = widget.user.pathobj.numCols![widget.user
+                .Bid]![widget.user.floor]!;
+            widget.user.path.forEach((node) {
+              List<int> pathcoord = [node % numCols, node ~/ numCols];
+              double d1 = tools.calculateDistance(beaconcoord, pathcoord);
+              if (d1 < distanceFromPath) {
+                distanceFromPath = d1.toInt();
+                //
+                //
+                indexOnPath = widget.user.path.indexOf(node);
+                //
+              }
+            });
+
+            if (distanceFromPath > 10) {
+              
+              _timer.cancel();
+              widget.repaint(nearestBeacon);
+              widget.reroute;
+              DirectionIndex = 1;
+              return false; //away from path
+            } else {
+              double dis = tools.calculateDistance([widget.user.showcoordX,widget.user.showcoordY], beaconcoord);
+              
+              widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+              if(!UserState.ttsOnlyTurns) {
+                speak(
+                    "${widget.direction} ${tools.convertFeet(
+                        widget.distance, widget.context)}",
+                    _currentLocale
+                );
+              }
+              widget.user.moveToPointOnPath(indexOnPath!);
+>>>>>>> Stashed changes
 
               if (distanceFromPath > 10) {
                 //print("workingg 3");
@@ -317,18 +455,64 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 return true; //moved on path
               }
             }
+<<<<<<< Updated upstream
+=======
+            // if (d < 5) {
+            //   
+            //   //near to user so nothing to do
+            //   return true;
+            // } else {
+            //   //
+            //   int distanceFromPath = 100000000;
+            //   int? indexOnPath = null;
+            //   int numCols = widget.user.pathobj.numCols![widget.user
+            //       .Bid]![widget.user.floor]!;
+            //   widget.user.path.forEach((node) {
+            //     List<int> pathcoord = [node % numCols, node ~/ numCols];
+            //     double d1 = tools.calculateDistance(beaconcoord, pathcoord);
+            //     if (d1 < distanceFromPath) {
+            //       distanceFromPath = d1.toInt();
+            //       //
+            //       //
+            //       indexOnPath = widget.user.path.indexOf(node);
+            //       //
+            //     }
+            //   });
+            //
+            //   if (distanceFromPath > 10) {
+            //     
+            //     _timer.cancel();
+            //     widget.repaint(nearestBeacon);
+            //     widget.reroute;
+            //     DirectionIndex = 1;
+            //     return false; //away from path
+            //   } else {
+            //     
+            //     widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
+            //     speak(
+            //         "${widget.direction} ${(widget.distance / UserState.stepSize).ceil()} ${LocaleData.steps.getString(widget.context)}",
+            //         _currentLocale
+            //     );
+            //     widget.user.moveToPointOnPath(indexOnPath!);
+            //     widget.moveUser();
+            //     DirectionIndex = nextTurnIndex;
+            //     return true; //moved on path
+            //   }
+            // }
+>>>>>>> Stashed changes
 
 
-            //print("d $d");
-            //print("widget.user.key ${widget.user.key}");
-            //print("beaconcoord ${beaconcoord}");
-            //print("usercoord ${usercoord}");
-            //print(nearestBeacon);
+            //
+            //
+            //
+            //
+            //
           }
         }
 
 
       }else{
+<<<<<<< Updated upstream
         //print("workingg 6");
         //print("listening");
         //print("inelese");
@@ -337,6 +521,20 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         _timer.cancel();
         widget.repaint(nearestBeacon);
         widget.reroute;
+=======
+        
+
+        
+        //
+        //
+
+        //
+        if(highestweight>1.2){
+          _timer.cancel();
+          widget.repaint(nearestBeacon);
+          widget.reroute;
+        }
+>>>>>>> Stashed changes
         return false;
       }
     }
@@ -369,7 +567,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     if(path.length >= widget.user.pathobj.index){
       return path[widget.user.pathobj.index];
     }else{
+<<<<<<< Updated upstream
       return 0;
+=======
+      return Cell(0, 0, 0, (double angle, {int? currPointer,int? totalCells}){}, 0.0, 0.0, "", 0,0);
+>>>>>>> Stashed changes
     }
   }
 
@@ -379,6 +581,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     if(widget.user.floor == widget.user.pathobj.sourceFloor && widget.user.pathobj.connections.isNotEmpty && widget.user.showcoordY*UserState.cols + widget.user.showcoordX  == widget.user.pathobj.connections[widget.user.Bid]![widget.user.pathobj.sourceFloor]){
 
+<<<<<<< Updated upstream
     }else{
 
       if(widget.user.path[widget.user.pathobj.index] == turnPoints.last){
@@ -386,6 +589,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         speak("You have reached ${widget.user.pathobj.destinationName}");
         widget.closeNavigation();
       }else{
+=======
+    }else if (widget.user.path.isNotEmpty && widget.user.Cellpath.length-1>widget.user.pathobj.index){
+      
+>>>>>>> Stashed changes
         widget.user.pathobj.connections.forEach((key, value) {
           value.forEach((inkey, invalue) {
             if(widget.user.path[widget.user.pathobj.index] == invalue){
@@ -393,7 +600,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             }
           });
         });
+<<<<<<< Updated upstream
 
+=======
+        List<Cell> remainingPath = widget.user.Cellpath.sublist(widget.user.pathobj.index+1);
+        // 
+        // 
+        Cell nextTurn = findNextTurn(turnPoints, remainingPath);
+        // 
+        // 
+
+        nextTurnIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == nextTurn.node);
+        // 
+>>>>>>> Stashed changes
 
 
 
@@ -407,12 +626,53 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           if(DirectionIndex + 1 < widget.user.pathobj.directions.length)
           DirectionIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == widget.user.path[widget.user.pathobj.index])+1;
         }
+<<<<<<< Updated upstream
         widget.distance = tools.distancebetweennodes(nextTurn, widget.user.path[widget.user.pathobj.index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
 
         double angle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
         widget.direction = tools.angleToClocks(angle) == "None"?oldWidget.direction:tools.angleToClocks(angle);
         int index = widget.user.path.indexOf(nextTurn);
         //print("index $index");
+=======
+          widget.distance = tools.distancebetweennodes_inCell(nextTurn, widget.user.Cellpath[widget.user.pathobj.index]);
+        double angle = 0.0;
+        try{
+          angle = tools.calculateAnglefifth(widget.user.Cellpath[widget.user.pathobj.index].node, widget.user.Cellpath[widget.user.pathobj.index+1].node, widget.user.Cellpath[widget.user.pathobj.index+2].node,widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+        }catch(e){
+          print("error to be solved later $e");
+        }
+        if(widget.user.pathobj.index != 0){
+          try {
+            angle = tools.calculateAnglefifth(
+                widget.user.Cellpath[widget.user.pathobj.index - 1].node,
+                widget.user.Cellpath[widget.user.pathobj.index].node,
+                widget.user.Cellpath[widget.user.pathobj.index + 1].node,
+                widget.user.pathobj.numCols![widget.user.Bid]![widget.user
+                    .floor]!);
+          }catch(e){
+            print("problem to be solved later $e");
+          }
+        }
+        double userangle = tools.calculateAngleBWUserandCellPath(widget.user.Cellpath[widget.user.pathobj.index], widget.user.Cellpath[widget.user.pathobj.index+1], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!,widget.user.theta);
+
+        widget.direction = tools.angleToClocks(angle,widget.context) == "None"?oldWidget.direction:tools.angleToClocks(angle,widget.context);
+        String userdirection = tools.angleToClocks(userangle,widget.context) == "None"?oldWidget.direction:tools.angleToClocks(userangle,widget.context);
+        if(userdirection == "Straight"){
+          widget.direction = "Straight";
+        }
+      if(widget.user.pathobj.index<3){
+        widget.direction = userdirection;
+      }
+
+      if(UserCredentials().getUserPersonWithDisability()==1 || UserCredentials().getUserPersonWithDisability()==2){
+        widget.direction = userdirection;
+      }
+
+
+
+      int index = widget.user.Cellpath.indexOf(nextTurn);
+        //
+>>>>>>> Stashed changes
         double a =0;
         if(index+1 == widget.user.path.length){
           a = tools.calculateAnglefifth(widget.user.path[index-2], widget.user.path[index-1], widget.user.path[index], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
@@ -437,6 +697,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             }
           }
         }
+<<<<<<< Updated upstream
 
 
         if(oldWidget.direction != widget.direction){
@@ -444,6 +705,27 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           if(oldWidget.direction == "Straight"){
 
             Vibration.vibrate();
+=======
+      
+      
+        String direc = tools.angleToClocks(a,widget.context);
+        turnDirection = direc;
+
+      if(oldWidget.direction != widget.direction){
+
+        if(oldWidget.direction == "Straight"){
+          
+
+          Vibration.vibrate();
+
+
+          // if(nextTurn == turnPoints.last){
+          //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
+          // }else{
+          //   speak("${widget.direction} ${widget.distance} meter");
+          // }
+          
+>>>>>>> Stashed changes
 
 
             // if(nextTurn == turnPoints.last){
@@ -456,6 +738,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
 
 
+<<<<<<< Updated upstream
           }else if(widget.direction == "Straight"){
 
 
@@ -466,6 +749,66 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           }
         }
       }
+=======
+        }else if(widget.direction == "Straight"){
+          Vibration.vibrate();
+          UserState.isTurn=false;
+          if(!UserState.ttsOnlyTurns) {
+            speak(
+                "${LocaleData.getProperty6('Go Straight', context)} ${tools
+                    .convertFeet(widget.distance, context)}}",
+                _currentLocale, prevpause: true);
+          }
+        }
+      }
+
+        if(nextTurn == turnPoints.last && widget.distance == 7){
+          double angle = 0.0;
+          try{
+            angle = tools.calculateAngleThird([widget.user.pathobj.destinationX,widget.user.pathobj.destinationY], widget.user.path[widget.user.pathobj.index+1], widget.user.path[widget.user.pathobj.index+2], widget.user.pathobj.numCols![widget.user.Bid]![widget.user.floor]!);
+          }catch(e){
+            print("problem to be solved later $e");
+          }
+          if(!UserState.ttsOnlyTurns) {
+            speak("${widget.direction} ${widget.distance} steps. ${widget.user
+                .pathobj.destinationName} will be ${tools.angleToClocks2(
+                angle, widget.context)}", _currentLocale);
+          }
+            widget.user.move(context);
+        }else if(nextTurn != turnPoints.last && widget.user.pathobj.connections[widget.user.Bid]?[widget.user.floor] != nextTurn && (widget.distance/UserState.stepSize).ceil() == 7){
+
+          if((!direc.toLowerCase().contains("slight") && !direc.toLowerCase().contains("straight")) && widget.user.pathobj.index > 4){
+
+            if(widget.user.pathobj.associateTurnWithLandmark[nextTurn] != null){
+              if(!UserState.ttsOnlyTurns){
+                speak(
+                    convertTolng(
+                        "You are approaching ${direc} turn from ${widget.user.pathobj.associateTurnWithLandmark[nextTurn]!.name!}",
+                        _currentLocale,
+                        '',
+                        direc,
+                        nextTurn!.node,""),
+                    _currentLocale);
+              }
+
+              return;
+              //widget.user.pathobj.associateTurnWithLandmark.remove(nextTurn);
+            }else{
+              if(!UserState.ttsOnlyTurns) {
+                speak(
+                    convertTolng("You are approaching ${direc} turn",
+                        _currentLocale, '', direc, nextTurn!.node, ""),
+                    _currentLocale);
+              }
+              widget.user.move(widget.context);
+              return;
+            }
+
+
+          }
+        }
+
+>>>>>>> Stashed changes
     }
   }
 
@@ -590,7 +933,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return Semantics(
-      excludeSemantics: true,
+      excludeSemantics: false,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -604,41 +947,49 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  child: IconButton(onPressed: (){setState(() {
-                    if(DirectionIndex - 1 >=1){
-                      DirectionIndex--;
-                      widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
-                      if(DirectionIndex == nextTurnIndex){
-                        widget.clearFocusTurnArrow();
+                Semantics(
+
+                  excludeSemantics: true,
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    child: IconButton(onPressed: (){setState(() {
+                      if(DirectionIndex - 1 >=1){
+                        DirectionIndex--;
+                        widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
+                        if(DirectionIndex == nextTurnIndex){
+                          widget.clearFocusTurnArrow();
+                        }
                       }
-                    }
-                  });}, icon: Icon(Icons.arrow_back_ios_new,color: DirectionIndex - 1 >=1?Colors.white:Colors.grey,)),
+                    });}, icon: Icon(Icons.arrow_back_ios_new,color: DirectionIndex - 1 >=1?Colors.white:Colors.grey,)),
+                  ),
                 ),
                 const SizedBox(width: 8,),
                 scrollableDirection("${widget.direction}", '${(widget.distance/UserState.stepSize).ceil()}', getCustomIcon(widget.direction),DirectionIndex,nextTurnIndex,widget.user.pathobj.directions,widget.user),
                 const SizedBox(width: 8,),
-                Container(
-                  width: 44,
-                  height: 44,
-                  child: IconButton(onPressed: (){setState(() {
-                    if(DirectionIndex + 1 < widget.user.pathobj.directions.length){
-                      DirectionIndex++;
-                      widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
-                      if(widget.user.pathobj.directions.length-DirectionIndex == 2 && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn != null && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn!<=5 && DirectionIndex + 1 < widget.user.pathobj.directions.length){
+                Semantics(
+                  excludeSemantics: true,
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    child: IconButton(onPressed: (){setState(() {
+                      if(DirectionIndex + 1 < widget.user.pathobj.directions.length){
                         DirectionIndex++;
+                        widget.focusOnTurn(widget.user.pathobj.directions[DirectionIndex]);
+                        if(widget.user.pathobj.directions.length-DirectionIndex == 2 && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn != null && widget.user.pathobj.directions[DirectionIndex].distanceToNextTurn!<=5 && DirectionIndex + 1 < widget.user.pathobj.directions.length){
+                          DirectionIndex++;
+                        }
+                        if(DirectionIndex == nextTurnIndex){
+                          widget.clearFocusTurnArrow();
+                        }
                       }
-                      if(DirectionIndex == nextTurnIndex){
-                        widget.clearFocusTurnArrow();
-                      }
-                    }
-                  });}, icon: Icon(Icons.arrow_forward_ios_outlined,color: DirectionIndex + 1 < widget.user.pathobj.directions.length?Colors.white:Colors.grey,size: 24,)),
+                    });}, icon: Icon(Icons.arrow_forward_ios_outlined,color: DirectionIndex + 1 < widget.user.pathobj.directions.length?Colors.white:Colors.grey,size: 24,)),
+                  ),
                 )
               ],
             ),
           ),
+<<<<<<< Updated upstream
           DirectionIndex == nextTurnIndex?Container(
             width: 98,
             height: 39,
@@ -658,14 +1009,38 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     fontWeight: FontWeight.w400,
                     color: Color(0xffFFFFFF),
                     height: 25/16,
+=======
+          DirectionIndex == nextTurnIndex?Semantics(
+            excludeSemantics: true,
+            child: Container(
+              width: 98,
+              height: 39,
+              margin: EdgeInsets.only(left: 9,top: 5),
+              padding: EdgeInsets.only(left: 16,right: 16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                color: Color(0xff013633),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    "${LocaleData.then.getString(context)}",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xffFFFFFF),
+                      height: 25/16,
+                    ),
+                    textAlign: TextAlign.left,
+>>>>>>> Stashed changes
                   ),
-                  textAlign: TextAlign.left,
-                ),
-                SizedBox(width: 6,),
-                // Text(DirectionIndex.toString()),
-                // Text(nextTurnIndex.toString())
-                getNextCustomIcon(turnDirection)
-              ],
+                  SizedBox(width: 6,),
+                  // Text(DirectionIndex.toString()),
+                  // Text(nextTurnIndex.toString())
+                  getNextCustomIcon(turnDirection)
+                ],
+              ),
             ),
           ):Container()
         ],
@@ -686,6 +1061,7 @@ class scrollableDirection extends StatelessWidget {
   scrollableDirection(this.Direction,this.steps,this.i,this.DirectionIndex,this.nextTurnIndex,this.listOfDirections,this.user);
 
   String chooseDirection(){
+<<<<<<< Updated upstream
     if(listOfDirections[DirectionIndex].isDestination){
       double? angle;
       if (user.pathobj.singleCellListPath.isNotEmpty) {
@@ -710,6 +1086,56 @@ class scrollableDirection extends StatelessWidget {
         return "${listOfDirections[DirectionIndex].turnDirection == "Straight"?"Go Straight":"Turn ${listOfDirections[DirectionIndex].turnDirection}, and Go Straight"}";
       }else{
         return "${listOfDirections[DirectionIndex-1].turnDirection == "Straight"?"Go Straight":"Turn ${listOfDirections[DirectionIndex-1].turnDirection}, and Go Straight"}";
+=======
+    
+    try {
+      if (listOfDirections.isNotEmpty &&
+          listOfDirections.length > DirectionIndex) {
+        if (DirectionIndex < listOfDirections.length &&
+            listOfDirections[DirectionIndex].isDestination) {
+          double? angle;
+          if (user.pathobj.singleCellListPath.isNotEmpty) {
+            int l = user.pathobj.singleCellListPath.length;
+            angle = tools.calculateAngle([
+              user.pathobj.singleCellListPath[l - 2].x,
+              user.pathobj.singleCellListPath[l - 2].y
+            ], [
+              user.pathobj.singleCellListPath[l - 1].x,
+              user.pathobj.singleCellListPath[l - 1].y
+            ], [
+              user.pathobj.destinationX,
+              user.pathobj.destinationY
+            ]);
+          }
+          return angle != null ? "${listOfDirections[DirectionIndex]
+              .turnDirection} ${LocaleData.willbe.getString(
+              context)} ${LocaleData
+              .getProperty(tools.angleToClocks3(angle, context), context) }" :
+          "${listOfDirections[DirectionIndex].turnDirection} ${LocaleData
+              .willbeonyourfront.getString(context)}";
+        } else if (DirectionIndex == nextTurnIndex) {
+          return "${Direction == "Straight" ? "${LocaleData.gostraight
+              .getString(
+              context)}" : LocaleData.getProperty(Direction, context)}";
+        } else {
+          if (DirectionIndex < listOfDirections.length) {
+            return "${listOfDirections[DirectionIndex].turnDirection ==
+                "Straight"
+                ? "${LocaleData.gostraight.getString(context)}"
+                : "${LocaleData.getProperty(
+                listOfDirections[DirectionIndex].turnDirection!, context)}"}";
+          } else {
+            return "${listOfDirections[DirectionIndex - 1].turnDirection ==
+                "Straight"
+                ? "${LocaleData.gostraight.getString(context)}"
+                : "${LocaleData.getProperty(
+                listOfDirections[DirectionIndex - 1].turnDirection!,
+                context)},"}";
+          }
+        }
+      } else {
+        return "${LocaleData.gostraight.getString(context)}";
+>>>>>>> Stashed changes
       }
     }
   }
@@ -743,15 +1169,19 @@ class scrollableDirection extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Center(
-              child: Text(
-                chooseDirection(),
-                style: const TextStyle(
-                  fontFamily: "Roboto",
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  height: 30/24,
+            child: Semantics(
+              label: "${chooseDirection() } ${chooseSteps()}",
+              excludeSemantics: true,
+              child: Center(
+                child: Text(
+                  chooseDirection(),
+                  style: const TextStyle(
+                    fontFamily: "Roboto",
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    height: 30/24,
+                  ),
                 ),
               ),
             ),
@@ -759,6 +1189,7 @@ class scrollableDirection extends StatelessWidget {
           SizedBox(
             width: 4,
           ),
+<<<<<<< Updated upstream
           Container(
             width: 75,
             height: 70,
@@ -784,6 +1215,41 @@ class scrollableDirection extends StatelessWidget {
                   child: chooseIcon(),
                 ),
               ],
+=======
+          Semantics(
+            excludeSemantics: true,
+            child: Container(
+              width: 85,
+              height: 75,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ((chooseDirection().toLowerCase().contains("lift") || chooseDirection().toLowerCase().contains("stair")) || listOfDirections.isEmpty || (DirectionIndex>0 && listOfDirections.length>DirectionIndex && listOfDirections[DirectionIndex].isDestination))?Container():Text(
+                    chooseSteps().replaceAll("meter", "m"),
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      height: 26/16,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 4,
+                  ),
+                  Container(
+                    height: 40,
+                    width: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white, // Set background color to white
+                      shape: BoxShape.circle, // Make the container a circle
+                    ),
+                    child: chooseIcon(), // Your icon or widget inside the circle
+                  )
+
+                ],
+              ),
+>>>>>>> Stashed changes
             ),
           )],
       ),

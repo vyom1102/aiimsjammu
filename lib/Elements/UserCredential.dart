@@ -1,6 +1,7 @@
 
 import 'package:hive/hive.dart';
 
+<<<<<<< Updated upstream
  class UserCredentials{
    var userInformationBox = Hive.box('UserInformation');
    String RefreshToken = "";
@@ -12,6 +13,26 @@ import 'package:hive/hive.dart';
    String UserNavigationModeSetting = "";
    String UserOrentationSetting = "";
    String UserPathDetails = '';
+=======
+class UserCredentials{
+  var userInformationBox = Hive.box('UserInformation');
+  String RefreshToken = "";
+  String AccessToken = "";
+  List<dynamic> Roles = [];
+  String UserId = "";
+  String UserHeight = "";
+  int UserPersonWithDisability = 0;
+  String UserNavigationModeSetting = "";
+  String UserOrentationSetting = "";
+  String UserPathDetails = '';
+  String userName = '';
+
+
+  String getuserName(){
+    userName = userInformationBox.get('username')??'username';
+    return userName;
+  }
+>>>>>>> Stashed changes
 
 
   void setUserHeight(String userheight){
@@ -43,7 +64,11 @@ import 'package:hive/hive.dart';
     userInformationBox.put('UserOrentationSetting', userOrentationSetting);
   }
   String getUserOrentationSetting(){
+<<<<<<< Updated upstream
     UserOrentationSetting = userInformationBox.get('UserOrentationSetting')?? "Focus Mode";
+=======
+    UserOrentationSetting = userInformationBox.get('UserOrentationSetting')??"Explore Mode";
+>>>>>>> Stashed changes
     return UserOrentationSetting;
   }
 

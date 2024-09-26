@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/API/RefreshTokenAPI.dart';
@@ -10,8 +11,12 @@ import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'guestloginapi.dart';
 
 class PolyLineApi {
+<<<<<<< Updated upstream
   final String baseUrl = "https://dev.iwayplus.in/secured/polyline";
   String token = "";
+=======
+  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/polyline" : "https://maps.iwayplus.in/secured/polyline";
+>>>>>>> Stashed changes
   String buildingID="";
   final BuildingAllBox = BuildingAllAPIModelBOX.getData();
   var signInBox = Hive.box('SignInDatabase');

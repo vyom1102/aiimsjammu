@@ -18,7 +18,12 @@ class pathState {
   Map<int, List<Cell>> Cellpath = {};
   List<int> singleListPath = [];
   List<Cell> singleCellListPath = [];
+<<<<<<< Updated upstream
   List<Cell> CellTurnPoints = [];
+=======
+  List<List<Cell>> listofPaths = [];
+  Map<String,patchDataModel> patchData = Map();
+>>>>>>> Stashed changes
   List<direction> directions = [];
   Map<String,Map<int,int>>? numCols = Map();
   int index = 0;
@@ -41,7 +46,6 @@ class pathState {
     path.clear();
     Cellpath.clear();
     singleListPath.clear();
-    CellTurnPoints.clear();
     directions.clear();
     connections.clear();
     nearbyLandmarks.clear();
@@ -80,4 +84,20 @@ class pathState {
       path[key] = value.reversed.toList();
     });
   }
+<<<<<<< Updated upstream
+=======
+
+  void clearforaccessiblepath(){
+    didPathStart = true;
+    realWorldCoordinates.clear();
+    path.clear();
+    Cellpath.clear();
+    singleListPath.clear();
+    singleCellListPath.clear();
+    listofPaths.clear();
+    directions.clear();
+    connections.clear();
+    noPathFound = false;
+  }
+>>>>>>> Stashed changes
 }

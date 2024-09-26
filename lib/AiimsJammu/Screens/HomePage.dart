@@ -11,7 +11,16 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 import 'package:intl/intl.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/NoInternetConnection.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/OpeningClosingStatus.dart';
+<<<<<<< Updated upstream
 import 'package:url_launcher/url_launcher.dart';
+=======
+import '../../API/RefreshTokenAPI.dart';
+import '../../API/UsergetAPI.dart';
+import '../../APIMODELS/DataVersion.dart';
+import '../../VersioInfo.dart';
+import '../../websocket/NotifIcationSocket.dart';
+import '../Widgets/Translator.dart';
+>>>>>>> Stashed changes
 import '/DestinationSearchPage.dart';
 import '/AiimsJammu/Screens/ATMScreen.dart';
 import '/AiimsJammu/Screens/AllAnnouncementScreen.dart';
@@ -77,6 +86,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    NotificationSocket.receiveMessage();
+
     _pageController = PageController(initialPage: _currentPage);
     _internetConnection = InternetConnection().onStatusChange.listen((event) {
       switch(event){

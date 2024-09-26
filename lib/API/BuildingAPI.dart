@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/DATABASE/BOXES/BuildingAPIModelBox.dart';
@@ -12,9 +13,16 @@ import 'guestloginapi.dart';
 
 
 class BuildingAPI {
+<<<<<<< Updated upstream
   final String baseUrl = "https://dev.iwayplus.in/secured/building/get/venue";
   var signInBox = Hive.box('SignInDatabase');
   String token = "";
+=======
+  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/building/get/venue" : "https://maps.iwayplus.in/secured/building/get/venue";
+  static var signInBox = Hive.box('SignInDatabase');
+  String accessToken = signInBox.get("accessToken");
+  String refreshToken = signInBox.get("refreshToken");
+>>>>>>> Stashed changes
 
   Future<Building> fetchBuildData() async {
     token = signInBox.get("accessToken");
