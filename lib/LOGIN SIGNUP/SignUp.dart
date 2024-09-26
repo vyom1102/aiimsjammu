@@ -689,7 +689,7 @@ class _SignUpState extends State<SignUp> {
 
 
                                                 bool userExists = await checkUserExists(finalMailEditingController);
-                                                if(userExists){
+                                                if(!userExists){
                                                   bool otpSent = await SendOTPAPI().sendOTP(finalMailEditingController);
                                                   if (!otpSent) {
                                                     HelperClass.showToast("Invalid email");

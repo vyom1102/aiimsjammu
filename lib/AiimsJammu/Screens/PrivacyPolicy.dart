@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../Widgets/Translator.dart';
+
 class PrivacyPolicy extends StatelessWidget {
   const PrivacyPolicy({super.key});
 
@@ -32,7 +34,7 @@ class PrivacyPolicy extends StatelessWidget {
             Row(
               children: [
                 SizedBox(width: 16,),
-                Text(
+                TranslatorWidget(
                   'Privacy Policy',
                   style: TextStyle(
                     color: Colors.black,
@@ -45,7 +47,7 @@ class PrivacyPolicy extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
+              child: TranslatorWidget(
                 'Welcome to iWayplus ! This Privacy Policy outlines how we collect, use, disclose, and safeguard your personal information when you use our indoor way finding application ("App"). By using the App, you agree to the terms of this Privacy Policy',
                 style: TextStyle(
                   color: Color(0xFF505054),
@@ -59,7 +61,7 @@ class PrivacyPolicy extends StatelessWidget {
             Row(
               children: [
                 SizedBox(width: 16,),
-                Text(
+                TranslatorWidget(
                   'Information We Collect',
                   style: TextStyle(
                     color: Colors.black,
@@ -74,7 +76,7 @@ class PrivacyPolicy extends StatelessWidget {
             SizedBox(height: 8,),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
+              child: TranslatorWidget(
                 'We may collect the following types of information when you use our App:',
                 style: TextStyle(
                   color: Color(0xFF505054),
@@ -88,7 +90,7 @@ class PrivacyPolicy extends StatelessWidget {
             Row(
               children: [
                 SizedBox(width: 16,),
-                Text(
+                TranslatorWidget(
                   'Location Information',
                   style: TextStyle(
                     color: Colors.black,
@@ -104,7 +106,7 @@ class PrivacyPolicy extends StatelessWidget {
             SizedBox(height: 8,),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
+              child: TranslatorWidget(
                   'Our App utilises GPS and Bluetooth data to provide accurate indoor navigation. This includes your devices location and proximity to Bluetooth beacons. This data helps us offer you  precise navigation guidance.',
                   style: TextStyle(
                   color: Color(0xFF505054),
@@ -118,7 +120,7 @@ class PrivacyPolicy extends StatelessWidget {
             Row(
               children: [
                 SizedBox(width: 16,),
-                Text(
+                TranslatorWidget(
                   'IMU (Inertial Measurement Unit) Data: ',
                   style: TextStyle(
                     color: Colors.black,
@@ -135,7 +137,7 @@ class PrivacyPolicy extends StatelessWidget {
             SizedBox(width: 16,),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
+              child: TranslatorWidget(
               'We may access your device`s IMU sensors to gather informationabout its movement, orientation, and direction. This data contributes to improving navigation accuracy. Usage Information: We collect information about your type of disability and how you interact with the  App, such as the features you use, the paths you take, and the settings you configure. This helps us enhance your overall experience.',
                   style: TextStyle(
                   color: Color(0xFF505054),
@@ -149,7 +151,7 @@ class PrivacyPolicy extends StatelessWidget {
             Row(
               children: [
                 SizedBox(width: 16,),
-                Text(
+                TranslatorWidget(
                   'Usage Information:',
                   style: TextStyle(
                     color: Colors.black,
@@ -165,7 +167,7 @@ class PrivacyPolicy extends StatelessWidget {
             SizedBox(height: 8,),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
+              child: TranslatorWidget(
                 'We collect information about your type of disability and how you interact with the  App, such as the features you use, the paths you take, and the settings you configure. This helps us enhance your overall experience.',
                 style: TextStyle(
                   color: Color(0xFF505054),
@@ -179,7 +181,7 @@ class PrivacyPolicy extends StatelessWidget {
             Row(
               children: [
                 SizedBox(width: 16,),
-                Text(
+                TranslatorWidget(
                   'How We Use Your Information',
                   style: TextStyle(
                     color: Colors.black,
@@ -193,7 +195,7 @@ class PrivacyPolicy extends StatelessWidget {
             // SizedBox(height: 8,),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
+              child: TranslatorWidget(
                 'We use the collected information for the following purposes:',
                 style: TextStyle(
                   color: Color(0xFF505054),
@@ -207,7 +209,7 @@ class PrivacyPolicy extends StatelessWidget {
             Row(
               children: [
                 SizedBox(width: 16,),
-                Text(
+                TranslatorWidget(
                   'Navigation Services:',
                   style: TextStyle(
                     color: Colors.black,
@@ -222,7 +224,7 @@ class PrivacyPolicy extends StatelessWidget {
             // SizedBox(height: 8,),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
+              child: TranslatorWidget(
                 'The location, Bluetooth, and IMU data we collect are used to provide indoor navigation services tailored to your needs, helping you find your way within indoor spaces.',
                 style: TextStyle(
                   color: Color(0xFF505054),
@@ -235,7 +237,7 @@ class PrivacyPolicy extends StatelessWidget {
             Row(
               children: [
                 SizedBox(width: 16,),
-                Text(
+                TranslatorWidget(
                   'Improvement of Services:',
                   style: TextStyle(
                     color: Colors.black,
@@ -249,7 +251,7 @@ class PrivacyPolicy extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 16),
-              child: Text(
+              child: TranslatorWidget(
                 'We analyse aggregated, anonymised data to enhance our navigation algorithms and overall App performance',
                 style: TextStyle(
                   color: Color(0xFF505054),
@@ -263,7 +265,7 @@ class PrivacyPolicy extends StatelessWidget {
             Row(
               children: [
                 SizedBox(width: 16,),
-                Text(
+                TranslatorWidget(
                   'Personalisation:',
                   style: TextStyle(
                     color: Colors.black,
@@ -277,7 +279,7 @@ class PrivacyPolicy extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
+              child: TranslatorWidget(
                 'We may use usage information to customise your navigation experience, suggest shortcuts, and offer relevant features based on your preferences.',
                 style: TextStyle(
                   color: Color(0xFF505054),
@@ -290,7 +292,7 @@ class PrivacyPolicy extends StatelessWidget {
             Row(
               children: [
                 SizedBox(width: 16,),
-                Text(
+                TranslatorWidget(
                   'Data Sharing and Disclosure',
                   style: TextStyle(
                     color: Colors.black,
@@ -303,7 +305,7 @@ class PrivacyPolicy extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
+              child: TranslatorWidget(
                 'We may share and disclose your information under the following circumstances:',
                 style: TextStyle(
                   color: Color(0xFF505054),
@@ -316,7 +318,7 @@ class PrivacyPolicy extends StatelessWidget {
             Row(
               children: [
                 SizedBox(width: 16,),
-                Text(
+                TranslatorWidget(
                   'Legal Requirements: ',
                   style: TextStyle(
                     color: Colors.black,
@@ -330,7 +332,7 @@ class PrivacyPolicy extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
+              child: TranslatorWidget(
                 'We may disclose your information to comply with applicable laws, regulations, legal  processes, or government requests.',
                 style: TextStyle(
                   color: Color(0xFF505054),
@@ -343,7 +345,7 @@ class PrivacyPolicy extends StatelessWidget {
             Row(
               children: [
                 SizedBox(width: 16,),
-                Text(
+                TranslatorWidget(
                   'Protection of Rights:',
                   style: TextStyle(
                     color: Colors.black,
@@ -357,7 +359,7 @@ class PrivacyPolicy extends StatelessWidget {
             ),
             Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Text(
+        child: TranslatorWidget(
             'We may disclose your information if we believe it`s necessary to protect our rights,  privacy, safety, or the rights, privacy, or safety of others.',
         style: TextStyle(
             color: Color(0xFF505054),
@@ -370,7 +372,7 @@ class PrivacyPolicy extends StatelessWidget {
             Row(
               children: [
                 SizedBox(width: 16,),
-                Text(
+                TranslatorWidget(
                   'Your Choices',
                   style: TextStyle(
                     color: Colors.black,
@@ -383,7 +385,7 @@ class PrivacyPolicy extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
+              child: TranslatorWidget(
                 'You can take the following actions regarding your information:',
                 style: TextStyle(
                   color: Color(0xFF505054),
@@ -396,7 +398,7 @@ class PrivacyPolicy extends StatelessWidget {
             Row(
               children: [
                 SizedBox(width: 16,),
-                Text(
+                TranslatorWidget(
                   'Location Services:',
                   style: TextStyle(
                     color: Colors.black,
@@ -410,7 +412,7 @@ class PrivacyPolicy extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
+              child: TranslatorWidget(
                 ' You can enable or disable location services for the App through your device`s settings.  Opt-out: You can opt-out of sharing usage data for analytical purposes through the App`s settings.',
                 style: TextStyle(
                   color: Color(0xFF505054),
@@ -423,7 +425,7 @@ class PrivacyPolicy extends StatelessWidget {
             Row(
               children: [
                 SizedBox(width: 16,),
-                Text(
+                TranslatorWidget(
                   'Security:',
                   style: TextStyle(
                     color: Colors.black,
@@ -436,7 +438,7 @@ class PrivacyPolicy extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
+              child: TranslatorWidget(
                 'We employ industry-standard security measures to protect your information from unauthorized access,  disclosure, alteration, or destruction.',
                 style: TextStyle(
                   color: Color(0xFF505054),
@@ -449,7 +451,7 @@ class PrivacyPolicy extends StatelessWidget {
              Row(
         children: [
           SizedBox(width: 16,),
-          Text(
+          TranslatorWidget(
             'Children`s Privacy',
           style: TextStyle(
           color: Colors.black,
@@ -462,7 +464,7 @@ class PrivacyPolicy extends StatelessWidget {
       ),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
+              child: TranslatorWidget(
                 'Our App is not intended for children under the age of We do not knowingly collect personal information from children. If you believe a child has provided us with their information, please contact us   so we can remove it.',
                 style: TextStyle(
                   color: Color(0xFF505054),
@@ -476,7 +478,7 @@ class PrivacyPolicy extends StatelessWidget {
               children: [
                 SizedBox(width:
                   16,),
-                Text(
+                TranslatorWidget(
                   'Changes to this Privacy Policy',
                   style: TextStyle(
                     color: Colors.black,
@@ -489,7 +491,7 @@ class PrivacyPolicy extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
+              child: TranslatorWidget(
                 'We may update this Privacy Policy as necessary. We will notify you of any changes by posting the updated policy within the App or through other communication methods.',
                 style: TextStyle(
                   color: Color(0xFF505054),
@@ -502,7 +504,7 @@ class PrivacyPolicy extends StatelessWidget {
             Row(
               children: [
                 SizedBox(width: 16,),
-                Text(
+                TranslatorWidget(
                   'Contact Us',
                   style: TextStyle(
                     color: Colors.black,
@@ -516,7 +518,7 @@ class PrivacyPolicy extends StatelessWidget {
 
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text('If you have any questions, concerns, or requests regarding this Privacy Policy, please contact us at info@iwayplus.com. By using our App, you consent to the terms of this Privacy Policy.'),
+              child: TranslatorWidget('If you have any questions, concerns, or requests regarding this Privacy Policy, please contact us at info@iwayplus.com. By using our App, you consent to the terms of this Privacy Policy.'),
             )
 
 

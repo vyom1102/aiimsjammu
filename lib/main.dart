@@ -12,9 +12,11 @@ import 'DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
 import 'DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
+import 'DATABASE/DATABASEMODEL/OutDoorModel.dart';
 import 'DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/SignINAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/WayPointModel.dart';
 import 'LOGIN SIGNUP/SignIn.dart';
 import 'MainScreen.dart';
 
@@ -39,6 +41,11 @@ Future<void> main() async {
   await Hive.openBox<BeaconAPIModel>('BeaconAPIModelFile');
   Hive.registerAdapter(BuildingAPIModelAdapter());
   await Hive.openBox<BuildingAPIModel>('BuildingAPIModelFile');
+  Hive.registerAdapter(OutDoorModelAdapter());
+  await Hive.openBox<OutDoorModel>('OutDoorModelFile');
+  Hive.registerAdapter(WayPointModelAdapter());
+  await Hive.openBox<WayPointModel>('WayPointModelFile');
+
   await Hive.openBox('Favourites');
   await Hive.openBox('UserInformation');
 
@@ -48,6 +55,8 @@ Future<void> main() async {
   await Hive.openBox('Filters');
   await Hive.openBox('SignInDatabase');
   await Hive.openBox('LocationPermission');
+  await Hive.openBox('VersionData');
+
   runApp(const MyApp());
 }
 

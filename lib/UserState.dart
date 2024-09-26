@@ -1,11 +1,18 @@
+import 'dart:collection';
+
+import 'package:flutter/cupertino.dart';
 import 'package:geodesy/geodesy.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iwaymaps/MotionModel.dart';
 import 'package:iwaymaps/pathState.dart';
+import 'package:iwaymaps/websocket/UserLog.dart';
 
+import 'APIMODELS/beaconData.dart';
 import 'Cell.dart';
+import 'localization/locales.dart';
 import 'navigationTools.dart';
 import 'package:geodesy/geodesy.dart' as geo;
+import 'package:iwaymaps/websocket/UserLog.dart';
 
 
 class UserState{
@@ -18,6 +25,7 @@ class UserState{
   double lng;
   String key;
   double theta;
+  String? locationName;
   bool isnavigating;
   int showcoordX;
   int showcoordY;
@@ -30,19 +38,20 @@ class UserState{
   static int xdiff = 0;
   static int ydiff = 0;
   static bool isRelocalizeAroundLift=false;
+  static bool reachedLift=false;
   static int UserHeight  = 195;
   static double stepSize = 2;
-
-
+  static String lngCode='en';
   static int cols = 0;
   static int rows = 0;
-  static Map<int, List<int>> nonWalkable = Map();
+  static Map<String,Map<int, List<int>>> nonWalkable = Map();
   static Function reroute = (){};
   static Function closeNavigation = (){};
-  static Function speak = (){};
+  static Function speak = (String lngcode){};
   static Function AlignMapToPath = (){};
   static Function startOnPath = (){};
   static Function paintMarker = (geo.LatLng Location){};
+  static Function createCircle=(double lat,double lng){};
 
   UserState({required this.floor, required this.coordX, required this.coordY, required this.lat, required this.lng, required this.theta, this.key = "", this.Bid = "", this.showcoordX = 0, this.showcoordY = 0, this.isnavigating = false, this.coordXf = 0.0, this.coordYf = 0.0});
 
@@ -75,10 +84,11 @@ class UserState{
   //
   // }
 
-  Future<void> move()async{
+  Future<void> move(context)async{
 
 
-    moveOneStep();
+
+    moveOneStep(context);
 
 
 
@@ -86,7 +96,7 @@ class UserState{
       bool movementAllowed = true;
 
 
-      if(!MotionModel.isValidStep(this, cols, rows, nonWalkable[floor]!, reroute)){
+      if(!MotionModel.isValidStep(this, cols, rows, nonWalkable[Bid]![floor]!, reroute)){
         movementAllowed = false;
       }
 
@@ -118,7 +128,7 @@ class UserState{
 
 
       if(movementAllowed){
-        moveOneStep();
+        moveOneStep(context);
       }else if(!movementAllowed){
         return;
       }
@@ -129,11 +139,17 @@ class UserState{
     }
   }
 
-  Future<void> moveOneStep()async{
+  Future<void> moveOneStep(context)async{
+
+    wsocket.message["userPosition"]["X"]=coordX;
+    wsocket.message["userPosition"]["Y"]=coordY;
+    wsocket.message["userPosition"]["floor"]=floor;
+
     if(isnavigating){
       checkForMerge();
       pathobj.index = pathobj.index + 1;
-      List<int> transitionvalue = Cellpath[pathobj.index].move(this.theta);
+      List<int> p = tools.analyzeCell(Cellpath, Cellpath[pathobj.index]);
+      List<int> transitionvalue = Cellpath[pathobj.index].move(this.theta,currPointer:p[1],totalCells:p[0]);
       coordX = coordX + transitionvalue[0];
       coordY = coordY + transitionvalue[1];
       List<double> values = tools.localtoglobal(coordX, coordY);
@@ -174,8 +190,12 @@ class UserState{
 
 
       //destination check
-      if(Cellpath.length - pathobj.index <6 ){
-        speak("You have reached ${pathobj.destinationName}");
+      print("angleeeeeeeee ${tools.calculateDistance([showcoordX,showcoordY], [pathobj.destinationX,pathobj.destinationY])}");
+      print("angleeeeeeeee ${floor}     ${pathobj.destinationFloor}");
+      print("angleeeeeeeee ${Bid}     ${pathobj.destinationBid }");
+      if(floor == pathobj.destinationFloor && Bid == pathobj.destinationBid && tools.calculateDistance([showcoordX,showcoordY], [pathobj.destinationX,pathobj.destinationY]) < 6 ){
+        print("angleeeeeeeee inside");
+        //createCircle(lat,lng);
         closeNavigation();
       }
 
@@ -190,24 +210,31 @@ class UserState{
       print("iwwwwi ${showcoordY*cols + showcoordX}");
 
       if(floor!=pathobj.destinationFloor &&  pathobj.connections[Bid]?[floor] == (showcoordY*cols + showcoordX)){
-        speak("Use this lift and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor");
+       // UserState.reachedLift=true;
+        createCircle(lat,lng);
+        speak(convertTolng(
+            "Use this ${pathobj.accessiblePath} and go to ${tools.numericalToAlphabetical(
+                pathobj.destinationFloor)} floor", "", 0.0, context, 0.0)
+            , lngCode, prevpause:true);
       }
 
-      if(pathState.nearbyLandmarks.isNotEmpty){
-        pathState.nearbyLandmarks.forEach((element) {
-          if(element.element!.subType == "room door" && element.properties!.polygonExist != true){
-            if(tools.calculateDistance([showcoordX,showcoordY], [element.doorX??element.coordinateX!,element.doorY??element.coordinateY!]) <=3){
-              speak("Passing by ${element.name}");
-              pathState.nearbyLandmarks.remove(element);
+      if(0<pathobj.index && pathobj.index<Cellpath.length-1 && pathState.nearbyLandmarks.isNotEmpty && !tools.isCellTurn(Cellpath[pathobj.index-1], Cellpath[pathobj.index], Cellpath[pathobj.index+1])){
+        pathState.nearbyLandmarks.retainWhere((element) {
+          if (element.element!.subType == "room door" && element.properties!.polygonExist != true) {
+            if (tools.calculateDistance([showcoordX, showcoordY], [element.doorX ?? element.coordinateX!, element.doorY ?? element.coordinateY!]) <= 3) {
+              speak(convertTolng("Passing by ${element.name}", element.name, 0.0, context, 0.0), lngCode);
+              return false; // Remove this element
             }
-          }else{
-            if(tools.calculateDistance([showcoordX,showcoordY], [element.doorX??element.coordinateX!,element.doorY??element.coordinateY!]) <=6){
-              double agl = tools.calculateAngle2([showcoordX,showcoordY], [showcoordX+transitionvalue[0],showcoordY+transitionvalue[1]], [element.coordinateX!,element.coordinateY!]);
-              speak("${element.name} is on your ${tools.angleToClocks(agl)}");
-              pathState.nearbyLandmarks.remove(element);
+          } else {
+            if (tools.calculateDistance([showcoordX, showcoordY], [element.doorX ?? element.coordinateX!, element.doorY ?? element.coordinateY!]) <= 6) {
+              double agl = tools.calculateAngle2([showcoordX, showcoordY], [showcoordX + transitionvalue[0], showcoordY + transitionvalue[1]], [element.coordinateX!, element.coordinateY!]);
+              speak(convertTolng("${element.name} is on your ${LocaleData.getProperty5(tools.angleToClocks(agl, context), context)}", element.name!, 0.0, context, 0.0), lngCode);
+              return false; // Remove this element
             }
           }
+          return true; // Keep this element
         });
+
       }
 
     }else{
@@ -235,6 +262,43 @@ class UserState{
   }
 
 
+  String convertTolng(String msg,String? name,double agl,BuildContext context,double a,{String destname = ""}){
+    print("msgggg");
+    print("${name} is on your ${LocaleData.getProperty5(tools.angleToClocks(agl,context),context)}");
+    if(msg=="You have reached ${destname}. It is ${tools.angleToClocks3(a, context)}"){
+      if(lngCode=='en'){
+        return msg;
+      }else{
+        return "आप ${destname} पर पहुँच गए हैं। वह ${LocaleData.getProperty(tools.angleToClocks3(a, context), context) }";
+      }
+    }else if(msg=="Use this Lifts and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor"){
+      if(lngCode=='en'){
+        return "Use this Lift and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor";
+      }else{
+        return "इस लिफ़्ट का उपयोग करें और ${tools.numericalToAlphabetical(pathobj.destinationFloor)} मंज़िल पर जाएँ";
+      }
+    }else if(msg=="Use this Stairs and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor"){
+      if(lngCode=='en'){
+        return "Use this Stair and go to ${tools.numericalToAlphabetical(pathobj.destinationFloor)} floor";
+      }else{
+        return "इन सीढ़ियों का उपयोग करें और ${tools.numericalToAlphabetical(pathobj.destinationFloor)} मंज़िल पर जाएँ";
+      }
+    }else if(name!=null && msg=="Passing by ${name}"){
+      if(lngCode=='en'){
+        return msg;
+      }else{
+        return "${name} से गुज़रते हुए";
+      }
+    }else if(name!=null && msg=="${name} is on your ${(tools.angleToClocks(agl,context),context)}")
+    {
+      if(lngCode=='en'){
+        return msg;
+      }else{
+        return "${name} आपके ${LocaleData.getProperty5(tools.angleToClocks(agl,context),context)} पर है";
+      }
+    }
+    return "";
+  }
 
 
   Future<void> checkForMerge()async{
@@ -253,6 +317,9 @@ class UserState{
   Future<void> moveToFloor(int fl)async{
     floor = fl;
     if(pathobj.Cellpath[fl] != null){
+
+      // coordX=coordinateX!;
+      // coordY=coordinateY!;
       coordX = pathobj.Cellpath[fl]![0].x;
       coordY = pathobj.Cellpath[fl]![0].y;
       List<double> values = tools.localtoglobal(coordX, coordY);
@@ -283,8 +350,8 @@ class UserState{
       pathobj.index = Cellpath.indexOf(turnPoints[0]);
     }
     floor = pathobj.sourceFloor;
-    showcoordX = path[pathobj.index] % pathobj.numCols![Bid]![floor]!;
-    showcoordY = path[pathobj.index] ~/ pathobj.numCols![Bid]![floor]!;
+    showcoordX = Cellpath[pathobj.index].x;
+    showcoordY = Cellpath[pathobj.index].y;
     coordX = showcoordX;
     coordY = showcoordY;
     List<double> values = tools.localtoglobal(coordX, coordY);

@@ -1,4 +1,4 @@
-package com.iwayplus.aiimsjammunavigation
+package com.iwayplus.aiimsjammu
 
 import io.flutter.embedding.android.FlutterActivity
 

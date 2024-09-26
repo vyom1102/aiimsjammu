@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import '../Widgets/Translator.dart';
 import '/AiimsJammu/Data/ServicesDemoData.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
@@ -141,7 +142,7 @@ class _OtherServiceScreenState extends State<OtherServiceScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: TranslatorWidget(
           'Other Services',
           style: TextStyle(
             color: Color(0xFF374151),
@@ -225,7 +226,7 @@ class _OtherServiceScreenState extends State<OtherServiceScreen> {
                                 SizedBox(
                                   width: 12,
                                 ),
-                                Text(
+                                TranslatorWidget(
                                   service['name'],
                                   style: const TextStyle(
                                     fontFamily: "Roboto",
@@ -267,7 +268,7 @@ class _OtherServiceScreenState extends State<OtherServiceScreen> {
                                 SizedBox(
                                   width: 8,
                                 ),
-                                Text(
+                                TranslatorWidget(
                                   service['locationName'],
                                   style: const TextStyle(
                                     fontFamily: "Roboto",
@@ -282,7 +283,7 @@ class _OtherServiceScreenState extends State<OtherServiceScreen> {
                                   onTap:(){
                                     PassLocationId(context,service['locationId']);
                                   },
-                                  child: Text(
+                                  child: TranslatorWidget(
                                     'Directions',
                                     style: TextStyle(
                                       color: Color(0xFF3F3F46),

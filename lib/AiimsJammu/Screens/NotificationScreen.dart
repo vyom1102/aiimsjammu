@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../Widgets/Translator.dart';
+
 class NotificationScreen extends StatelessWidget {
   const NotificationScreen({super.key});
 
@@ -8,7 +10,7 @@ class NotificationScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: TranslatorWidget(
           "Notification",
           style: const TextStyle(
             fontFamily: "Roboto",
@@ -31,7 +33,7 @@ class NotificationScreen extends StatelessWidget {
                 width: 100,
                 height: 100,
               ),
-              Text(
+              TranslatorWidget(
                 'No Notifications',
                 style: TextStyle(
                   color: Color(0xFF18181B),
@@ -45,7 +47,7 @@ class NotificationScreen extends StatelessWidget {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(
+                child: TranslatorWidget(
                   'We’ll let you know when there will be something to update you.',
                   textAlign: TextAlign.center,
                   style: TextStyle(

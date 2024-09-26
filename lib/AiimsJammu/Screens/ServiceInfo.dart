@@ -12,6 +12,8 @@ import '../Widgets/OpeningClosingStatus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:hive/hive.dart';
+
+import '../Widgets/Translator.dart';
 class ServiceInfo extends StatefulWidget {
   final String id;
   final String imagePath;
@@ -276,7 +278,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(
+                          TranslatorWidget(
                             widget.type,
                             style: TextStyle(
                               color: Colors.white,
@@ -298,7 +300,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                   SizedBox(
                     width: 12,
                   ),
-                  Text(
+                  TranslatorWidget(
                     widget.name,
                     style: const TextStyle(
                       fontFamily: "Roboto",
@@ -333,7 +335,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                   SizedBox(
                     width: 8,
                   ),
-                  Text(
+                  TranslatorWidget(
                     widget.location,
                     style: const TextStyle(
                       fontFamily: "Roboto",
@@ -408,7 +410,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                 padding: const EdgeInsets.only(top: 8.0,left: 16,right: 16),
                 child: Row(
                   children: [
-                    Text(
+                    TranslatorWidget(
                       'About',
                       style: TextStyle(
                         color: Color(0xFF18181B),
@@ -423,7 +425,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
               ),
               Padding(
                 padding: EdgeInsets.only(top: 12.0,right: 16,left: 16,bottom: 16),
-                child: Text('Designing the operation hours section for a mobile app involves displaying the opening and closing hours of a business ',
+                child: TranslatorWidget('Designing the operation hours section for a mobile app involves displaying the opening and closing hours of a business ',
                 style: TextStyle(
                   color: Color(0xFF595967),
                   fontSize: 14,
@@ -438,7 +440,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                 padding: const EdgeInsets.only(left: 16.0,bottom: 8),
                 child: Row(
                   children: [
-                    Text(
+                    TranslatorWidget(
                       'Information',
                       style: TextStyle(
                         color: Color(0xFF18181B),
@@ -468,7 +470,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                     children: [
                       Icon(Icons.phone),
                       SizedBox(width: 8,),
-                      Text(
+                      TranslatorWidget(
                         widget.contact,
                         style: TextStyle(
                           color: Color(0xFF595967),
@@ -491,7 +493,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                       children: [
                         Icon(Icons.schedule),
                         SizedBox(width: 8,),
-                        Text(
+                        TranslatorWidget(
                           'Opening Hours:',
                           style: TextStyle(
                             color: Color(0xFF4CAF50),
@@ -509,7 +511,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                         SizedBox(width: 16,),
                         Column(
                           children: [
-                            Text(
+                            TranslatorWidget(
                               'Monday to Sunday',
                               style: TextStyle(
                                 color: Color(0xFF595967),
@@ -520,7 +522,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                               ),
                             ),
                             SizedBox(height: 4,),
-                            Text(
+                            TranslatorWidget(
                               '     ${widget.startTime} Am - ${widget.endTime} Pm',
                               style: TextStyle(
                                 color: Color(0xFF595967),
@@ -586,7 +588,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                       ),
                     ),
                     SizedBox(width: 8),
-                    Text(
+                    TranslatorWidget(
                       'Directions',
                       style: TextStyle(
                         color:
@@ -643,7 +645,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                       size: 18,
                     ),
                     SizedBox(width: 8),
-                    Text(
+                    TranslatorWidget(
                       'Share',
                       style: TextStyle(
                         color: Colors.black,
@@ -701,7 +703,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                       size: 18,
                     ),
                     SizedBox(width: 8),
-                    Text(
+                    TranslatorWidget(
                       'Call',
                       style: TextStyle(
                         color: Colors.black,

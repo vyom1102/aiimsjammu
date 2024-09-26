@@ -9,9 +9,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:iwaymaps/API/DataVersionApi.dart';
+import 'package:iwaymaps/API/buildingAllApi.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/NoInternetConnection.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/OpeningClosingStatus.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../../APIMODELS/DataVersion.dart';
+import '../../VersioInfo.dart';
+import '../Widgets/Translator.dart';
 import '/DestinationSearchPage.dart';
 import '/AiimsJammu/Screens/ATMScreen.dart';
 import '/AiimsJammu/Screens/AllAnnouncementScreen.dart';
@@ -55,10 +59,7 @@ class _HomePageState extends State<HomePage> {
   List<dynamic> _cafeteriafilteredServices = [];
   List<dynamic> _otherservices = [];
   List<dynamic>   _otherfilteredServices = [];
-  String twitter ="";
-  String facebook ="";
-  String youtube ="";
-  String instagram="";
+
 
   int _currentPage = 0;
   String token = "";
@@ -82,7 +83,15 @@ class _HomePageState extends State<HomePage> {
       switch(event){
         case InternetStatus.disconnected:
           _showNoInternetSnackbar();
-
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(content: Text('No Internet Connection')),
+          // );
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => NoInternetConnection(),
+          //   ),
+          // );
         case InternetStatus.connected:
           break;
         default:
@@ -100,7 +109,7 @@ class _HomePageState extends State<HomePage> {
     _loadServicesFromAPI();
     _loadAnnouncementsFromAPI();
     getUserDataFromHive();
-    _loadSocialsFromAPI();
+    versionApiCall();
 
 
     index = 0;
@@ -108,6 +117,87 @@ class _HomePageState extends State<HomePage> {
     // _timer = Timer.periodic(Duration(seconds: 10), (timer) {
     //   _scrollToNext();
     // });
+
+  }
+  var versionBox = Hive.box('VersionData');
+  void versionApiCall() async{
+    try {
+      DataVersion dataVersion = await DataVersionApi()
+          .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
+      if (versionBox.containsKey("buildingID") &&
+          versionBox.get("buildingID") == dataVersion.versionData!.buildingID) {
+        print("Already present");
+        if (dataVersion.versionData!.landmarksDataVersion ==
+            versionBox.get("landmarksDataVersion")) {
+          VersionInfo.landmarksDataVersionUpdate = false;
+          print("LandmarkVersion change: False");
+        } else {
+          versionBox.put("landmarksDataVersion",
+              dataVersion.versionData!.landmarksDataVersion);
+
+          VersionInfo.landmarksDataVersionUpdate = true;
+          print("LandmarkVersion change: True");
+        }
+
+        if (dataVersion.versionData!.polylineDataVersion ==
+            versionBox.get("polylineDataVersion")) {
+          VersionInfo.polylineDataVersionUpdate = false;
+
+          print("PolylineVersion change: False");
+          print(
+              "${dataVersion.versionData!.polylineDataVersion} ${versionBox.get(
+                  "polylineDataVersion")}");
+        } else {
+          VersionInfo.polylineDataVersionUpdate = true;
+          print("PolylineVersion change: True");
+          versionBox.put("polylineDataVersion",
+              dataVersion.versionData!.polylineDataVersion);
+          print(
+              "${dataVersion.versionData!.polylineDataVersion} ${versionBox.get(
+                  "polylineDataVersion")}");
+        }
+
+        if (dataVersion.versionData!.buildingDataVersion ==
+            versionBox.get("buildingDataVersion")) {
+          VersionInfo.buildingDataVersionUpdate = false;
+          print("BuildingDataVersion change: False");
+        } else {
+          VersionInfo.buildingDataVersionUpdate = true;
+          versionBox.put("buildingDataVersion",
+              dataVersion.versionData!.buildingDataVersion);
+          print("BuildingDataVersion change: True");
+        }
+
+        if (dataVersion.versionData!.patchDataVersion ==
+            versionBox.get("patchDataVersion")) {
+          VersionInfo.patchDataVersionUpdate = false;
+          print("PatchDataVersion change: False");
+        } else {
+          VersionInfo.patchDataVersionUpdate = true;
+          versionBox.put(
+              "patchDataVersion", dataVersion.versionData!.patchDataVersion);
+
+          print("PatchDataVersion change: True");
+        }
+      } else {
+        print("Not present");
+        versionBox.put("landmarksDataVersion",
+            dataVersion.versionData!.landmarksDataVersion);
+        versionBox.put("polylineDataVersion",
+            dataVersion.versionData!.polylineDataVersion);
+        versionBox.put("buildingDataVersion",
+            dataVersion.versionData!.buildingDataVersion);
+        versionBox.put(
+            "patchDataVersion", dataVersion.versionData!.patchDataVersion);
+        versionBox.put("sId", dataVersion.versionData!.sId);
+        versionBox.put("iV", dataVersion.versionData!.iV);
+        versionBox.put("createdAt", dataVersion.versionData!.createdAt);
+        versionBox.put("updatedAt", dataVersion.versionData!.updatedAt);
+        versionBox.put("buildingID", dataVersion.versionData!.buildingID);
+      }
+    }catch(e){
+
+    }
   }
 
   @override
@@ -168,20 +258,18 @@ class _HomePageState extends State<HomePage> {
       // Handle error
     }
   }
-  Future<void> _launchInWebView(Uri url) async {
-    if (!await launchUrl(url, mode: LaunchMode.inAppBrowserView)) {
-      throw Exception('Could not launch $url');
-    }
-  }
   void _showNoInternetSnackbar() {
     setState(() {
       isConnectedToInternet = false;
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+
+        margin: EdgeInsets.only(bottom: 90,right: 10,left:10),
         content: Text('No Internet Connection'),
+
         behavior: SnackBarBehavior.floating,
-        duration: Duration(days: 1),
+        duration: Duration(days: 1), // Long duration to keep the snackbar visible
         action: SnackBarAction(
           label: 'Retry',
           onPressed: () {
@@ -324,56 +412,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _loadSocialsFromAPI() async {
-    try {
-      await guestApi().guestlogin().then((value) {
-        if (value.accessToken != null) {
-          token = value.accessToken!;
-        }
-      });
-      final response = await http.get(
-        Uri.parse('https://dev.iwayplus.in/secured/hospital/get-hospital/6673e7a3b92e69bc7f4b40ae'),
-        headers: {
-          'Content-Type': 'application/json',
-          "x-access-token": token,
-        },
-      );
 
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        print("Hospital data");
-        print(responseData['data']['twitter']);
-        if (responseData['status'] == true && responseData.containsKey('data')) {
-          setState(() {
-            if(responseData['data']['twitter']!=null)
-           twitter= responseData['data']['twitter'];
-            if(responseData['data']['facebook']!=null)
-              facebook= responseData['data']['facebook'];
-            if(responseData['data']['youtube']!=null)
-              youtube= responseData['data']['youtube'];
-            if(responseData['data']['instagram']!=null)
-              instagram= responseData['data']['instagram'];
-          });
-          print("twitteerrrr");
-          print(twitter);
-          print("dataaaa");
-          print(responseData['data']);
-          // setState(() {
-          //   announcements = responseData['data'];
-          //
-          // });
-          // print(announcements);
-        } else {
-          throw Exception('Response data does not contain the expected list of announcements');
-        }
-      } else {
-        throw Exception('Failed to load data: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error: $e');
-      // Handle error
-    }
-  }
   void _loadServicesFromAPI() async {
     try {
       await guestApi().guestlogin().then((value) {
@@ -507,6 +546,7 @@ class _HomePageState extends State<HomePage> {
         nameLoading = false;
       });
     }
+
   }
 
   @override
@@ -528,20 +568,25 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    nameLoading
-                        ? CircularProgressIndicator()
-                        : Text(
-                      "Hi, $userName",
-                      style: const TextStyle(
-                        fontFamily: "Roboto",
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xff18181b),
-                        height: 26 / 20,
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                    Text(
+                    Row(
+                          children: [
+                            TranslatorWidget("Hello ,"),
+                            nameLoading
+                                ? CircularProgressIndicator()
+                                : TranslatorWidget(
+                                                  "$userName",
+                                                  style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xff18181b),
+                            height: 26 / 20,
+                                                  ),
+                                                  textAlign: TextAlign.left,
+                                                ),
+                          ],
+                        ),
+                    TranslatorWidget(
                       "How can we help you today?",
                       style: TextStyle(
                         fontFamily: "Roboto",
@@ -586,7 +631,28 @@ class _HomePageState extends State<HomePage> {
                   ),
                   // Icon(Icons.search),
                   SizedBox(width: 16),
-
+                  // Semantics(
+                  //   header: true,
+                  //   // label: "Search Bar",
+                  //   child: GestureDetector(
+                  //     onTap: (){
+                  //       Navigator.push(
+                  //         context,
+                  //         MaterialPageRoute(
+                  //             builder: (context) => DestinationSearchPage(voiceInputEnabled: false)),
+                  //       );
+                  //     },
+                  //     child: Container(
+                  //       width: MediaQuery.sizeOf(context).width * 0.67,
+                  //       child: TextField(
+                  //         decoration: InputDecoration(
+                  //           hintText: 'Doctor, services..',
+                  //           border: InputBorder.none,
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   Semantics(
                     header: true,
                     // label: "Search Bar",
@@ -603,7 +669,7 @@ class _HomePageState extends State<HomePage> {
                           padding: EdgeInsets.only(top: 8),
                           width: MediaQuery.of(context).size.width * 0.67,
                           height: 40,
-                          child: Text(
+                          child: TranslatorWidget(
                             "Doctor, services,",
                             style: const TextStyle(
                               fontFamily: "Roboto",
@@ -668,7 +734,7 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Semantics(
                             header: true,
-                            child: Text(
+                            child: TranslatorWidget(
                               "Categories",
                               style: TextStyle(
                                 fontFamily: "Roboto",
@@ -797,7 +863,7 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Semantics(
                             header: true,
-                            child: Text(
+                            child: TranslatorWidget(
                               "Nearby Services",
                               style: TextStyle(
                                 fontFamily: "Roboto",
@@ -818,7 +884,7 @@ class _HomePageState extends State<HomePage> {
                                     builder: (context) => ServiceListScreen()),
                               );
                             },
-                            child: Text(
+                            child: TranslatorWidget(
                               "View all",
                               style: TextStyle(
                                 fontFamily: "Roboto",
@@ -906,7 +972,7 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Semantics(
                             header:true,
-                            child: Text(
+                            child: TranslatorWidget(
                               "Announcements",
                               style: TextStyle(
                                 fontFamily: "Roboto",
@@ -926,7 +992,7 @@ class _HomePageState extends State<HomePage> {
                                     builder: (context) => AllAnnouncementScreen()),
                               );
                             },
-                            child: Text(
+                            child: TranslatorWidget(
                               "View all",
                               style: TextStyle(
                                 fontFamily: "Roboto",
@@ -963,91 +1029,14 @@ class _HomePageState extends State<HomePage> {
                     ),
                     SizedBox(
                       height: 16,
-                    ),
-
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16,right: 16,bottom: 8),
-                      child: Row(
-                        children: [
-                          Text(
-                            'Connect with us',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 16,
-                              fontFamily: 'Roboto',
-                              fontWeight: FontWeight.w500,
-                              
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-
-                    Row(
-                      children: [
-                        SizedBox(width: 16,),
-                        InkWell(
-                          onTap: (){
-                            _launchInWebView(Uri.parse(facebook));
-                          },
-                          child: Container(
-                            height: 40,
-                              width: 40,
-                            child: SvgPicture.asset("assets/images/facebook.svg"),
-                          ),
-                        ),
-                        SizedBox(width: 8,),
-                        InkWell(
-                          onTap: (){
-                            _launchInWebView(Uri.parse(twitter));
-                          },
-                          child: Container(
-                            height: 40,
-                            width: 40,
-                            child: SvgPicture.asset("assets/images/twitter.svg"),
-                          ),
-                        ),
-                        SizedBox(width: 8,),
-
-                        InkWell(
-                          onTap: (){
-                            _launchInWebView(Uri.parse(youtube));
-                          },
-                          child: Container(
-                            height: 40,
-                            width: 40,
-                            child: SvgPicture.asset("assets/images/youtube.svg"),
-
-                          ),
-                        ),
-                        SizedBox(width: 8,),
-
-                        InkWell(
-                          onTap: (){
-                            _launchInWebView(Uri.parse(instagram));
-                          },
-                          child: Container(
-
-                            height: 40,
-                            width: 40,
-                            child:
-                            SvgPicture.asset("assets/images/instagram.svg"),
-                            // Image.asset("assets/images/instaa.jpeg",height: 40,width: 40,),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16,),
-
-
-
+                    )
                   ],
                 ),
               ],
             ),
           ),
         ],
-      ):Text("Offline"),
+      ):TranslatorWidget("Offline"),
     );
   }
 }
@@ -1081,7 +1070,7 @@ Widget _buildCard(String imagePath, String text) {
           SizedBox(
             height: 5,
           ),
-          Text(
+          TranslatorWidget(
             text,
             style: TextStyle(
               fontSize: 12,
@@ -1199,7 +1188,7 @@ Widget _buildNearbyService(String imagePath, String name, String Location,
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(
+                            TranslatorWidget(
                               type,
                               style: TextStyle(
                                 color: Colors.white,
@@ -1221,7 +1210,7 @@ Widget _buildNearbyService(String imagePath, String name, String Location,
                     SizedBox(
                       width: 12,
                     ),
-                    Text(
+                    TranslatorWidget(
                       name,
                       style: const TextStyle(
                         fontFamily: "Roboto",
@@ -1256,7 +1245,7 @@ Widget _buildNearbyService(String imagePath, String name, String Location,
                     SizedBox(
                       width: 8,
                     ),
-                    Text(
+                    TranslatorWidget(
                       Location,
                       style: const TextStyle(
                         fontFamily: "Roboto",
@@ -1296,7 +1285,7 @@ Widget _buildNearbyService(String imagePath, String name, String Location,
                             child: CircularProgressIndicator(),
                           );
                         } else if (snapshot.hasError) {
-                          return Text(
+                          return TranslatorWidget(
                             'Error',
                             style: TextStyle(color: Colors.red),
                           );

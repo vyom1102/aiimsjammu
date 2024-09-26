@@ -85,12 +85,45 @@ class tools {
         return 'Invalid number';
     }
   }
+
+  static int alphabeticalToNumerical(String word) {
+    switch (word) {
+      case 'ground':
+        return 0;
+      case 'first':
+        return 1;
+      case 'second':
+        return 2;
+      case 'third':
+        return 3;
+      case 'fourth':
+        return 4;
+      case 'fifth':
+        return 5;
+      case 'sixth':
+        return 6;
+      case 'seventh':
+        return 7;
+      case 'eighth':
+        return 8;
+      case 'ninth':
+        return 9;
+      case 'tenth':
+        return 10;
+      default:
+        return -1; // Using -1 to indicate an invalid input
+    }
+  }
+
+
   static bool gotBhart = false;
 
   static List<double> localtoglobal(int x, int y,
       {PDM.patchDataModel? patchData = null}) {
+
     x = x - UserState.xdiff;
     y = y - UserState.ydiff;
+
     ////print("Wilsonlocaltoglobal started");
     PDM.patchDataModel Data = PDM.patchDataModel();
     if (patchData != null) {
@@ -248,7 +281,7 @@ class tools {
     return sqrt(dist);
   }
 
- static String angleToClocks(double angle) {
+  static String angleToClocks(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -280,14 +313,14 @@ class tools {
     }
   }
 
-  static String angleToClocks2(double angle) {
+  static String angleToClocks2(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
     }
     String currentDir = UserCredentials().getuserNavigationModeSetting();
     if (angle >= 337.5 || angle <= 22.5) {
       return (currentDir == 'Natural Direction')
-          ? "on your front"
+          ? "on your Front"
           : "on 12 o'clock";
     } else if (angle > 22.5 && angle <= 67.5) {
       return (currentDir == 'Natural Direction')
@@ -303,7 +336,7 @@ class tools {
           : "on 4-5 o'clock";
     } else if (angle > 157.5 && angle <= 202.5) {
       return (currentDir == 'Natural Direction')
-          ? "on your back"
+          ? "on your Back"
           : "on 6 o'clock";
     } else if (angle > 202.5 && angle <= 247.5) {
       return (currentDir == 'Natural Direction')
@@ -322,7 +355,7 @@ class tools {
     }
   }
 
-  static String angleToClocks3(double angle) {
+  static String angleToClocks3(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -342,7 +375,7 @@ class tools {
     }
   }
 
-  static String angleToClocksForNearestLandmarkToBeacon(double angle) {
+  static String angleToClocksForNearestLandmarkToBeacon(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -395,11 +428,55 @@ class tools {
     return degree * pi / 180.0;
   }
 
+
+  // static double calculateBearing(List<double> pointA, List<double> pointB) {
+  //   double lat1 = toRadians(pointA[0]);
+  //   double lon1 = toRadians(pointA[1]);
+  //   double lat2 = toRadians(pointB[0]);
+  //   double lon2 = toRadians(pointB[1]);
+  //
+  //   double dLon = lon2 - lon1;
+  //
+  //   // Debugging prints
+  //   print("Original dLon: $dLon");
+  //
+  //   // Adjust dLon for wrap-around at the International Date Line
+  //   if (dLon > pi) {
+  //     dLon -= 2 * pi;
+  //   } else if (dLon < -pi) {
+  //     dLon += 2 * pi;
+  //   }
+  //
+  //   // Debugging prints
+  //   print("Adjusted dLon: $dLon");
+  //
+  //   double x = sin(dLon) * cos(lat2);
+  //   double y = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
+  //
+  //   double bearingRadians = atan2(x, y);
+  //   double bearingDegrees = bearingRadians * 180.0 / pi;
+  //
+  //   // Normalize the bearing to be within the range 0° to 360°
+  //   bearingDegrees = (bearingDegrees + 360) % 360;
+  //
+  //   // Debugging prints
+  //   print("Point A: (${pointA[0]}, ${pointA[1]})");
+  //   print("Point B: (${pointB[0]}, ${pointB[1]})");
+  //   print("x: $x, y: $y");
+  //   print("Bearing (Radians): $bearingRadians");
+  //   print("Bearing (Degrees): $bearingDegrees");
+  //
+  //   return bearingDegrees;
+  // }
+
+
+
+
   static double calculateBearing(List<double> pointA, List<double> pointB) {
-    double lat1 = toRadians(pointA[0]);
-    double lon1 = toRadians(pointA[1]);
-    double lat2 = toRadians(pointB[0]);
-    double lon2 = toRadians(pointB[1]);
+    double lat1 = toRadians(pointA[0]); //user
+    double lon1 = toRadians(pointA[1]); //user
+    double lat2 = toRadians(pointB[0]); //path next point
+    double lon2 = toRadians(pointB[1]); //path next point
 
     double dLon = lon2 - lon1;
 
@@ -416,9 +493,9 @@ class tools {
 
 
   static double calculateAngleSecond(List<int> a, List<int> b, List<int> c) {
-    // //print("AAAAAA $a");
-    // //print("B $b");
-    // //print("C $c");
+    print("AAAAAA $a");
+    print("B $b");
+    print("C $c");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -469,6 +546,14 @@ class tools {
     }
 
     return angleInDegrees;
+  }
+
+  static void setBuildingAngle(String angle){
+    AngleBetweenBuildingandGlobalNorth = double.parse(angle);
+    AngleBetweenBuildingandGlobalNorth = AngleBetweenBuildingandGlobalNorth + 90;
+    if(AngleBetweenBuildingandGlobalNorth>360){
+      AngleBetweenBuildingandGlobalNorth=AngleBetweenBuildingandGlobalNorth-360;
+    }
   }
 
 
@@ -540,17 +625,51 @@ class tools {
     return crossProduct != 0;
   }
 
+  static bool isCellTurn(Cell prev, Cell currentCoordinate, Cell next) {
+    if (prev == null || next == null) {
+      return false;  // Not enough data to determine if it's a turn.
+    }
+
+    // Extracting coordinates
+    int prevX = prev.x;
+    int prevY = prev.y;
+    int currentX = currentCoordinate.x;
+    int currentY = currentCoordinate.y;
+    int nextX = next.x;
+    int nextY = next.y;
+
+    // Calculate the vectors from prev to current and from current to next
+    int vector1X = currentX - prevX;
+    int vector1Y = currentY - prevY;
+    int vector2X = nextX - currentX;
+    int vector2Y = nextY - currentY;
+
+    // Calculate the cross product of vector1 and vector2
+    int crossProduct = vector1X * vector2Y - vector1Y * vector2X;
+
+    // A cross product of zero means the points are collinear (no turn).
+    // Cross product != 0 means there is a turn.
+    return crossProduct != 0;
+  }
+
 
   static double calculateAngleBWUserandCellPath(Cell user, Cell node , int cols,double theta) {
     List<int> a = [user.x, user.y];
     List<int> tval = user.move(theta);
+    if(user.move == tools.twocelltransitionhorizontal || user.move == tools.twocelltransitionvertical){
+      tval = tools.fourcelltransition(theta);
+    }else if(user.move == tools.eightcelltransitionforTurns){
+      tval = tools.eightcelltransition(theta);
+    }
     List<int> b = [user.x+tval[0], user.y+tval[1]];
     List<int> c = [node.x , node.y];
 
-    // //print("AA $a");
-    // //print("BB $b");
-    // //print("CC $c");
-    // //print("DD ${node.move.toString()}");
+
+    // print("AA $a");
+    // print("BB $b");
+    // print("CC $c");
+    // print("theta $theta");
+    // print("DD ${user.move.toString()}");
     // //print("EE ${theta}");
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
@@ -669,7 +788,7 @@ class tools {
     return angleInDegrees;
   }
 
-  static List<direction> getDirections(List<int> path, int columns,Map<int,Landmarks> associateTurnWithLandmark,int floor, String Bid, pathState PathState) {
+  static List<direction> getDirections(List<int> path, int columns,Map<int,Landmarks> associateTurnWithLandmark,int floor, String Bid, pathState PathState,context) {
     List<int> turns = tools.getTurnpoints(path, columns);
     turns.insert(0, path[0]);
     turns.add(path.last);
@@ -680,7 +799,7 @@ class tools {
       double Nextdistance = tools.calculateDistance([turns[i]%columns,turns[i]~/columns], [turns[i+1]%columns,turns[i+1]~/columns]);
       double Prevdistance = tools.calculateDistance([turns[i]%columns,turns[i]~/columns], [turns[i-1]%columns,turns[i-1]~/columns]);
       double angle = tools.calculateAnglefifth(path[index-1], path[index], path[index+1], columns);
-      String direc = tools.angleToClocks(angle);
+      String direc = tools.angleToClocks(angle,context);
       Directions.add(direction(turns[i], direc, associateTurnWithLandmark[turns[i]], Nextdistance, Prevdistance,turns[i]%columns,turns[i]~/columns,floor,Bid,numCols:columns));
     }
     return Directions;
@@ -726,47 +845,61 @@ class tools {
   }
 
 
-  static nearestLandInfo localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
+  static nearestLandInfo? localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
 
     PriorityQueue<MapEntry<nearestLandInfo, double>> priorityQueue = PriorityQueue<MapEntry<nearestLandInfo, double>>((a, b) => a.value.compareTo(b.value));
     int distance=10;
+    List<int> pCoord = [];
+    pCoord.add(Beacon.coordinateX!);
+    pCoord.add(Beacon.coordinateY!);
     landmarksMap.forEach((key, value) {
-      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons"){
+
+      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && value.coordinateX!=null){
         if (Beacon.floor! == value.floor) {
-          List<int> pCoord = [];
-          pCoord.add(Beacon.coordinateX!);
-          pCoord.add(Beacon.coordinateY!);
+
           double d = 0.0;
 
           if (value.doorX != null) {
             d = calculateDistance(
                 pCoord, [value.doorX!, value.doorY!]);
 
-            if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
-                  doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
-              priorityQueue.add(MapEntry(currentLandInfo, d));
-              //print(value.name);
-            }
           }else{
+
+
             d = calculateDistance(
                 pCoord, [value.coordinateX!, value.coordinateY!]);
-            if (d<distance) {
-              nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
-                doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
-              priorityQueue.add(MapEntry(currentLandInfo, d));
-            }
+            // if (d<distance) {
+            //   nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
+            //     doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
+            //   priorityQueue.add(MapEntry(currentLandInfo, d));
+            // }
+
+
           }
+          if (d<distance) {
+
+            nearestLandInfo currentLandInfo = nearestLandInfo(buildingID: value.buildingID,buildingName: value.buildingName,coordinateX: value.coordinateX,coordinateY: value.coordinateY,
+              doorX: value.doorX,doorY: value.doorY,floor: value.floor,sId: value.sId,name: value.name,venueName: value.venueName, type: '', updatedAt: '',);
+            print(currentLandInfo.name);
+            priorityQueue.add(MapEntry(currentLandInfo, d));
+
+            //print(value.name);
+          }
+
         }
+
       }
     });
-    late nearestLandInfo nearestLandmark;
+
+    nearestLandInfo? nearestLandmark;
     if(priorityQueue.isNotEmpty){
       MapEntry<nearestLandInfo, double> entry = priorityQueue.removeFirst();
       nearestLandmark = entry.key;
     }else{
       //print("priorityQueue.isEmpty");
     }
+
+
     return nearestLandmark;
   }
   static List<nearestLandInfo> localizefindAllNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
@@ -897,45 +1030,42 @@ class tools {
     return sqrt(pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2));
   }
 
-  static double angleBetweenBuildingAndNorth(String Bid) {
-    // Assuming corners is a list of Point objects representing coordinates of the building corners
 
-    int i = 0;
-    int j = 1;
-    if(Bid  == "65d8825cdb333f89456d0562"){
-      i = 0;
-      j = 1;
-    }else if(Bid == "65d8833adb333f89456e6519"){
-      i=2;
-      j=3;
-    }else if(Bid == "65d8835adb333f89456e687f"){
-      i = 2;
-      j = 3;
+
+  static List<int> analyzeCell(List<Cell> path, Cell targetCell) {
+    int targetIndex = path.indexOf(targetCell);
+
+    if (targetIndex == -1) {
+      throw ArgumentError('Cell not found in the path');
     }
 
-    // Choose two adjacent corners
-    Point<double> corner1 = corners[i]; //0 for RNI   2 for Ashoka
-    Point<double> corner2 = corners[j]; //1 for RNI   3 for Ashoka
-
-    // Calculate the slope
-    double slope = (corner2.y - corner1.y) / (corner2.x - corner1.x);
-
-    // Calculate the angle in radians
-    double angleRad = atan(slope);
-
-    // Convert angle to degrees
-    double angleDeg = angleRad * (180 / pi);
-
-    // Adjust for the correct quadrant
-    if (angleDeg < 0) {
-      angleDeg += 360;
+    // Count cells to the left with the same move function
+    int leftCount = 0;
+    for (int i = targetIndex - 1; i >= 0; i--) {
+      if (path[i].move == targetCell.move) {
+        leftCount++;
+      } else {
+        break;
+      }
     }
 
-    AngleBetweenBuildingandGlobalNorth = angleDeg;
-    return angleDeg;
+    // Count cells to the right with the same move function
+    int rightCount = 0;
+    for (int i = targetIndex + 1; i < path.length; i++) {
+      if (path[i].move == targetCell.move) {
+        rightCount++;
+      } else {
+        break;
+      }
+    }
+
+    // Position within the segment
+    int positionInSegment = leftCount + 1; // 1-based index
+
+    return [leftCount+rightCount+1, positionInSegment];
   }
 
-  static List<int> eightcelltransition(double angle) {
+  static List<int> eightcelltransition(double angle, {int? currPointer,int? totalCells}) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -966,7 +1096,7 @@ class tools {
     }
   }
 
-  static List<int> eightcelltransitionforTurns(double angle) {
+  static List<int> eightcelltransitionforTurns(double angle, {int? currPointer,int? totalCells}) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -998,7 +1128,7 @@ class tools {
   }
 
 
-  static List<int> fourcelltransition(double angle) {
+  static List<int> fourcelltransition(double angle, {int? currPointer,int? totalCells}) {
     if (angle < 0) {
       angle = angle + 360;
     }
@@ -1021,11 +1151,141 @@ class tools {
   }
 
 
-  static List<int> twocelltransitionvertical(double angle) {
+  static List<int> twocelltransitionvertical1(double angle,{int? currPointer, int? totalCells}) {
     if (angle < 0) {
       angle = angle + 360;
     }
     ////print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+
+    double adjustmentFactor = 0.0; // Default to no adjustment
+
+    if (currPointer != null && totalCells != null) {
+      double positionFactor = currPointer / totalCells;
+      adjustmentFactor = 0.3*positionFactor;
+    }
+
+    double adjustmentAngle = 360*adjustmentFactor;
+
+    if (angle >= 260 || angle <= 100) {
+      return [0, -1];
+    } else if (angle > 100 && angle <= 153) {
+      return [1,0];
+    } else if (angle > 153 && angle <= 207) {
+      return [0,1];
+    } else if (angle > 207 && angle <= 260) {
+      return [-1,0];
+    } else {
+      return [0, 0];
+    }
+  }
+
+  static List<int> twocelltransitionvertical2(double angle,{int? currPointer, int? totalCells}) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    ////print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+
+    double adjustmentFactor = 0.0; // Default to no adjustment
+
+    if (currPointer != null && totalCells != null) {
+      double positionFactor = currPointer / totalCells;
+      adjustmentFactor = 0.3*positionFactor;
+    }
+
+    double adjustmentAngle = 360*adjustmentFactor;
+
+    if (angle >= 333 || angle <= 27) {
+      return [0, -1];
+    } else if (angle > 27 && angle <= 80) {
+      return [1,0];
+    } else if (angle > 80 && angle <= 280) {
+      return [0,1];
+    } else if (angle > 280 && angle <= 333) {
+      return [-1,0];
+    } else {
+      return [0, 0];
+    }
+  }
+
+  static List<int> twocelltransitionhorizontal1(double angle, {int? currPointer,int? totalCells}) {
+    //print("first $angle");
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    ////print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+
+    double adjustmentFactor = 0.0; // Default to no adjustment
+
+    if (currPointer != null && totalCells != null) {
+      double positionFactor = currPointer / totalCells;
+      adjustmentFactor = 0.3*positionFactor;
+    }
+
+    double adjustmentAngle = 360*adjustmentFactor;
+
+    if (angle > (170)  && angle <= 10) {
+      return [-1,0];
+    } else if (angle > 10 && angle <= 63) {
+      return [0,-1];
+    } else if (angle > 63 && angle <= 117) {
+      return [1,0];
+    } else if (angle > 117 && angle <= 170) {
+      return [0,1];
+    } else {
+      return [0, 0];
+    }
+  }
+
+  static List<int> twocelltransitionhorizontal2(double angle, {int? currPointer,int? totalCells}) {
+    //print("first $angle");
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    ////print(AngleBetweenBuildingandGlobalNorth);
+    angle = angle - AngleBetweenBuildingandGlobalNorth;
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+
+    double adjustmentFactor = 0.0; // Default to no adjustment
+
+    if (currPointer != null && totalCells != null) {
+      double positionFactor = currPointer / totalCells;
+      adjustmentFactor = 0.3*positionFactor;
+    }
+
+    double adjustmentAngle = 360*adjustmentFactor;
+
+    if (angle > (243)  && angle <= 297) {
+      return [-1,0];
+    } else if (angle > 297 && angle <= 350) {
+      return [0,-1];
+    } else if (angle > 350 && angle <= 190) {
+      return [1,0];
+    } else if (angle > 190 && angle <= 243) {
+      return [0,1];
+    } else {
+      return [0, 0];
+    }
+  }
+
+  static List<int> twocelltransitionvertical(double angle,{int? currPointer,int? totalCells}) {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -1039,12 +1299,12 @@ class tools {
     }
   }
 
-  static List<int> twocelltransitionhorizontal(double angle) {
-    //print("first $angle");
+  static List<int> twocelltransitionhorizontal(double angle,{int? currPointer,int? totalCells}) {
+    print("first $angle");
     if (angle < 0) {
       angle = angle + 360;
     }
-    ////print(AngleBetweenBuildingandGlobalNorth);
+    print(AngleBetweenBuildingandGlobalNorth);
     angle = angle - AngleBetweenBuildingandGlobalNorth;
     if (angle < 0) {
       angle = angle + 360;
@@ -1102,8 +1362,6 @@ class tools {
       if(land != null){
         ls[turn] = land!;
       }
-
-
     });
 
     // landmarks.forEach((element) {
@@ -1333,11 +1591,15 @@ class tools {
   }
 
   static int distancebetweennodes(int node1, int node2, int numCols){
+    print("nextturn $node1 $node2");
     int x1 = node1 % numCols;
     int y1 = node1 ~/ numCols;
 
     int x2 = node2 % numCols;
     int y2 = node2 ~/ numCols;
+
+    print("nextturn [$x1,$y1] [$x2,$y2]");
+
 
     // //print("@@@@@ $x1,$y1");
     // //print("&&&&& $x2,$y2");

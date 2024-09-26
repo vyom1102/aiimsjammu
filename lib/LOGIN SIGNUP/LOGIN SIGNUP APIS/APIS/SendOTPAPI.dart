@@ -9,6 +9,7 @@ class SendOTPAPI{
   final String baseUrl = "https://dev.iwayplus.in/auth/otp/send";
 
   Future<bool> sendOTP(String username) async {
+    print('sendOTP');
     final Map<String, dynamic> data = {
       "username": username,
       "digits":4,
@@ -23,8 +24,10 @@ class SendOTPAPI{
     );
 
     if (response.statusCode == 200) {
+      HelperClass.showToast("OTP sent successfully");
+      print("in if");
       return true;
-        // return HelperClass.showToast("OTP sent successfully");
+
     } else {
       print("SendOTPAPI--response.statusCode${response.statusCode} ${response.body}");
       return false;

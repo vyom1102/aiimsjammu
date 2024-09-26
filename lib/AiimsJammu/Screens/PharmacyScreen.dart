@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import '../Widgets/Translator.dart';
 import '/AiimsJammu/Data/ServicesDemoData.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
@@ -110,7 +111,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: TranslatorWidget(
           'Pharmacy',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -335,7 +336,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                                           mainAxisAlignment: MainAxisAlignment.start,
                                           crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
-                                            Text(
+                                            TranslatorWidget(
                                               service['type'],
                                               style: TextStyle(
                                                 color: Colors.white,
@@ -357,7 +358,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                                     SizedBox(
                                       width: 12,
                                     ),
-                                    Text(
+                                    TranslatorWidget(
                                       service['name'],
                                       style: const TextStyle(
                                         fontFamily: "Roboto",
@@ -390,7 +391,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                                     SizedBox(
                                       width: 8,
                                     ),
-                                    Text(
+                                    TranslatorWidget(
                                       service['locationName'],
                                       style: const TextStyle(
                                         fontFamily: "Roboto",
@@ -426,7 +427,7 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
                                             child: CircularProgressIndicator(),
                                           );
                                         } else if (snapshot.hasError) {
-                                          return Text(
+                                          return TranslatorWidget(
                                             'Error',
                                             style: TextStyle(color: Colors.red),
                                           );

@@ -14,6 +14,7 @@ import '../../API/guestloginapi.dart';
 import '../Widgets/CalculateDistance.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/OpeningClosingStatus.dart';
+import '../Widgets/Translator.dart';
 import 'serviceInfo.dart';
 class CountersScreen extends StatefulWidget {
   @override
@@ -86,7 +87,7 @@ class _CountersScreenState extends State<CountersScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: TranslatorWidget(
           'Counters',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -212,7 +213,7 @@ class _CountersScreenState extends State<CountersScreen> {
                                           mainAxisAlignment: MainAxisAlignment.start,
                                           crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
-                                            Text(
+                                            TranslatorWidget(
                                               service['type'],
                                               style: TextStyle(
                                                 color: Colors.white,
@@ -234,7 +235,7 @@ class _CountersScreenState extends State<CountersScreen> {
                                     SizedBox(
                                       width: 12,
                                     ),
-                                    Text(
+                                    TranslatorWidget(
                                       service['name'],
                                       style: const TextStyle(
                                         fontFamily: "Roboto",
@@ -267,7 +268,7 @@ class _CountersScreenState extends State<CountersScreen> {
                                     SizedBox(
                                       width: 8,
                                     ),
-                                    Text(
+                                    TranslatorWidget(
                                       service['locationName'],
                                       style: const TextStyle(
                                         fontFamily: "Roboto",

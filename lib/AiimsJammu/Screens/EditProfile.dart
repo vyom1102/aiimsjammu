@@ -10,6 +10,7 @@ import 'package:quickalert/widgets/quickalert_dialog.dart';
 
 import '../../API/DeleteApi.dart';
 import '../../LOGIN SIGNUP/SignIn.dart';
+import '../Widgets/Translator.dart';
 import 'ChangePassword.dart';
 
 class EditProfile extends StatefulWidget {
@@ -296,7 +297,7 @@ class _EditProfileState extends State<EditProfile> {
       if (response.statusCode == 200) {
         // Handle successful update after token refresh
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Name updated successfully')),
+          SnackBar(content: TranslatorWidget('Name updated successfully')),
         );
       } else {
         // Handle other status codes after token refresh
@@ -311,7 +312,7 @@ class _EditProfileState extends State<EditProfile> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: TranslatorWidget(
           'My Profile',
           style: TextStyle(
             color: Color(0xFF374151),
@@ -399,7 +400,7 @@ class _EditProfileState extends State<EditProfile> {
                             builder: (context) => ChangePasswordScreen(email: _emailController.text,)),
                       );
                     },
-                    child: Text(
+                    child: TranslatorWidget(
                       'Change password',
                       style: TextStyle(
                         color: Color(0xFF0B6B94),
@@ -426,7 +427,7 @@ class _EditProfileState extends State<EditProfile> {
                   //       signInBox.clear();
                   //       print("Localdatabase cleared");
                   //       print(signInBox.keys);
-                  //       Future<bool> response = DeleteApi.fetchPatchData();
+                  //       Future<bool> response = DeleteApi..deleteDataa();
                   //       if(await response){
                   //         signInBox.clear();
                   //         print("Localdatabase cleared");
@@ -480,7 +481,7 @@ class _EditProfileState extends State<EditProfile> {
                   print("Local database cleared");
                   print(signInBox.keys);
 
-                  Future<bool> response = DeleteApi.fetchPatchData();
+                  Future<bool> response = DeleteApi.deleteData();
                   if (await response) {
                     signInBox.clear();
                     print("Local database cleared");
@@ -505,7 +506,7 @@ class _EditProfileState extends State<EditProfile> {
                 },
               );
             },
-            child: Text(
+            child: TranslatorWidget(
               'Delete Profile',
               style: TextStyle(
                 color: Colors.red,
@@ -577,7 +578,7 @@ class _EditProfileState extends State<EditProfile> {
                         ),
                         side: BorderSide(color: Color(0xFF0B6B94)),
                       ),
-                      child: Text(
+                      child: TranslatorWidget(
                         'Save changes',
                         style: TextStyle(
                           color: Color(0xFF0B6B94),

@@ -18,6 +18,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/API/BuildingAPI.dart';
 import 'package:iwaymaps/API/RefreshTokenAPI.dart';
+import 'package:iwaymaps/DATABASE/BOXES/WayPointModelBOX.dart';
 import 'package:iwaymaps/Elements/buildingCard.dart';
 import 'package:iwaymaps/MODELS/VenueModel.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -195,18 +196,22 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     );
   }
 
-  calcDistanceFromUser(List<VenueModel> buildingsPos,Position userLoc){
-    // buildingsPos.clear();
-    // finalDist.clear();
-    for(int i=0;i<buildingsPos.length;i++){
-      int dist=getDistanceFromLatLonInKm(buildingsPos[i].coordinates[0],buildingsPos[i].coordinates[1],userLoc.latitude,userLoc.longitude);
-      buildingsPos[i].dist=dist;
-      finalDist.add(dist);
+  // calcDistanceFromUser(List<VenueModel> buildingsPos,Position userLoc){
+  //   // buildingsPos.clear();
+  //   // finalDist.clear();
 
-    }
-    // print("finalDist");
-    // print(finalDist);
-  }
+  //   print(buildingsPos[0].coordinates);
+
+  //   for(int i=0;i<buildingsPos.length;i++){
+  //     int dist=getDistanceFromLatLonInKm(buildingsPos[i].coordinates[0],buildingsPos[i].coordinates[1],userLoc.latitude,userLoc.longitude);
+  //     buildingsPos[i].dist=dist;
+  //     finalDist.add(dist);
+
+
+  //   }
+  //   // print("finalDist");
+  //   // print(finalDist);
+  // }
   List<VenueModel> buildingsPos=[];
   List<int> finalDist=[];
 
@@ -221,7 +226,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
             label: "Iwayplus",
             child: InkWell(
               onTap: (){
-                RefreshTokenAPI.fetchPatchData();
+                RefreshTokenAPI.refresh();
               },
               child: Container(
                 alignment: Alignment.bottomLeft,
@@ -254,13 +259,15 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                 final LandMarkBox = LandMarkApiModelBox.getData();
                 final PatchBox = PatchAPIModelBox.getData();
                 final PolyLineBox = PolylineAPIModelBOX.getData();
+                final WayPointBox = WayPointModeBOX.getData();
 
                 BeaconBox.clear();
                 BuildingAllBox.clear();
                 LandMarkBox.clear();
                 PatchBox.clear();
                 PolyLineBox.clear();
-                showToast("Database Cleared ${BeaconBox.length},${BuildingAllBox.length},${LandMarkBox.length},${PatchBox.length},${PolyLineBox.length}");
+                WayPointBox.clear();
+                showToast("Database Cleared ${BeaconBox.length},${BuildingAllBox.length},${LandMarkBox.length},${PatchBox.length},${PolyLineBox.length},${WayPointBox.length}");
 
               },
             ),
@@ -411,11 +418,13 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                         ListView.builder(
                           itemBuilder: (context,index){
 
-                            // var currentData = venueList[index];
+                             var currentData = venueList[index];
 
-                            calcDistanceFromUser(buildingsPos,userLoc!);
-                            buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
-                            var currentData = buildingsPos[index];
+
+                            // calcDistanceFromUser(buildingsPos,userLoc!);
+                            // buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+
+                            //var currentData = buildingsPos[index];
 
 
 
@@ -448,8 +457,10 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                         ),
                         ListView.builder(
                           itemBuilder: (context, index) {
-                            calcDistanceFromUser(buildingsPos,userLoc!);
-                            buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+
+                            // calcDistanceFromUser(buildingsPos,userLoc!);
+                            // buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+
                             var currentData = buildingsPos[index];
                             if (currentData.Tag == "Academic") {
                               return GestureDetector(
@@ -474,8 +485,10 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                         ),
                         ListView.builder(
                           itemBuilder: (context, index) {
-                            calcDistanceFromUser(buildingsPos,userLoc!);
-                            buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+
+                            // calcDistanceFromUser(buildingsPos,userLoc!);
+                            // buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+
                             var currentData = buildingsPos[index];
                             if (currentData.Tag == "Hospital") {
                               return GestureDetector(
@@ -519,8 +532,10 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                         // ),
                         ListView.builder(
                           itemBuilder: (context, index) {
-                            calcDistanceFromUser(buildingsPos,userLoc!);
-                            buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+
+                            // calcDistanceFromUser(buildingsPos,userLoc!);
+                            // buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+
                             var currentData = buildingsPos[index];
                             if (currentData.Tag == "Event") {
                               return GestureDetector(

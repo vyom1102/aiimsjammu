@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../Widgets/Translator.dart';
 import '/FavouriteScreen.dart';
 import '/LOGIN%20SIGNUP/SignIn.dart';
 import '/AiimsJammu/Screens/EditProfile.dart';
@@ -149,7 +150,7 @@ class _ProfilePageState extends State<ProfilePage> {
         return Scaffold(
 
       appBar: AppBar(
-        title: Text(
+        title: TranslatorWidget(
           'Account',
           style: TextStyle(
             color: Color(0xFF18181B),
@@ -193,7 +194,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text(
+                          child: TranslatorWidget(
                            name??'user',
                             style: TextStyle(
                               color: Color(0xFF18181B),
@@ -210,7 +211,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           label: "Email Address",
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
+                            child: TranslatorWidget(
 
                               username??"loading..",
                               style: TextStyle(
@@ -257,7 +258,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: SvgPicture.asset('assets/profilePageAssets/account_circle.svg'),
                     ),
                     const SizedBox(width: 12),
-                    Text(
+                    TranslatorWidget(
                       'Edit Profile',
                       style: TextStyle(
                         color: Color(0xFF18181B),
@@ -309,7 +310,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: SvgPicture.asset('assets/profilePageAssets/favorite.svg'),
                     ),
                     const SizedBox(width: 12),
-                    Text(
+                    TranslatorWidget(
                       'Favourite',
                       style: TextStyle(
                         color: Color(0xFF18181B),
@@ -359,7 +360,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: SvgPicture.asset('assets/profilePageAssets/profileSetting.svg'),
                     ),
                     const SizedBox(width: 12),
-                    Text(
+                    TranslatorWidget(
                       'Settings',
                       style: TextStyle(
                         color: Color(0xFF18181B),
@@ -456,7 +457,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: SvgPicture.asset('assets/profilePageAssets/help_center.svg'),
                     ),
                     const SizedBox(width: 12),
-                    Text(
+                    TranslatorWidget(
                       'Help and Support',
                       style: TextStyle(
                         color: Color(0xFF18181B),
@@ -510,7 +511,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     crossAxisAlignment:
                     CrossAxisAlignment.center,
                     children: [
-                      Text(
+                      TranslatorWidget(
                         'Log out',
                         style: TextStyle(
                           color: Color(0xFF0B6B94),

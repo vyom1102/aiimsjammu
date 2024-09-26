@@ -236,7 +236,9 @@
 //     ),
 //   );
 // }
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '/AiimsJammu/Screens/ServiceInfo.dart';
 
@@ -399,15 +401,23 @@ class NearbyServiceWidget extends StatelessWidget {
                       SizedBox(
                         width: 8,
                       ),
-                      Text(
-                        location,
-                        style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFF8D8C8C),
+                      
+                      Expanded(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Text(
+                            location,
+                            style: const TextStyle(
+                              fontFamily: "Roboto",
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xFF8D8C8C),
+                            ),
+                            textAlign: TextAlign.left,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        
                         ),
-                        textAlign: TextAlign.left,
                       ),
                     ],
                   ),

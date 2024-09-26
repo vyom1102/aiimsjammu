@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../Widgets/Translator.dart';
+
 class AnnouncementDetailsPage extends StatefulWidget {
   final String image;
   final String title;
@@ -66,7 +68,7 @@ class _AnnouncementDetailsPageState extends State<AnnouncementDetailsPage> {
             if(widget.image.isNotEmpty)
             SizedBox(height: 8,),
 
-            Text(
+            TranslatorWidget(
               widget.title,
               style: TextStyle(
                 color: Color(0xFF18181B),
@@ -82,7 +84,7 @@ class _AnnouncementDetailsPageState extends State<AnnouncementDetailsPage> {
             Row(
               children: [
 
-                Text(
+                TranslatorWidget(
                   widget.department,
                   style: TextStyle(
                     color: Color(0xff0B6B94),
@@ -92,7 +94,7 @@ class _AnnouncementDetailsPageState extends State<AnnouncementDetailsPage> {
                   ),
                 ),
                 SizedBox(width: 8,),
-                Text(
+                TranslatorWidget(
                   widget.dateTime,
                   style: TextStyle(
                     color: Color(0xFFA1A1AA),
@@ -108,7 +110,7 @@ class _AnnouncementDetailsPageState extends State<AnnouncementDetailsPage> {
 
             Expanded(
               child: SingleChildScrollView(
-                child: Text(
+                child: TranslatorWidget(
                   widget.article,
                   style: TextStyle(
                     color: Color(0xFF595967),

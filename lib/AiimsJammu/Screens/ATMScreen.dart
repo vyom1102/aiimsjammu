@@ -15,6 +15,7 @@ import '../../API/guestloginapi.dart';
 import '../Widgets/CalculateDistance.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/OpeningClosingStatus.dart';
+import '../Widgets/Translator.dart';
 import 'serviceInfo.dart';
 class ATMScreen extends StatefulWidget {
   @override
@@ -85,7 +86,7 @@ class _ATMScreenState extends State<ATMScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: TranslatorWidget(
           'ATM',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -211,7 +212,7 @@ class _ATMScreenState extends State<ATMScreen> {
                                           mainAxisAlignment: MainAxisAlignment.start,
                                           crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
-                                            Text(
+                                            TranslatorWidget(
                                               service['type'],
                                               style: TextStyle(
                                                 color: Colors.white,
@@ -233,7 +234,7 @@ class _ATMScreenState extends State<ATMScreen> {
                                     SizedBox(
                                       width: 12,
                                     ),
-                                    Text(
+                                    TranslatorWidget(
                                       service['name'],
                                       style: const TextStyle(
                                         fontFamily: "Roboto",
@@ -266,7 +267,7 @@ class _ATMScreenState extends State<ATMScreen> {
                                     SizedBox(
                                       width: 8,
                                     ),
-                                    Text(
+                                    TranslatorWidget(
                                       service['locationName'],
                                       style: const TextStyle(
                                         fontFamily: "Roboto",
