@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:iwaymaps/AiimsJammu/Screens/FavouriteDoctor.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/FavouriteService.dart';
 
+import '../../config.dart';
 import '../Widgets/Translator.dart';
 
 class FavouriteRGCIScreen extends StatefulWidget {
@@ -33,7 +34,7 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
   }
 
   Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -104,7 +105,7 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
     setState(() {
       isLoading = true;
     });
-    final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
 
     try {
       final response = await http.post(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../config.dart';
 import '../Widgets/Translator.dart';
 
 class AnnouncementDetailsPage extends StatefulWidget {
@@ -60,7 +61,7 @@ class _AnnouncementDetailsPageState extends State<AnnouncementDetailsPage> {
           children: [
             if(widget.image.isNotEmpty)
               Image.network(
-                'https://dev.iwayplus.in/uploads/${widget.image}',
+                '${AppConfig.baseUrl}/uploads/${widget.image}',
                 // width: 250,
                 height: 140,
                 fit: BoxFit.fitWidth,

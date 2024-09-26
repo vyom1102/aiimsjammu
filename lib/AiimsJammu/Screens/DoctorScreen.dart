@@ -10,6 +10,7 @@ import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../API/guestloginapi.dart';
+import '../../config.dart';
 import '../Data/DoctorDemoData.dart';
 import 'package:http/http.dart' as http;
 
@@ -64,7 +65,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
       print('trying');
       final response = await http.get(
 
-        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-doctors/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-doctors/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
         "x-access-token": token,
@@ -367,7 +368,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                                                   //   decoration: BoxDecoration(
                                                   //     shape: BoxShape.circle,
                                                   //     image: DecorationImage(
-                                                  //       image: NetworkImage('https://dev.iwayplus.in/uploads/${doctor['imageUrl']}'),
+                                                  //       image: NetworkImage('${AppConfig.baseUrl}/uploads/${doctor['imageUrl']}'),
                                                   //       fit: BoxFit.cover,
                                                   //     ),
                                                   //   ),
@@ -379,7 +380,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                                                       shape: BoxShape.circle,
                                                     ),
                                                     child: CachedNetworkImage(
-                                                      imageUrl: 'https://dev.iwayplus.in/uploads/${doctor['imageUrl']}',
+                                                      imageUrl: '${AppConfig.baseUrl}/uploads/${doctor['imageUrl']}',
                                                       placeholder: (context, url) => Shimmer.fromColors(
                                                         baseColor: Colors.grey[300]!,
                                                         highlightColor: Colors.grey[100]!,
@@ -739,7 +740,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
 
                                                       ),
                                                       child:  CachedNetworkImage(
-                                                        imageUrl: 'https://dev.iwayplus.in/uploads/${doctor['imageUrl']}',
+                                                        imageUrl: '${AppConfig.baseUrl}/uploads/${doctor['imageUrl']}',
                                                         placeholder: (context, url) => Shimmer.fromColors(
                                                           baseColor: Colors.grey[300]!,
                                                           highlightColor: Colors.grey[100]!,

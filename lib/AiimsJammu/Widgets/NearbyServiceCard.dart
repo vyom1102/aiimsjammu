@@ -29,7 +29,7 @@
 //                   children: [
 //
 //                     Image.network(
-//                       'https://dev.iwayplus.in/uploads/${imagePath}',
+//                       '${AppConfig.baseUrl}/uploads/${imagePath}',
 //                       width: 250,
 //                       height: 140,
 //                       fit: BoxFit.cover,
@@ -243,6 +243,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/Translator.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../config.dart';
 import '/AiimsJammu/Screens/ServiceInfo.dart';
 
 import 'CalculateDistance.dart';
@@ -346,7 +347,7 @@ class _NearbyServiceWidgetState extends State<NearbyServiceWidget> {
                           topRight: Radius.circular(8),
                         ),
                         child: CachedNetworkImage(
-                          imageUrl: 'https://dev.iwayplus.in/uploads/${widget.imagePath}',
+                          imageUrl: '${AppConfig.baseUrl}/uploads/${widget.imagePath}',
                           width: 250,
                             height: 140,
                           placeholder: (context, url) => Shimmer.fromColors(
@@ -364,7 +365,7 @@ class _NearbyServiceWidgetState extends State<NearbyServiceWidget> {
                         ),
                       ),
                       // Image.network(
-                      //   'https://dev.iwayplus.in/uploads/$imagePath',
+                      //   '${AppConfig.baseUrl}/uploads/$imagePath',
                       //   width: 250,
                       //   height: 140,
                       //   fit: BoxFit.cover,

@@ -15,6 +15,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../API/DeleteApi.dart';
 import '../../LOGIN SIGNUP/SignIn.dart';
+import '../../config.dart';
 import '../Widgets/Translator.dart';
 import 'ChangePassword.dart';
 
@@ -50,7 +51,7 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
   Future<void> uploadImage() async {
-    final String uploadUrl = "https://dev.iwayplus.in/secured/upload";
+    final String uploadUrl = "${AppConfig.baseUrl}/secured/upload";
 
     try {
       final request = http.MultipartRequest('POST', Uri.parse(uploadUrl));
@@ -85,7 +86,7 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
   Future<void> refreshTokenAndRetryUpload() async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -154,7 +155,7 @@ class _EditProfileState extends State<EditProfile> {
     setState(() {
       isLoading = true;
     });
-    final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
 
     try {
       final response = await http.post(
@@ -198,7 +199,7 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -255,7 +256,7 @@ class _EditProfileState extends State<EditProfile> {
 
 
   // Future<void> updateUser() async {
-  //   final String updateUrl = "https://dev.iwayplus.in/secured/user/update/$userId";
+  //   final String updateUrl = "${AppConfig.baseUrl}/secured/user/update/$userId";
   //
   //   try {
   //     final response = await http.put(
@@ -287,7 +288,7 @@ class _EditProfileState extends State<EditProfile> {
   //   }
   // }
   Future<void> updateUser(BuildContext context) async {
-    final String updateUrl = "https://dev.iwayplus.in/secured/user/update/$userId";
+    final String updateUrl = "${AppConfig.baseUrl}/secured/user/update/$userId";
 
     // Show a loading indicator
     QuickAlert.show(
@@ -357,7 +358,7 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future<void> refreshTokenAndRetry(String updateUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -463,7 +464,7 @@ class _EditProfileState extends State<EditProfile> {
                     ),
                     child: ClipOval(
                       child: CachedNetworkImage(
-                        imageUrl: 'https://dev.iwayplus.in/uploads/$uploadedimage',
+                        imageUrl: '${AppConfig.baseUrl}/uploads/$uploadedimage',
                         width: 150,
                         height: 150,
                         fit: BoxFit.contain,

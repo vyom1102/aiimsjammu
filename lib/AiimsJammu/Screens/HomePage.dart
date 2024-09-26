@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:iwaymaps/AiimsJammu/Widgets/GlobalSearch.dart';
 import 'package:iwaymaps/LOGIN%20SIGNUP/SignIn.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:quickalert/models/quickalert_type.dart';
@@ -22,6 +23,7 @@ import '../../API/RefreshTokenAPI.dart';
 import '../../API/UsergetAPI.dart';
 import '../../APIMODELS/DataVersion.dart';
 import '../../VersioInfo.dart';
+import '../../config.dart';
 import '../Widgets/Translator.dart';
 import '/DestinationSearchPage.dart';
 import '/AiimsJammu/Screens/ATMScreen.dart';
@@ -133,7 +135,7 @@ class _HomePageState extends State<HomePage> {
       refreshTokenN = signInBox.get("refreshToken");
 
       final response = await http.post(
-        Uri.parse("https://dev.iwayplus.in/secured/data-version1"),
+        Uri.parse("${AppConfig.baseUrl}/secured/data-version1"),
         body: json.encode({
           "id": "6673e7a3b92e69bc7f4b40ae",
         }),
@@ -394,7 +396,7 @@ class _HomePageState extends State<HomePage> {
       print('trying');
       final response = await http.get(
 
-        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-doctors/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-doctors/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": token,
@@ -434,7 +436,7 @@ class _HomePageState extends State<HomePage> {
       print('trying');
       final response = await http.get(
 
-        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": token,
@@ -515,7 +517,7 @@ class _HomePageState extends State<HomePage> {
       });
       print('trying');
       final response = await http.get(
-        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-corousal/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-corousal/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": token,
@@ -553,7 +555,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -594,7 +596,7 @@ class _HomePageState extends State<HomePage> {
         }
       });
       final response = await http.get(
-        Uri.parse('https://dev.iwayplus.in/secured/hospital/all-announcement/6673e7a3b92e69bc7f4b40ae'),
+        Uri.parse('${AppConfig.baseUrl}/secured/hospital/all-announcement/6673e7a3b92e69bc7f4b40ae'),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": token,
@@ -632,7 +634,7 @@ class _HomePageState extends State<HomePage> {
       });
       print('trying');
       final response = await http.get(
-        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": token,
@@ -764,7 +766,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       nameLoading = true;
     });
-    final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
 
     try {
       final response = await http.post(
@@ -916,7 +918,7 @@ class _HomePageState extends State<HomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => DestinationSearchPage(voiceInputEnabled: false),
+                              builder: (context) => GlobalSearchPage(voiceInputEnabled: false),
                             ),
                           ).then((value) => PassLocationId(context, value));
                         },

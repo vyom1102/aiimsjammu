@@ -15,6 +15,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../MainScreen.dart';
+import '../../config.dart';
 import '../Widgets/CalculateDistance.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/OpeningClosingStatus.dart';
@@ -59,7 +60,7 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
     }
   }
   Future<void> getUserDetails() async {
-    final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
 
     try {
       final response = await http.post(
@@ -116,7 +117,7 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
   }
   Future<void> getServiceDetails(String serviceId) async {
     final String serviceUrl =
-        "https://dev.iwayplus.in/secured/hospital/get-service/${serviceId}";
+        "${AppConfig.baseUrl}/secured/hospital/get-service/${serviceId}";
 
     try {
       isLoading =true;
@@ -147,7 +148,7 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
     }
   }
   Future<void> refreshTokenAndRetryForService(String serviceId) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -177,7 +178,7 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
 
   Future<void> updateUserFavorites() async {
 
-    String baseUrl = "https://dev.iwayplus.in/secured/user/toggle-favourites";
+    String baseUrl = "${AppConfig.baseUrl}/secured/user/toggle-favourites";
 
     Map<String, String> headers = {
       'Content-Type': 'application/json',
@@ -226,7 +227,7 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
   }
 
   Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -389,14 +390,14 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
                   children: [
 
                     // Image.network(
-                    //   'https://dev.iwayplus.in/uploads/${widget.imagePath}',
+                    //   '${AppConfig.baseUrl}/uploads/${widget.imagePath}',
                     //   // width: 250,
                     //   width: MediaQuery.of(context).size.width,
                     //   height: 200,
                     //   fit: BoxFit.cover,
                     // ),
                     CachedNetworkImage(
-                      imageUrl: 'https://dev.iwayplus.in/uploads/${service["data"]["image"]}',
+                      imageUrl: '${AppConfig.baseUrl}/uploads/${service["data"]["image"]}',
                       width: MediaQuery.of(context).size.width,
                       height: 200,
                       fit: BoxFit.fill,
@@ -803,7 +804,7 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () {
-                    _shareContent("https://dev.iwayplus.in/#/iway-apps/aiimsj.com/service?serviceId=${widget.id}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
+                    _shareContent("${AppConfig.baseUrl}/#/iway-apps/aiimsj.com/service?serviceId=${widget.id}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
 
                     // _shareContent("iwayplus://aiimsj.com/service?serviceId=${widget.id}");
                   },

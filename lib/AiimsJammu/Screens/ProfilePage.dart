@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../config.dart';
 import '../Widgets/Translator.dart';
 import '/FavouriteScreen.dart';
 import '/LOGIN%20SIGNUP/SignIn.dart';
@@ -68,7 +69,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
   Future<void> logout() async {
-    final String logoutUrl = "https://dev.iwayplus.in/api/refreshToken/delete";
+    final String logoutUrl = "${AppConfig.baseUrl}/api/refreshToken/delete";
 
     try {
       final response = await http.delete(
@@ -121,7 +122,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> getUserDetails() async {
-    final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
 
     try {
       final response = await http.post(
@@ -164,7 +165,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
   Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -234,7 +235,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       child: ClipOval(
                         child: CachedNetworkImage(
-                          imageUrl: 'https://dev.iwayplus.in/uploads/$uploadedimage',
+                          imageUrl: '${AppConfig.baseUrl}/uploads/$uploadedimage',
                           width: 54,
                           height: 54,
                           fit: BoxFit.contain,

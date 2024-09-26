@@ -11,6 +11,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:http/http.dart' as http;
 import '../../API/guestloginapi.dart';
+import '../../config.dart';
 import '../Widgets/CalculateDistance.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/OpeningClosingStatus.dart';
@@ -83,7 +84,7 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
       print('trying');
       final response = await http.get(
 
-        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": token,
@@ -220,8 +221,8 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
                                 Stack(
                                   children: [
                                     Image.network(
-                                      // 'https://dev.iwayplus.in/uploads/$service['image']',
-                                      'https://dev.iwayplus.in/uploads/${service['image']}',
+                                      // '${AppConfig.baseUrl}/uploads/$service['image']',
+                                      '${AppConfig.baseUrl}/uploads/${service['image']}',
                                       width: cardWidth,
                                       height: 140,
                                       fit: BoxFit.cover,

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
+import '../../config.dart';
 import '../Widgets/Translator.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
@@ -91,7 +92,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       );
     }
 
-    final String apiUrl = 'https://dev.iwayplus.in/secured/change-password';
+    final String apiUrl = '${AppConfig.baseUrl}/secured/change-password';
     final Map<String, String> headers = {
       'Content-Type': 'application/json',
       'x-access-token': '$accessToken',

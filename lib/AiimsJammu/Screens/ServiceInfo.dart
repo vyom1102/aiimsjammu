@@ -13,6 +13,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../config.dart';
 import '../Widgets/CalculateDistance.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/OpeningClosingStatus.dart';
@@ -69,7 +70,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
   double? _distanceFuture;
 
   Future<void> getUserDetails() async {
-    final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
 
     try {
       final response = await http.post(
@@ -126,7 +127,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
   }
   Future<void> updateUserFavorites() async {
 
-    String baseUrl = "https://dev.iwayplus.in/secured/user/toggle-favourites";
+    String baseUrl = "${AppConfig.baseUrl}/secured/user/toggle-favourites";
 
     Map<String, String> headers = {
       'Content-Type': 'application/json',
@@ -175,7 +176,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
   }
 
   Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -323,14 +324,14 @@ class _ServiceInfoState extends State<ServiceInfo> {
                 children: [
 
                   // Image.network(
-                  //   'https://dev.iwayplus.in/uploads/${widget.imagePath}',
+                  //   '${AppConfig.baseUrl}/uploads/${widget.imagePath}',
                   //   // width: 250,
                   //   width: MediaQuery.of(context).size.width,
                   //   height: 200,
                   //   fit: BoxFit.cover,
                   // ),
                   CachedNetworkImage(
-                    imageUrl: 'https://dev.iwayplus.in/uploads/${widget.imagePath}',
+                    imageUrl: '${AppConfig.baseUrl}/uploads/${widget.imagePath}',
                     width: MediaQuery.of(context).size.width,
                     height: 200,
                     fit: BoxFit.fill,
@@ -725,7 +726,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
             Expanded(
               child: OutlinedButton(
                 onPressed: () {
-                  _shareContent("https://dev.iwayplus.in/#/iway-apps/aiimsj.com/service?serviceId=${widget.id}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
+                  _shareContent("${AppConfig.baseUrl}/#/iway-apps/aiimsj.com/service?serviceId=${widget.id}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
 
                   // _shareContent("iwayplus://aiimsj.com/service?serviceId=${widget.id}");
                 },
