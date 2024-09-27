@@ -8,8 +8,10 @@ class Cell{
   bool ttsEnabled;
   String? bid;
   int floor;
+  int numCols;
+  bool imaginedCell;
 
-  Cell(this.node, this.x, this.y, this.move, this.lat, this.lng,this.bid, this.floor, {this.ttsEnabled = true});
+  Cell(this.node, this.x, this.y, this.move, this.lat, this.lng,this.bid, this.floor, this.numCols, {this.ttsEnabled = true, this.imaginedCell = false});
 
   static void printList(List<Cell> list){
     List<List<int>> intList = [];

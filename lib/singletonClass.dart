@@ -2,13 +2,15 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:iwaymaps/buildingState.dart';
+import '/buildingState.dart';
 
 import 'API/beaconapi.dart';
 import 'API/buildingAllApi.dart';
 
 import 'APIMODELS/beaconData.dart';
+import 'VersioInfo.dart';
 import 'bluetooth_scanning.dart';
 
 class SingletonFunctionController {
@@ -27,19 +29,30 @@ class SingletonFunctionController {
     // Mark the function as running and create a new Completer
     _isRunning = true;
     _completer = Completer<void>();
+    
 
+    var beaconData = await beaconapi().fetchBeaconData("65d9cacfdb333f8945861f0f");
+    building.beacondata = beaconData;
+    print("building.beacondata.length");
     try {
       // Perform your task here
       print("Function is running...");
-      print(buildingAllApi.allBuildingID);
+      building.qrOpened=false;
+      building.destinationQr=false;
       await Future.wait(allBuildingID.entries.map((entry) async {
+        print("entry$entry");
         var key = entry.key;
 
         var beaconData = await beaconapi().fetchBeaconData(key);
+        print("keydata${beaconData.length}");
         if (building.beacondata == null) {
-          building.beacondata = List.from(beaconData);
+          print("entryprintifstate${key}");
+          building.beacondata = beaconData;
+          print("entryprintifstate${building.beacondata!.length}");
         } else {
+          print("entryprint${building.beacondata!.length}");
           building.beacondata = List.from(building.beacondata!)..addAll(beaconData);
+          print("entryprint${building.beacondata!.length}");
         }
 
         for (var beacon in beaconData) {
@@ -48,14 +61,19 @@ class SingletonFunctionController {
           }
         }
         Building.apibeaconmap = apibeaconmap;
+        print(buildingAllApi.allBuildingID);
+        print(apibeaconmap);
 
-      })).then((value){
+      })).then((value) async {
+        print("blue statusssss");
+        print(await FlutterBluePlus.isOn);
         if(Platform.isAndroid){
+
           btadapter.startScanning(apibeaconmap);
         }else{
           btadapter.startScanningIOS(apibeaconmap);
         }
-        timer= Future.delayed(Duration(seconds:9));
+        timer= Future.delayed((await FlutterBluePlus.isOn==true)?Duration(seconds:9):Duration(seconds:0));
       });
 
       // Simulate a long-running task
@@ -64,8 +82,7 @@ class SingletonFunctionController {
       // Mark the function as complete
       _isRunning = false;
       _completer?.complete();
-      building.qrOpened=false;
-      building.destinationQr=false;
+
     }
   }
 }

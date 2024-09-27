@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/UserState.dart';
+import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -97,6 +98,7 @@ class _MyAppState extends State<MyApp> {
   String? initialDocId;
   String? initialServiceId;
   bool isLocating=false;
+  wsocket sc=wsocket('com.iwayplus.aiimsjammu');
 
   @override
   void initState() {

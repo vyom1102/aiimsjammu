@@ -106,6 +106,8 @@ dependencies:
   widget_to_marker:
   app_settings: ^5.1.1
   string_similarity: ^2.1.1
+  flutter_local_notifications: ^17.2.2
+
 
 
 

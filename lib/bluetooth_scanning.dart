@@ -65,8 +65,9 @@ class BLueToothClass {
   Stream<HashMap<int, HashMap<String, double>>> get binStream =>
       _binController.stream;
 
-   bool isScanningOn(){
-    return FlutterBluePlus.isScanningNow;
+
+  bool isScanningOn(){
+    return FlutterBluePlus.isScanningNow ?? false;
   }
 
   void startScanning(HashMap<String, beacon> apibeaconmap) {
@@ -84,7 +85,6 @@ class BLueToothClass {
           // print("himanshu 5 ${result}");
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
-          print("mac $MacId    rssi $Rssi  beaconMap${apibeaconmap}");
           wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
           if (apibeaconmap.containsKey(MacId)) {
             //print(MacId);
@@ -183,12 +183,13 @@ class BLueToothClass {
 
     _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
       _scanResults = results;
-      print("mac $results");
+      // print("mac $results");
       for (ScanResult result in _scanResults) {
         String MacId = "${result.device.platformName}";
         int Rssi = result.rssi;
         // print(result);
-        print("mac $MacId   rssi $Rssi");
+        // print("mac $MacId   rssi $Rssi");
+        wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
 
         if (apibeaconmap.containsKey(MacId)) {
           beacondetail[MacId] = Rssi * -1;
@@ -213,11 +214,11 @@ class BLueToothClass {
 
 
   void stopScanning() async{
+    emptyBin();
     await FlutterBluePlus.stopScan();
     _scanResultsSubscription.cancel();
     _scanResults.clear();
     _systemDevices.clear();
-    emptyBin();
     priorityQueue.clear();
   }
 
@@ -225,7 +226,6 @@ class BLueToothClass {
     for (int i = 0; i < BIN.length; i++) {
       BIN[i]!.clear();
     }
-    print("entereddd");
     numberOfSample.clear();
     rs.clear();
   }

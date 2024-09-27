@@ -11,6 +11,7 @@ import 'package:easter_egg_trigger/easter_egg_trigger.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geodesy/geodesy.dart';
@@ -24,6 +25,9 @@ import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/Elements/UserCredential.dart';
 import 'package:iwaymaps/Elements/buildingCard.dart';
 import 'package:iwaymaps/MODELS/VenueModel.dart';
+import 'package:iwaymaps/websocket/NotifIcationSocket.dart';
+import 'package:iwaymaps/UserState.dart';
+import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'API/buildingAllApi.dart';
@@ -34,10 +38,13 @@ import 'BuildingInfoScreen.dart';
 import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'DATABASE/BOXES/LandMarkApiModelBox.dart';
+import 'DATABASE/BOXES/OutDoorModelBOX.dart';
 import 'DATABASE/BOXES/PatchAPIModelBox.dart';
 import 'DATABASE/BOXES/PolyLineAPIModelBOX.dart';
+
 import 'HomeNestedSearch.dart';
 import 'Navigation.dart';
+
 
 class VenueSelectionScreen extends StatefulWidget{
 
@@ -61,26 +68,39 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   @override
   void initState(){
     super.initState();
+    //PushNotifications.showSimpleNotificationwithButton(title: "", body:"", payload: "", imageUrl: '');
+    NotificationSocket.receiveMessage();
+//startScan();
     getLocs();
-    apiCall();
 
+    apiCall();
     print("venueHashMap");
     print(venueHashMap);
-
-
-
-
-
   }
 
+  void startScan(){
+    FlutterBluePlus.startScan();
+    //  print("himanshu 3");
+    FlutterBluePlus.scanResults.listen((results) async {
+      // print("himanshu 4");
+      for (ScanResult result in results) {
+        if(result.device.platformName.length > 2){
+          //print("himanshu 5 ${result}");
+          String MacId = "${result.device.platformName}";
+          int Rssi = result.rssi;
+          print("mac $MacId    rssi $Rssi");
+          wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
+        }
+      }
+    });
+  }
+  static var infoBox=Hive.box('SignInDatabase');
   void loadInfoToFile(){
-    var infoBox=Hive.box('SignInDatabase');
+
     String accessToken = infoBox.get('accessToken');
     print('loadInfoToFile');
     print(infoBox.get('userId'));
-
     UsergetAPI().getUserDetailsApi(infoBox.get('userId'));
-
   }
 
 
@@ -89,6 +109,10 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
       isLocating=true;
     });
     userLoc= await getUsersCurrentLatLng();
+
+
+UserState.geoLat=userLoc!.latitude;
+UserState.geoLng=userLoc!.longitude;
     if(mounted){
       setState(() {
         isLocating=false;
@@ -97,32 +121,31 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
     }
 
   }
+
   var locBox=Hive.box('LocationPermission');
   Position? userLoc;
+
   Future<Position?> getUsersCurrentLatLng()async{
-
-    if ((locBox.get('location')==null)?false:locBox.get('location')) {
-
-      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-
-
-      return position;
-
-
-    }else{
-      Position pos=Position(longitude: 77.1852061, latitude:  28.5436197, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
+   // if ((locBox.get('location')==null)?false:locBox.get('location')) {
+   //
+   //    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+   //  print("accuracyy");
+   //  print(position.accuracy);
+   //    return position;
+   //
+   //
+   //  }
+   //  else{
+      Position pos=Position(longitude: 79.10139, latitude:  28.947555, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
       return pos;
-    }
-
-
-
-
+   // }
 
   }
 
+  String? _FCMToken = infoBox.get("FCMToken");
+
   void apiCall() async  {
-    // print('Running api');
-    //await Future.delayed(Duration(milliseconds: 1300));
+
     await buildingAllApi().fetchBuildingAllData().then((value) {
       print(value);
       setState(() {
@@ -279,6 +302,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                 final PatchBox = PatchAPIModelBox.getData();
                 final PolyLineBox = PolylineAPIModelBOX.getData();
                 final WayPointBox = WayPointModeBOX.getData();
+                final OutBuildingBox = OutDoorModeBOX.getData();
 
                 BeaconBox.clear();
                 BuildingAllBox.clear();
@@ -286,7 +310,8 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                 PatchBox.clear();
                 PolyLineBox.clear();
                 WayPointBox.clear();
-                showToast("Database Cleared ${BeaconBox.length},${BuildingAllBox.length},${LandMarkBox.length},${PatchBox.length},${PolyLineBox.length},${WayPointBox.length}");
+                OutBuildingBox.clear();
+                showToast("Database Cleared ${BeaconBox.length},${BuildingAllBox.length},${LandMarkBox.length},${PatchBox.length},${PolyLineBox.length},${WayPointBox.length},${OutBuildingBox.length}");
 
               },
             ),
@@ -448,11 +473,13 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
 
 
                             return GestureDetector(
-                              onTap: () {
+                              onTap: () async{
                                 // Handle onTap for the specific item here
                                 // For example, you can navigate to a new screen or perform some action
                                 // print("Tapped on item at index $index");
                                 buildingAllApi.setStoredVenue(currentData.venueName!);
+                                print("await HelperClass.getGeoFenced");
+                                print(await HelperClass.getGeoFenced("AIIMSJAMMU", userLoc!));
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(

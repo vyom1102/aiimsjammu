@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:hive/hive.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/UserState.dart';
+import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
@@ -43,6 +45,7 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     index = widget.initialIndex;
     getLocs();
+    setIDforWebSocket();
     print(index);
   }
 
@@ -76,6 +79,12 @@ print("userLoc");
       return pos;
     }
 
+  }
+
+  void setIDforWebSocket()async{
+    final signInBox = await Hive.openBox('SignInDatabase');
+    print("user id ${signInBox.get("userId")}");
+    wsocket.message["userId"] = signInBox.get("userId");
   }
 
 
