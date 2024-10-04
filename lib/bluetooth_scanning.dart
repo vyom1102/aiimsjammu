@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'dart:collection';
 import 'package:collection/collection.dart';
-import 'package:iwaymaps/Elements/HelperClass.dart';
+import '/Elements/HelperClass.dart';
 
 import '../buildingState.dart';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'APIMODELS/beaconData.dart';
 import 'Elements/HelperClass.dart';
-import 'package:iwaymaps/websocket/UserLog.dart';
+import '/websocket/UserLog.dart';
 
 class BLueToothClass {
   HashMap<int, HashMap<String, double>> BIN = HashMap();
@@ -72,6 +72,8 @@ class BLueToothClass {
 
   void startScanning(HashMap<String, beacon> apibeaconmap) {
 
+    wsocket.message["AppInitialization"]["bleScanResults"] = {};
+
     // print("himanshu 1");
 
     startbin();
@@ -79,16 +81,16 @@ class BLueToothClass {
     FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
     //  print("himanshu 3");
     FlutterBluePlus.scanResults.listen((results) async {
-      // print("himanshu 4");
+      // print("himanshu 4 $apibeaconmap");
       for (ScanResult result in results) {
         if(result.device.platformName.length > 2){
-          // print("himanshu 5 ${result}");
+        //  print("himanshu 5 ${result}");
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
           wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
           if (apibeaconmap.containsKey(MacId)) {
             //print(MacId);
-            print("mac1 $MacId    rssi $Rssi");
+            //print("mac1 $MacId    rssi $Rssi");
             beacondetail[MacId] = Rssi * -1;
             addtoBin(MacId, Rssi);
             _binController.add(BIN); // Emitting event when BIN changes
@@ -185,11 +187,13 @@ class BLueToothClass {
       _scanResults = results;
       // print("mac $results");
       for (ScanResult result in _scanResults) {
-        String MacId = "${result.device.platformName}";
+        String MacId = "${result.device.advName}";
+        if(result.device.platformName.contains("IW")){
+          MacId = result.device.platformName;
+        }
         int Rssi = result.rssi;
         // print(result);
         // print("mac $MacId   rssi $Rssi");
-        wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
 
         if (apibeaconmap.containsKey(MacId)) {
           beacondetail[MacId] = Rssi * -1;
@@ -214,8 +218,8 @@ class BLueToothClass {
 
 
   void stopScanning() async{
-    emptyBin();
     await FlutterBluePlus.stopScan();
+    emptyBin();
     _scanResultsSubscription.cancel();
     _scanResults.clear();
     _systemDevices.clear();
@@ -263,7 +267,6 @@ class BLueToothClass {
     }
 
     if (BIN[binnumber]!.containsKey(MacId)) {
-      // print(BIN[binnumber]![MacId]! + weight[binnumber]!);
       BIN[binnumber]![MacId] = BIN[binnumber]![MacId]! + weight[binnumber]!;
     } else {
       BIN[binnumber]![MacId] = 1 * weight[binnumber]!;
