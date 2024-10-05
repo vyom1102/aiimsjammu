@@ -31,6 +31,7 @@ class UserState {
   int showcoordX;
   int showcoordY;
   static int geoFenced=0;
+  static bool lowCompassAccuracy=false;
 
   static bool isTurn=false;
   pathState pathobj = pathState();

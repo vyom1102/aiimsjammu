@@ -32,7 +32,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
 
   late int index;
-  bool isLocating=false;
+
   final screens = [
     HomePage(),
     Navigation(),
@@ -44,42 +44,11 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     index = widget.initialIndex;
-    getLocs();
     setIDforWebSocket();
     print(index);
   }
 
-  Position? userLoc;
-  void getLocs()async{
-    setState(() {
-      isLocating=true;
-    });
-    userLoc= await getUsersCurrentLatLng();
-    if(mounted){
-      setState(() {
-        isLocating=false;
-      });
-    }
 
-print("userLoc");
-    print(userLoc);
-    UserState.geoFenced=await HelperClass.getGeoFenced("AIIMSJAMMU", userLoc!);
-
-  }
-
-  Future<Position?> getUsersCurrentLatLng()async{
-
-    if (await Permission.location.isGranted) {
-      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-      return position;
-
-    }
-    else{
-      Position pos=Position(longitude: 77.1852061, latitude:  28.5436197, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
-      return pos;
-    }
-
-  }
 
   void setIDforWebSocket()async{
     final signInBox = await Hive.openBox('SignInDatabase');
@@ -126,15 +95,14 @@ print("userLoc");
             backgroundColor: Color(0xffFFFFFF),
             selectedIndex: index,
             onDestinationSelected: (index)=>setState(() {
-              if (index==1 ){
+              if (index==1){
+                print("value im getiing ${UserState.geoFenced}");
                 if(UserState.geoFenced!=3){
                   Navigator.push(context, MaterialPageRoute(builder: (context) => Navigation()));
                 }else{
                   HelperClass.showToast("This map preview is not available at your location");
                 }
-
               } else {
-
                 this.index = index;
                 print(index);
               }

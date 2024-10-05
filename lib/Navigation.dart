@@ -8628,32 +8628,32 @@ setState(() {
                           ],
                         ),
                       ),
-                      Container(
-                        child: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                PathState.swap();
-                                PathState.path.clear();
-                                pathMarkers.clear();
-                                PathState.directions.clear();
-                                if (user.isnavigating == false) {
-                                  clearPathVariables();
-                                }
-                                SingletonFunctionController
-                                    .building.landmarkdata!
-                                    .then((value) {
-                                  calculateroute(value.landmarksMap!);
-                                });
-                              });
-                            },
-                            icon: Semantics(
-                              label: "Swap location",
-                              child: Icon(
-                                Icons.swap_vert_circle_outlined,
-                                size: 24,
-                              ),
-                            )),
-                      ),
+                      // Container(
+                      //   child: IconButton(
+                      //       onPressed: () {
+                      //         setState(() {
+                      //           PathState.swap();
+                      //           PathState.path.clear();
+                      //           pathMarkers.clear();
+                      //           PathState.directions.clear();
+                      //           if (user.isnavigating == false) {
+                      //             clearPathVariables();
+                      //           }
+                      //           SingletonFunctionController
+                      //               .building.landmarkdata!
+                      //               .then((value) {
+                      //             calculateroute(value.landmarksMap!);
+                      //           });
+                      //         });
+                      //       },
+                      //       icon: Semantics(
+                      //         label: "Swap location",
+                      //         child: Icon(
+                      //           Icons.swap_vert_circle_outlined,
+                      //           size: 24,
+                      //         ),
+                      //       )),
+                      // ),
                     ],
                   ),
                   PathState.sourceFloor != PathState.destinationFloor

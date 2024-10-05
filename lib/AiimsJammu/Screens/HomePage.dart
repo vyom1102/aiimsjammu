@@ -22,8 +22,12 @@ import 'package:iwaymaps/AiimsJammu/Widgets/OpeningClosingStatus.dart';
 import '../../API/RefreshTokenAPI.dart';
 import '../../API/UsergetAPI.dart';
 import '../../APIMODELS/DataVersion.dart';
+import '../../Elements/HelperClass.dart';
+import '../../UserState.dart';
 import '../../VersioInfo.dart';
 import '../../config.dart';
+import '../../singletonClass.dart';
+import '../../websocket/UserLog.dart';
 import '../Widgets/Translator.dart';
 import '/DestinationSearchPage.dart';
 import '/AiimsJammu/Screens/ATMScreen.dart';
@@ -100,15 +104,51 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentPage);
+    getLocs();
+    wsocket.message["AppInitialization"]["BID"]=buildingAllApi.allBuildingID;
+    wsocket.message["AppInitialization"]["buildingName"]="AIIMS JAMMU";
+    SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID);
     versionApiCheck();
     checkForReload();
     versionApiCall();
-
     isUserValid();
 
 
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
+
+  }
+
+  Position? userLoc;
+  bool isLocating=false;
+  void getLocs()async{
+    setState(() {
+      isLocating=true;
+    });
+    userLoc= await getUsersCurrentLatLng();
+    if(mounted){
+      setState(() {
+        isLocating=false;
+      });
+    }
+
+    print("userLoc");
+    print(userLoc);
+    UserState.geoFenced=await HelperClass.getGeoFenced("AIIMSJAMMU", userLoc!);
+
+  }
+
+  Future<Position?> getUsersCurrentLatLng()async{
+
+    if (await Permission.location.isGranted) {
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      return position;
+
+    }
+    else{
+      Position pos=Position(longitude: 77.1852061, latitude:  28.5436197, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
+      return pos;
+    }
 
   }
   Future<void> isUserValid() async{
