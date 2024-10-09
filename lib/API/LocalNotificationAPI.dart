@@ -34,7 +34,7 @@ class LocalNotificationAPI{
 
     if(!deviceConnected){
       print("LocalNotificationAPI DATA FROM DATABASE");
-      Map<String, dynamic> responseBody = NotifiBox.get("com.iwayplus.navigation")!.responseBody;
+      Map<String, dynamic> responseBody = NotifiBox.get("com.iwayplus.aiimsjammu")!.responseBody;
       LocalNotificationAPIModel notificationData =LocalNotificationAPIModel.fromJson(responseBody);
       List<NotificationsInLocalNotificationModule> notificationsList = notificationData.notifications!;
       return notificationsList;
@@ -55,7 +55,7 @@ class LocalNotificationAPI{
       LocalNotificationAPIModel notificationData =LocalNotificationAPIModel.fromJson(responseBody);
       List<NotificationsInLocalNotificationModule> notificationsList = notificationData.notifications!;
       final notificationSaveData = LocalNotificationAPIDatabaseModel(responseBody: responseBody);
-      NotifiBox.put("com.iwayplus.navigation", notificationSaveData);
+      NotifiBox.put("com.iwayplus.aiimsjammu", notificationSaveData);
       notificationSaveData.save();
       return notificationsList;
     }

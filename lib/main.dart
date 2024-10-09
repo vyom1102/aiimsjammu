@@ -22,6 +22,7 @@ import 'DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
 import 'DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
 import 'DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
+import 'DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
 import 'DATABASE/DATABASEMODEL/OutDoorModel.dart';
 import 'DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
@@ -58,6 +59,8 @@ Future<void> main() async {
   await Hive.openBox<WayPointModel>('WayPointModelFile');
   Hive.registerAdapter(DataVersionLocalModelAdapter());
   await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
+  Hive.registerAdapter(LocalNotificationAPIDatabaseModelAdapter());
+  await Hive.openBox<LocalNotificationAPIDatabaseModel>('LocalNotificationAPIDatabaseModel');
 
   await Hive.openBox('Favourites');
   await Hive.openBox('UserInformation');

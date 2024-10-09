@@ -27,6 +27,7 @@ import '../../UserState.dart';
 import '../../VersioInfo.dart';
 import '../../config.dart';
 import '../../singletonClass.dart';
+import '../../websocket/NotifIcationSocket.dart';
 import '../../websocket/UserLog.dart';
 import '../Widgets/Translator.dart';
 import '/DestinationSearchPage.dart';
@@ -103,6 +104,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    NotificationSocket.receiveMessage();
     _pageController = PageController(initialPage: _currentPage);
     getLocs();
     wsocket.message["AppInitialization"]["BID"]=buildingAllApi.allBuildingID;
@@ -897,18 +899,18 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                   Spacer(),
-                  // IconButton(
-                  //   icon: Icon(Icons.notifications_none_outlined),
-                  //   color: Color(0xff18181b),
-                  //   onPressed: () {
-                  //     Navigator.push(
-                  //       context,
-                  //       MaterialPageRoute(
-                  //         builder: (context) => NotificationScreen(),
-                  //       ),
-                  //     );
-                  //   },
-                  // ),
+                  IconButton(
+                    icon: Icon(Icons.notifications_none_outlined),
+                    color: Color(0xff18181b),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NotificationScreen(),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
               SizedBox(height: 10,),

@@ -10,7 +10,6 @@ import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
 import 'package:iwaymaps/singletonClass.dart';
 import 'package:iwaymaps/websocket/NotifIcationSocket.dart';
-import 'package:widget_to_marker/widget_to_marker.dart';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:collection/collection.dart';
 import 'package:collection/collection.dart' as pac;
@@ -36,6 +35,7 @@ import 'package:iwaymaps/realWorldModel.dart';
 import 'package:iwaymaps/wayPointPath.dart';
 import 'package:iwaymaps/waypoint.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
+import 'package:widget_to_marker/widget_to_marker.dart';
 import 'API/DataVersionApi.dart';
 import 'API/outBuilding.dart';
 import 'API/slackApi.dart';
@@ -12688,7 +12688,7 @@ bool onStart=false;
                     if(cameraPosition.zoom>15.5){
                       focusBuildingChecker(cameraPosition);
                     }else{
-                      renderCampusPatchTransition(buildingAllApi.outdoorID);
+                      //renderCampusPatchTransition(buildingAllApi.outdoorID);
                     }
 
 
