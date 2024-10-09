@@ -194,7 +194,7 @@ class BLueToothClass {
         int Rssi = result.rssi;
         // print(result);
         // print("mac $MacId   rssi $Rssi");
-
+        wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
         if (apibeaconmap.containsKey(MacId)) {
           beacondetail[MacId] = Rssi * -1;
 

@@ -34,8 +34,6 @@ class wsocket{
       "BID": "",
       "buildingName": "",
       "bleScanResults": {
-        "IW122": 0,
-        "IW123": 0,
       },
       "localizedOn": ""
     },

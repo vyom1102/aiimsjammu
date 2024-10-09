@@ -8,6 +8,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
+import 'package:iwaymaps/config.dart';
 import 'package:iwaymaps/singletonClass.dart';
 import 'package:iwaymaps/websocket/NotifIcationSocket.dart';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
@@ -6538,7 +6539,7 @@ cachedPolygon.clear();
                               child: IconButton(
                                   onPressed: () {
                                     HelperClass.shareContent(
-                                        "https://dev.iwayplus.in/#/iway-apps/iwaymaps.com/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${SingletonFunctionController.building.selectedLandmarkID!}&appStore=rgci-navigation/id6505062168&playStore=com.iwayplus.rgcinavigation");
+                                        "${AppConfig.baseUrl}/#/iway-apps/aiimsj.com/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${SingletonFunctionController.building.selectedLandmarkID!}&appStore=rgci-navigation/id6505062168&playStore=com.iwayplus.aiimsjammu");
                                   },
                                   icon: Semantics(
                                       label: "Share route information",
