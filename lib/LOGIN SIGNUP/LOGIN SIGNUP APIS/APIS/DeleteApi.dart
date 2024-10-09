@@ -3,10 +3,12 @@ import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/Elements/HelperClass.dart';
 
+import '../../../config.dart';
+
 class DeleteApi {
 
   static String refreshToken = "";
-  static String baseUrl = "https://dev.iwayplus.in/secured/user/delete";
+  static String baseUrl = "${AppConfig.baseUrl}/secured/user/delete";
 
   static Future<bool> fetchPatchData() async {
     var signInBox = Hive.box('SignInDatabase');

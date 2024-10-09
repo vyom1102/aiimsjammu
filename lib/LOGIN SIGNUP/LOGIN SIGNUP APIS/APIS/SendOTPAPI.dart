@@ -4,9 +4,11 @@ import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/Elements/HelperClass.dart';
 
+import '../../../config.dart';
+
 class SendOTPAPI{
 
-  final String baseUrl = "https://dev.iwayplus.in/auth/otp/send";
+  final String baseUrl = "${AppConfig.baseUrl}/auth/otp/send";
 
   Future<bool> sendOTP(String username) async {
     print('sendOTP');

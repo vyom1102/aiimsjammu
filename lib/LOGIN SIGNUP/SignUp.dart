@@ -14,6 +14,7 @@ import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
 import '../Elements/HelperClass.dart';
 import '../MainScreen.dart';
+import '../config.dart';
 import 'LOGIN SIGNUP APIS/APIS/SendOTPAPI.dart';
 import 'SignIn.dart';
 import 'VerifyYourAccount.dart';
@@ -227,7 +228,7 @@ class _SignUpState extends State<SignUp> {
       'Content-Type': 'application/json'
     };
     var request = http.Request(
-        'POST', Uri.parse('https://dev.iwayplus.in/auth/username'));
+        'POST', Uri.parse('${AppConfig.baseUrl}/auth/username'));
     request.body = json.encode({"username": username,"appId":"com.iwayplus.aiimsjammu"});
     request.headers.addAll(headers);
 

@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/Elements/HelperClass.dart';
+
+import '../../../config.dart';
 class SignUpAPI{
 
-  final String baseUrl = "https://dev.iwayplus.in/auth/signup";
+  final String baseUrl = "${AppConfig.baseUrl}/auth/signup";
 
   Future<bool> signUP(String username,String name, String password,String OTP) async {
     final Map<String, dynamic> data = {
