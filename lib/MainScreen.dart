@@ -97,11 +97,9 @@ class _MainScreenState extends State<MainScreen> {
             onDestinationSelected: (index)=>setState(() {
               if (index==1){
                 print("value im getiing ${UserState.geoFenced}");
-                if(UserState.geoFenced!=3){
+
                   Navigator.push(context, MaterialPageRoute(builder: (context) => Navigation()));
-                }else{
-                  HelperClass.showToast("This map preview is not available at your location");
-                }
+
               } else {
                 this.index = index;
                 print(index);
