@@ -5,6 +5,7 @@ import 'package:hive/hive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/GlobalSearch.dart';
 import 'package:iwaymaps/LOGIN%20SIGNUP/SignIn.dart';
+import 'package:new_version_plus/new_version_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
@@ -105,6 +106,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     NotificationSocket.receiveMessage();
+    checkForUpdate();
     _pageController = PageController(initialPage: _currentPage);
     getLocs();
     wsocket.message["AppInitialization"]["BID"]=buildingAllApi.allBuildingID;
@@ -119,6 +121,74 @@ class _HomePageState extends State<HomePage> {
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
 
+  }
+
+  bool _updateAvailable = false;
+  bool _checkingForUpdate = true;
+  String? currentVersion = "";
+
+  Future<void> checkForUpdate() async {
+    final newVersion = NewVersionPlus(
+      androidId: 'com.iwayplus.aiimsjammu',
+      // iOSId: 'com.iwayplus.rgcinavigation',
+    );
+
+    try {
+      final status = await newVersion.getVersionStatus();
+      print("status");
+      print(status!.canUpdate);
+      setState(() {
+        currentVersion = status?.localVersion;
+        _updateAvailable = status != null && status.canUpdate;
+        _checkingForUpdate = false;
+      });
+
+      // Show dialog if update is available
+      if (_updateAvailable) {
+        _showUpdateDialog();
+      }
+
+    } catch (e) {
+      print('Error checking for updates: $e');
+      setState(() {
+        _checkingForUpdate = false;
+      });
+    }
+  }
+
+  // Function to show update dialog
+  void _showUpdateDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Update Available"),
+          content: Text("A new version of the app is available. Please update to the latest version."),
+          actions: <Widget>[
+            TextButton(
+              child: Text("Update Now"),
+              onPressed: () async {
+                // Add your app update logic here
+                final url = Theme.of(context).platform == TargetPlatform.iOS
+                    ? 'https://apps.apple.com/in/app/rgci-navigation/id6505062168'
+                    : 'https://play.google.com/store/apps/details?id=com.iwayplus.aiimsjammu';
+                if (await canLaunch(url)) {
+                  await launch(url);
+                } else {
+                  print('Could not launch $url');
+                }
+              },
+            ),
+            TextButton(
+              child: Text("Close"),
+              onPressed: () async {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Position? userLoc;
