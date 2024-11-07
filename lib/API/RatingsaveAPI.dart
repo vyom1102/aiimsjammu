@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/Elements/HelperClass.dart';
@@ -7,19 +8,19 @@ import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'RefreshTokenAPI.dart';
 
 class RatingsaveAPI{
-  final String baseUrl = "https://dev.iwayplus.in/secured/rating-save";
+  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/rating-save" : "https://maps.iwayplus.in/secured/rating-save";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
 
   Future<void> saveRating(String feedback,int rating,String userId,String username, String sourceId,String destinationID,String appId) async {
     final Map<String, dynamic> data = {
       "userId": userId,
-      "username": username,
+      "username": username??'username',
       "sourceId": sourceId,
       "destinationId": destinationID,
       "rating": rating,
       "feedback": feedback,
-      "appId": "com.iwayplus.navigation"
+      "appId": "com.iwaymaps.navigation"
     };
 
     final response = await http.post(

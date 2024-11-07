@@ -109,12 +109,12 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
       isLocating=true;
     });
     userLoc= await getUsersCurrentLatLng();
-if(userLoc!=null){
-  UserState.geoLat=userLoc!.latitude;
-  UserState.geoLng=userLoc!.longitude;
-}else{
-  userLoc=Position(longitude: 77.18803031572772, latitude:  28.544277333724025, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
-}
+    if(userLoc!=null){
+      UserState.geoLat=userLoc!.latitude;
+      UserState.geoLng=userLoc!.longitude;
+    }else{
+      userLoc=Position(longitude: 77.18803031572772, latitude:  28.544277333724025, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
+    }
     if(mounted){
       setState(() {
         isLocating=false;
@@ -128,18 +128,18 @@ if(userLoc!=null){
   Position? userLoc;
 
   Future<Position?> getUsersCurrentLatLng()async{
-   //if ((locBox.get('location')==null)?false:locBox.get('location')) {
-      try{
-        Position? position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-        return position;
-      }catch(e){
-        print("error in location fetching");
-        return null;
-      }
+    //if ((locBox.get('location')==null)?false:locBox.get('location')) {
+    try{
+      Position? position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      return position;
+    }catch(e){
+      print("error in location fetching");
+      return null;
+    }
 
 
 
-   // }
+    // }
     // else{
     //   Position pos=Position(longitude: 79.10139, latitude:  28.947555, timestamp: DateTime.now(), accuracy: 100, altitude: 1, altitudeAccuracy: 100, heading: 10, headingAccuracy: 100, speed: 100, speedAccuracy: 100);
     //   return pos;
@@ -267,368 +267,368 @@ if(userLoc!=null){
     double screenHeight = MediaQuery.of(context).size.height;
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          title: Semantics(
-            label: "Iwayplus",
-            child: InkWell(
-              onTap: (){
-                RefreshTokenAPI.refresh();
-              },
-              child: Container(
-                alignment: Alignment.bottomLeft,
-                child: Text(
-                  "Iwayplus",
-                  style: const TextStyle(
-                    fontFamily: "Roboto",
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xff000000),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          centerTitle: true,
-          leading: Semantics(
-            child: EasterEggTrigger(
-              child: Container(
-                alignment: Alignment.centerRight,
-                width: 60,
-                child: SvgPicture.asset("assets/MainScreen_IwayplusLogo.svg"),
-              ),codes: [
-              EasterEggTriggers.SwipeDown,
-              EasterEggTriggers.LongPress,
-            ],
-              action: (){
-                final BeaconBox = BeaconAPIModelBOX.getData();
-                final BuildingAllBox = BuildingAllAPIModelBOX.getData();
-                final LandMarkBox = LandMarkApiModelBox.getData();
-                final PatchBox = PatchAPIModelBox.getData();
-                final PolyLineBox = PolylineAPIModelBOX.getData();
-                final WayPointBox = WayPointModeBOX.getData();
-                final OutBuildingBox = OutDoorModeBOX.getData();
-
-                BeaconBox.clear();
-                BuildingAllBox.clear();
-                LandMarkBox.clear();
-                PatchBox.clear();
-                PolyLineBox.clear();
-                WayPointBox.clear();
-                OutBuildingBox.clear();
-                showToast("Database Cleared ${BeaconBox.length},${BuildingAllBox.length},${LandMarkBox.length},${PatchBox.length},${PolyLineBox.length},${WayPointBox.length},${OutBuildingBox.length}");
-
-              },
-            ),
-          ),
-
-          actions: [
-            IconButton(
-              icon: Icon(Icons.notifications_none_outlined),
-              color: Color(0xff18181b),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => NotificationScreen(),
-                  ),
-                );
-              },
-            ),
-            Container(
-                margin: EdgeInsets.only(right: 20),
-                // decoration: BoxDecoration(
-                //   borderRadius: BorderRadius.circular(8.0),
-                //   border: Border.all(
-                //     color: Color(0x204A4545),
-                //   ),
-                // ),
-                child: IconButton(
-                  icon: Semantics(
-                      label: "Search",
-                      child: Icon(Icons.search,color: Colors.black,)),
-                  color: Color(0xff000000),
-                  onPressed: () {
-                    showSearch(context: context, delegate: HomeNestedSearch(newbuildingList));
-                  },
-                )),
-
-          ],
-          backgroundColor: Colors.transparent, // Set the background color to transparent
-          elevation: 0,
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFFFFFFFF), Color(0xFFFFFFFF)], // Set your gradient colors
-              ),
-            ),
-          ),
-        ),
-        body:(isLocating)? Center(
-            child: Animate(
-                effects: [FadeEffect(), ScaleEffect()],
-                child: Text("Loading Data. . .",style: TextStyle(
-                  fontFamily: "Roboto",
-                  fontSize: 30,
-                  color: Color(0xFF666870),
-                  height: 1,
-                  letterSpacing: -1,
-                ),)
-                    .animate(onPlay: (controller) => controller.repeat())
-                    .shimmer(duration: 1200.ms, color: const Color(0xFF80DDFF))
-                    .animate() // this wraps the previous Animate in another Animate
-                    .fade(duration: 1200.ms, curve: Curves.ease)
-                    .slide()
-            )
-          // Show linear loading indicator
-        ):isLoading_buildingList
-            ? Center(
-            child: Animate(
-                effects: [FadeEffect(), ScaleEffect()],
-                child: Text("Loading Data. . .",style: TextStyle(
-                  fontFamily: "Roboto",
-                  fontSize: 30,
-                  color: Color(0xFF666870),
-                  height: 1,
-                  letterSpacing: -1,
-                ),)
-                    .animate(onPlay: (controller) => controller.repeat())
-                    .shimmer(duration: 1200.ms, color: const Color(0xFF80DDFF))
-                    .animate() // this wraps the previous Animate in another Animate
-                    .fade(duration: 1200.ms, curve: Curves.ease)
-                    .slide()
-            )
-          // Show linear loading indicator
-        )
-            : DefaultTabController(
-
-            length: 4,
-            child: Column(
-              children: [
-                Material(
-                  child: Container(
-                    height: 55,
-                    color: Color(0xffFFFFFF),
-                    child: Container(
-                      height: 55,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [Color(0xFFFFFFFF), Color(0xFFFFFFFF)], // Set your gradient colors
-                        ),
-                      ),
-                      child: TabBar(
-                        unselectedLabelColor: Color(0xffB3B3B3),
-                        isScrollable: false,
-                        indicatorColor: Colors.black,
-                        labelColor: Colors.black,
-                        tabs: [
-                          Tab(
-                            child: Container(
-                              height: 35,
-                              child: Align(
-                                alignment: Alignment.center,
-                                child: Text("All"),
-                              ),
-                            ),
-                          ),
-                          Tab(
-                            child: Container(
-                              height: 35,
-                              child: Align(
-                                alignment: Alignment.center,
-                                child: Text("Academic"),
-                              ),
-                            ),
-                          ),
-                          Tab(
-                            child: Container(
-                              height: 35,
-                              child: Align(
-                                alignment: Alignment.center,
-                                child: Text("Hospital"),
-                              ),
-                            ),
-                          ),
-                          // Tab(child: Container(
-                          //   height: 35,
-                          //   child: Align(
-                          //     alignment: Alignment.center,
-                          //     child: Text("Mall"),
-                          //   ),
-                          // ),
-                          // ),
-                          Tab(child: Container(
-                            height: 35,
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: Text("Event"),
-                            ),
-                          ),
-                          ),
-                        ],
-                      ),
+          appBar: AppBar(
+            title: Semantics(
+              label: "Iwayplus",
+              child: InkWell(
+                onTap: (){
+                  RefreshTokenAPI.refresh();
+                },
+                child: Container(
+                  alignment: Alignment.bottomLeft,
+                  child: Text(
+                    "Iwayplus",
+                    style: const TextStyle(
+                      fontFamily: "Roboto",
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xff000000),
                     ),
                   ),
                 ),
-                Expanded(
-                    child: TabBarView(
-                      children: [
-                        ListView.builder(
-                          itemBuilder: (context,index){
+              ),
+            ),
+            centerTitle: true,
+            leading: Semantics(
+              child: EasterEggTrigger(
+                child: Container(
+                  alignment: Alignment.centerRight,
+                  width: 60,
+                  child: SvgPicture.asset("assets/MainScreen_IwayplusLogo.svg"),
+                ),codes: [
+                EasterEggTriggers.SwipeDown,
+                EasterEggTriggers.LongPress,
+              ],
+                action: (){
+                  final BeaconBox = BeaconAPIModelBOX.getData();
+                  final BuildingAllBox = BuildingAllAPIModelBOX.getData();
+                  final LandMarkBox = LandMarkApiModelBox.getData();
+                  final PatchBox = PatchAPIModelBox.getData();
+                  final PolyLineBox = PolylineAPIModelBOX.getData();
+                  final WayPointBox = WayPointModeBOX.getData();
+                  final OutBuildingBox = OutDoorModeBOX.getData();
 
-                             //var currentData = venueList[index];
+                  BeaconBox.clear();
+                  BuildingAllBox.clear();
+                  LandMarkBox.clear();
+                  PatchBox.clear();
+                  PolyLineBox.clear();
+                  WayPointBox.clear();
+                  OutBuildingBox.clear();
+                  showToast("Database Cleared ${BeaconBox.length},${BuildingAllBox.length},${LandMarkBox.length},${PatchBox.length},${PolyLineBox.length},${WayPointBox.length},${OutBuildingBox.length}");
+
+                },
+              ),
+            ),
+
+            actions: [
+              IconButton(
+                icon: Icon(Icons.notifications_none_outlined),
+                color: Color(0xff18181b),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => NotificationScreen(),
+                    ),
+                  );
+                },
+              ),
+              Container(
+                  margin: EdgeInsets.only(right: 20),
+                  // decoration: BoxDecoration(
+                  //   borderRadius: BorderRadius.circular(8.0),
+                  //   border: Border.all(
+                  //     color: Color(0x204A4545),
+                  //   ),
+                  // ),
+                  child: IconButton(
+                    icon: Semantics(
+                        label: "Search",
+                        child: Icon(Icons.search,color: Colors.black,)),
+                    color: Color(0xff000000),
+                    onPressed: () {
+                      showSearch(context: context, delegate: HomeNestedSearch(newbuildingList));
+                    },
+                  )),
+
+            ],
+            backgroundColor: Colors.transparent, // Set the background color to transparent
+            elevation: 0,
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFFFFFFFF), Color(0xFFFFFFFF)], // Set your gradient colors
+                ),
+              ),
+            ),
+          ),
+          body:(isLocating)? Center(
+              child: Animate(
+                  effects: [FadeEffect(), ScaleEffect()],
+                  child: Text("Loading Data. . .",style: TextStyle(
+                    fontFamily: "Roboto",
+                    fontSize: 30,
+                    color: Color(0xFF666870),
+                    height: 1,
+                    letterSpacing: -1,
+                  ),)
+                      .animate(onPlay: (controller) => controller.repeat())
+                      .shimmer(duration: 1200.ms, color: const Color(0xFF80DDFF))
+                      .animate() // this wraps the previous Animate in another Animate
+                      .fade(duration: 1200.ms, curve: Curves.ease)
+                      .slide()
+              )
+            // Show linear loading indicator
+          ):isLoading_buildingList
+              ? Center(
+              child: Animate(
+                  effects: [FadeEffect(), ScaleEffect()],
+                  child: Text("Loading Data. . .",style: TextStyle(
+                    fontFamily: "Roboto",
+                    fontSize: 30,
+                    color: Color(0xFF666870),
+                    height: 1,
+                    letterSpacing: -1,
+                  ),)
+                      .animate(onPlay: (controller) => controller.repeat())
+                      .shimmer(duration: 1200.ms, color: const Color(0xFF80DDFF))
+                      .animate() // this wraps the previous Animate in another Animate
+                      .fade(duration: 1200.ms, curve: Curves.ease)
+                      .slide()
+              )
+            // Show linear loading indicator
+          )
+              : DefaultTabController(
+
+              length: 4,
+              child: Column(
+                children: [
+                  Material(
+                    child: Container(
+                      height: 55,
+                      color: Color(0xffFFFFFF),
+                      child: Container(
+                        height: 55,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xFFFFFFFF), Color(0xFFFFFFFF)], // Set your gradient colors
+                          ),
+                        ),
+                        child: TabBar(
+                          unselectedLabelColor: Color(0xffB3B3B3),
+                          isScrollable: false,
+                          indicatorColor: Colors.black,
+                          labelColor: Colors.black,
+                          tabs: [
+                            Tab(
+                              child: Container(
+                                height: 35,
+                                child: Align(
+                                  alignment: Alignment.center,
+                                  child: Text("All"),
+                                ),
+                              ),
+                            ),
+                            Tab(
+                              child: Container(
+                                height: 35,
+                                child: Align(
+                                  alignment: Alignment.center,
+                                  child: Text("Academic"),
+                                ),
+                              ),
+                            ),
+                            Tab(
+                              child: Container(
+                                height: 35,
+                                child: Align(
+                                  alignment: Alignment.center,
+                                  child: Text("Hospital"),
+                                ),
+                              ),
+                            ),
+                            // Tab(child: Container(
+                            //   height: 35,
+                            //   child: Align(
+                            //     alignment: Alignment.center,
+                            //     child: Text("Mall"),
+                            //   ),
+                            // ),
+                            // ),
+                            Tab(child: Container(
+                              height: 35,
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: Text("Event"),
+                              ),
+                            ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                      child: TabBarView(
+                        children: [
+                          ListView.builder(
+                            itemBuilder: (context,index){
+
+                              //var currentData = venueList[index];
 
 
-                             calcDistanceFromUser(buildingsPos,userLoc!);
-                            buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+                              calcDistanceFromUser(buildingsPos,userLoc!);
+                              buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
 
-                            var currentData = buildingsPos[index];
+                              var currentData = buildingsPos[index];
 
 
 
-                            return GestureDetector(
-                              onTap: () async{
-                                // Handle onTap for the specific item here
-                                // For example, you can navigate to a new screen or perform some action
-                                // print("Tapped on item at index $index");
-                                buildingAllApi.setStoredVenue(currentData.venueName!);
+                              return GestureDetector(
+                                onTap: () async{
+                                  // Handle onTap for the specific item here
+                                  // For example, you can navigate to a new screen or perform some action
+                                  // print("Tapped on item at index $index");
+                                  buildingAllApi.setStoredVenue(currentData.venueName!);
 
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist,currentLatLng: userLoc,),
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist,currentLatLng: userLoc,),
+                                    ),
+                                  );
+                                },
+                                child: buildingCard(
+                                  imageURL: "",
+                                  Name: currentData.venueName ?? "",
+                                  Tag: currentData.Tag ?? "Null",
+                                  Address: currentData.address ?? "",
+                                  Distance:buildingsPos[index].dist,
+                                  NumberofBuildings: currentData.buildingNumber ?? 0,
+                                  bid: currentData.venueName ?? "",
+
+                                ),
+                              );
+                            },
+                            itemCount: venueList.length,
+                          ),
+                          ListView.builder(
+                            itemBuilder: (context, index) {
+
+                              // calcDistanceFromUser(buildingsPos,userLoc!);
+                              // buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+
+                              var currentData = buildingsPos[index];
+                              if (currentData.Tag == "Academic") {
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist,currentLatLng: userLoc),
+                                      ),
+                                    );
+                                  },
+                                  child: buildingCard(imageURL: "",
+                                    Name: currentData.venueName??"",
+                                    Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: buildingsPos[index].dist, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
                                   ),
                                 );
-                              },
-                              child: buildingCard(
-                                imageURL: "",
-                                Name: currentData.venueName ?? "",
-                                Tag: currentData.Tag ?? "Null",
-                                Address: currentData.address ?? "",
-                                Distance:buildingsPos[index].dist,
-                                NumberofBuildings: currentData.buildingNumber ?? 0,
-                                bid: currentData.venueName ?? "",
+                              } else {
+                                return SizedBox.shrink(); // Empty widget if not Hospital
+                              }
+                            },
+                            itemCount: venueList.length,
+                          ),
+                          ListView.builder(
+                            itemBuilder: (context, index) {
 
-                              ),
-                            );
-                          },
-                          itemCount: venueList.length,
-                        ),
-                        ListView.builder(
-                          itemBuilder: (context, index) {
+                              // calcDistanceFromUser(buildingsPos,userLoc!);
+                              // buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
 
-                            // calcDistanceFromUser(buildingsPos,userLoc!);
-                            // buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+                              var currentData = buildingsPos[index];
+                              if (currentData.Tag == "Hospital") {
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist,currentLatLng: userLoc),
+                                      ),
+                                    );
+                                  },
+                                  child: buildingCard(imageURL: "",
+                                    Name: currentData.venueName??"",
+                                    Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: buildingsPos[index].dist, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
+                                  ),
+                                );
+                              } else {
+                                return SizedBox.shrink(); // Empty widget if not Hospital
+                              }
+                            },
+                            itemCount: venueList.length,
+                          ),
+                          // ListView.builder(
+                          //   itemBuilder: (context, index) {
+                          //     var currentData = newbuildingList[index];
+                          //     if (currentData.category == "Mall") {
+                          //       return buildingCard(
+                          //         imageURL: currentData.photo ?? "",
+                          //         Name: currentData.buildingName ?? "",
+                          //         Tag: currentData.category ?? "",
+                          //         Address: currentData.address ?? "",
+                          //         Distance: 190,
+                          //         NumberofBuildings: 3,
+                          //         bid: currentData.sId ?? "",
+                          //       );
+                          //     } else {
+                          //       return SizedBox.shrink(); // Empty widget if not Hospital
+                          //     }
+                          //   },
+                          //   itemCount: newbuildingList.length,
+                          // ),
+                          ListView.builder(
+                            itemBuilder: (context, index) {
 
-                            var currentData = buildingsPos[index];
-                            if (currentData.Tag == "Academic") {
-                              return GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist,currentLatLng: userLoc),
-                                    ),
-                                  );
-                                },
-                                child: buildingCard(imageURL: "",
-                                  Name: currentData.venueName??"",
-                                  Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: buildingsPos[index].dist, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
-                                ),
-                              );
-                            } else {
-                              return SizedBox.shrink(); // Empty widget if not Hospital
-                            }
-                          },
-                          itemCount: venueList.length,
-                        ),
-                        ListView.builder(
-                          itemBuilder: (context, index) {
+                              // calcDistanceFromUser(buildingsPos,userLoc!);
+                              // buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
 
-                            // calcDistanceFromUser(buildingsPos,userLoc!);
-                            // buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
+                              var currentData = buildingsPos[index];
+                              if (currentData.Tag == "Event") {
+                                return GestureDetector(
+                                  onTap: () {
+                                    print("Object Handeling");
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist,currentLatLng: userLoc),
+                                      ),
+                                    );
+                                  },
+                                  child: buildingCard(imageURL: "",
+                                    Name: currentData.venueName??"",
+                                    Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: buildingsPos[index].dist, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
+                                  ),
+                                );
+                              } else {
+                                return SizedBox.shrink(); // Empty widget if not Hospital
+                              }
+                            },
+                            itemCount: venueList.length,
+                          ),
 
-                            var currentData = buildingsPos[index];
-                            if (currentData.Tag == "Hospital") {
-                              return GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist,currentLatLng: userLoc),
-                                    ),
-                                  );
-                                },
-                                child: buildingCard(imageURL: "",
-                                  Name: currentData.venueName??"",
-                                  Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: buildingsPos[index].dist, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
-                                ),
-                              );
-                            } else {
-                              return SizedBox.shrink(); // Empty widget if not Hospital
-                            }
-                          },
-                          itemCount: venueList.length,
-                        ),
-                        // ListView.builder(
-                        //   itemBuilder: (context, index) {
-                        //     var currentData = newbuildingList[index];
-                        //     if (currentData.category == "Mall") {
-                        //       return buildingCard(
-                        //         imageURL: currentData.photo ?? "",
-                        //         Name: currentData.buildingName ?? "",
-                        //         Tag: currentData.category ?? "",
-                        //         Address: currentData.address ?? "",
-                        //         Distance: 190,
-                        //         NumberofBuildings: 3,
-                        //         bid: currentData.sId ?? "",
-                        //       );
-                        //     } else {
-                        //       return SizedBox.shrink(); // Empty widget if not Hospital
-                        //     }
-                        //   },
-                        //   itemCount: newbuildingList.length,
-                        // ),
-                        ListView.builder(
-                          itemBuilder: (context, index) {
+                        ],
 
-                            // calcDistanceFromUser(buildingsPos,userLoc!);
-                            // buildingsPos.sort((a, b) => a.dist.compareTo(b.dist));
-
-                            var currentData = buildingsPos[index];
-                            if (currentData.Tag == "Event") {
-                              return GestureDetector(
-                                onTap: () {
-                                  print("Object Handeling");
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => BuildingInfoScreen(receivedAllBuildingList: venueHashMap[currentData.venueName],venueDescription:  currentData.description,venueTitle: currentData.venueName,venueAddress: currentData.address,venueCategory: currentData.Tag,venuePhone: currentData.phoneNo,venueWebsite: currentData.website,dist: buildingsPos[index].dist,currentLatLng: userLoc),
-                                    ),
-                                  );
-                                },
-                                child: buildingCard(imageURL: "",
-                                  Name: currentData.venueName??"",
-                                  Tag: currentData.Tag?? "", Address: currentData.address?? "", Distance: buildingsPos[index].dist, NumberofBuildings: currentData.buildingNumber??0, bid: currentData.venueName??"",
-                                ),
-                              );
-                            } else {
-                              return SizedBox.shrink(); // Empty widget if not Hospital
-                            }
-                          },
-                          itemCount: venueList.length,
-                        ),
-
-                      ],
-
-                    )
-                )
-              ],
-            )
-        )
+                      )
+                  )
+                ],
+              )
+          )
 
         // AnimationLimiter(
         //   child: ListView.builder(
@@ -659,5 +659,3 @@ if(userLoc!=null){
     );
   }
 }
-
-

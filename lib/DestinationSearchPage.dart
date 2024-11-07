@@ -34,6 +34,8 @@ import 'Elements/SearchpageCategoryResult.dart';
 import 'Elements/SearchpageResults.dart';
 import 'package:iwaymaps/buildingState.dart';
 
+import 'FloorSelectionPage.dart';
+
 
 class DestinationSearchPage extends StatefulWidget {
   String hintText;
@@ -73,7 +75,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   String selectedButton = "";
 
   @override
-  void initState() {
+
+  void initState()  {
     super.initState();
     fetchandBuild();
     _controller.addListener(_onSearchChanged);
@@ -388,6 +391,16 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
   ];
 
+  List<IconData> _icons = [
+    Icons.wash_sharp,
+    Icons.local_cafe,
+    Icons.water_drop,
+    Icons.atm_sharp,
+    Icons.door_front_door_outlined,
+    Icons.elevator,
+    Icons.desk_sharp,
+  ];
+
 
 
   void onChipSelected(int index) {
@@ -404,7 +417,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     await flutterTts.setPitch(1.0);
     await flutterTts.speak(msg);
   }
-
 
   void search(String searchText,{String wantToFilter=''}) {
     setState(() {
@@ -434,15 +446,15 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
             }
           });
 
-          optionListItemBuildingName.forEach((element) {
-            searcCategoryhResults.add(
-              SearchpageCategoryResults(
-                name: searchText,
-                buildingName: element,
-                onClicked: onVenueClicked,
-              ),
-            );
-          });
+            optionListItemBuildingName.forEach((element) {
+              searcCategoryhResults.add(
+                SearchpageCategoryResults(
+                  name: searchText,
+                  buildingName: element,
+                  onClicked: onVenueClicked,
+                ),
+              );
+            });
         }
       } else {
         category = false;
@@ -479,19 +491,20 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     print('In--IF');
                     searchResults.add(SearchpageResults(
                       name: value.name!,
-                      location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
+                      location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
                       onClicked: onVenueClicked,
                       ID: value.properties!.polyId!,
                       bid: value.buildingID!,
                       floor: value.floor!,
                       coordX: value.coordinateX!,
                       coordY: value.coordinateY!,
+                      accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false",
                     ));
                   }else{
                     print('In--ELSE');
                     searchResults.add(SearchpageResults(
                       name: value.name!,
-                      location: "Floor ${value.floor}, ${value
+                      location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value
                           .buildingName}, ${value.venueName}",
                       onClicked: onVenueClicked,
                       ID: value.properties!.polyId!,
@@ -499,35 +512,40 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       floor: value.floor!,
                       coordX: value.coordinateX!,
                       coordY: value.coordinateY!,
+                        accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false"
                     ));
                   }
                 }
               });
-            }else if (normalizedValueName.contains(normalizedSearchText)) {
+            }
+            else if (partialMatch(normalizedValueName, normalizedSearchText)) {
+
+              if (partialMatch(normalizedValueName, normalizedSearchText)) {
+                print('Match found!');
+              } else {
+                print('No match found.');
+              }
               final fuse = Fuzzy(
-                [normalizedValueName],
+                [normalizedSearchText],
                 options: FuzzyOptions(
                   findAllMatches: true,
                   tokenize: true,
-                  threshold: 0.5,
+                  threshold: 1,
                 ),
               );
-
               final result = fuse.search(normalizedSearchText);
-              print("fuseresult");
-              print(result);
-
               result.forEach((fuseResult) {
-                if (fuseResult.score < 0.2) {
+                if (fuseResult.score < 0.5) {
                   searchResults.add(SearchpageResults(
                     name: value.name!,
-                    location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
+                    location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
                     onClicked: onVenueClicked,
                     ID: value.properties!.polyId!,
                     bid: value.buildingID!,
                     floor: value.floor!,
                     coordX: value.coordinateX!,
                     coordY: value.coordinateY!,
+                    accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false",
                   ));
                 }
               });
@@ -536,6 +554,21 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         }
       }
     });
+  }
+  bool partialMatch(String dataName, String searchQuery) {
+    String normalizedData = normalizeString(dataName);
+    String normalizedQuery = normalizeString(searchQuery);
+
+    // Break query into keywords and check if all are present in data
+    List<String> queryKeywords = normalizedQuery.split(' ');
+    return queryKeywords.every((keyword) => normalizedData.contains(keyword));
+  }
+  String normalizeString(String input) {
+    // Remove common prefixes and convert to lowercase
+    input = input.toLowerCase().replaceAll(RegExp(r'^(dr|mr|mrs|ms|prof)\s*'), '');
+
+    // Return the cleaned-up string
+    return input;
   }
   void topSearchesFunc(){
     setState(() {
@@ -571,6 +604,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               floor: value.floor!,
               coordX: value.coordinateX!,
               coordY: value.coordinateY!,
+              accessible:  value.properties!.wheelChairAccessibility??"",
+
             ));
           }
 
@@ -610,11 +645,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     }
   }
 
-  List<IconData> _icons = [
-    Icons.home,
-    Icons.wash_sharp,
-    Icons.school,
-  ];
+
   List<String> optionsTags = [];
   List<String> floorOptionsTags = [];
   String currentSelectedFilter = "";
@@ -634,6 +665,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    double statusBarHeight = MediaQuery.of(context).padding.top;
+
 
 
     // if(speetchText.isNotListening){
@@ -642,18 +675,18 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     // }else{
     //   micColor = Color(0xff24B9B0);
     // }
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 0,
-        ),
-        body: Container(
-          color: Colors.white,
-          child: !promptLoader? Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
+    return Scaffold(
+      body: Container(
+        padding: EdgeInsets.only(top: statusBarHeight),
+        color: Colors.white,
+        child: !promptLoader? Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
 
-              Container(
+            Semantics(
+              header: true,
+              label: "Search",
+              child: Container(
                   width: screenWidth - 32,
                   height: 48,
                   margin: EdgeInsets.only(top: 16, left: 16, right: 17),
@@ -747,6 +780,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                 });
                               },
                               icon: Semantics(
+                                  container: true,
+
                                   label: "Close", child: Icon(Icons.close)))
                               : IconButton(
                             onPressed: () {
@@ -774,34 +809,38 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                       ),
                     ],
                   )),
-              (searchHintString.toLowerCase().contains("source") && widget.userLocalized != "")?InkWell(
-                onTap: (){
-                  Navigator.pop(context, widget.userLocalized);
-                },
-                child: Container(
-                  margin: EdgeInsets.only(top:24,left: 17,right: 17,bottom: 8),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          SizedBox(width: 16,),
-                          Image.asset("assets/rw.png"),
-                          SizedBox(width: 24,),
-                          Text(style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff000000),
-                          ),"Your Current Location")
-                        ],
-                      ),
-                    ],
-                  ),
+            ),
+            (searchHintString.toLowerCase().contains("source") && widget.userLocalized != "")?InkWell(
+              onTap: (){
+                Navigator.pop(context, widget.userLocalized);
+              },
+              child: Container(
+                margin: EdgeInsets.only(top:24,left: 17,right: 17,bottom: 8),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(width: 16,),
+                        Image.asset("assets/rw.png"),
+                        SizedBox(width: 24,),
+                        Text(style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xff000000),
+                        ),"Your Current Location")
+                      ],
+                    ),
+                  ],
                 ),
-              ):Container(),
-              searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
-              Container(
+              ),
+            ):Container(),
+            searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
+            Semantics(
+              label: "Filter Section",
+              header: true,
+              child: Container(
                 margin: EdgeInsets.only(left: 7,top: 4),
                 width: screenWidth,
                 child: ChipsChoice<int>.single(
@@ -846,13 +885,17 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                           searcCategoryhResults = [];
                           vall = -1;
                         }
-                      },
+                      }, icon: _icons[i],
                     );
                   },
                   direction: Axis.horizontal,
                 ),
               ),
-              !category && _controller.text.isNotEmpty ? Container(
+            ),
+            !category && _controller.text.isNotEmpty ? Semantics(
+              header: true,
+              label: "Building Filter section",
+              child: Container(
                 margin: EdgeInsets.only(left: 7,top: 4),
                 width: screenWidth,
                 child: ChipsChoice<int>.single(
@@ -899,61 +942,65 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                         //   searcCategoryhResults = [];
                         //   newvall = -1;
                         // }
-                      },
+                      }, icon: _icons[i],
                     );
                   },
                   direction: Axis.horizontal,
                 ),
-              ) : Container(),
+              ),
+            ) : Container(),
 
-              SizedBox(height: 4,),
-              Divider(thickness: 6,color: Color(0xfff2f3f5)),
-              Flexible(
-                  flex: 1,
-                  child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: (!category && topCategory)? topSearches:(category)?searcCategoryhResults:searchResults,
+            SizedBox(height: 4,),
+            Divider(thickness: 6,color: Color(0xfff2f3f5)),
+            Flexible(
+                flex: 1,
+                child: SingleChildScrollView(
+                  child: Semantics(
+                    label: "Search Results",
+                    header: true,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: (!category && topCategory)? topSearches:(category)?searcCategoryhResults:searchResults,
 
+                    ),
+                  ),
+                )),
+            if (_controller.text.isNotEmpty && searchResults.isEmpty && (category ? searcCategoryhResults : (!category && topCategory ? topSearches : [])).isEmpty)
+
+              Column(
+                  children: [
+                    SizedBox(height: 16,),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.asset('assets/noResults.png'),
+                    ),
+                    Text(
+                      'Sorry, No Results Found',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w500,
                       ),
-                  )),
-              if (_controller.text.isNotEmpty && searchResults.isEmpty && (category ? searcCategoryhResults : (!category && topCategory ? topSearches : [])).isEmpty)
+                    ),
+                    Text(
+                      ' Try something new  with different keywords',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Color(0xFFA1A1AA),
+                        fontSize: 14,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    )
+                  ]
+              )
 
-                Column(
-                 children: [
-                   SizedBox(height: 16,),
-                   Padding(
-                     padding: const EdgeInsets.all(8.0),
-                     child: Image.asset('assets/noResults.png'),
-                   ),
-                   Text(
-                     'Sorry, No Results Found',
-                     textAlign: TextAlign.center,
-                     style: TextStyle(
-                       color: Colors.black,
-                       fontSize: 16,
-                       fontFamily: 'Roboto',
-                       fontWeight: FontWeight.w500,
-                     ),
-                   ),
-                   Text(
-                     ' Try something new  with different keywords',
-                     textAlign: TextAlign.center,
-                     style: TextStyle(
-                       color: Color(0xFFA1A1AA),
-                       fontSize: 14,
-                       fontFamily: 'Roboto',
-                       fontWeight: FontWeight.w400,
-                     ),
-                   )
-                 ]
-                )
-
-            ],
-          ) : Center(
-            child: CircularProgressIndicator(
-              color: Colors.red,
-            ),
+          ],
+        ) : Center(
+          child: CircularProgressIndicator(
+            color: Colors.red,
           ),
         ),
       ),

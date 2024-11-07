@@ -242,9 +242,12 @@ import 'package:iwaymaps/api/buildingAllApi.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
+import '../../API/QRDataAPI.dart';
+import '../../APIMODELS/QRDataAPIModel.dart';
 import '../../APIMODELS/buildingAll.dart';
 import '../../Elements/HelperClass.dart';
 import '../../Navigation.dart';
+import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/Translator.dart';
 
 class QRScannerScreen extends StatefulWidget {
@@ -289,14 +292,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
     try {
       final buildings = await buildingAllApi().fetchBuildingAllData();
-
       print("Fetched buildings: $buildings");
-
       final venue = buildings.firstWhere(
             (building) => building.sId == bid,
         orElse: () => throw Exception("Building not found."),
       ).venueName;
-
       final venueMap = await HelperClass.groupBuildings(buildings);
       final allBuildingMap = await HelperClass.createAllbuildingMap(venueMap, venue!);
 
@@ -304,7 +304,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       buildingAllApi.selectedBuildingID = bid!;
       buildingAllApi.selectedID = bid!;
       buildingAllApi.selectedVenue = venue;
-
       if (source != null) {
         Navigator.push(
           context,
@@ -372,12 +371,28 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
-    controller.scannedDataStream.listen((scanData) {
+    controller.scannedDataStream.listen((scanData) async {
       if (!_isDeepLinkHandled) {
         _isDeepLinkHandled = true;
         try {
           final uri = Uri.parse(scanData.code ?? '');
-          iwaymapsDeepLink(uri, context, "aiimsj.com");
+          String qrCode = uri.fragment.split('/').last;
+          print("qrCode");
+          print(qrCode);
+
+          List<QRDataAPIModel>? qrData = await QRDataAPI().fetchQRData(buildingAllApi.allBuildingID.keys.toList());
+          qrData?.forEach((e){
+            if(e.code == qrCode){
+              if(e.landmarkId == null){
+                HelperClass.launchURL(scanData.code!);
+              }else{
+                PassLocationId(context,e.landmarkId!);
+              }
+            }
+          });
+          print(qrData);
+          print("qrScanner");
+          print(uri);
           controller.stopCamera();
         } catch (e) {
           print('Error parsing URL: $e');

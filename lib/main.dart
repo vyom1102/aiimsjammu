@@ -156,8 +156,6 @@ class _MyAppState extends State<MyApp> {
 
     });
   }
-
-
   var locBox=Hive.box('LocationPermission');
   Future<void> requestLocationPermission() async {
     final status = await Permission.location.request();

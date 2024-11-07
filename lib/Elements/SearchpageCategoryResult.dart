@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:iwaymaps/API/buildingAllApi.dart';
-import 'package:iwaymaps/Elements/HelperClass.dart';
 
+import '../API/buildingAllApi.dart';
 import '../API/ladmarkApi.dart';
 import '../APIMODELS/landmark.dart';
 import '../FloorSelectionPage.dart';
+import 'HelperClass.dart';
 class SearchpageCategoryResults extends StatefulWidget {
   final Function(String name, String location, String ID, String bid) onClicked;
   final String name;
@@ -96,6 +96,7 @@ class _SearchpageCategoryResultsState extends State<SearchpageCategoryResults> {
             builder: (context) => FloorSelectionPage(filterName: widget.name, filterBuildingName: widget.buildingName,floors: sortedListString,),
           ),
         ).then((value){
+          print("value $value");
           widget.onClicked(value[0],value[1],value[2],value[3]);
         });
 

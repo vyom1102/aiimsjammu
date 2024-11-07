@@ -12,18 +12,16 @@ import '../APIMODELS/buildingAll.dart';
 
 class Deeplink{
   static String? initialDocId; // To store the initial doctor's ID from the deep link
- static String? initialServiceId;
+  static String? initialServiceId;
   static String? accessToken;
   static String? bid;
   static String landmarkID = "";
   static String? source;
- static var signinBox = Hive.box('SignInDatabase');
+  static var signinBox = Hive.box('SignInDatabase');
 
   static Future<void> deeplinkConditions(Uri?uri,BuildContext context)async{
     if (uri != null) {
-
       print('Received deep link: ${uri.toString()}');
-
       if (uri.toString().contains("rgci.com")) {
         await rgciDeepLink(uri, context, "rgci.com");
       }else if(uri.toString().contains("iwaymaps.com")){
@@ -31,7 +29,6 @@ class Deeplink{
       }else if (uri.toString().contains("aiimsj.com")){
         await aiimsjDeepLink(uri, context, "aiimsj.com");
       }
-
     }
     return ;
   }
@@ -51,7 +48,6 @@ class Deeplink{
       if(s != null){
         source = s;
       }
-
       await buildingAllApi().fetchBuildingAllData().then((value)async{
         print("deeplink $bid ${uri!.queryParameters['bid']} $value");
         String venue = value.where((building)=>building.sId == bid).first.venueName!;

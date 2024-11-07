@@ -10,6 +10,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geodesy/geodesy.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -18,6 +19,8 @@ import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/Elements/buildingCard.dart';
 import 'package:iwaymaps/Navigation.dart';
+import 'package:iwaymaps/singletonClass.dart';
+import 'package:test/test.dart';
 import 'API/BuildingAPI.dart';
 import 'APIMODELS/Building.dart';
 import 'APIMODELS/buildingAll.dart';
@@ -47,7 +50,7 @@ class BuildingInfoScreen extends StatefulWidget {
 class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
   late List<buildingAll> allBuildingList=[];
   List<BuildingAPIInsideModel> dd = [];
-  HashMap<String,LatLng> allBuildingID = new HashMap();
+  HashMap<String,g.LatLng> allBuildingID = new HashMap();
   String truncateString(String input, int maxLength) {
     if (input.length <= maxLength) {
       return input;
@@ -66,15 +69,37 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     }
   }
   bool bluetoohEnabled = false;
+  SingletonFunctionController controller = SingletonFunctionController();
 
   @override
   void initState() {
     super.initState();
     print(widget.receivedAllBuildingList);
+   // allBuildingID["65d9cacfdb333f8945861f0f"] =  g.LatLng(28.9469, 77.1011);
     apiCall();
     print("building list");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      processBuildingData().then((_) {
+        print("timestamppp1");
+        print(DateTime.timestamp());
+        print(allBuildingID);
+        controller.executeFunction(allBuildingID);
+      });
+    });
+    // widget.receivedAllBuildingList!.forEach((element) {
+    //   g.LatLng kk = g.LatLng(element.coordinates![0], element.coordinates![1]);
+    //   allBuildingID[element.sId!] = kk;
+    // });
+
+    // controller.executeFunction();
+
+  }
+
+  // Get user's current location
+
+  Future<void> processBuildingData() async {
     widget.receivedAllBuildingList!.forEach((element) {
-      LatLng kk = LatLng(element.coordinates![0], element.coordinates![1]);
+      g.LatLng kk = g.LatLng(element.coordinates![0], element.coordinates![1]);
       allBuildingID[element.sId!] = kk;
     });
   }
@@ -92,6 +117,8 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
     print(dd.length);
   }
   var currentData;
+
+
 
   Future<void> customEnableBT(BuildContext context) async {
     String dialogTitle = "Hey! Please give me permission to use Bluetooth!";
@@ -289,7 +316,8 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                         scrollDirection:Axis.horizontal ,
                         itemBuilder: (context,index){
                           currentData = widget.receivedAllBuildingList![index];
-                          currentData.geofencing;
+                          print("currentData.geofencing");
+                          print(currentData.geofencing);
 
                           final isFavourite = value.get(currentData.buildingName)!=null;
                           return Container(
@@ -298,16 +326,18 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                             child: Container(
 
                               child: ListTile(
-
-
                                 onTap: (){
-                                 // if((widget.currentLatLng!.latitude.toStringAsFixed(2)==(28.54343736711034).toStringAsFixed(2) && widget.currentLatLng!.longitude.toStringAsFixed(2)==(77.18752205371858).toStringAsFixed(2)) ){
 
+                                 if((widget.currentLatLng!.latitude.toStringAsFixed(2)==(28.544277333724025).toStringAsFixed(2) && widget.currentLatLng!.longitude.toStringAsFixed(2)==(77.18803031572772).toStringAsFixed(2)) ){
+                                    wsocket.message["AppInitialization"]["BID"]=widget.receivedAllBuildingList![index].sId!;
+                                    wsocket.message["AppInitialization"]["buildingName"]=widget.receivedAllBuildingList![index].buildingName!;
 
 
                                     buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
                                     buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
-                                    // buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                                    buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                                    print("allbuildingapi");
+                                    print(allBuildingID);
                                     // while({
                                     //
                                     // }
@@ -319,27 +349,27 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>   Navigation(),
+                                        builder: (context) => Navigation(),
                                       ),
                                     );
-                                // }else{
-                                //     if(widget.dist==0 && currentData.geofencing!=false){
-                                //       wsocket.message["AppInitialization"]["BID"]=widget.receivedAllBuildingList![index].sId!;
-                                //       wsocket.message["AppInitialization"]["buildingName"]=widget.receivedAllBuildingList![index].buildingName!;
-                                //       buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
-                                //       buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
-                                //       buildingAllApi.setStoredAllBuildingID(allBuildingID);
-                                //       Navigator.push(
-                                //         context,
-                                //         MaterialPageRoute(
-                                //           builder: (context) =>   Navigation(),
-                                //         ),
-                                //       );
-                                //     }else{
-                                //       HelperClass.showToast("Not your current venue");
-                                //     }
-                                //
-                                //  }
+                                }else{
+                                    if(widget.dist==0){
+                                      wsocket.message["AppInitialization"]["BID"]=widget.receivedAllBuildingList![index].sId!;
+                                      wsocket.message["AppInitialization"]["buildingName"]=widget.receivedAllBuildingList![index].buildingName!;
+                                      buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
+                                      buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
+                                      buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>   Navigation(),
+                                        ),
+                                      );
+                                    }else{
+                                      HelperClass.showToast("Not your current venue");
+                                    }
+
+                                 }
 
                                 },
                                 title: Container(
@@ -699,7 +729,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                 IconButton(onPressed: (){
                   buildingAllApi.setStoredString(currentData.sId!);
                   buildingAllApi.setSelectedBuildingID(currentData.sId!);
-                  // buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                  buildingAllApi.setStoredAllBuildingID( allBuildingID);
                   Navigator.push(
                     context,
                     MaterialPageRoute(

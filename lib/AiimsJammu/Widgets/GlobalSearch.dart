@@ -100,6 +100,13 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
     'Entry',
 
   ];
+  List<IconData> _icons = [
+    Icons.wash_sharp,
+    Icons.local_cafe,
+    Icons.water_drop,
+    Icons.atm_sharp,
+    Icons.door_front_door_outlined,
+  ];
   Set<String> optionListItemBuildingName = {};
   List<Widget> searcCategoryhResults = [];
   Color containerBoxColor = Color(0xffA1A1AA);
@@ -223,7 +230,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
               bid: value.buildingID!,
               floor: value.floor!,
               coordX: value.coordinateX!,
-              coordY: value.coordinateY!,
+              coordY: value.coordinateY!, accessible: '',
             ));
           }
 
@@ -494,7 +501,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
                       bid: value.buildingID!,
                       floor: value.floor!,
                       coordX: value.coordinateX!,
-                      coordY: value.coordinateY!,
+                      coordY: value.coordinateY!, accessible: '',
                     ));
                     locationCount++;
                   }
@@ -592,7 +599,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
                         bid: value.buildingID!,
                         floor: value.floor!,
                         coordX: value.coordinateX!,
-                        coordY: value.coordinateY!,
+                        coordY: value.coordinateY!, accessible: '',
                       ));
                       locationCount++;
                     }
@@ -1054,7 +1061,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
                                     vall = -1;
                                   });
                                 }
-                              },
+                              }, icon: _icons[i],
                             );
                           },
                           direction: Axis.horizontal,

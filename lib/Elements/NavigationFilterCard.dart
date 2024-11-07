@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hive/hive.dart';
-import 'package:iwaymaps/BuildingInfoScreen.dart';
-import 'package:iwaymaps/DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
 import '../API/buildingAllApi.dart';
 import '../APIMODELS/buildingAll.dart';
 import '../DATABASE/BOXES/BuildingAPIModelBox.dart';
 import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
+import '../DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
 import '../DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
 import '../Navigation.dart';
 

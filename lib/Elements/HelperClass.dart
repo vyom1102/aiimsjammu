@@ -11,13 +11,13 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:url_launcher/url_launcher.dart';
-
 import '../API/buildingAllApi.dart';
 import '../APIMODELS/buildingAll.dart';
 import '../MODELS/VenueModel.dart';
 
 class HelperClass{
   static bool SemanticEnabled = false;
+
   static Future<void> launchURL(String url) async {
     if (await canLaunch(url)) {
       await launch(url);
@@ -26,13 +26,6 @@ class HelperClass{
     }
   }
 
-  static String truncateString(String input, int maxLength) {
-    if (input.length <= maxLength) {
-      return input;
-    } else {
-      return input.substring(0, maxLength - 2) + '..';
-    }
-  }
   static Future<void> sendMailto({
     String email = "mail@example.com",
   }) async {
@@ -54,6 +47,15 @@ class HelperClass{
       path: phoneNumber,
     );
     await launch(launchUri.toString());
+  }
+
+
+  static String truncateString(String input, int maxLength) {
+    if (input.length <= maxLength) {
+      return input;
+    } else {
+      return input.substring(0, maxLength - 2) + '..';
+    }
   }
   static void showToast(String mssg) {
     Fluttertoast.showToast(
@@ -131,7 +133,7 @@ class HelperClass{
       print('Error sharing content: $e');
     }
   }
-
+  
   static Future<HashMap<String,List<buildingAll>>> groupBuildings(List<buildingAll> data)async{
     HashMap<String,List<buildingAll>> venueMap = HashMap();
     for(buildingAll building in data){
@@ -140,7 +142,7 @@ class HelperClass{
     }
     return venueMap;
   }
-
+  
   static Future<Map<String,g.LatLng>> createAllbuildingMap (HashMap<String,List<buildingAll>> venueMap, String venue)async{
     Map<String,g.LatLng> AllBuildingMap = Map();
     for (var building in venueMap[venue]!) {
@@ -191,33 +193,33 @@ class HelperClass{
   static List<VenueModel> buildingsPos=[];
   static buildingApicall()async{
     await buildingAllApi().fetchBuildingAllData().then((value) {
-      // print(value);
-      venueHashMap=createVenueHashMap(value);
-      venueList = createVenueList(venueHashMap);
-      for(int i=0;i<venueList.length;i++)
-      {
-        buildingsPos.add(venueList[i]);
-      }
+     // print(value);
+     venueHashMap=createVenueHashMap(value);
+     venueList = createVenueList(venueHashMap);
+     for(int i=0;i<venueList.length;i++)
+     {
+       buildingsPos.add(venueList[i]);
+     }
     });
 
   }
 
   static Future<int> getGeoFenced(String venueName,Position userPos)async{
-    await buildingApicall();
-    List<buildingAll>? buildingList=venueHashMap[venueName];
-    for(int i=0;i<buildingList!.length;i++){
-      var currentData=buildingList[i];
-      if(currentData.geofencing!=null && currentData.geofencing!){
-        for(int j=0;j<venueList.length;j++){
-          if(userPos.latitude.toStringAsFixed(2)==venueList[j].coordinates[0].toStringAsFixed(2) && userPos.longitude.toStringAsFixed(2)==venueList[j].coordinates[1].toStringAsFixed(2)){
-            return 0;
-          }
+  await buildingApicall();
+  List<buildingAll>? buildingList=venueHashMap[venueName];
+  for(int i=0;i<buildingList!.length;i++){
+    var currentData=buildingList[i];
+    if(currentData.geofencing!=null && currentData.geofencing!){
+      for(int j=0;j<venueList.length;j++){
+        if(userPos.latitude.toStringAsFixed(2)==venueList[j].coordinates[0].toStringAsFixed(2) && userPos.longitude.toStringAsFixed(2)==venueList[j].coordinates[1].toStringAsFixed(2)){
+          return 0;
         }
-      }else{
-        return 1;
       }
+    }else{
+      return 1;
     }
-    return 2;
+  }
+  return 2;
 
   }
 

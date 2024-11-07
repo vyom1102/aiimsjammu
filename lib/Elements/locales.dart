@@ -114,14 +114,15 @@ mixin LocaleData {
   static const String youareon= 'You are on';
   static const String isonyour='is on your';
   static const String near='near';
-  static const String unabletofindyourlocation='Unable to find your location';
+  static const String unabletofindyourlocation='Unable to find your location. Scan nearby QR to know your location';
   static const String youaregoingawayfromthepath= 'You are going away from the path. Click Reroute to Navigate from here.';
+  static const String changingaccessiblepath= 'Calculating new path.';
   static const String issss= 'is';
   static const String meteraway='meter away';
   static const String clickstarttonavigate= 'Click Start to Navigate';
   static const String exploremodenabled= 'Explore Mode Enabled';
   static const String direction='Get Direction';
-  static const String turnfrm='turn from';
+  static const String turnfrm='Turn from';
   static const String approaching='Approaching';
   static const String location='Location';
   static const String none='None';
@@ -129,8 +130,6 @@ mixin LocaleData {
   static const String waytogo="Where you want to go?";
   static const String scanQr="Scan nearby QR to know your location";
   static const String reroute="You are going away from the path. Rerouting you to the destination";
-  static const String upToDate ='upToDate';
-
 
 
   static Map<String, String> get properties => {
@@ -289,13 +288,13 @@ mixin LocaleData {
     'Slight Left':'Slight Left',
     'Sharp Right':'Sharp Right',
 
-    'tsRight':'turn right and go straight',
-    'tsU Turn':'turn around and go straight',
-    'tsSharp Left':'turn sharp left and go straight',
-    'tsLeft':'turn left and go straight',
-    'tsSlight Right':'turn slight right and go straight',
-    'tsSlight Left':'turn slight left and go straight',
-    'tsSharp Right':'turn sharp right and go straight',
+    'tsRight':'Turn right and go straight',
+    'tsU Turn':'Turn around and go straight',
+    'tsSharp Left':'Turn sharp left and go straight',
+    'tsLeft':'Turn left and go straight',
+    'tsSlight Right':'Turn slight right and go straight',
+    'tsSlight Left':'Turn slight left and go straight',
+    'tsSharp Right':'Turn sharp right and go straight',
 
     'tRight':'Right',
     'tLeft':'Left',
@@ -345,7 +344,7 @@ mixin LocaleData {
     'Click Start to Navigate' : 'Click Start to Navigate',
     'Explore Mode Enabled' : 'Explore Mode Enabled',
     'Get Direction':'Get Direction',
-    'turn from':'turn from',
+    'Turn from':'Turn from',
     'Approaching': 'Approaching',
     'hRight':'',
     'hLeft':'',
@@ -364,8 +363,7 @@ mixin LocaleData {
     'Where you want to go?':'Where you want to go?',
     'Scan nearby QR to know your location':'Scan nearby QR to know your location',
     'You are going away from the path. Rerouting you to the destination':'You are going away from the path. Rerouting you to the destination',
-    'upToDate':'Up to date',
-
+    'Calculating new path.':'Calculating new path.'
 
 
 
@@ -472,7 +470,7 @@ mixin LocaleData {
     'Click Start to Navigate' : 'नेविगेट करने के लिए इस्टार्ट पर क्लिक करें',
     'Explore Mode Enabled' : 'एक्सप्लोर मोड सक्षम',
     'Get Direction':'दिशा',
-    'turn from':'से मुड़ो',
+    'Turn from':'से मुड़ो',
     'Approaching': 'पास आ रहे हैं',
     'Location':'लोकेशन',
 
@@ -490,8 +488,7 @@ mixin LocaleData {
     'Where you want to go?':'आप कहाँ जाना चाहते हैं?',
     'Scan nearby QR to know your location':'अपना स्थान जानने के लिए नजदिकी QR को स्कैन करें',
     'You are going away from the path. Rerouting you to the destination':'आप रास्ते से दूर जा रहे हैं। आपको आपकी मंजिल की दिशा में रीरूट किया जाया जा रहा है',
-    'upToDate':'अप टू डेट',
-
+    'Calculating new path.':'नया रास्ता खोजा जा रहा है'
   };
 
   static const Map<String, dynamic> TA = {

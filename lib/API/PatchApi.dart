@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
+import 'package:device_information/device_information.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
@@ -18,13 +19,15 @@ import 'guestloginapi.dart';
 class patchAPI {
 
   String token = "";
-  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/patch/get" : "https://maps.iwayplus.in/secured/patch/get";
+  final String baseUrl = kDebugMode? "https://maps.iwayplus.in/secured/patch/get" : "https://maps.iwayplus.in/secured/patch/get";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
 
 
   Future<patchDataModel> fetchPatchData({String? id = null}) async {
+    String manufacturer = await DeviceInformation.deviceManufacturer;
+    String deviceModel = await DeviceInformation.deviceModel;
     print("checking data ${id??buildingAllApi.getStoredString()}");
     print(accessToken);
     print(refreshToken);
@@ -43,7 +46,9 @@ class patchAPI {
 
 
     final Map<String, dynamic> data = {
-      "id": id??buildingAllApi.getStoredString()
+      "id": id??buildingAllApi.getStoredString(),
+      "manufacturer":manufacturer,
+      "devicemodel": deviceModel
     };
 
     final response = await http.post(
@@ -56,7 +61,7 @@ class patchAPI {
 
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = json.decode(response.body);
-
+      print("patchdata $responseBody");
       final patchData = PatchAPIModel(responseBody: responseBody);
       PatchBox.put(patchDataModel.fromJson(responseBody).patchData!.buildingID,patchData);
       patchData.save();

@@ -3,10 +3,12 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:iwaymaps/Elements/HelperClass.dart';
-import 'package:iwaymaps/Navigation.dart';
-import 'package:iwaymaps/pathState.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+
+import '../API/QRDataAPI.dart';
+import '../API/buildingAllApi.dart';
+import '../APIMODELS/QRDataAPIModel.dart';
+import 'HelperClass.dart';
 
 class QRViewExample extends StatefulWidget {
   const QRViewExample({Key? key}) : super(key: key);
@@ -145,25 +147,39 @@ class _QRViewExampleState extends State<QRViewExample> {
   }
 
   void _onQRViewCreated(QRViewController controller) {
-    setState(() {
-      this.controller = controller;
-    });
-    controller.scannedDataStream.listen((scanData) {
+    try {
       setState(() {
-        result = scanData;
+        this.controller = controller;
       });
-      print("result");
-      print(result!.code);
-      if(result != null){
-        String polyValue = HelperClass.extractLandmark(result!.code!);
-        print("polyValue $polyValue");
-        if(polyValue != ""){
-          Navigator.pop(context,polyValue);
-        }else{
-          HelperClass.showToast("Invalid QR");
+      controller.scannedDataStream.listen((scanData) async {
+        setState(() {
+          result = scanData;
+        });
+        print("result");
+        print(result!.code);
+        if (result != null && result!.code != null) {
+          final uri = Uri.parse(result!.code ?? '');
+          String qrCode = uri.fragment
+              .split('/')
+              .last;
+          List<QRDataAPIModel>? qrData = await QRDataAPI().fetchQRData(buildingAllApi.allBuildingID.keys.toList());
+          if(qrData != null){
+            for(var e in qrData){
+              if (e.code == qrCode) {
+                if (e.landmarkId == null) {
+                  HelperClass.launchURL(result!.code!);
+                } else {
+                  Navigator.pop(context, e.landmarkId);
+                  return;
+                }
+              }
+            }
+          }
         }
-      }
-    });
+      });
+    }catch(e){
+      print("error in qr $e");
+    }
   }
 
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
@@ -177,7 +193,7 @@ class _QRViewExampleState extends State<QRViewExample> {
 
   @override
   void dispose() {
-    controller?.dispose();
+    //controller?.dispose();
     super.dispose();
   }
 }

@@ -2,7 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
 import 'package:geodesy/geodesy.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
 import 'package:iwaymaps/API/buildingAllApi.dart';
 import 'package:iwaymaps/MotionModel.dart';
 import 'package:iwaymaps/pathState.dart';
@@ -11,9 +11,9 @@ import 'buildingState.dart' as b;
 
 import 'APIMODELS/beaconData.dart';
 import 'Cell.dart';
-import 'localization/locales.dart';
+import 'Elements/locales.dart';
 import 'navigationTools.dart';
-import 'package:geodesy/geodesy.dart' as geo;
+import 'package:geodesy/geodesy.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 
 class UserState {
@@ -30,10 +30,9 @@ class UserState {
   bool isnavigating;
   int showcoordX;
   int showcoordY;
-  static int geoFenced=0;
-  static bool lowCompassAccuracy=false;
-
   static bool isTurn=false;
+  static bool lowCompassAccuracy=false;
+  static int geoFenced=0;
   pathState pathobj = pathState();
   List<int> path = [];
   List<Cell> Cellpath = [];
@@ -68,25 +67,25 @@ class UserState {
 
   UserState(
       {required this.floor,
-      required this.coordX,
-      required this.coordY,
-      required this.lat,
-      required this.lng,
-      required this.theta,
-      this.key = "",
-      this.Bid = "",
-      this.showcoordX = 0,
-      this.showcoordY = 0,
-      this.isnavigating = false,
-      this.coordXf = 0.0,
-      this.coordYf = 0.0});
+        required this.coordX,
+        required this.coordY,
+        required this.lat,
+        required this.lng,
+        required this.theta,
+        this.key = "",
+        this.Bid = "",
+        this.showcoordX = 0,
+        this.showcoordY = 0,
+        this.isnavigating = false,
+        this.coordXf = 0.0,
+        this.coordYf = 0.0});
 
   // Future<void> move()async {
-  //   
-  //   
-  //   
+  //
+  //
+  //
   //   pathobj.index = pathobj.index + 1;
-  //   
+  //
   //
   //   List<int> transitionvalue = tools.eightcelltransition(this.theta);
   //   coordX = coordX + transitionvalue[0];
@@ -104,22 +103,26 @@ class UserState {
   //     showcoordY = coordY;
   //   }
   //
-  //   
-  //   
-  //   
+  //
+  //
+  //
   //
   // }
 
   Future<void> move(context) async {
-
+    List<Cell> turnPoints = [];
+    try {
+      turnPoints =
+          tools.getCellTurnpoints(Cellpath);
+    }catch(_){}
     moveOneStep(context);
-
+    print("stepSize $stepSize");
     for (int i = 1; i < stepSize.toInt(); i++) {
       bool movementAllowed = true;
 
       if (!MotionModel.isValidStep(
           this, cols, rows, nonWalkable[Bid]![floor]!, reroute)) {
-        
+
         movementAllowed = false;
       }
 
@@ -132,22 +135,32 @@ class UserState {
 
         //destination check
         if (Cellpath.length - pathobj.index < 6) {
-          
+
           movementAllowed = false;
         }
 
         //turn check
-        if (tools
-            .isTurn([prevX, prevY], [showcoordX, showcoordY], [nextX, nextY])) {
-          
-          movementAllowed = false;
-        }
+        try{
+          if(Bid == buildingAllApi.outdoorID){
+            for(var c in turnPoints){
+              if(c.bid == Bid && c.x == showcoordX && c.y == showcoordY){
+                movementAllowed = false;
+              }
+            }
+          }else{
+            if (tools
+                .isTurn([prevX, prevY], [showcoordX, showcoordY], [nextX, nextY])) {
+
+              movementAllowed = false;
+            }
+          }}catch(_){}
+
 
         //lift check
 
         if (pathobj.connections[Bid]?[floor] ==
             showcoordY * cols + showcoordX) {
-          
+
           movementAllowed = false;
         }
       }
@@ -169,10 +182,8 @@ class UserState {
 
     if (isnavigating) {
       checkForMerge();
-      moveinCampus(context);
       pathobj.index = pathobj.index + 1;
       if((Bid == buildingAllApi.outdoorID && Cellpath[pathobj.index].bid == buildingAllApi.outdoorID) && tools.calculateDistance([showcoordX, showcoordY], [Cellpath[pathobj.index].x,Cellpath[pathobj.index].y])>=3){
-
         //destination check
         List<Cell> turnPoints =
         tools.getCellTurnpoints(Cellpath);
@@ -203,18 +214,33 @@ class UserState {
         Cell point = tools.findingprevpoint(Cellpath,pathobj.index);
         double angle = tools.calculateBearing([lat,lng], [Cellpath[pathobj.index].lat, Cellpath[pathobj.index].lng]);
         Map<String, double> data = tools.findslopeandintercept(point.x, point.y, Cellpath[pathobj.index].x, Cellpath[pathobj.index].y);
-        List<int> transitionvalue = tools.findpoint(coordX,coordY, Cellpath[pathobj.index].x, Cellpath[pathobj.index].y, data);
+        List<int> transitionvalue = tools.findpoint(showcoordX,showcoordY, Cellpath[pathobj.index].x, Cellpath[pathobj.index].y, data);
+        List<int>? trans ;
+        if(angle-(theta<0?theta+360 : theta) <= 45  && angle-(theta<0?theta+360 : theta) >= -45){
+          List<int> tv = tools.eightcelltransition(angle);
+          trans = [tv[0]+coordX , tv[1]+coordY];
+        }else{
+          List<int> tv = tools.eightcelltransition(theta);
+          trans = [tv[0]+coordX , tv[1]+coordY];
+        }
         showcoordX = transitionvalue[0];
         showcoordY = transitionvalue[1];
-        coordX = transitionvalue[0];
-        coordY = transitionvalue[1];
+        print("himanshu check $trans");
+        coordX = trans[0];
+        coordY = trans[1];
         List<double> values = tools.moveLatLng([lat,lng], angle, 1);
         lat = values[0];
         lng = values[1];
         path.insert(pathobj.index, (showcoordY*cols)+showcoordX);
         Cellpath.insert(pathobj.index, Cell((showcoordY*cols)+showcoordX, showcoordX, showcoordY, tools.eightcelltransition, lat, lng, buildingAllApi.outdoorID, floor, cols,imaginedCell: true));
+        int d = tools
+            .calculateDistance([coordX, coordY], [showcoordX, showcoordY]).toInt();
+        if (d > 0) {
+          offPathDistance.add(d);
+        }
         return;
       }
+
       if(Cellpath[pathobj.index].bid != null && Bid != Cellpath[pathobj.index].bid) {
         Bid = Cellpath[pathobj.index].bid!;
         cols = building!.floorDimenssion[Bid]![floor]![0];
@@ -226,7 +252,7 @@ class UserState {
       coordX = coordX+transitionvalue[0];
       coordY = coordY+transitionvalue[1];
       List<double> values =
-          tools.localtoglobal(showcoordX, showcoordY, building!.patchData[Cellpath[pathobj.index].bid]);
+      tools.localtoglobal(showcoordX, showcoordY, building!.patchData[Cellpath[pathobj.index].bid]);
       lat = values[0];
       lng = values[1];
 
@@ -254,7 +280,7 @@ class UserState {
         lat = values[0];
         lng = values[1];
         if(Cellpath[pathobj.index-1].bid != Cellpath[pathobj.index].bid){
-          
+
           coordX = showcoordX;
           coordY = showcoordY;
           values =
@@ -296,7 +322,7 @@ class UserState {
 
       //destination check
       List<Cell> turnPoints =
-          tools.getCellTurnpoints(Cellpath);
+      tools.getCellTurnpoints(Cellpath);
       print("angleeeeeeeee ${(tools.calculateDistance([showcoordX, showcoordY],
           [pathobj.destinationX, pathobj.destinationY]) <
           6)}");
@@ -348,8 +374,8 @@ class UserState {
       }
 
       //lift check
-      
-      
+
+
 
       if (floor != pathobj.destinationFloor &&
           pathobj.connections[Bid]?[floor] ==
@@ -377,12 +403,12 @@ class UserState {
           if (element.element!.subType == "room door" &&
               element.properties!.polygonExist != true) {
             if (tools.calculateDistance([
-                  showcoordX,
-                  showcoordY
-                ], [
-                  element.doorX ?? element.coordinateX!,
-                  element.doorY ?? element.coordinateY!
-                ]) <=
+              showcoordX,
+              showcoordY
+            ], [
+              element.doorX ?? element.coordinateX!,
+              element.doorY ?? element.coordinateY!
+            ]) <=
                 3) {
               if(!UserState.ttsOnlyTurns){
                 speak(
@@ -395,12 +421,12 @@ class UserState {
             }
           } else {
             if (tools.calculateDistance([
-                  showcoordX,
-                  showcoordY
-                ], [
-                  element.doorX ?? element.coordinateX!,
-                  element.doorY ?? element.coordinateY!
-                ]) <=
+              showcoordX,
+              showcoordY
+            ], [
+              element.doorX ?? element.coordinateX!,
+              element.doorY ?? element.coordinateY!
+            ]) <=
                 6) {
               double agl = tools.calculateAngle2([
                 showcoordX,
@@ -436,7 +462,7 @@ class UserState {
       coordX = coordX + transitionvalue[0];
       coordY = coordY + transitionvalue[1];
       List<double> values =
-          tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
+      tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
       lat = values[0];
       lng = values[1];
       if (this.isnavigating &&
@@ -457,14 +483,10 @@ class UserState {
     }
   }
 
-  Future<void> moveinCampus(context) async {
-
-  }
-
   String convertTolng(
       String msg, String? name, double agl, BuildContext context, double a,String nextBuildingName ,String currentBuildingName,
       {String destname = ""}) {
-    
+
     print(
         "$msg");
     if (msg ==
@@ -497,8 +519,8 @@ class UserState {
     } else if (name != null &&
         msg ==
             "${name} is on your ${(
-              tools.angleToClocks(agl, context),
-              context
+            tools.angleToClocks(agl, context),
+            context
             )}") {
       if (lngCode == 'en') {
         return msg;
@@ -556,7 +578,7 @@ class UserState {
       coordX = pathobj.Cellpath[fl]![0].x;
       coordY = pathobj.Cellpath[fl]![0].y;
       List<double> values =
-          tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
+      tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
       lat = values[0];
       lng = values[1];
       showcoordX = coordX;
@@ -582,7 +604,7 @@ class UserState {
     coordY = showcoordY;
     pathobj.index = index + 1;
     List<double> values =
-        tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
+    tools.localtoglobal(coordX, coordY, building!.patchData[Bid]);
     lat = values[0];
     lng = values[1];
     createCircle(values[0], values[1]);
@@ -608,13 +630,13 @@ class UserState {
 
   Future<void> moveToNearestTurn(int index) async {
     List<Cell> turnPoints =
-        tools.getCellTurnpoints(Cellpath);
+    tools.getCellTurnpoints(Cellpath);
     for (int i = index; i < Cellpath.length; i++) {
       for (int j = 0; j < turnPoints.length; j++) {
         if (Cellpath[i] == turnPoints[j]) {
           if (tools.calculateDistance(
-                  [Cellpath[pathobj.index].x, Cellpath[pathobj.index].y],
-                  [turnPoints[j].x, turnPoints[j].y]) <=
+              [Cellpath[pathobj.index].x, Cellpath[pathobj.index].y],
+              [turnPoints[j].x, turnPoints[j].y]) <=
               10) {
             pathobj.index = Cellpath.indexOf(turnPoints[j]);
           }
@@ -644,7 +666,7 @@ class UserState {
   Future<void> moveToStartofPath() async {
     double d = 100000000;
     int i = await moveToNearestPoint();
-    
+
     await moveToNearestTurn(i);
 
     // if(Cellpath[0].x == turnPoints[0].x && Cellpath[0].y == turnPoints[0].y){
@@ -667,11 +689,11 @@ class UserState {
     coordX = showcoordX;
     coordY = showcoordY;
     List<double> values =
-        tools.localtoglobal(showcoordX, showcoordY, building!.patchData[Bid]);
+    tools.localtoglobal(showcoordX, showcoordY, building!.patchData[Bid]);
     lat = values[0];
     lng = values[1];
 
-    
+
   }
 
   Future<void> reset() async {
@@ -682,3 +704,4 @@ class UserState {
     path = [];
   }
 }
+

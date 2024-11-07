@@ -2054,10 +2054,10 @@ packages:
     dependency: "direct main"
     description:
       name: widget_to_marker
-      sha256: "44df9d5e2cf9418108eaf635e54b0a34a2eeb7f8959aeab7f69f3015e13baadd"
+      sha256: "073a4d54045f4413ac923cf986e2290390589b937e8f2123b16c457ae3f67e4f"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.4"
+    version: "1.0.5"
   win32:
     dependency: transitive
     description:
