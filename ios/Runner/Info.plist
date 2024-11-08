@@ -58,7 +58,7 @@
 	<key>NSContactsUsageDescription</key>
 	<string>To add access contact information</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>We need location access to localise user to nearest building on our map</string>
+	<string>We need location access to localise user to nearest landmark to start navigation</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>locating the user to the nearest building</string>
 	<key>NSMicrophoneUsageDescription</key>
