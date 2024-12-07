@@ -26,6 +26,7 @@ import '../../APIMODELS/DataVersion.dart';
 import '../../Elements/HelperClass.dart';
 import '../../UserState.dart';
 import '../../VersioInfo.dart';
+import '../../buildingState.dart';
 import '../../config.dart';
 import '../../singletonClass.dart';
 import '../../websocket/NotifIcationSocket.dart';
@@ -116,11 +117,42 @@ class _HomePageState extends State<HomePage> {
     checkForReload();
     versionApiCall();
     isUserValid();
-
-
+    callbackFunc();
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
 
+  }
+
+  void callbackFunc(){
+    SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID).then((_){
+      SingletonFunctionController.timer?.whenComplete((){
+        localizeUser();
+      });
+    });
+  }
+  Future<void> localizeUser({bool speakTTS = true}) async {
+    double highestweight = 0;
+    String nearestBeacon = "";
+    print("binresult ${SingletonFunctionController.btadapter.BIN}");
+    for (int i = 0;
+    i < SingletonFunctionController.btadapter.BIN.length;
+    i++) {
+      if (SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty) {
+        SingletonFunctionController.btadapter.BIN[i]!.forEach((key, value) {
+          if (value < 0) {
+            value = value * -1;
+          }
+          if (value > highestweight) {
+            highestweight = value;
+            nearestBeacon = key;
+          }
+        });
+        break;
+      }
+    }
+    if (nearestBeacon != "" && Building.apibeaconmap[nearestBeacon] != null) {
+      SingletonFunctionController.currentBeacon = nearestBeacon;
+    }
   }
 
   bool _updateAvailable = false;

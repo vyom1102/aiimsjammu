@@ -13,20 +13,19 @@ import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:iwaymaps/API/buildingAllApi.dart';
-import 'package:iwaymaps/API/ladmarkApi.dart';
-import 'package:iwaymaps/APIMODELS/buildingAll.dart';
-import 'package:iwaymaps/Elements/HelperClass.dart';
-import 'package:iwaymaps/Elements/SearchNearby.dart';
-import 'package:iwaymaps/Elements/SearchpageRecents.dart';
+import 'package:iwaymaps/singletonClass.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
+import 'API/ladmarkApi.dart';
 import 'APIMODELS/landmark.dart';
 import 'Elements/DestinationPageChipsWidget.dart';
+import 'Elements/HelperClass.dart';
 import 'Elements/HomepageFilter.dart';
 
 import 'Elements/SearchpageCategoryResult.dart';
 import 'Elements/SearchpageResults.dart';
+import 'navigationTools.dart';
 class FloorSelectionPage extends StatefulWidget {
   String filterName ;
   String filterBuildingName;
@@ -41,9 +40,9 @@ class FloorSelectionPage extends StatefulWidget {
 class _FloorSelectionPageState extends State<FloorSelectionPage> {
   land landmarkData = land();
 
-  List<Widget> searchResults = [];
+  List<SearchpageResults> searchResults = [];
 
-  List<Widget> recentResults = [];
+  List<SearchpageResults> recentResults = [];
 
   List<dynamic> recent = [];
 
@@ -73,7 +72,9 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
       widget.floors.add("");
     }else{
       setState(() {
-        if(int.parse(widget.floors[0])==-1 && int.parse(widget.floors[1])==0){
+        if(SingletonFunctionController().getlocalizedBeacon()!=null){
+          tag=SingletonFunctionController().getlocalizedBeacon()!.floor!;
+        }else if(int.parse(widget.floors[0])==-1 && int.parse(widget.floors[1])==0){
           setState(() {
             tag = 0;
           });
@@ -86,7 +87,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
           print("Tag=00");
         }
       });
-
     }
 
     optionListForUI.add(widget.filterName);
@@ -103,15 +103,15 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
     setState(() {
       searchHintString = widget.filterName;
     });
-    fetchandBuild();
+    fetchandBuild(currFloor: tag);
   }
 
 
-  void fetchandBuild()async{
+  void fetchandBuild({int? currFloor})async{
     await fetchlist();
     if(widget.filterName.isNotEmpty && widget.filterBuildingName.isNotEmpty){
       print("fetchandbuild debug ${[int.parse(widget.floors[0])]}");
-      search(widget.filterName, widget.filterBuildingName,[int.parse(widget.floors[0])]);
+      search(widget.filterName, widget.filterBuildingName,[(currFloor!=null)?currFloor:int.parse(widget.floors[0])]);
     }
   }
 
@@ -155,7 +155,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                     onClicked: onVenueClicked,
                     ID: value.properties!.polyId!,
                     bid: value.buildingID!,
-                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!,accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false"));
+                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!,accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,));
                 }else{
                   print("NO");
                 }
@@ -167,49 +167,49 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                     onClicked: onVenueClicked,
                     ID: value.properties!.polyId!,
                     bid: value.buildingID!,
-                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!,accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false"));
+                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!,accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,));
                 }else{
                   print("NO-");
                 }
               }
-
             }
           } else {
             return;
           }
         });
       }
-
-
+      if((searchResults.isNotEmpty) && SingletonFunctionController().getlocalizedBeacon()!=null){
+        sortResultsByDistance(SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,SingletonFunctionController().getlocalizedBeacon()!.coordinateY!);
+      }
     });
 
     print("optionListItemBuildingName");
     print(optionListItemBuildingName);
   }
 
-  void fetchRecents()async{
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? savedData = prefs.getString('recents');
-    if(savedData != null){
-      recent = jsonDecode(savedData);
-      setState(() {
-        for(List<dynamic> value in recent){
-          if(buildingAllApi.getStoredAllBuildingID()[value[3]] != null){
-            recentResults.add(SearchpageRecents(name: value[0], location: value[1],onVenueClicked: onVenueClicked, ID: value[2], bid: value[3],));
-            searchResults = recentResults;
-          }
-        }
-      });
-    }
-  }
+  void sortResultsByDistance(int userLat, int userLng) {
+    print("searchResults before: ${searchResults[0].name}");
+    print("coordinates : $userLat, $userLng");
 
+
+    // Sort by distance after ensuring the list is already sorted by floor and building
+    searchResults.sort((a, b) {
+      // Convert coordinates of elements (a and b) to global coordinates
+      // Calculate the distances between the user's location and the elements (a and b)
+      print("coordinates a ${a.coordX},${a.coordY}");
+      double distanceA = tools.calculateDistance([userLat, userLng], [a.coordX, a.coordY]);
+      double distanceB = tools.calculateDistance([userLat, userLng],  [b.coordX, b.coordY]);
+      a.distance = (distanceA*0.306).toInt();
+      b.distance = (distanceB*0.306).toInt();
+      // Sort by distance in increasing order
+      return distanceA.compareTo(distanceB);
+    });
+
+    print("searchResults after in floor: ${searchResults[0].name}  ${searchResults[0].coordX} ${searchResults[0].coordY}");
+  }
   void onVenueClicked(String name, String location, String ID, String bid){
     Navigator.pop(context,[name,location,ID,bid]);
   }
-
-
-
-
   List<IconData> _icons = [
     Icons.home,
     Icons.wash_sharp,
@@ -225,9 +225,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
   int vall2 = 0;
   int tag=0;
   int lastPosition = 0;
-
-
-
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -303,7 +300,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                                         containerBoxColor = Color(0xffA1A1AA);
                                       }
                                       print("Final Set");
-
                                     },
                                   )),
                             ),
@@ -398,8 +394,8 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                   flex: 1,
                   child: SingleChildScrollView(
                       child: Semantics(
-                        header: true,
-                        label: "Column",
+                          header: true,
+                          label: "Column",
                           child: Column(children:searchResults,))
                   )
               ),

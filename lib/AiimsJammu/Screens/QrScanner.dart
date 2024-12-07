@@ -275,21 +275,16 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       print("Error: URI is null.");
       return;
     }
-
     print("Deep link URI: ${uri.toString()}");
-
     String queryString = uri.fragment.contains('?') ? uri.fragment.split('?').last : '';
     Uri actualUri = Uri.parse('https://iwayplus.com/?$queryString');
-
     bid = actualUri.queryParameters['bid'];
     landmarkID = actualUri.queryParameters['landmark'];
     source = actualUri.queryParameters['source'];
-
     if (bid == null || landmarkID == null) {
       print("Error: Missing query parameters.");
       return;
     }
-
     try {
       final buildings = await buildingAllApi().fetchBuildingAllData();
       print("Fetched buildings: $buildings");

@@ -24,6 +24,8 @@ import '../../APIMODELS/landmark.dart';
 import '../../Elements/SearchpageCategoryResult.dart';
 import '../../Elements/SearchpageResults.dart';
 import '../../config.dart';
+import '../../navigationTools.dart';
+import '../../singletonClass.dart';
 import '../Screens/DoctorProfile.dart';
 import '../Screens/ServiceInfo.dart';
 import '/API/buildingAllApi.dart';
@@ -57,7 +59,8 @@ class GlobalSearchPage extends StatefulWidget {
 class _GlobalSearchPageState extends State<GlobalSearchPage> {
   land landmarkData = land();
   List<String> landmarkFuzzyNameList = [];
-  List<Widget> searchResults = [];
+  List<SearchpageResults> searchResults = [];
+  List<Widget> searchResults1 = [];
   List<Widget> recentResults = [];
   List<dynamic>_services = [];
   String token = "";
@@ -150,7 +153,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
       searchHintString = widget.hintText;
     });
 
-    fetchRecents();
+    //fetchRecents();
   }
   Future<void> getUserDataFromHive() async {
     final signInBox = await Hive.openBox('SignInDatabase');
@@ -160,27 +163,27 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
       refreshToken = signInBox.get("refreshToken");
     });
   }
-  void fetchRecents() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? savedData = prefs.getString('recents');
-    if (savedData != null) {
-      recent = jsonDecode(savedData);
-      setState(() {
-        for (List<dynamic> value in recent) {
-          if (buildingAllApi.getStoredAllBuildingID()[value[3]] != null) {
-            recentResults.add(SearchpageRecents(
-              name: value[0],
-              location: value[1],
-              onVenueClicked: onVenueClicked,
-              ID: value[2],
-              bid: value[3],
-            ));
-            searchResults = recentResults;
-          }
-        }
-      });
-    }
-  }
+  // void fetchRecents() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   String? savedData = prefs.getString('recents');
+  //   if (savedData != null) {
+  //     recent = jsonDecode(savedData);
+  //     setState(() {
+  //       for (List<dynamic> value in recent) {
+  //         if (buildingAllApi.getStoredAllBuildingID()[value[3]] != null) {
+  //           recentResults.add(SearchpageRecents(
+  //             name: value[0],
+  //             location: value[1],
+  //             onVenueClicked: onVenueClicked,
+  //             ID: value[2],
+  //             bid: value[3],
+  //           ));
+  //           searchResults1 = recentResults;
+  //         }
+  //       }
+  //     });
+  //   }
+  // }
 
   void fetchandBuild() async {
     await fetchlist();
@@ -230,7 +233,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
               bid: value.buildingID!,
               floor: value.floor!,
               coordX: value.coordinateX!,
-              coordY: value.coordinateY!, accessible: '',
+              coordY: value.coordinateY!, accessible: '', distance: 0,
             ));
           }
 
@@ -419,7 +422,59 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
 
   bool topCategory=false;
 
+  void sortAndSeparateByUserLocation(int userLat, int userLng, int userFloor, String userBuildingID,Landmarks value,String searchedtext) {
 
+
+    if (value.name!.toLowerCase().contains(searchedtext.toLowerCase()) && value.buildingID==userBuildingID && value.floor==userFloor) {
+      searchResults.add(SearchpageResults(
+        name: value.name!,
+        location: value.buildingID == buildingAllApi.outdoorID ? "${value
+            .venueName}" : "Floor ${value.floor}, ${value.buildingName}, ${value
+            .venueName}",
+        onClicked: onVenueClicked,
+        ID: value.properties!.polyId!,
+        bid: value.buildingID!,
+        floor: value.floor!,
+        coordX: value.doorX??value.coordinateX!,
+        coordY: value.doorY??value.coordinateY!,
+        accessible: value.element!.subType == "restRoom" &&
+            value.properties!.washroomType == "Handicapped" ? "true" : "false",
+        distance: 0,
+      ));
+    }
+    // Step 1: Sort the main list as per previous logic
+    searchResults.sort((a, b) {
+      // Building comparison
+      // Distance comparison within the same building and floor
+      double distanceA = tools.calculateDistance([userLat, userLng], [a.coordX!, a.coordY!]);
+      double distanceB = tools.calculateDistance([userLat, userLng], [b.coordX!, b.coordY!]);
+      // Populate the distance field for each element
+      a.distance = (distanceA*0.306).toInt();
+      b.distance = (distanceB*0.306).toInt();
+      return distanceA.compareTo(distanceB);
+    });
+    if(searchResults.length>2){
+      print("searchResults after in desti: ${searchResults[1].name}  ${searchResults[1].coordX} ${searchResults[1].coordY}");
+    }
+
+  }
+
+  String normalizeString(String input) {
+    // Remove common prefixes and convert to lowercase
+    input = input.toLowerCase().replaceAll(RegExp(r'^(dr|mr|mrs|ms|prof)\s*'), '');
+
+    // Return the cleaned-up string
+    return input;
+  }
+
+  bool partialMatch(String dataName, String searchQuery) {
+    String normalizedData = normalizeString(dataName);
+    String normalizedQuery = normalizeString(searchQuery);
+
+    // Break query into keywords and check if all are present in data
+    List<String> queryKeywords = normalizedQuery.split(' ');
+    return queryKeywords.every((keyword) => normalizedData.contains(keyword));
+  }
 
   void search(String searchText) {
     setState(() {
@@ -464,7 +519,6 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
                 }
               }
             });
-
             optionListItemBuildingName.forEach((element) {
               searcCategoryhResults.add(SearchpageCategoryResults(
                 name: matchedCategory!,
@@ -486,25 +540,47 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
           print("Searching landmarks...");
           if (landmarkData.landmarksMap != null) {
             landmarkData.landmarksMap!.forEach((key, value) {
-              if (locationCount < 5 && searchResults.length < 10) {
+              if (locationCount < 30 && searchResults.length < 50) {
                 if (value.name != null && value.element!.subType != "beacon") {
                   String normalizedSearchText = normalizeText(searchText);
                   String normalizedValueName = normalizeText(value.name!);
 
-                  if (normalizedValueName.contains(normalizedSearchText)) {
+                  if (partialMatch(normalizedValueName, normalizedSearchText)) {
+                    final fuse = Fuzzy(
+                      [normalizedSearchText],
+                      options: FuzzyOptions(
+                        findAllMatches: true,
+                        tokenize: true,
+                        threshold: 1,
+                      ),
+                    );
+                    final result = fuse.search(normalizedSearchText);
                     print("Landmark match found: ${value.name}");
-                    searchResults.add(SearchpageResults(
-                      name: "${value.name}",
-                      location: "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
-                      onClicked: onVenueClicked,
-                      ID: value.properties!.polyId!,
-                      bid: value.buildingID!,
-                      floor: value.floor!,
-                      coordX: value.coordinateX!,
-                      coordY: value.coordinateY!, accessible: '',
-                    ));
-                    locationCount++;
+                    result.forEach((fuseResult) {
+                      if (fuseResult.score < 0.5) {
+                        if((searchResults.isNotEmpty) && SingletonFunctionController().getlocalizedBeacon()!=null){
+                          sortAndSeparateByUserLocation(SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,SingletonFunctionController().getlocalizedBeacon()!.coordinateY!,SingletonFunctionController().getlocalizedBeacon()!.floor!,SingletonFunctionController().getlocalizedBeacon()!.buildingID!,value,normalizedSearchText);
+                        }
+                        else{
+                          print("got into this");
+                          searchResults.add(SearchpageResults(
+                            name: value.name!,
+                            location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
+                            onClicked: onVenueClicked,
+                            ID: value.properties!.polyId!,
+                            bid: value.buildingID!,
+                            floor: value.floor!,
+                            coordX: value.coordinateX!,
+                            coordY: value.coordinateY!,
+                            accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,
+                          ));
+                        }
+                        locationCount++;
+                      }
+                    });
                   }
+
+
                 }
               }
             });
@@ -517,7 +593,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
               String locationName = doctor['locationName'] ?? '';
               if (courseName.toLowerCase().contains(searchText.toLowerCase()) ||
                   locationName.toLowerCase().contains(searchText.toLowerCase())) {
-                searchResults.add(ClassroomCourseResult(
+                searchResults1.add(ClassroomCourseResult(
                   courseName: courseName,
                   locationName: locationName,
                   onClicked: (name, location) {
@@ -544,7 +620,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
               if (serviceName.toLowerCase().contains(searchText.toLowerCase()) ||
                   serviceLocation.toLowerCase().contains(searchText.toLowerCase())) {
                 print("Service match found: $serviceName at $serviceLocation");
-                searchResults.add(ServiceResult(
+                searchResults1.add(ServiceResult(
                   serviceName: serviceName,
                   serviceLocation: serviceLocation,
                   onClicked: (name, location) {
@@ -599,7 +675,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
                         bid: value.buildingID!,
                         floor: value.floor!,
                         coordX: value.coordinateX!,
-                        coordY: value.coordinateY!, accessible: '',
+                        coordY: value.coordinateY!, accessible: '', distance: 0,
                       ));
                       locationCount++;
                     }
@@ -641,7 +717,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
                 if (StringSimilarity.compareTwoStrings(serviceName.toLowerCase(), searchText.toLowerCase()) > similarityThreshold ||
                     StringSimilarity.compareTwoStrings(serviceLocation.toLowerCase(), searchText.toLowerCase()) > similarityThreshold) {
                   print("Service similar match found: $serviceName at $serviceLocation");
-                  searchResults.add(ServiceResult(
+                  searchResults1.add(ServiceResult(
                     serviceName: serviceName,
                     serviceLocation: serviceLocation,
                     onClicked: (name, location) {
@@ -1072,18 +1148,28 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
                     Divider(thickness: 6, color: Color(0xfff2f3f5)),
                     // Search results
                     Flexible(
-                        flex: 1,
-                        child: SingleChildScrollView(
-                          child: Semantics(
-                            header: true,
-                            label: 'Related Search',
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: (!category && topCategory)? topSearches:(category)?searcCategoryhResults:searchResults,
-
-                            ),
+                      flex: 1,
+                      child: SingleChildScrollView(
+                        child: Semantics(
+                          header: true,
+                          label: 'Related Search',
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Show topSearches only when both `!category` and `topCategory` are true
+                              if (!category && topCategory) ...topSearches,
+                              // Show searchCategoryResults only when `category` is true
+                              if (category) ...searcCategoryhResults,
+                              // Show searchResults and searchResults1 for the default case
+                              if (!topCategory && !category) ...[
+                                ...searchResults,
+                                ...searchResults1,
+                              ],
+                            ],
                           ),
-                        )),
+                        ),
+                      ),
+                    ),
                     if (_controller.text.isNotEmpty && searchResults.isEmpty && (category ? searcCategoryhResults : (!category && topCategory ? topSearches : [])).isEmpty)
 
                       Column(

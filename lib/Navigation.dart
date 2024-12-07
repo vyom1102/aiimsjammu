@@ -3743,6 +3743,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       Building.apibeaconmap[nearestBeacon]!.buildingID!;
       buildingAllApi.selectedBuildingID =
       Building.apibeaconmap[nearestBeacon]!.buildingID!;
+      SingletonFunctionController.currentBeacon=nearestBeacon;
     }
     paintUser(nearestBeacon, speakTTS: speakTTS);
     Future.delayed(Duration(milliseconds: 1500)).then((value) => {
