@@ -39,7 +39,6 @@ class _SettingScreenState extends State<SettingScreen> {
   void initState() {
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
-    if(Platform.isAndroid)
     checkForUpdate();
     if(UserCredentials().getUserPersonWithDisability()>0){
       _selectedDisability[UserCredentials().getUserPersonWithDisability()-1]=true;
@@ -110,13 +109,13 @@ class _SettingScreenState extends State<SettingScreen> {
     print("checking update");
     final newVersion = NewVersionPlus(
       androidId: 'com.iwayplus.aiimsjammu',
-      // iOSId: 'com.iwayplus.rgcinavigation',
+      iOSId: 'com.iwayplus.aiimsjammu',
     );
 
     try {
-      if(Platform.isIOS){
-        _checkingForUpdate=false;
-      }
+      // if(Platform.isIOS){
+      //   _checkingForUpdate=false;
+      // }
       final status = await newVersion.getVersionStatus();
       print("status");
       print(status?.localVersion);
@@ -374,7 +373,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       ),
                       Spacer(),
 
-                      if (_checkingForUpdate && Platform.isAndroid)
+                      if (_checkingForUpdate)
                         CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0B6B94)),
@@ -383,7 +382,7 @@ class _SettingScreenState extends State<SettingScreen> {
                         InkWell(
                           onTap: () async {
                             final url = Theme.of(context).platform == TargetPlatform.iOS
-                                ? 'https://apps.apple.com/in/app/rgci-navigation/id6505062168'
+                                ? 'https://apps.apple.com/in/app/aiims-jammu-navigation/id6677034083'
                                 : 'https://play.google.com/store/apps/details?id=com.iwayplus.aiimsjammu';
                             if (await canLaunch(url)) {
                               await launch(url);

@@ -201,7 +201,13 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             label:"",
             child: InkWell(
               onTap: (){
-                _shareContent("https://play.google.com/store/apps/details?id=com.iwayplus.aiimsjammu");
+                final storeurl = Theme.of(context).platform == TargetPlatform.iOS
+                    ? 'https://apps.apple.com/in/app/aiims-jammu-navigation/id6677034083'
+                    : 'https://play.google.com/store/apps/details?id=com.iwayplus.aiimsjammu';
+
+                _shareContent(storeurl);
+                // _shareContent("https://play.google.com/store/apps/details?id=com.iwayplus.aiimsjammu");
+              //   aiims-jammu-navigation/id6677034083
               },
               child: Container(
                 width: MediaQuery.sizeOf(context).width,
