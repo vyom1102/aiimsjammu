@@ -10,10 +10,10 @@ import 'package:hive/hive.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../API/RefreshTokenAPI.dart';
 import '../../config.dart';
 import '../Data/DoctorDemoData.dart';
 import 'package:http/http.dart' as http;
-import '../../API/guestloginapi.dart';
 import '../Widgets/CalculateDistance.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/OpeningClosingStatus.dart';
@@ -29,7 +29,8 @@ class _CountersScreenState extends State<CountersScreen> {
   List<dynamic> _filteredServices= [];
   List<String> _selectedServices = [];
   bool _isLoading = true;
-  String token = "";
+  String? accessToken;
+  String? refreshToken;
   var DashboardListBox = Hive.box('DashboardList');
   double? _distanceFuture;
 
@@ -37,12 +38,22 @@ class _CountersScreenState extends State<CountersScreen> {
   @override
   void initState() {
     super.initState();
+    getUserDataFromHive();
+
     // _loadServices();
     // _loadPharmacyServicesFromAPI();
     checkForReload();
     _updateDistances();
 
   }
+  Future<void> getUserDataFromHive() async {
+    final signInBox = await Hive.openBox('SignInDatabase');
+    setState(() {
+      accessToken = signInBox.get("accessToken");
+      refreshToken = signInBox.get("refreshToken");
+    });
+  }
+
   Future<void> _updateDistances() async {
     for (var service in _services) {
       double distance = await calculateDistance(
@@ -77,18 +88,14 @@ class _CountersScreenState extends State<CountersScreen> {
   void _loadPharmacyServicesFromAPI() async {
 
     try {
-      await guestApi().guestlogin().then((value){
-        if(value.accessToken != null){
-          token = value.accessToken!;
-        }
-      });
+
       print('trying');
       final response = await http.get(
 
         Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
-          "x-access-token": token,
+          "x-access-token": '$accessToken',
         },);
 
       if (response.statusCode == 200) {
@@ -106,6 +113,11 @@ class _CountersScreenState extends State<CountersScreen> {
         } else {
           throw Exception('Response data does not contain the expected list of doctors under the "ServiceData" key');
         }
+      }else if(response.statusCode==403){
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        _loadPharmacyServicesFromAPI();
+
       } else {
         throw Exception('Failed to load data: ${response.statusCode}');
       }

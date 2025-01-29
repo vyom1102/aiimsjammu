@@ -46,7 +46,6 @@ import '/AiimsJammu/Screens/ServicesScreen.dart';
 import 'package:http/http.dart' as http;
 import '/AiimsJammu/Widgets/LocationIdFunction.dart';
 import '/AiimsJammu/Widgets/NearbyServiceCard.dart';
-import '../../API/guestloginapi.dart';
 import '../Widgets/AnouncementCard.dart';
 import '../Widgets/CalculateDistance.dart';
 import '../Widgets/ImageCarouse.dart';
@@ -87,7 +86,6 @@ class _HomePageState extends State<HomePage> {
   int corousalVersion = 0;
   int announcementVersion = 0;
   int _currentPage = 0;
-  String token = "";
   late int index;
   late ScrollController _scrollController;
   late Timer _timer;
@@ -95,7 +93,7 @@ class _HomePageState extends State<HomePage> {
   String? userId;
   String? accessToken;
   String? refreshToken;
-  String? userName;
+  String? userName = "User";
   String? emailAddress;
   bool nameLoading= false;
   bool isOnline = true;
@@ -106,6 +104,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    getUserDataFromHive();
     NotificationSocket.receiveMessage();
     checkForUpdate();
     _pageController = PageController(initialPage: _currentPage);
@@ -121,6 +120,13 @@ class _HomePageState extends State<HomePage> {
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
 
+  }
+  Future<void> getUserDataFromHive() async {
+    final signInBox = await Hive.openBox('SignInDatabase');
+    setState(() {
+      accessToken = signInBox.get("accessToken");
+      refreshToken = signInBox.get("refreshToken");
+    });
   }
 
   void callbackFunc(){
@@ -162,7 +168,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> checkForUpdate() async {
     final newVersion = NewVersionPlus(
       androidId: 'com.iwayplus.aiimsjammu',
-      // iOSId: 'com.iwayplus.rgcinavigation',
+      iOSId: 'com.iwayplus.aiimsjammu',
     );
 
     try {
@@ -532,18 +538,14 @@ class _HomePageState extends State<HomePage> {
   // }
   Future<void> _loadDoctorsFromAPI() async {
     try {
-      await guestApi().guestlogin().then((value){
-        if(value.accessToken != null){
-          token = value.accessToken!;
-        }
-      });
+
       print('trying');
       final response = await http.get(
 
         Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-doctors/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
-          "x-access-token": token,
+          "x-access-token": '$accessToken',
         },);
 
       if (response.statusCode == 200) {
@@ -560,53 +562,13 @@ class _HomePageState extends State<HomePage> {
         } else {
           throw Exception('Response data does not contain the expected list of doctors under the "DoctorData" key');
         }
+      }else if(response.statusCode==403){
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        _loadDoctorsFromAPI();
+
       } else {
         print("nope");
-        throw Exception('Failed to load data: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error: $e');
-      // Handle error
-    }
-  }
-  void _loadOtherServicesFromAPI() async {
-
-    try {
-      await guestApi().guestlogin().then((value){
-        if(value.accessToken != null){
-          token = value.accessToken!;
-        }
-      });
-      print('trying');
-      final response = await http.get(
-
-        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
-        headers: {
-          'Content-Type': 'application/json',
-          "x-access-token": token,
-        },);
-
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        // print(responseData);
-        if (responseData.containsKey('data') && responseData['data'] is List) {
-
-          setState(() {
-            _otherservices = responseData['data'];
-            _otherfilteredServices = _otherservices.where((service) =>
-            service['type'] != 'Pharmacy' &&
-                service['type'] != 'Ambulance' &&
-                service['type'] != 'BloodBank' &&
-                service['type'] != 'Counters' &&
-                service['type'] != 'Cafeteria'
-            ).toList();
-
-          });
-
-        } else {
-          throw Exception('Response data does not contain the expected list of doctors under the "ServiceData" key');
-        }
-      } else {
         throw Exception('Failed to load data: ${response.statusCode}');
       }
     } catch (e) {
@@ -654,17 +616,13 @@ class _HomePageState extends State<HomePage> {
   }
   Future<void> _loadImageCorousalFromAPI() async {
     try {
-      await guestApi().guestlogin().then((value) {
-        if (value.accessToken != null) {
-          token = value.accessToken!;
-        }
-      });
+
       print('trying');
       final response = await http.get(
         Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-corousal/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
-          "x-access-token": token,
+          "x-access-token": '$accessToken',
         },
       );
 
@@ -698,52 +656,14 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
-
-    try {
-      final response = await http.post(
-        Uri.parse(refreshTokenUrl),
-        body: json.encode({
-          "refreshToken": refreshToken,
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final newAccessToken = json.decode(response.body)["accessToken"];
-        setState(() {
-          accessToken = newAccessToken;
-        });
-
-        // Save the new access token to Hive
-        final signInBox = await Hive.openBox('SignInDatabase');
-        signInBox.put('accessToken', accessToken);
-
-        // Retry the getUserDetails call with the new access token
-        await getUserDetails();
-      } else {
-        // Handle token refresh failure
-      }
-    } catch (e) {
-      // Handle errors
-    }
-  }
-
   Future<void> _loadAnnouncementsFromAPI() async {
     try {
-      await guestApi().guestlogin().then((value) {
-        if (value.accessToken != null) {
-          token = value.accessToken!;
-        }
-      });
+
       final response = await http.get(
         Uri.parse('${AppConfig.baseUrl}/secured/hospital/all-announcement/6673e7a3b92e69bc7f4b40ae'),
         headers: {
           'Content-Type': 'application/json',
-          "x-access-token": token,
+          "x-access-token": '$accessToken',
         },
       );
 
@@ -759,6 +679,11 @@ class _HomePageState extends State<HomePage> {
         } else {
           throw Exception('Response data does not contain the expected list of announcements');
         }
+      }else if(response.statusCode==403){
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        _loadAnnouncementsFromAPI();
+
       } else {
         throw Exception('Failed to load data: ${response.statusCode}');
       }
@@ -771,17 +696,13 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadServicesFromAPI() async {
     try {
-      await guestApi().guestlogin().then((value) {
-        if (value.accessToken != null) {
-          token = value.accessToken!;
-        }
-      });
+
       print('trying');
       final response = await http.get(
         Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
-          "x-access-token": token,
+          "x-access-token": '$accessToken',
         },
       );
 
@@ -815,6 +736,11 @@ class _HomePageState extends State<HomePage> {
         // To be later changed according to distance
         ////
         _services.sort((a, b) => a['endTime'].compareTo(b['endTime']));
+      }else if(response.statusCode==403){
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        _loadServicesFromAPI();
+
       } else {
         throw Exception('Failed to load data: ${response.statusCode}');
       }
@@ -890,21 +816,6 @@ class _HomePageState extends State<HomePage> {
       curve: Curves.easeInOut,
     );
   }
-  Future<void> getUserDataFromHive() async {
-    final signInBox = await Hive.openBox('SignInDatabase');
-    setState(() {
-      userId = signInBox.get("userId");
-      accessToken = signInBox.get("accessToken");
-      refreshToken = signInBox.get("refreshToken");
-    });
-
-    if (userId != null && accessToken != null && refreshToken != null) {
-      // If user ID, access token, and refresh token are available, call API
-      getUserDetails();
-    } else {
-      // Handle case where user ID, access token, or refresh token is missing
-    }
-  }
   Future<void> getUserDetails() async {
 
     setState(() {
@@ -931,8 +842,9 @@ class _HomePageState extends State<HomePage> {
           userListBox.put('username',responseBody['username']);
         });
       } else if (response.statusCode == 403) {
-        await refreshTokenAndRetryForGetUserDetails(baseUrl);
-
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        getUserDetails();
       }else {
         // Handle other status codes
       }

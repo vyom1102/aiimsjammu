@@ -9,7 +9,7 @@ import 'package:iwaymaps/AiimsJammu/Screens/DoctorProfile.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../API/guestloginapi.dart';
+import '../../API/RefreshTokenAPI.dart';
 import '../../config.dart';
 import '../Data/DoctorDemoData.dart';
 import 'package:http/http.dart' as http;
@@ -29,7 +29,8 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
   String _selectedSpeciality = '';
   bool _isSearching = false;
   bool _isLoading = true;
-  String token = "";
+  String? accessToken;
+  String? refreshToken;
   var DashboardListBox = Hive.box('DashboardList');
 
   TextEditingController _searchController = TextEditingController();
@@ -37,10 +38,20 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
   void initState() {
     super.initState();
     // _loadDoctors();
+    getUserDataFromHive();
+
     checkForReload();
 
     // _loadDoctorsFromAPI();
   }
+  Future<void> getUserDataFromHive() async {
+    final signInBox = await Hive.openBox('SignInDatabase');
+    setState(() {
+      accessToken = signInBox.get("accessToken");
+      refreshToken = signInBox.get("refreshToken");
+    });
+  }
+
   void checkForReload(){
     if(DashboardListBox.containsKey('_doctors')){
       _doctors = DashboardListBox.get('_doctors');
@@ -57,18 +68,14 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
   }
   Future<void> _loadDoctorsFromAPI() async {
     try {
-      await guestApi().guestlogin().then((value){
-        if(value.accessToken != null){
-          token = value.accessToken!;
-        }
-      });
+
       print('trying');
       final response = await http.get(
 
         Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-doctors/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
-        "x-access-token": token,
+        "x-access-token": '$accessToken',
       },);
 
       if (response.statusCode == 200) {
@@ -86,6 +93,11 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
         } else {
           throw Exception('Response data does not contain the expected list of doctors under the "DoctorData" key');
         }
+      }else if(response.statusCode==403){
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        _loadDoctorsFromAPI();
+
       } else {
         print("nope");
         throw Exception('Failed to load data: ${response.statusCode}');

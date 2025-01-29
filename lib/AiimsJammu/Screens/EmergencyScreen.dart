@@ -9,6 +9,7 @@ import 'package:iwaymaps/AiimsJammu/Widgets/Translator.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../API/RefreshTokenAPI.dart';
 import '../../config.dart';
 import '../Data/DoctorDemoData.dart';
 import 'package:http/http.dart' as http;
@@ -27,18 +28,29 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
   List<dynamic> _filteredServices= [];
   List<String> _selectedServices = [];
   bool _isLoading = true;
-  String token = "";
+  String? accessToken;
+  String? refreshToken;
   var DashboardListBox = Hive.box('DashboardList');
 
   TextEditingController _searchController = TextEditingController();
   @override
   void initState() {
     super.initState();
+    getUserDataFromHive();
+
     // _loadServices();
     // _loadPharmacyServicesFromAPI();
     checkForReload();
 
   }
+  Future<void> getUserDataFromHive() async {
+    final signInBox = await Hive.openBox('SignInDatabase');
+    setState(() {
+      accessToken = signInBox.get("accessToken");
+      refreshToken = signInBox.get("refreshToken");
+    });
+  }
+
   void checkForReload(){
     if(DashboardListBox.containsKey('_services')){
       _services = DashboardListBox.get('_services');
@@ -64,18 +76,14 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
   void _loadPharmacyServicesFromAPI() async {
 
     try {
-      await guestApi().guestlogin().then((value){
-        if(value.accessToken != null){
-          token = value.accessToken!;
-        }
-      });
+
       print('trying');
       final response = await http.get(
 
         Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
-          "x-access-token": token,
+          "x-access-token": '$accessToken',
         },);
 
       if (response.statusCode == 200) {
@@ -93,7 +101,12 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
         } else {
           throw Exception('Response data does not contain the expected list of doctors under the "ServiceData" key');
         }
-      } else {
+      }else if(response.statusCode==403){
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        _loadPharmacyServicesFromAPI();
+
+      }  else {
         throw Exception('Failed to load data: ${response.statusCode}');
       }
     } catch (e) {

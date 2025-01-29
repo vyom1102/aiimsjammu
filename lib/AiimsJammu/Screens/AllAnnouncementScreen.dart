@@ -6,7 +6,7 @@ import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iwaymaps/AiimsJammu/Widgets/Translator.dart';
 
-import '../../API/guestloginapi.dart';
+import '../../API/RefreshTokenAPI.dart';
 import '../../config.dart';
 import '../Widgets/AnouncementCard.dart';
 
@@ -19,16 +19,25 @@ class AllAnnouncementScreen extends StatefulWidget {
 
 class _AllAnnouncementScreenState extends State<AllAnnouncementScreen> {
   List<dynamic> _announcement=[];
-  String token = "";
+  String? accessToken;
+  String? refreshToken;
   var DashboardListBox = Hive.box('DashboardList');
 
   @override
 
   void initState() {
     super.initState();
+    getUserDataFromHive();
     // _loadServices();
     // _loadAnnouncementFromAPI();
     checkForReload();
+  }
+  Future<void> getUserDataFromHive() async {
+    final signInBox = await Hive.openBox('SignInDatabase');
+    setState(() {
+      accessToken = signInBox.get("accessToken");
+      refreshToken = signInBox.get("refreshToken");
+    });
   }
   void checkForReload(){
     if(DashboardListBox.containsKey('announcements')){
@@ -43,18 +52,14 @@ class _AllAnnouncementScreenState extends State<AllAnnouncementScreen> {
   void _loadAnnouncementFromAPI() async {
 
     try {
-      await guestApi().guestlogin().then((value){
-        if(value.accessToken != null){
-          token = value.accessToken!;
-        }
-      });
+
       print('trying');
       final response = await http.get(
 
         Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-announcement/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
-          "x-access-token": token,
+          "x-access-token": '$accessToken',
         },);
 
       if (response.statusCode == 200) {
@@ -70,7 +75,12 @@ class _AllAnnouncementScreenState extends State<AllAnnouncementScreen> {
         } else {
           throw Exception('Response data does not contain the expected list of doctors under the "ServiceData" key');
         }
-      } else {
+      }else if(response.statusCode==403){
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        _loadAnnouncementFromAPI();
+
+      }  else {
         throw Exception('Failed to load data: ${response.statusCode}');
       }
     } catch (e) {

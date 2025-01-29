@@ -85,7 +85,9 @@ class SignInAPI{
   static Future<int> sendOtpForgetPassword(String user) async {
     print("user");
     print(user);
-    var headers = {'Content-Type': 'application/json'};
+    var headers = {'Content-Type': 'application/json',
+      'x-access-token': AppConfig.xaccesstoken
+    };
     var request = http.Request(
         'POST', Uri.parse('${AppConfig.baseUrl}/auth/otp/username'));
     request.body = json.encode({"username": user, "digits":4,"appId":"com.iwayplus.aiimsjammu"});
