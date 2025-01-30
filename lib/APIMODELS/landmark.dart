@@ -84,6 +84,8 @@ class Landmarks {
   List<Stairs>? stairs;
   List<Escalator>? escalators;
   List<Ramps>? ramps;
+  double? centerX;
+  double? centerY;
   List<Others>? others;
   String? createdAt;
   String? updatedAt;
@@ -110,6 +112,8 @@ class Landmarks {
         this.lifts,
         this.stairs,
         this.ramps,
+        this.centerX,
+        this.centerY,
         this.escalators,
         this.others,
         this.createdAt,
@@ -118,6 +122,7 @@ class Landmarks {
         this.buildingName,
         this.venueName,
         this.wasPolyIdNull});
+
 
   Landmarks.fromJson(Map<dynamic, dynamic> json) {
     element =
@@ -131,7 +136,7 @@ class Landmarks {
       wasPolyIdNull = true;
       properties!.polyId = json['_id'];
     }
-    buildingID = json['building_ID'];
+      buildingID = json['building_ID'];
     coordinateX = json['coordinateX']!=null?json['coordinateX'].toInt():json['coordinateX'];
     coordinateY = json['coordinateY']!=null?json['coordinateY'].toInt():json['coordinateY'];
     doorX = json['doorX'] != null ? json['doorX'].toInt():json['doorX'];
@@ -168,6 +173,8 @@ class Landmarks {
         ramps!.add(new Ramps.fromJson(v));
       });
     }
+    centerX= json['centerX']!=null?json['centerX']+0.0:json['centerX'];
+    centerY= json['centerY']!=null?json['centerY']+0.0:json['centerY'];
     if (json['others'] != null) {
       others = <Others>[];
       json['others'].forEach((v) {
@@ -210,6 +217,8 @@ class Landmarks {
     if (this.ramps != null) {
       data['ramps'] = this.ramps!.map((v) => v.toJson()).toList();
     }
+    data['centerX']=this.centerX;
+    data['centerY']=this.centerY;
     if (this.stairs != null) {
       data['stairs'] = this.stairs!.map((v) => v.toJson()).toList();
     }
@@ -296,7 +305,9 @@ class Properties {
   String? capacity;
   String? callLocation;
   String? panelDir;
+  bool isWaypoint = false;
   String? shopNature;
+  String? alertName;
   String? photo;
   bool? polygonExist;
   String? polyId;
@@ -362,6 +373,7 @@ class Properties {
         this.callLocation,
         this.panelDir,
         this.shopNature,
+        this.alertName,
         this.photo,
         this.polygonExist,
         this.polyId,
@@ -427,6 +439,7 @@ class Properties {
     callLocation = json['callLocation'];
     panelDir = json['panelDir'];
     shopNature = json['shopNature'];
+    alertName = json['alertName'];
     photo = json['photo'];
     polygonExist = json['polygonExist'];
     polyId = json['polyId'];
@@ -494,6 +507,7 @@ class Properties {
     data['callLocation'] = this.callLocation;
     data['panelDir'] = this.panelDir;
     data['shopNature'] = this.shopNature;
+    data['alertName'] = this.alertName;
     data['photo'] = this.photo;
     data['polygonExist'] = this.polygonExist;
     data['polyId'] = this.polyId;
@@ -520,7 +534,11 @@ class Lifts {
 
   Lifts.fromJson(Map<dynamic, dynamic> json) {
     name = json['name'];
-    distance = json['distance'];
+    try {
+      distance = json['distance'];
+    }catch(e){
+      print('name $name');
+    }
     x = json['x'].toInt();
     y = json['y'].toInt();
   }

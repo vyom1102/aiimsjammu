@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
-import 'package:iwaymaps/Navigation.dart';
 
 import '../API/buildingAllApi.dart';
 import '../APIMODELS/buildingAll.dart';
+import '../Navigation.dart';
 
 class Deeplink{
   static String? initialDocId; // To store the initial doctor's ID from the deep link

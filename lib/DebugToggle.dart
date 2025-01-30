@@ -1,11 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class DebugToggle extends StatefulWidget {
-  static bool Slider = false;
-  static bool StepButton = false;
-  static bool PDRIcon = false;
+  //always change only the first boolean value only
+  static bool Slider = kDebugMode?false:false;
+  static bool StepButton = kDebugMode?false:false;
+  static bool PDRIcon = kDebugMode?false:false;
   const DebugToggle({super.key});
-
   @override
   State<DebugToggle> createState() => _DebugToggleState();
 }
@@ -14,8 +15,6 @@ class _DebugToggleState extends State<DebugToggle> {
   bool Slider = true;
   bool StepButton = true;
   bool PDRIcon = false;
-
-
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;

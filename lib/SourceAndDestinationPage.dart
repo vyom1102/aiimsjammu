@@ -1,20 +1,25 @@
 import 'dart:convert';
-
 import 'package:easter_egg_trigger/easter_egg_trigger.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:iwaymaps/API/ladmarkApi.dart';
-import 'package:iwaymaps/API/buildingAllApi.dart';
-import 'package:iwaymaps/Elements/SearchpageRecents.dart';
+import '/API/ladmarkApi.dart';
+import '/ELEMENTS/SearchpageRecents.dart';
+import '/singletonClass.dart';
+
+import '/API/ladmarkApi.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '/API/buildingAllApi.dart';
 import 'APIMODELS/landmark.dart';
 import 'DestinationSearchPage.dart';
-import 'Elements/SearchpageResults.dart';
+import 'ELEMENTS/SearchpageResults.dart';
 import 'UserState.dart';
+
+
 class SourceAndDestinationPage extends StatefulWidget {
   String SourceID ;
   String DestinationID;
@@ -95,13 +100,22 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
     ));
   }
 
-  Future<void> fetchlist()async{
-    buildingAllApi.getStoredAllBuildingID().forEach((key, value)async{
-      await landmarkApi().fetchLandmarkData(id: key).then((value){
+  Future<void> fetchlist() async {
+    land? singletonData = await SingletonFunctionController.building.landmarkdata;
+
+    if(singletonData != null){
+      landmarkData = singletonData;
+      return;
+    }
+
+    buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
+      await landmarkApi().fetchLandmarkData(id: key).then((value) {
         landmarkData.mergeLandmarks(value.landmarks);
+        //optionListForUI.addAll(fetchCategories(value));
       });
     });
   }
+
 
   void swap(){
     String temp = widget.SourceID;
@@ -180,131 +194,131 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
-          padding: EdgeInsets.only(top: 16),
-          color: Colors.white,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                height: 119,
-                width: screenWidth-32,
-                padding: EdgeInsets.only(top: 15,bottom: 15),
+    double statusBarHeight = MediaQuery.of(context).padding.top;
 
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      child: IconButton(onPressed: (){
-                        print("h2");
-                        Navigator.pop(context);
-                      }, icon: Semantics(label:"Back",child: Icon(Icons.arrow_back_ios_new,size: 24,))),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          FocusScope(
-                            autofocus: true,
-                            child: Focus(
-                              child: Semantics(
-                                label: "SourceName",
-                                child: InkWell(
-                                  child: Container(height:40,width:double.infinity,margin:EdgeInsets.only(bottom: 8),decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    border: Border.all(color: Color(0xffE2E2E2)),
-                                  ),
-                                    padding: EdgeInsets.only(left: 8,top: 7,bottom: 8),
-                                    child: Text(
-                                      SourceName,
-                                      style:  TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                        color: widget.SourceID != ""?Color(0xff24b9b0):Color(0xff282828),
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    ),),
-                                  onTap: (){
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => DestinationSearchPage(hintText: 'Source location',voiceInputEnabled: false,userLocalized: widget.user != null? widget.user!.key:"",))
-                                    ).then((value){
-                                      setState(() {
-                                        widget.SourceID = value;
-                                        print("dataPOpped:$value");
-                                        SourceName = widget.user?.key == value ? "Your current location":landmarkData.landmarksMap![value]!.name!;
-                                        if(widget.SourceID != "" && widget.DestinationID != ""){
-                                          print("h3");
-                                          Navigator.pop(context,[widget.SourceID,widget.DestinationID]);
-                                        }
-                                      });
+    return Scaffold(
+      body: Container(
+        padding: EdgeInsets.only(top: statusBarHeight),
+        color: Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              height: 119,
+              width: screenWidth-32,
+              padding: EdgeInsets.only(top: 15,bottom: 15),
+
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    child: IconButton(onPressed: (){
+                      print("h2");
+                      Navigator.pop(context);
+                    }, icon: Semantics(label:"Back",child: Icon(Icons.arrow_back_ios_new,size: 24,))),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        FocusScope(
+                          autofocus: true,
+                          child: Focus(
+                            child: Semantics(
+                              label: "Source Name",
+                              child: InkWell(
+                                child: Container(height:40,width:double.infinity,margin:EdgeInsets.only(bottom: 8),decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  border: Border.all(color: Color(0xffE2E2E2)),
+                                ),
+                                  padding: EdgeInsets.only(left: 8,top: 7,bottom: 8),
+                                  child: Text(
+                                    SourceName,
+                                    style:  TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                      color: widget.SourceID != ""?Color(0xff24b9b0):Color(0xff282828),
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),),
+                                onTap: (){
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => DestinationSearchPage(hintText: 'Source location',voiceInputEnabled: false,userLocalized: widget.user != null? widget.user!.key:"",))
+                                  ).then((value){
+                                    setState(() {
+                                      widget.SourceID = value;
+                                      print("dataPOpped:$value");
+                                      SourceName = widget.user?.key == value ? "Your current location":landmarkData.landmarksMap![value]!.name!;
+                                      if(widget.SourceID != "" && widget.DestinationID != ""){
+                                        print("h3");
+                                        Navigator.pop(context,[widget.SourceID,widget.DestinationID]);
+                                      }
                                     });
-                                  },
-                                ),
+                                  });
+                                },
+                              ),
 
-                              ),),
+                            ),),
 
 
+                        ),
+                        InkWell(
+                          child: Container(height:40,width:double.infinity,decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.0),
+                            border: Border.all(color: Color(0xffE2E2E2)),
                           ),
-                          InkWell(
-                            child: Container(height:40,width:double.infinity,decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10.0),
-                              border: Border.all(color: Color(0xffE2E2E2)),
-                            ),
-                              padding: EdgeInsets.only(left: 8,top: 7,bottom: 8),
-                              child: Text(
-                                DestinationName,
-                                style: const TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xff282828),
-                                ),
-                                textAlign: TextAlign.left,
-                              ),),
-                            onTap: (){
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
-                              ).then((value){
-                                setState(() {
-                                  widget.DestinationID = value;
-                                  DestinationName = landmarkData.landmarksMap![value]!.name??landmarkData.landmarksMap![value]!.element!.subType!;
-                                  if(widget.SourceID != "" && widget.DestinationID != ""){
-                                    print("h4");
-                                    Navigator.pop(context,[widget.SourceID,widget.DestinationID]);
-                                  }
-                                });
+                            padding: EdgeInsets.only(left: 8,top: 7,bottom: 8),
+                            child: Text(
+                              DestinationName,
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xff282828),
+                              ),
+                              textAlign: TextAlign.left,
+                            ),),
+                          onTap: (){
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
+                            ).then((value){
+                              setState(() {
+                                widget.DestinationID = value;
+                                DestinationName = landmarkData.landmarksMap![value]!.name??landmarkData.landmarksMap![value]!.element!.subType!;
+                                if(widget.SourceID != "" && widget.DestinationID != ""){
+                                  print("h4");
+                                  Navigator.pop(context,[widget.SourceID,widget.DestinationID]);
+                                }
                               });
-                            },
-                          ),
-                        ],
-                      ),
+                            });
+                          },
+                        ),
+                      ],
                     ),
-                    Container(
-                      child: IconButton(onPressed: (){
-                        swap();
-                      }, icon: Semantics(label: "Swap Directions",child: Icon(Icons.swap_vert_circle_outlined,size: 24,))),
-                    ),
-                  ],
-                ),
+                  ),
+                  Container(
+                    child: IconButton(onPressed: (){
+                      swap();
+                    }, icon: Semantics(label: "Swap Directions",child: Icon(Icons.swap_vert_circle_outlined,size: 24,))),
+                  ),
+                ],
               ),
-              SizedBox(
-                height: 16,
-              ),
-              Container(
-                width: screenWidth,
-                height: 1,
-                color: Color(0xffB3B3B3),
-              ),
-              Flexible(flex:1,child: SingleChildScrollView(child: Column(children: recentResults,)))
-            ],
-          ),
+            ),
+            SizedBox(
+              height: 16,
+            ),
+            Container(
+              width: screenWidth,
+              height: 1,
+              color: Color(0xffB3B3B3),
+            ),
+            Flexible(flex:1,child: SingleChildScrollView(child: Column(children: recentResults,)))
+          ],
         ),
       ),
     );

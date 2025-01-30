@@ -1,5 +1,5 @@
 import 'package:geodesy/geodesy.dart';
-import 'package:iwaymaps/Cell.dart';
+import '/Cell.dart';
 import 'package:google_maps_flutter_platform_interface/src/types/marker.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart';
@@ -45,11 +45,9 @@ class pathState {
   bool didPathStart = false;
   // Default constructor without arguments
   pathState();
-
   // Additional constructor with named parameters for creating instances with specific values
   pathState.withValues(
       this.sourceX, this.sourceY, this.sourceFloor, this.destinationX, this.destinationY, this.destinationFloor, this.numCols, this.index);
-
 
   void clear(){
     path.clear();
@@ -64,7 +62,6 @@ class pathState {
     noPathFound = false;
     didPathStart = false;
   }
-
   void swap() {
     // Swap source and destination information
     String tempPolyID = sourcePolyID;

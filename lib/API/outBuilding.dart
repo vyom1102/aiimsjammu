@@ -2,15 +2,14 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import 'package:iwaymaps/API/RefreshTokenAPI.dart';
-import 'package:iwaymaps/DATABASE/BOXES/OutDoorModelBOX.dart';
-import '../APIMODELS/guestloginmodel.dart';
-import '../APIMODELS/outdoormodel.dart';
+import '/API/RefreshTokenAPI.dart';
+import '/DATABASE/BOXES/OutDoorModelBOX.dart';
+import '../config.dart';
+import '/APIMODELS/outdoormodel.dart';
 import '../DATABASE/DATABASEMODEL/OutDoorModel.dart';
-import 'guestloginapi.dart';
 
 class outBuilding {
-  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/outdoor" : "https://maps.iwayplus.in/secured/outdoor";
+  final String baseUrl = "${AppConfig.baseUrl}/secured/outdoor";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
 
@@ -20,8 +19,8 @@ class outBuilding {
 
     for(var id in ids){
       if(OutBuildingBox.containsKey(id)){
-        print("OUTBUILDING DATA FORM DATABASE");
         Map<String, dynamic> responseBody = OutBuildingBox.get(id)!.responseBody;
+        print("OUTBUILDING DATA FORM DATABASE $responseBody");
         return outdoormodel.fromJson(responseBody);
       }
     }
@@ -41,7 +40,7 @@ class outBuilding {
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = json.decode(response.body);
       final outBuildingData = OutDoorModel(responseBody: responseBody);
-      print("OUTBUILDING DATA FORM API");
+      print("OUTBUILDING DATA FORM API $responseBody");
 
 
       OutBuildingBox.put(ids[0], outBuildingData);

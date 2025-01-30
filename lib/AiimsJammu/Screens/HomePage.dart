@@ -244,7 +244,7 @@ class _HomePageState extends State<HomePage> {
 
     print("userLoc");
     print(userLoc);
-    UserState.geoFenced=await HelperClass.getGeoFenced("AIIMSJAMMU", userLoc!);
+    // UserState.geoFenced=await HelperClass.getGeoFenced("AIIMSJAMMU", userLoc!);
 
   }
 

@@ -19,9 +19,10 @@ import "package:google_maps_flutter_platform_interface/src/types/polyline.dart" 
 import 'package:iwaymaps/APIMODELS/polylinedata.dart' as ply;
 import 'package:google_maps_flutter_platform_interface/src/types/polyline.dart' as gmappol;
 import 'package:geodesy/geodesy.dart' as geo;
-import 'package:iwaymaps/navigationTools.dart';
 import 'MODELS/GMapIconNameModel.dart';
 import 'package:iwaymaps/buildingState.dart' as bs;
+
+import 'navigationTools.dart';
 
 
 

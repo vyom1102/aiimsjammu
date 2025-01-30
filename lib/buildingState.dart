@@ -1,8 +1,9 @@
 import 'dart:collection';
 
 import 'package:geodesy/geodesy.dart';
-import 'package:iwaymaps/waypoint.dart';
+import '/waypoint.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
+import 'APIMODELS/GlobalAnnotationModel.dart';
 import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/buildingAll.dart';
 import 'APIMODELS/landmark.dart';
@@ -18,6 +19,7 @@ class Building{
   static Map<String,List<int>> numberOfFloorsDelhi = Map();
   Map<String,Map<int, List<int>>> nonWalkable = Map();
   Map<String,Map<int,List<int>>> floorDimenssion = Map();
+  List<Landmarks>? listOfNearbyLandmarksToLocalize;
   //Map<int,List<poly.Nodes>> wayPoints = {};
   polylinedata? polyLineData = null;
   Map<String,polylinedata> polylinedatamap = Map();
@@ -31,6 +33,7 @@ class Building{
   static HashMap<String, beacon> apibeaconmap = HashMap();
   static String thresh = "";
   static Map<String,List<PathModel>> waypoint = {};
+  static GlobalModel? GlobalAnnotation = null;
   static Map<String,g.LatLng> allBuildingID = {
   };
   Map<String,Map<int, g.LatLng>> ARCoordinates = {};

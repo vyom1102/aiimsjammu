@@ -83,7 +83,7 @@
 //
 // import '../../APIMODELS/buildingAll.dart';
 // import '../../Elements/HelperClass.dart';
-// import '../../Navigation.dart';
+// import '.dart';
 // import '../Widgets/Translator.dart';
 //
 // class QRScannerScreen extends StatefulWidget {

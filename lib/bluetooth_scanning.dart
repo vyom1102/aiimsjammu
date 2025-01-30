@@ -1,14 +1,11 @@
 import 'dart:async';
 import 'dart:collection';
 import 'package:collection/collection.dart';
-import '/Elements/HelperClass.dart';
-
-import '../buildingState.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'APIMODELS/beaconData.dart';
-import 'Elements/HelperClass.dart';
 import '/websocket/UserLog.dart';
+import 'APIMODELS/beaconData.dart';
 
 class BLueToothClass {
   HashMap<int, HashMap<String, double>> BIN = HashMap();
@@ -32,15 +29,18 @@ class BLueToothClass {
 
 
   BLueToothClass(){
-    try {
-      FlutterBluePlus.systemDevices;
-    } catch (e) {
+    if(!kIsWeb){
+      try {
+        FlutterBluePlus.systemDevices;
+      } catch (e) {
 
-    }
-    try {
-      FlutterBluePlus.startScan();
-    } catch (e) {
+      }
+      try {
 
+        FlutterBluePlus.startScan();
+      } catch (e) {
+
+      }
     }
   }
 
@@ -58,8 +58,8 @@ class BLueToothClass {
     weight[2] = 4.0;
     weight[3] = 0.5;
     weight[4] = 0.25;
-    weight[5] = 0.0;
-    weight[6] = 0.0;
+    weight[5] = 0.15;
+    weight[6] = 0.1;
   }
 
   Stream<HashMap<int, HashMap<String, double>>> get binStream =>
@@ -71,11 +71,8 @@ class BLueToothClass {
   }
 
   void startScanning(HashMap<String, beacon> apibeaconmap) {
-
     wsocket.message["AppInitialization"]["bleScanResults"] = {};
-
     // print("himanshu 1");
-
     startbin();
     // print("himanshu 2");
     FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
@@ -275,28 +272,19 @@ class BLueToothClass {
     } else {
       BIN[binnumber]![MacId] = 1 * weight[binnumber]!;
     }
-
-
     //print("number of sample---${numberOfSample[MacId]}");
-
   }
+
   Map<String, double> calculateAverage(){
-
     //HelperClass.showToast("Bin ${BIN} \n number $numberOfSample");
-
     Map<String, double> sumMap = {};
-
     // Iterate over each inner map and accumulate the values for each string key
-
     BIN.values.forEach((innerMap) {
       innerMap.forEach((key, value) {
         sumMap[key] = (sumMap[key] ?? 0.0) + value;
       });
     });
-
-
     // Divide the sum by the number of values for each string key
-
     sumMap.forEach((key, sum) {
       int count = numberOfSample[key]!;
       sumMap[key] = sum / count;

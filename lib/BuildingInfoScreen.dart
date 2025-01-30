@@ -18,7 +18,6 @@ import 'package:iwaymaps/API/buildingAllApi.dart';
 import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/Elements/buildingCard.dart';
-import 'package:iwaymaps/Navigation.dart';
 import 'package:iwaymaps/singletonClass.dart';
 import 'package:test/test.dart';
 import 'API/BuildingAPI.dart';
@@ -27,6 +26,8 @@ import 'APIMODELS/buildingAll.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'Elements/InsideBuildingCard.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
+
+import 'Navigation.dart';
 
 
 class BuildingInfoScreen extends StatefulWidget {

@@ -12,32 +12,26 @@ import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:iwaymaps/API/buildingAllApi.dart';
-import 'package:iwaymaps/API/ladmarkApi.dart';
-import 'package:iwaymaps/APIMODELS/buildingAll.dart';
-import 'package:iwaymaps/Elements/DestinationPageChipsWidget.dart';
-import 'package:iwaymaps/Elements/HelperClass.dart';
-import 'package:iwaymaps/Elements/SearchNearby.dart';
-import 'package:iwaymaps/Elements/SearchpageRecents.dart';
-import 'package:iwaymaps/UserState.dart';
-import 'package:iwaymaps/pathState.dart';
-import 'package:iwaymaps/singletonClass.dart';
+import '/singletonClass.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
-import 'package:string_similarity/string_similarity.dart';
+import 'package:test/expect.dart';
+import 'package:test/scaffolding.dart';
 
+import '/Elements/HelperClass.dart';
+import 'API/buildingAllApi.dart';
+import 'API/ladmarkApi.dart';
 import 'APIMODELS/landmark.dart';
 import 'Elements/DestinationPageChipsWidget.dart';
 import 'Elements/HomepageFilter.dart';
 
 import 'Elements/SearchpageCategoryResult.dart';
 import 'Elements/SearchpageResults.dart';
-import 'package:iwaymaps/buildingState.dart';
+
 
 import 'FloorSelectionPage.dart';
 import 'navigationTools.dart';
-
-
 class DestinationSearchPage extends StatefulWidget {
   String hintText;
   String previousFilter;
@@ -115,50 +109,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       searchHintString = widget.hintText;
     });
 
-    // fetchRecents();
-
-
-    // recentResults.add(Container(
-    //   margin: EdgeInsets.only(left: 16, right: 16, top: 8),
-    //   child: Semantics(
-    //     excludeSemantics: true,
-    //     child: Row(
-    //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //       children: [
-    //         Text(
-    //           "Recent Searches",
-    //           style: const TextStyle(
-    //             fontFamily: "Roboto",
-    //             fontSize: 16,
-    //             fontWeight: FontWeight.w500,
-    //             color: Color(0xff000000),
-    //             height: 23 / 16,
-    //           ),
-    //           textAlign: TextAlign.left,
-    //         ),
-    //         TextButton(
-    //             onPressed: () {
-    //               clearAllRecents();
-    //               recent.clear();
-    //               setState(() {
-    //                 recentResults.clear();
-    //               });
-    //             },
-    //             child: Text(
-    //               "Clear all",
-    //               style: const TextStyle(
-    //                 fontFamily: "Roboto",
-    //                 fontSize: 16,
-    //                 fontWeight: FontWeight.w400,
-    //                 color: Color(0xff24b9b0),
-    //                 height: 25 / 16,
-    //               ),
-    //               textAlign: TextAlign.left,
-    //             ))
-    //       ],
-    //     ),
-    //   ),
-    // ));
+    fetchRecents();
   }
   String name = "";
   String floor = "";
@@ -167,9 +118,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   String finalName = "";
   bool promptLoader = false;
   Set<String> optionListItemBuildingNameNew = {};
-
-
-
   void _onSearchChanged() {
     List<String> promptArray = ["navigate to","take me to"];
     String userInput = _controller.text.toLowerCase();
@@ -393,7 +341,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
 
   ];
-
   List<IconData> _icons = [
     Icons.wash_sharp,
     Icons.local_cafe,
@@ -403,8 +350,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     Icons.elevator,
     Icons.desk_sharp,
   ];
-
-
 
   void onChipSelected(int index) {
     setState(() {
@@ -426,17 +371,14 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       if (searchText.isEmpty) {
         return;
       }
-
       searchText = searchText.toLowerCase();
       searchResults.clear();
       searcCategoryhResults.clear();
       optionListItemBuildingName.clear();
-
       if (optionList.contains(searchText)) {
         category = true;
         topCategory=false;
         vall = optionList.indexOf(searchText);
-
         if (landmarkData.landmarksMap != null) {
           landmarkData.landmarksMap!.forEach((key, value) {
             if (value.name != null && value.element!.subType != "beacons") {
@@ -448,7 +390,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               }
             }
           });
-
+          print("entered here");
           optionListItemBuildingName.forEach((element) {
             searcCategoryhResults.add(
               SearchpageCategoryResults(
@@ -459,7 +401,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
             );
           });
         }
-      } else {
+      }
+      else {
         category = false;
         vall = -1;
         topCategory=false;
@@ -516,12 +459,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               });
             }
             else if (partialMatch(normalizedValueName, normalizedSearchText)) {
-
-              if (partialMatch(normalizedValueName, normalizedSearchText)) {
-                print('Match found!');
-              } else {
-                print('No match found.');
-              }
               final fuse = Fuzzy(
                 [normalizedSearchText],
                 options: FuzzyOptions(
@@ -536,7 +473,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                   if((searchResults.isNotEmpty || wantToFilter.isNotEmpty) && SingletonFunctionController().getlocalizedBeacon()!=null){
                     sortAndSeparateByUserLocation(SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,SingletonFunctionController().getlocalizedBeacon()!.coordinateY!,SingletonFunctionController().getlocalizedBeacon()!.floor!,SingletonFunctionController().getlocalizedBeacon()!.buildingID!,value,normalizedSearchText);
                   }else{
-                    print("got into this");
                     searchResults.add(SearchpageResults(
                       name: value.name!,
                       location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
@@ -558,6 +494,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       }
     });
   }
+
 
   void sortAndSeparateByUserLocation(int userLat, int userLng, int userFloor, String userBuildingID,Landmarks value,String searchedtext) {
 
@@ -595,6 +532,14 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     }
 
   }
+
+
+
+
+
+
+
+
   bool partialMatch(String dataName, String searchQuery) {
     String normalizedData = normalizeString(dataName);
     String normalizedQuery = normalizeString(searchQuery);
@@ -645,7 +590,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               coordX: value.coordinateX!,
               coordY: value.coordinateY!,
               accessible:  value.properties!.wheelChairAccessibility??"", distance: 0,
-
             ));
           }
 
@@ -663,27 +607,20 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     Navigator.pop(context, ID);
   }
 
-  // void fetchRecents() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   String? savedData = prefs.getString('recents');
-  //   if (savedData != null) {
-  //     recent = jsonDecode(savedData);
-  //     setState(() {
-  //       for (List<dynamic> value in recent) {
-  //         if (buildingAllApi.getStoredAllBuildingID()[value[3]] != null) {
-  //           recentResults.add(SearchpageRecents(
-  //             name: value[0],
-  //             location: value[1],
-  //             onVenueClicked: onVenueClicked,
-  //             ID: value[2],
-  //             bid: value[3],
-  //           ));
-  //           searchResults = recentResults;
-  //         }
-  //       }
-  //     });
-  //   }
-  // }
+  void fetchRecents() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedData = prefs.getString('recents');
+    if (savedData != null) {
+      recent = jsonDecode(savedData);
+      setState(() {
+        for (List<dynamic> value in recent) {
+          if (buildingAllApi.getStoredAllBuildingID()[value[3]] != null) {
+            searchResults = recentResults;
+          }
+        }
+      });
+    }
+  }
 
 
   List<String> optionsTags = [];
@@ -695,6 +632,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   int vall = -1;
   int newvall = -1;
   int lastval =-1;
+  bool isTyping=true;
 
 
 
@@ -706,15 +644,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     double statusBarHeight = MediaQuery.of(context).padding.top;
-
-
-
-    // if(speetchText.isNotListening){
-    //   micColor = Colors.black;
-    //   print("Not listening");
-    // }else{
-    //   micColor = Color(0xff24B9B0);
-    // }
     return Scaffold(
       body: Container(
         padding: EdgeInsets.only(top: statusBarHeight),
@@ -722,7 +651,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         child: !promptLoader? Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-
             Semantics(
               header: true,
               label: "Search",
@@ -784,14 +712,18 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                     }
                                   },
                                   onSubmitted: (value) {
-
                                     search(value);
                                   },
                                   onChanged: (value) {
                                     search(value);
                                     if(_controller.text.isEmpty){
+                                      isTyping=true;
                                       topSearches.clear();
                                       topSearchesFunc();
+                                    }else{
+                                      setState(() {
+                                        isTyping=false;
+                                      });
                                     }
                                     // print("Final Set");
                                     // print(cardSet);
@@ -815,13 +747,13 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                   recentResults = [];
                                   searcCategoryhResults = [];
                                   category=false;
+                                  isTyping=true;
                                   topSearches.clear();
                                   topSearchesFunc();
                                 });
                               },
                               icon: Semantics(
                                   container: true,
-
                                   label: "Close", child: Icon(Icons.close)))
                               : IconButton(
                             onPressed: () {
@@ -877,115 +809,117 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
               ),
             ):Container(),
             searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
-            Semantics(
-              label: "Filter Section",
-              header: true,
-              child: Container(
-                margin: EdgeInsets.only(left: 7,top: 4),
-                width: screenWidth,
-                child: ChipsChoice<int>.single(
-                  value: vall,
-                  onChanged: (val) {
+            Visibility(
+              visible: isTyping,
+              child: Semantics(
+                label: "Filter Section",
+                header: true,
+                child: Container(
+                  margin: EdgeInsets.only(left: 7,top: 4),
+                  width: screenWidth,
+                  child: ChipsChoice<int>.single(
+                    value: vall,
+                    onChanged: (val) {
+                      if(HelperClass.SemanticEnabled) {
+                        speak("${optionListForUI[val]} selected");
+                      }
+                      selectedButton = optionListForUI[val];
+                      setState(() => vall = val);
+                      lastval = val;
+                      _controller.text = optionListForUI[val];
+                      search(optionListForUI[val]);
+                    },
+                    choiceItems: C2Choice.listFrom<int, String>(
+                      source: optionListForUI,
+                      value: (i, v) => i,
+                      label: (i, v) => v,
+                    ),
 
-                    if(HelperClass.SemanticEnabled) {
-                      speak("${optionListForUI[val]} selected");
-                    }
+                    choiceBuilder: (item, i) {
+                      if(!item.selected){
+                        vall = -1;
+                      }
+                      return DestinationPageChipsWidget(
+                        svgPath: '',
+                        text: optionListForUI[i],
+                        onSelect: item.select!,
+                        selected: item.selected,
 
-                    selectedButton = optionListForUI[val];
-                    setState(() => vall = val);
-                    lastval = val;
-
-
-                    _controller.text = optionListForUI[val];
-                    search(optionListForUI[val]);
-                  },
-                  choiceItems: C2Choice.listFrom<int, String>(
-                    source: optionListForUI,
-                    value: (i, v) => i,
-                    label: (i, v) => v,
+                        onTap: (String Text) {
+                          if (Text.isNotEmpty) {
+                            search(Text);
+                          } else {
+                            search(Text);
+                            _controller.text="";
+                            searchResults = [];
+                            searcCategoryhResults = [];
+                            vall = -1;
+                          }
+                        }, icon: _icons[i],
+                      );
+                    },
+                    direction: Axis.horizontal,
                   ),
-
-                  choiceBuilder: (item, i) {
-                    if(!item.selected){
-                      vall = -1;
-                    }
-                    return DestinationPageChipsWidget(
-                      svgPath: '',
-                      text: optionListForUI[i],
-                      onSelect: item.select!,
-                      selected: item.selected,
-
-                      onTap: (String Text) {
-                        if (Text.isNotEmpty) {
-                          search(Text);
-                        } else {
-                          search(Text);
-                          _controller.text="";
-                          searchResults = [];
-                          searcCategoryhResults = [];
-                          vall = -1;
-                        }
-                      }, icon: _icons[i],
-                    );
-                  },
-                  direction: Axis.horizontal,
                 ),
               ),
             ),
-            !category && _controller.text.isNotEmpty ? Semantics(
-              header: true,
-              label: "Building Filter section",
-              child: Container(
-                margin: EdgeInsets.only(left: 7,top: 4),
-                width: screenWidth,
-                child: ChipsChoice<int>.single(
-                  value: newvall,
-                  onChanged: (val) {
+            !category && _controller.text.isNotEmpty ? Visibility(
+              visible: isTyping,
+              child: Semantics(
+                header: true,
+                label: "Building Filter section",
+                child: Container(
+                  margin: EdgeInsets.only(left: 7,top: 4),
+                  width: screenWidth,
+                  child: ChipsChoice<int>.single(
+                    value: newvall,
+                    onChanged: (val) {
 
-                    // if(HelperClass.SemanticEnabled) {
-                    //   speak("${optionListItemBuildingName.toList()[val]} selected");
-                    // }
-                    //
-                    // selectedButton = optionListItemBuildingName.toList()[val];
-                    setState(() => newvall = val);
-                    //
-                    //
-                    // //_controller.text = optionListItemBuildingName.toList()[val];
-                    // search(optionListItemBuildingName.toList()[val]);
-                  },
-                  choiceItems: C2Choice.listFrom<int, String>(
-                    source: optionListItemBuildingNameNew.toList(),
-                    value: (i, v) => i,
-                    label: (i, v) => v,
+                      // if(HelperClass.SemanticEnabled) {
+                      //   speak("${optionListItemBuildingName.toList()[val]} selected");
+                      // }
+                      //
+                      // selectedButton = optionListItemBuildingName.toList()[val];
+                      setState(() => newvall = val);
+                      //
+                      //
+                      // //_controller.text = optionListItemBuildingName.toList()[val];
+                      // search(optionListItemBuildingName.toList()[val]);
+                    },
+                    choiceItems: C2Choice.listFrom<int, String>(
+                      source: optionListItemBuildingNameNew.toList(),
+                      value: (i, v) => i,
+                      label: (i, v) => v,
+                    ),
+
+                    choiceBuilder: (item, i) {
+                      if(!item.selected){
+                        newvall = -1;
+                      }
+                      return DestinationPageChipsWidget(
+                        svgPath: '',
+                        text: optionListItemBuildingNameNew.toList()[i],
+                        onSelect: item.select!,
+                        selected: item.selected,
+
+                        onTap: (String Text) {
+                          print("tapped$Text");
+
+                          if (Text.isNotEmpty) {
+                            search(_controller.text,wantToFilter: Text);
+                          }
+                          // else {
+                          //   search(Text,wantToFilter: optionListItemBuildingName.toList()[i]);
+                          //   _controller.text="";
+                          //   searchResults = [];
+                          //   searcCategoryhResults = [];
+                          //   newvall = -1;
+                          // }
+                        }, icon: _icons[i],
+                      );
+                    },
+                    direction: Axis.horizontal,
                   ),
-
-                  choiceBuilder: (item, i) {
-                    if(!item.selected){
-                      newvall = -1;
-                    }
-                    return DestinationPageChipsWidget(
-                      svgPath: '',
-                      text: optionListItemBuildingNameNew.toList()[i],
-                      onSelect: item.select!,
-                      selected: item.selected,
-
-                      onTap: (String Text) {
-                        print("tapped$Text");
-
-                        if (Text.isNotEmpty) {
-                          search(_controller.text,wantToFilter: Text);
-                        }
-                        // else {
-                        //   search(Text,wantToFilter: optionListItemBuildingName.toList()[i]);
-                        //   _controller.text="";
-                        //   searchResults = [];
-                        //   searcCategoryhResults = [];
-                        //   newvall = -1;
-                        // }
-                      }, icon: _icons[i],
-                    );
-                  },
-                  direction: Axis.horizontal,
                 ),
               ),
             ) : Container(),
@@ -996,17 +930,14 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                 flex: 1,
                 child: SingleChildScrollView(
                   child: Semantics(
-                    label: "Search Results",
                     header: true,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: (!category && topCategory)? topSearches:(category)?searcCategoryhResults:searchResults,
-
                     ),
                   ),
                 )),
             if (_controller.text.isNotEmpty && searchResults.isEmpty && (category ? searcCategoryhResults : (!category && topCategory ? topSearches : [])).isEmpty)
-
               Column(
                   children: [
                     SizedBox(height: 16,),
@@ -1036,7 +967,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     )
                   ]
               )
-
           ],
         ) : Center(
           child: CircularProgressIndicator(

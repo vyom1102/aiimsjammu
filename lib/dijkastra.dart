@@ -2,7 +2,7 @@
 import 'dart:math';
 
 import 'package:collection/collection.dart';
-import 'package:iwaymaps/path.dart';
+import '/path.dart';
 
 import 'navigationTools.dart';
 
@@ -14,7 +14,7 @@ double euclideanDistance(String point1, String point2) {
 }
 
 // Dijkstra's algorithm to find the shortest path
-Future<List<List<int>>> dijkstra(Map<String, List<dynamic>> graph, String start, String goal, int col, {bool isoutdoorPath = false})async{
+Future<List<List<int>>> dijkstra(Map<String, dynamic> graph, String start, String goal, int col, {bool isoutdoorPath = false})async{
 
 
 
@@ -46,6 +46,7 @@ Future<List<List<int>>> dijkstra(Map<String, List<dynamic>> graph, String start,
       if(isoutdoorPath){
         return path.reversed.toList();
       }
+      print("graph path debug ${path.reversed.toList()}");
       return addCoordinatesBetweenVertices(path.reversed.toList(), col);
     }
 
@@ -104,7 +105,7 @@ List<List<int>> addCoordinatesBetweenVertices(List<List<int>> coordinates, int c
 }
 
 List<String> findNearestAndSecondNearestVertices(
-    Map<String, List<dynamic>> pathNetwork,
+    Map<String, dynamic> pathNetwork,
     List<int> coord1,
     List<int> coord2) {
   String nearestToCoord1 = '';
@@ -115,6 +116,8 @@ List<String> findNearestAndSecondNearestVertices(
   double secondMinDistToCoord1 = double.infinity;
   double minDistToCoord2 = double.infinity;
   double secondMinDistToCoord2 = double.infinity;
+
+  print("source and destination points are $coord1 and $coord2");
 
   // Iterate through each vertex in the pathNetwork
   pathNetwork.forEach((vertex, neighbors) {
@@ -253,22 +256,35 @@ List<int> mergeLists(List<int> l1, List<int> l2, List<int> l3) {
 }
 
 
-Future<List<int>> findShortestPath (Map<String, List<dynamic>> graph, int sourceX, int sourceY, int destinationX, int destinationY, List<int> nonWalkableCells, int col, int row, {bool isoutdoorPath = false})async{
+Future<List<int>> findShortestPath (Map<String, dynamic> graph, int sourceX, int sourceY, int destinationX, int destinationY, List<int>? nonWalkableCells, int col, int row, {bool isoutdoorPath = false})async{
+  nonWalkableCells ??= [];
   List<String> states = findNearestAndSecondNearestVertices(graph, [sourceX,sourceY], [destinationX,destinationY]);
   String start1 = states[0];
   String start2 = states[1];
   String goal1 = states[2];
   String goal2 = states[3];
 
+  print("states debug $states");
+
+
   List<List<int>> temppath1 = await dijkstra(graph,start1,goal1,col,isoutdoorPath: isoutdoorPath);
   List<List<int>> temppath2 = await dijkstra(graph,start2,goal2,col, isoutdoorPath: isoutdoorPath);
 
   List<List<int>> temppath =[];
-  if(temppath1.length>temppath2.length){
-    temppath = temppath2;
+
+  if(tools.calculateDistance(start1.split(',').map(int.parse).toList(), start2.split(',').map(int.parse).toList()) <=10){
+    if(temppath1.length>temppath2.length){
+      print("returning 1 $temppath2");
+      temppath = temppath2;
+    }else{
+      print("returning 2");
+      temppath = temppath1;
+    }
   }else{
+    print("returning 3");
     temppath = temppath1;
   }
+
 
   if(tools.calculateDistance(temppath.first, [sourceX,sourceY])==1){
     temppath.insert(0, [sourceX,sourceY]);
@@ -300,9 +316,14 @@ Future<List<int>> findShortestPath (Map<String, List<dynamic>> graph, int source
       // print("l1 $l1");
     });
   }
+
   for(int i = s ; i<=e; i++){
     l2.add((temppath[i][1]*col) + temppath[i][0]);
   }
+  if((sourceY*col)+sourceX != (temppath[s][1]*col)+temppath[s][0] && isoutdoorPath){
+    l2.insert(0,(sourceY*col)+sourceX);
+  }
+
   // print("l2 $l2");
   if((temppath[e][1]*col)+temppath[e][0] != (destinationY*col)+destinationX && !isoutdoorPath){
 
@@ -317,7 +338,18 @@ Future<List<int>> findShortestPath (Map<String, List<dynamic>> graph, int source
   }
 
   if(l1.isNotEmpty || l3.isNotEmpty){
-    return getFinalOptimizedPath(mergeLists(l1, l2, l3), nonWalkableCells, col, sourceX, sourceY, destinationX, destinationY);
+    try {
+      return getFinalOptimizedPath(
+          mergeLists(l1, l2, l3),
+          nonWalkableCells,
+          col,
+          sourceX,
+          sourceY,
+          destinationX,
+          destinationY);
+    }catch(e){
+      return mergeLists(l1, l2, l3);
+    }
   }else{
     return mergeLists(l1, l2, l3);
   }

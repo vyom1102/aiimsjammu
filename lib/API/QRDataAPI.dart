@@ -5,7 +5,7 @@ import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
 import '../APIMODELS/QRDataAPIModel.dart';
-
+import '/config.dart';
 
 
 class QRDataAPI{
@@ -16,7 +16,7 @@ class QRDataAPI{
   Future<List<QRDataAPIModel>?> fetchQRData(List<String> id)async{
     print("IDfetchQRData");
     print(id);
-    final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/building-qrs" : "https://maps.iwayplus.in/secured/building-qrs";
+    final String baseUrl = "${AppConfig.baseUrl}/secured/building-qrs";
     final Map<String, dynamic> data = {
       "buildingIds": id
     };
@@ -28,8 +28,6 @@ class QRDataAPI{
         'x-access-token': accessToken
       },
     );
-
-    print("response ${response.statusCode}   ${response.body}");
     if (response.statusCode == 200) {
       List<dynamic> jsonResponse = jsonDecode(response.body);
       print("QRDataAPI DATA FROM API");
@@ -37,9 +35,7 @@ class QRDataAPI{
       List<QRDataAPIModel> qrDataList = jsonResponse
           .map((data) => QRDataAPIModel.fromJson(data))
           .toList();
-
       return qrDataList;
-
     }else{
       return null;
     }

@@ -2,23 +2,18 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
+import '/Elements/HelperClass.dart';
 import '../DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import '../DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
-import '/API/BuildingAPI.dart';
-import '/API/buildingAllApi.dart';
+import '../config.dart';
 import '/APIMODELS/DataVersion.dart';
-import '/DATABASE/BOXES/BeaconAPIModelBOX.dart';
-import '/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
-import '/Elements/HelperClass.dart';
 
-import '../APIMODELS/beaconData.dart';
 import '../VersioInfo.dart';
 import 'RefreshTokenAPI.dart';
-import 'guestloginapi.dart';
 
 
 class DataVersionApi {
-  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/data-version" : "https://maps.iwayplus.in/secured/data-version";
+  final String baseUrl = "${AppConfig.baseUrl}/secured/data-version";
   static var signInBox = Hive.box('SignInDatabase');
   var versionBox = Hive.box('VersionData');
   String accessToken = signInBox.get("accessToken");

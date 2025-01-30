@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import 'package:iwaymaps/Elements/HelperClass.dart';
-
-import 'RefreshTokenAPI.dart';
+import '../Elements/HelperClass.dart';
+import '../api/RefreshTokenAPI.dart';
+import '/config.dart';
 
 class RatingsaveAPI{
-  final String baseUrl = kDebugMode? "https://dev.iwayplus.in/secured/rating-save" : "https://maps.iwayplus.in/secured/rating-save";
+  final String baseUrl = "${AppConfig.baseUrl}/secured/rating-save";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
 
@@ -20,7 +20,7 @@ class RatingsaveAPI{
       "destinationId": destinationID,
       "rating": rating,
       "feedback": feedback,
-      "appId": "com.iwaymaps.navigation"
+      "appId": "com.iwayplus.navigation"
     };
 
     final response = await http.post(
