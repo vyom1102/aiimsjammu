@@ -424,7 +424,7 @@ class BluetoothScanAndroidClass{
     print("findLowestRssiDevice");
     print(lowestValue);
 
-    return lowestKey ?? "No devices found";
+    return lowestKey ?? "";
   }
 
   String EM_findLowestRssiDevice(Map<String, double> rssiAverage) {
@@ -444,7 +444,7 @@ print(rssiAverage);
     print(lowestValue);
     print(lowestKey);
 
-    return lowestKey ?? "No devices found";
+    return lowestKey ?? "";
   }
 
 

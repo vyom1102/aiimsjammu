@@ -1769,7 +1769,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       widget.directsourceID = '';
     }
     // If nearestBeacon is provided, localize the user to it
-    if (nearestBeacon != null && nearestBeacon.isNotEmpty) {
+    if (nearestBeacon != null && nearestBeacon.isNotEmpty && SingletonFunctionController.apibeaconmap[nearestBeacon] != null) {
 
       print("Beacon localization $nearestBeacon");
       await _handleBeaconLocalization(nearestBeacon, speakTTS, render,providePinSelection);
@@ -2271,8 +2271,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
     if (speakTTS) {
       List<double> lvalue = tools.localtoglobal(
-          userSetLocation.doorX!.toInt(),
-          userSetLocation.doorY!.toInt(),
+          (userSetLocation.doorX??userSetLocation.coordinateX!).toInt(),
+          (userSetLocation.doorY??userSetLocation.coordinateY!).toInt(),
           SingletonFunctionController.building.patchData[user.bid]
       );
 
@@ -12514,7 +12514,7 @@ bool _isPlaying=false;
                 EdgeInsets.only(left: 20), // <--- padding added here
                 initialCameraPosition: _initialCameraPosition,
                 myLocationButtonEnabled: false,
-                myLocationEnabled: false,
+                myLocationEnabled: true,
                 zoomControlsEnabled: false,
                 zoomGesturesEnabled: true,
                 mapToolbarEnabled: false,
