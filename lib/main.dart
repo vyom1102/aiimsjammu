@@ -14,6 +14,7 @@ import 'package:flutter_localization/flutter_localization.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '/localization/locales.dart';
+import 'API/buildingAllApi.dart';
 import 'AiimsJammu/Screens/DoctorProfile1.dart';
 import 'AiimsJammu/Screens/ServiceInfo1.dart';
 import 'DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
@@ -80,6 +81,10 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  await buildingAllApi().fetchBuildingAllData().then((value){
+    buildingAllApi.findBuildings(value);
+  });
 
   WakelockPlus.enable();
 

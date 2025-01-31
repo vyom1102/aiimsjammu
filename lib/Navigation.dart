@@ -1770,14 +1770,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
     // If nearestBeacon is provided, localize the user to it
     if (nearestBeacon != null && nearestBeacon.isNotEmpty) {
+
+      print("Beacon localization $nearestBeacon");
       await _handleBeaconLocalization(nearestBeacon, speakTTS, render,providePinSelection);
     }
     // If polyID is provided, localize the user to the polygon
     else if (polyID != null && polyID.isNotEmpty) {
+      print("Polygon localization");
       await _handlePolygonLocalization(polyID, speakTTS, render);
     }
     // Fallback to global coordinates if neither nearestBeacon nor polyID is available
     else {
+      print("GPS localization");
       await _handleGlobalCoordinatesLocalization(speakTTS, render,providePinSelection);
     }
 
@@ -1881,7 +1885,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     await Future.delayed(const Duration(seconds: 9));
     subscription.cancel();
     gps.dispose();
-
+    print("User location is ${_kalmanFilter.latitudeEstimate},${_kalmanFilter.longitudeEstimate}");
     if(_kalmanFilter.latitudeEstimate != null && _kalmanFilter.longitudeEstimate != null) {
       UserState.geoLat = _kalmanFilter.latitudeEstimate;
       UserState.geoLng = _kalmanFilter.longitudeEstimate;
@@ -1903,8 +1907,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
 
   void unableToFindLocation(){
-    speak("Unable to find your location. Scan nearby QR to know your location",
-        _currentLocale);
+    speak("Unable to find your location. Scan nearby QR to know your location", _currentLocale);
     showLocationDialog(context);
     SingletonFunctionController.building.qrOpened = true;
   }
@@ -2126,9 +2129,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
       SingletonFunctionController.building
           .floor[userSetLocation.buildingID!] = userSetLocation.floor!;
-      if (widget.directLandID.length < 2) {
-        createRooms(SingletonFunctionController.building.polyLineData!,
-            userSetLocation.floor!);
+      if (widget.directLandID.length < 2 && userSetLocation.buildingID != buildingAllApi.outdoorID) {
+        createRooms(SingletonFunctionController.building.polyLineData!, userSetLocation.floor!);
       }
 
       SingletonFunctionController.building.landmarkdata!.then((value) {
@@ -2273,7 +2275,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           userSetLocation.doorY!.toInt(),
           SingletonFunctionController.building.patchData[user.bid]
       );
-      try{
+
+      if(SingletonFunctionController.apibeaconmap[lastBeaconValue] != null){
         List<double> uvalue = tools.localtoglobal(
             SingletonFunctionController.apibeaconmap[lastBeaconValue]!.coordinateX!.toInt(),
             SingletonFunctionController.apibeaconmap[lastBeaconValue]!.coordinateY!.toInt(),
@@ -2301,7 +2304,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             );
           });
         });
-      }finally{
+      }
+
         mapState.zoom = 22.0;
         _googleMapController.animateCamera(
           CameraUpdate.newLatLngZoom(
@@ -2309,7 +2313,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             22, // Specify your custom zoom level here
           ),
         );
-      }
 
     }
     Future.delayed(Duration(milliseconds: 5000)).then((value){
@@ -3027,7 +3030,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         isBlueToothLoading = false;
       });
     }
-
+    SingletonFunctionController.building.buildingsLoaded = true;
   }
 
   var versionBox = Hive.box('VersionData');
@@ -13240,10 +13243,8 @@ bool _isPlaying=false;
           //   backgroundColor: Colors
           //       .white, // Set the background color of the FAB
           // ),
-          (!SingletonFunctionController.building.destinationQr &&
-              !user.initialallyLocalised &&
-              !SingletonFunctionController.building.qrOpened && !PinLandmarkPannel.isPanelOpened())
-              ? Container(
+          (SingletonFunctionController.building.buildingsLoaded || SingletonFunctionController.building.destinationQr || user.initialallyLocalised || SingletonFunctionController.building.qrOpened || PinLandmarkPannel.isPanelOpened())
+              ?Container(): Container(
             height: screenHeight,
             width: screenWidth,
             color: Colors.white.withOpacity(0.8),
@@ -13265,8 +13266,7 @@ bool _isPlaying=false;
                 )
               ],
             ),
-          )
-              : Container(),
+          ),
           ExcludeSemantics(child: Visibility(visible:nearbyLandmarks.isNotEmpty,child: Center(child: PickupLocationPin())))
         ],
       ),

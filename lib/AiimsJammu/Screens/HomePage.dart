@@ -23,6 +23,14 @@ import 'package:iwaymaps/AiimsJammu/Widgets/OpeningClosingStatus.dart';
 import '../../API/RefreshTokenAPI.dart';
 import '../../API/UsergetAPI.dart';
 import '../../APIMODELS/DataVersion.dart';
+import '../../DATABASE/BOXES/BeaconAPIModelBOX.dart';
+import '../../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
+import '../../DATABASE/BOXES/DataVersionLocalModelBOX.dart';
+import '../../DATABASE/BOXES/LandMarkApiModelBox.dart';
+import '../../DATABASE/BOXES/OutDoorModelBOX.dart';
+import '../../DATABASE/BOXES/PatchAPIModelBox.dart';
+import '../../DATABASE/BOXES/PolyLineAPIModelBOX.dart';
+import '../../DATABASE/BOXES/WayPointModelBOX.dart';
 import '../../Elements/HelperClass.dart';
 import '../../UserState.dart';
 import '../../VersioInfo.dart';
@@ -765,6 +773,25 @@ class _HomePageState extends State<HomePage> {
         // news.clear();
         DashboardListBox.clear();
       });
+
+      final BeaconBox = BeaconAPIModelBOX.getData();
+      final DataBox = DataVersionLocalModelBOX.getData();
+      final BuildingAllBox = BuildingAllAPIModelBOX.getData();
+      final LandMarkBox = LandMarkApiModelBox.getData();
+      final PatchBox = PatchAPIModelBox.getData();
+      final PolyLineBox = PolylineAPIModelBOX.getData();
+      final WayPointBox = WayPointModeBOX.getData();
+      final OutBuildingBox = OutDoorModeBOX.getData();
+
+      BeaconBox.clear();
+      BuildingAllBox.clear();
+      LandMarkBox.clear();
+      PatchBox.clear();
+      PolyLineBox.clear();
+      WayPointBox.clear();
+      OutBuildingBox.clear();
+      DataBox.clear();
+
       print("Refreshed");
 
       await _loadImageCorousalFromAPI();
