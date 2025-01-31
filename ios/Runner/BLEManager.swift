@@ -2,8 +2,9 @@
 //  BLEManager.swift
 //  Runner
 //
-//  Created by Wilson on 14/01/25.
+//  Created by Wilson on 31/01/25.
 //
+
 
 import Foundation
 import CoreBluetooth
