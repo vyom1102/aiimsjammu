@@ -9,7 +9,7 @@ import app_links
 import connectivity_plus
 import device_info_plus
 import file_selector_macos
-import flutter_blue_plus
+import flutter_blue_plus_darwin
 import flutter_local_notifications
 import flutter_localization
 import flutter_tts
@@ -19,7 +19,7 @@ import path_provider_foundation
 import share_plus
 import shared_preferences_foundation
 import speech_to_text_macos
-import sqflite
+import sqflite_darwin
 import url_launcher_macos
 import wakelock_plus
 

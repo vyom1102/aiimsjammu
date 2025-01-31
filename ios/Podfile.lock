@@ -1,8 +1,6 @@
 PODS:
   - app_links (0.0.2):
     - Flutter
-  - app_settings (5.1.1):
-    - Flutter
   - barcode_scan2 (0.0.1):
     - Flutter
     - MTBBarcodeScanner
@@ -19,8 +17,9 @@ PODS:
   - Flutter (1.0.0)
   - flutter_beep (0.0.1):
     - Flutter
-  - flutter_blue_plus (0.0.1):
+  - flutter_blue_plus_darwin (0.0.2):
     - Flutter
+    - FlutterMacOS
   - flutter_compass (0.0.1):
     - Flutter
   - flutter_local_notifications (0.0.1):
@@ -92,7 +91,6 @@ PODS:
 
 DEPENDENCIES:
   - app_links (from `.symlinks/plugins/app_links/ios`)
-  - app_settings (from `.symlinks/plugins/app_settings/ios`)
   - barcode_scan2 (from `.symlinks/plugins/barcode_scan2/ios`)
   - bluetooth_enable_fork (from `.symlinks/plugins/bluetooth_enable_fork/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/darwin`)
@@ -100,7 +98,7 @@ DEPENDENCIES:
   - device_information (from `.symlinks/plugins/device_information/ios`)
   - Flutter (from `Flutter`)
   - flutter_beep (from `.symlinks/plugins/flutter_beep/ios`)
-  - flutter_blue_plus (from `.symlinks/plugins/flutter_blue_plus/ios`)
+  - flutter_blue_plus_darwin (from `.symlinks/plugins/flutter_blue_plus_darwin/darwin`)
   - flutter_compass (from `.symlinks/plugins/flutter_compass/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_localization (from `.symlinks/plugins/flutter_localization/ios`)
@@ -136,8 +134,6 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   app_links:
     :path: ".symlinks/plugins/app_links/ios"
-  app_settings:
-    :path: ".symlinks/plugins/app_settings/ios"
   barcode_scan2:
     :path: ".symlinks/plugins/barcode_scan2/ios"
   bluetooth_enable_fork:
@@ -152,8 +148,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_beep:
     :path: ".symlinks/plugins/flutter_beep/ios"
-  flutter_blue_plus:
-    :path: ".symlinks/plugins/flutter_blue_plus/ios"
+  flutter_blue_plus_darwin:
+    :path: ".symlinks/plugins/flutter_blue_plus_darwin/darwin"
   flutter_compass:
     :path: ".symlinks/plugins/flutter_compass/ios"
   flutter_local_notifications:
@@ -199,15 +195,14 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   app_links: e7a6750a915a9e161c58d91bc610e8cd1d4d0ad0
-  app_settings: 017320c6a680cdc94c799949d95b84cb69389ebc
   barcode_scan2: 0af2bb63c81b4565aab6cd78278e4c0fa136dbb0
   bluetooth_enable_fork: 73b8ca6e67230a9baa04010cd5c1e824e00d2797
-  connectivity_plus: 4c41c08fc6d7c91f63bc7aec70ffe3730b04f563
+  connectivity_plus: 18382e7311ba19efcaee94442b23b32507b20695
   device_info_plus: 97af1d7e84681a90d0693e63169a5d50e0839a0d
   device_information: d652f6dcea86bdc5300ffd495486de1d5047bf4f
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_beep: 54fb393b22dfa0f0e4573c81b1c74dd71c4e5af8
-  flutter_blue_plus: 4837da7d00cf5d441fdd6635b3a57f936778ea96
+  flutter_blue_plus_darwin: 3ea4ec9133b377febcc8a70b28cd2d2dc9242bd9
   flutter_compass: cbbd285cea1584c7ac9c4e0c3e1f17cbea55e855
   flutter_local_notifications: 4cde75091f6327eb8517fa068a0a5950212d2086
   flutter_localization: f43b18844a2b3d2c71fd64f04ffd6b1e64dd54d4
@@ -235,8 +230,8 @@ SPEC CHECKSUMS:
   Try: 5ef669ae832617b3cee58cb2c6f99fb767a4ff96
   url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
   vibration: 7d883d141656a1c1a6d8d238616b2042a51a1241
-  wakelock_plus: 78ec7c5b202cab7761af8e2b2b3d0671be6c4ae1
+  wakelock_plus: 373cfe59b235a6dd5837d0fb88791d2f13a90d56
 
 PODFILE CHECKSUM: a176e2e187df16cabfd52e549ea68dab4b5027ea
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2
