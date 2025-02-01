@@ -179,8 +179,6 @@ class BluetoothScanAndroidClass{
     try {
       // Listen to the stream continuously
       subscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
-        print("Received device detail: $deviceDetail");
-
         BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
         if (apibeaconmap.containsKey(deviceDetails.DeviceName)) {
           print("Device found in apibeaconmap: ${deviceDetails.DeviceName}");

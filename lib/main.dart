@@ -82,9 +82,13 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  await buildingAllApi().fetchBuildingAllData().then((value){
-    buildingAllApi.findBuildings(value);
-  });
+  var signInDatabaseBox = Hive.box('SignInDatabase');
+  if (signInDatabaseBox.containsKey("accessToken")) {
+    await buildingAllApi().fetchBuildingAllData().then((value){
+      buildingAllApi.findBuildings(value);
+    });
+  }
+
 
   WakelockPlus.enable();
 
@@ -115,40 +119,18 @@ class _MyAppState extends State<MyApp> {
 
     super.initState();
   }
-  // void _initDeepLinkListener() async {
-  //   _appLinks = AppLinks();
-  //   _appLinks.uriLinkStream.listen((Uri? uri) {
-  //     if (uri != null) {
-  //       print('Received deep link: $uri');
-  //       if (uri.toString().contains("iwayplus://aiimsj.com/doctor")) {
-  //         final docId = uri.queryParameters['docId'];
-  //         if (docId != null) {
-  //           setState(() {
-  //             initialDocId = docId;
-  //           });
-  //         }
-  //       } else if (uri.toString().contains("iwayplus://aiimsj.com/service")) {
-  //         final serviceId = uri.queryParameters['serviceId'];
-  //         if (serviceId != null) {
-  //           setState(() {
-  //             initialServiceId = serviceId;
-  //           });
-  //         }
-  //       }
-  //
-  //     }
-  //   });
-  // }
+
+
   void _initDeepLinkListener(BuildContext c) async {
     _appLinks = AppLinks();
     _appLinks.uriLinkStream.listen((Uri? uri) {
-      Deeplink.deeplinkConditions(uri, c).then((v){
-        setState(() {
-          initialDocId = Deeplink.initialDocId;
-          initialServiceId=Deeplink.initialServiceId;
-          _accessToken=Deeplink.accessToken;
+        Deeplink.deeplinkConditions(uri, c).then((v){
+          setState(() {
+            initialDocId = Deeplink.initialDocId;
+            initialServiceId=Deeplink.initialServiceId;
+            _accessToken=Deeplink.accessToken;
+          });
         });
-      });
     });
   }
   void configureLocalization(){

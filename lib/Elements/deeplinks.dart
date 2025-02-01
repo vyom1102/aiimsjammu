@@ -18,15 +18,19 @@ class Deeplink{
   static String landmarkID = "";
   static String? source;
   static var signinBox = Hive.box('SignInDatabase');
+  static bool gotDeepLink = false;
 
   static Future<void> deeplinkConditions(Uri?uri,BuildContext context)async{
     if (uri != null) {
       print('Received deep link: ${uri.toString()}');
-      if (uri.toString().contains("rgci.com")) {
+      if (uri.toString().contains("rgci.com") && !gotDeepLink) {
+        gotDeepLink = true;
         await rgciDeepLink(uri, context, "rgci.com");
-      }else if(uri.toString().contains("iwaymaps.com")){
+      }else if(uri.toString().contains("iwaymaps.com") && !gotDeepLink){
+        gotDeepLink = true;
         await iwaymapsDeepLink(uri, context, "iwaymaps.com");
-      }else if (uri.toString().contains("aiimsj.com")){
+      }else if (uri.toString().contains("aiimsj.com") && !gotDeepLink){
+        gotDeepLink = true;
         await aiimsjDeepLink(uri, context, "aiimsj.com");
       }
     }
@@ -165,15 +169,11 @@ class Deeplink{
       if(s != null){
         source = s;
       }
+
+      print("bid  landmarkID  source $bid <-----> $landmarkID <------> $source");
       await buildingAllApi().fetchBuildingAllData().then((value)async{
-        print("deeplink $bid ${uri!.queryParameters['bid']} $value");
-        String venue = value.where((building)=>building.sId == bid).first.venueName!;
-        HashMap<String,List<buildingAll>> venueMap = await HelperClass.groupBuildings(value);
-        Map<String, g.LatLng> AllBuildingMap = await HelperClass.createAllbuildingMap(venueMap, venue);
-        buildingAllApi.allBuildingID = AllBuildingMap;
-        buildingAllApi.selectedBuildingID = bid!;
-        buildingAllApi.selectedID = bid!;
-        buildingAllApi.selectedVenue = venue;
+        buildingAllApi.findBuildings(value);
+        print("deeplink $bid ${uri!.queryParameters['bid']}");
         if(Deeplink.source != null){
           Navigator.push(
               context,

@@ -13,6 +13,7 @@ import 'package:iwaymaps/ContactUs.dart';
 import 'package:iwaymaps/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
+import '../API/buildingAllApi.dart';
 import '../Elements/HelperClass.dart';
 import '../MainScreen.dart';
 import 'ForgetPassword.dart';
@@ -148,6 +149,9 @@ bool isLoading = false;
       });
       HelperClass.showToast("Invalid Username or Password");
     } else {
+      await buildingAllApi().fetchBuildingAllData().then((value){
+        buildingAllApi.findBuildings(value);
+      });
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(

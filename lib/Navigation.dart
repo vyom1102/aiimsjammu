@@ -3936,30 +3936,23 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     // polygonPoints=[];
   }
 
-  Future<void> addselectedMarker(LatLng Point) async {
+  Future<void> addselectedMarker(LatLng point) async {
     selectedroomMarker.clear(); // Clear existing markers
+    print("addSelectedMarker $point");
+
+    String buildingKey = buildingAllApi.getStoredString();
 
     setState(() {
-      if (selectedroomMarker.containsKey(buildingAllApi.getStoredString())) {
-        selectedroomMarker[buildingAllApi.getStoredString()]?.add(
-          Marker(
-            markerId: MarkerId('selectedroomMarker'),
-            position: Point,
-            icon: BitmapDescriptor.defaultMarker,
-          ),
-        );
-      } else {
-        selectedroomMarker[buildingAllApi.getStoredString()] = Set<Marker>();
-        selectedroomMarker[buildingAllApi.getStoredString()]?.add(
-          Marker(
-            markerId: MarkerId('selectedroomMarker'),
-            position: Point,
-            icon: BitmapDescriptor.defaultMarker,
-          ),
-        );
-      }
+      selectedroomMarker[buildingKey] = {
+        Marker(
+          markerId: const MarkerId('selectedroomMarker'),
+          position: point,
+          icon: BitmapDescriptor.defaultMarker,
+        ),
+      };
     });
   }
+
 
   LatLng calculateRoomCenter(List<LatLng> polygonPoints) {
     double lat = 0.0;
@@ -4476,22 +4469,36 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   int currentToggleFloor =0;
 
-  Future<void> polygonTap(List<LatLng> coordinates, String id) async {
+  Future<void> polygonTap(List<LatLng>? coordinates, String id) async {
+    print("called polygonTap $id");
     land? singletonData = await SingletonFunctionController.building.landmarkdata;
+    Landmarks? landmark;
     if(singletonData!.landmarksMap![id] == null){
       return;
+    }else{
+      landmark = singletonData!.landmarksMap![id];
     }
-    _googleMapController.animateCamera(
-      CameraUpdate.newLatLngZoom(
-        tools.calculateRoomCenterinLatLng(coordinates),
-        22,
-      ),
-    );
+
+    if(coordinates != null){
+      _googleMapController.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          tools.calculateRoomCenterinLatLng(coordinates),
+          22,
+        ),
+      );
+    }else{
+      print("called polygonTap animating to landmark");
+      _googleMapController.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(double.parse(landmark!.properties!.latitude!), double.parse(landmark.properties!.longitude!)),
+          22,
+        ),
+      );
+    }
+
+
     setState(() {
-      if (SingletonFunctionController.building
-          .selectedLandmarkID != id &&
-          !user.isnavigating &&
-          !_isRoutePanelOpen) {
+      if (SingletonFunctionController.building.selectedLandmarkID != id && !user.isnavigating && !_isRoutePanelOpen) {
         user.reset();
         PathState = pathState.withValues(
             -1,
@@ -4522,7 +4529,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         _isLandmarkPanelOpen = true;
         PathState.directions = [];
         interBuildingPath.clear();
-        addselectedRoomMarker(coordinates, 'assets/Generic Marker.png');
+        if(coordinates != null){
+          print("called polygonTap end first");
+          addselectedRoomMarker(coordinates, 'assets/Generic Marker.png');
+        }else{
+          print("called polygonTap end second");
+          addselectedMarker(LatLng(double.parse(landmark!.properties!.latitude!), double.parse(landmark.properties!.longitude!)));
+        }
+
       }
     });
   }
@@ -5895,6 +5909,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         snapshot.data!.landmarksMap![
         SingletonFunctionController.building.selectedLandmarkID] ==
             null) {
+      print("${!snapshot.hasData} || ${snapshot.data?.landmarksMap == null} || ${snapshot.data?.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]}");
       print("landmark pannel got id ${SingletonFunctionController.building.selectedLandmarkID}");
       //
       // If the data is not available, return an empty container
@@ -11894,14 +11909,12 @@ bool _isPlaying=false;
     _feedbackController.open();
   }
 
-  void onLandmarkVenueClicked(String ID,
-      {bool DirectlyStartNavigation = false}) async {
+  void onLandmarkVenueClicked(String ID, {bool DirectlyStartNavigation = false}) async {
     final snapshot = await SingletonFunctionController.building.landmarkdata;
-    SingletonFunctionController.building.selectedLandmarkID = ID;
 
     _isBuildingPannelOpen = false;
 
-    if (!DirectlyStartNavigation) {
+    /// floor alignement
       if (snapshot!.landmarksMap![ID]!.floor != 0) {
         List<PolyArray> prevFloorLifts = findLift(
             tools.numericalToAlphabetical(0),
@@ -11929,18 +11942,17 @@ bool _isPlaying=false;
         UserState.xdiff = 0;
         UserState.ydiff = 0;
       }
+      ///
+
 
       List<int> value = [
         snapshot!.landmarksMap![ID]!.coordinateX!,
         snapshot!.landmarksMap![ID]!.coordinateY!
       ];
-      List<double> coords = tools.localtoglobal(
-          value[0],
-          value[1],
-          SingletonFunctionController
-              .building.patchData[snapshot!.landmarksMap![ID]!.buildingID]);
+      List<double> coords = tools.localtoglobal(value[0], value[1], SingletonFunctionController.building.patchData[snapshot!.landmarksMap![ID]!.buildingID]);
       int floor = snapshot!.landmarksMap![ID]!.floor!;
 
+      /// room selection
       try {
         List<Nodes>? nodes = SingletonFunctionController
             .building
@@ -11953,6 +11965,7 @@ bool _isPlaying=false;
             .firstWhere((element) =>
         element.id == snapshot!.landmarksMap![ID]!.properties!.polyId)
             .nodes;
+
         List<LatLng> corners = [];
         for (var element in nodes!) {
           List<double> value = tools.localtoglobal(
@@ -11971,6 +11984,7 @@ bool _isPlaying=false;
         ));
         cachedPolygon.clear();
       } catch (e) {}
+    ///
 
       _googleMapController.animateCamera(
         CameraUpdate.newLatLngZoom(
@@ -11991,102 +12005,8 @@ bool _isPlaying=false;
         createMarkers(snapshot!, floor);
       }
 
-      setState(() {
-        user.reset();
-        PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
-        pathMarkers.clear();
-        PathState.path.clear();
-        PathState.sourcePolyID = "";
-        PathState.destinationPolyID = "";
-        singleroute.clear(); pathCovered.clear();
-
-        user.isnavigating = false;
-        _isnavigationPannelOpen = false;
-        SingletonFunctionController.building.selectedLandmarkID = ID;
-        SingletonFunctionController.building.ignoredMarker.clear();
-        SingletonFunctionController.building.ignoredMarker.add(ID);
-        _isBuildingPannelOpen = false;
-        _isRoutePanelOpen = false;
-        singleroute.clear(); pathCovered.clear();
-        _isLandmarkPanelOpen = true;
-        PathState.directions = [];
-        interBuildingPath.clear();
-
-        addselectedMarker(LatLng(coords[0], coords[1]));
-      });
-    } else {
-      setState(() {
-        if (user.coordY != 0 && user.coordX != 0) {
-          PathState.sourceX = user.coordX;
-          PathState.sourceY = user.coordY;
-          PathState.sourceFloor = user.floor;
-          PathState.sourcePolyID = user.key;
-
-          PathState.sourceName = "Your current location";
-          PathState.destinationPolyID =
-          SingletonFunctionController.building.selectedLandmarkID!;
-          PathState.destinationName = snapshot!
-              .landmarksMap![
-          SingletonFunctionController.building.selectedLandmarkID]!
-              .name ??
-              snapshot!
-                  .landmarksMap![
-              SingletonFunctionController.building.selectedLandmarkID]!
-                  .element!
-                  .subType!;
-          PathState.destinationFloor = snapshot!
-              .landmarksMap![
-          SingletonFunctionController.building.selectedLandmarkID]!
-              .floor!;
-          PathState.sourceBid = user.bid;
-
-          PathState.destinationBid = snapshot!
-              .landmarksMap![
-          SingletonFunctionController.building.selectedLandmarkID]!
-              .buildingID!;
-
-          setState(() {
-            calculatingPath = true;
-          });
-          Future.delayed(Duration(seconds: 1), () {
-            calculateroute(snapshot!.landmarksMap!).then((value) {
-              calculatingPath = false;
-              _isLandmarkPanelOpen = false;
-              _isRoutePanelOpen = true;
-            });
-          });
-        } else {
-          PathState.sourceName = "Choose Starting Point";
-          PathState.destinationPolyID =
-          SingletonFunctionController.building.selectedLandmarkID!;
-          PathState.destinationName = snapshot!
-              .landmarksMap![
-          SingletonFunctionController.building.selectedLandmarkID]!
-              .name ??
-              snapshot!
-                  .landmarksMap![
-              SingletonFunctionController.building.selectedLandmarkID]!
-                  .element!
-                  .subType!;
-          PathState.destinationFloor = snapshot!
-              .landmarksMap![
-          SingletonFunctionController.building.selectedLandmarkID]!
-              .floor!;
-          SingletonFunctionController.building.selectedLandmarkID = "";
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => SourceAndDestinationPage(
-                    DestinationID: PathState.destinationPolyID,
-                    user: user,
-                  ))).then((value) {
-            if (value != null) {
-              fromSourceAndDestinationPage(value);
-            }
-          });
-        }
-      });
-    }
+    await Future.delayed(const Duration(milliseconds: 2000));
+      polygonTap(null,ID);
   }
 
   void fromSourceAndDestinationPage(List<String> value) {
@@ -12328,6 +12248,7 @@ bool _isPlaying=false;
   @override
   void dispose() {
     disposed = true;
+    _controller.dispose();
     UserState.geoLat=0.0;
     UserState.geoLng=0.0;
     flutterTts.stop();
