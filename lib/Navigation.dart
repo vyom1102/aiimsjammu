@@ -472,7 +472,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     )..repeat(reverse: true);
 
     _animationController = AnimationController(
-      duration: Duration(milliseconds: 2000), // Adjust for smoother animation
+      duration: Duration(milliseconds: 800), // Adjust for smoother animation
       vsync: this,
     );
 
@@ -4957,6 +4957,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                             PathState = pathState.withValues(
                                 -1, -1, -1, -1, -1, -1, null, 0);
                             pathMarkers.clear();
+
                             PathState.path.clear();
                             PathState.sourcePolyID = "";
                             PathState.destinationPolyID = "";
@@ -8190,7 +8191,7 @@ bool _isPlaying=false;
 
 
   }
-  
+
   final FocusNode _directionFocus=FocusNode();
   final FocusNode _startbuttonFocus=FocusNode();
 
@@ -12005,7 +12006,9 @@ bool _isPlaying=false;
         createMarkers(snapshot!, floor);
       }
 
-    await Future.delayed(const Duration(milliseconds: 2000));
+      if(widget.directLandID.length > 2) {
+        await Future.delayed(const Duration(milliseconds: 2000));
+      }
       polygonTap(null,ID);
   }
 
@@ -12424,9 +12427,8 @@ bool _isPlaying=false;
     return Scaffold(
       body: Stack(
         children: [
-          detected
-              ? Semantics(excludeSemantics: true, child: ExploreModePannel())
-              : Semantics(excludeSemantics: true, child: Container()),
+          detected ? Semantics(excludeSemantics: true, child: ExploreModePannel()) : Semantics(excludeSemantics: true, child: Container()),
+
           Semantics(
             excludeSemantics: true,
             child: Container(
@@ -12534,8 +12536,7 @@ bool _isPlaying=false;
           //debug----
 
 
-          DebugToggle.PDRIcon
-              ? Positioned(
+          DebugToggle.PDRIcon ? Positioned(
               top: 150,
               right: 50,
               child: Container(
@@ -12998,37 +12999,7 @@ bool _isPlaying=false;
               ),
             ),
           ),
-          //-------
-          // (user.isnavigating && recenter)? Positioned(
-          //   bottom: 145,
-          //   right: 220,
-          //   child: Container(
-          //     height: 50,
-          //     width: 150, // Adjust width as needed
-          //     child: ElevatedButton(
-          //       onPressed: () {
-          //         // Implement recenter logic here
-          //         _recenterMap();
-          //       },
-          //       style: ElevatedButton.styleFrom(
-          //         foregroundColor: Colors.white, // Background color
-          //         backgroundColor: Colors.blueGrey.withOpacity(0.5), // Text color
-          //         shape: RoundedRectangleBorder(
-          //           borderRadius: BorderRadius.circular(30), // Rounded corners
-          //         ),
-          //       ),
-          //       child: Row(
-          //         mainAxisSize: MainAxisSize.min,
-          //         mainAxisAlignment: MainAxisAlignment.center,
-          //         children: [
-          //           Icon(Icons.my_location, size: 24),
-          //           SizedBox(width: 8), // Space between icon and text
-          //           Text('Recenter', style: TextStyle(fontSize: 16)),
-          //         ],
-          //       ),
-          //     ),
-          //   ),
-          // ):Container(),
+
           SafeArea(
             child: Stack(
               children:[
@@ -13077,6 +13048,7 @@ bool _isPlaying=false;
                   )) : Container()] ,
             ),
           ),
+
           FutureBuilder(
             future: SingletonFunctionController.building.landmarkdata,
             builder: (context, snapshot) {
@@ -13098,72 +13070,7 @@ bool _isPlaying=false;
           SafeArea(child: PinLandmarkPannel.getPanelWidget(context,updateNearbyLandmarkMarkers, localizeOnPinedLandmark, closePinnedLandmarkPannel, nearbyLandmarks,PinedLandmark)),
           detected ? Semantics(child: SafeArea(child: nearestLandmarkpannel())) : Container(),
           SizedBox(height: 28.0), // Adjust the height as needed
-          // FloatingActionButton(
-          //     onPressed: (){
-          //
-          //       //SingletonFunctionController.building.floor == 0 ? 'G' : '${SingletonFunctionController.building.floor}',
-          //
-          //       int firstKey = SingletonFunctionController.building.floor.values.first;
-          //
-          //
-          //
-          //
-          //
-          //
-          //
-          //     },
-          //     child: Icon(Icons.add)
-          // ),
 
-          // FloatingActionButton(
-          //   onPressed: () async {
-          //
-          //     //StopPDR();
-          //
-          //     if (user.initialallyLocalised) {
-          //       setState(() {
-          //         isLiveLocalizing = !isLiveLocalizing;
-          //       });
-          //       HelperClass.showToast("realTimeReLocalizeUser started");
-          //
-          //       Timer.periodic(
-          //           Duration(milliseconds: 5000),
-          //               (timer) async {
-          //
-          //             SingletonFunctionController.btadapter.startScanning(resBeacons);
-          //
-          //
-          //             // setState(() {
-          //             //   sumMap=  SingletonFunctionController.btadapter.calculateAverage();
-          //             // });
-          //
-          //
-          //             Future.delayed(Duration(milliseconds: 2000)).then((value) => {
-          //               realTimeReLocalizeUser(resBeacons)
-          //               // listenToBin()
-          //
-          //
-          //             });
-          //
-          //             setState(() {
-          //               debugPQ = SingletonFunctionController.btadapter.returnPQ();
-          //
-          //             });
-          //
-          //           });
-          //
-          //     }
-          //
-          //   },
-          //   child: Icon(
-          //     Icons.location_history_sharp,
-          //     color: (isLiveLocalizing)
-          //         ? Colors.cyan
-          //         : Colors.black,
-          //   ),
-          //   backgroundColor: Colors
-          //       .white, // Set the background color of the FAB
-          // ),
           (SingletonFunctionController.building.buildingsLoaded || SingletonFunctionController.building.destinationQr || user.initialallyLocalised || SingletonFunctionController.building.qrOpened || PinLandmarkPannel.isPanelOpened())
               ?Container(): Container(
             height: screenHeight,
@@ -13188,121 +13095,12 @@ bool _isPlaying=false;
               ],
             ),
           ),
+
           ExcludeSemantics(child: Visibility(visible:nearbyLandmarks.isNotEmpty,child: Center(child: PickupLocationPin())))
         ],
       ),
     );
   }
-
-  //
-  // int d=0;
-  // bool listenToBin(){
-  //   double highestweight = 0;
-  //   String nearestBeacon = "";
-  //   Map<String, double> sumMap = SingletonFunctionController.btadapter.calculateAverage();
-  //
-  //
-  //
-  //  // widget.direction = "";
-  //
-  //
-  //   for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
-  //     if(SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty){
-  //       SingletonFunctionController.btadapter.BIN[i]!.forEach((key, value) {
-  //         key = "";
-  //         value = 0.0;
-  //       });
-  //     }
-  //   }
-  //   SingletonFunctionController.btadapter.numberOfSample.clear();
-  //   SingletonFunctionController.btadapter.rs.clear();
-  //   Building.thresh = "";
-  //
-  //   d++;
-  //   sumMap.forEach((key, value) {
-  //
-  //     setState(() {
-  //      // direction = "${widget.direction}$key   $value\n";
-  //     });
-  //
-  //
-  //
-  //     if(value>highestweight){
-  //       highestweight =  value;
-  //       nearestBeacon = key;
-  //     }
-  //   });
-  //
-  //   //
-  //
-  //
-  //   if(nearestBeacon !=""){
-  //
-  //     if(user.pathobj.path[Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor] != null){
-  //       if(user.key != Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.sId){
-  //
-  //         if(user.floor == Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor  && highestweight >9){
-  //           List<int> beaconcoord = [Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.coordinateX!,Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.coordinateY!];
-  //           List<int> usercoord = [user.showcoordX, user.showcoordY];
-  //           double d = tools.calculateDistance(beaconcoord, usercoord);
-  //           if(d < 5){
-  //             //near to user so nothing to do
-  //             return true;
-  //           }else{
-  //             int distanceFromPath = 100000000;
-  //             int? indexOnPath = null;
-  //             int numCols = user.pathobj.numCols![user.Bid]![user.floor]!;
-  //             user.path.forEach((node) {
-  //               List<int> pathcoord = [node % numCols, node ~/ numCols];
-  //               double d1 = tools.calculateDistance(beaconcoord, pathcoord);
-  //               if(d1<distanceFromPath){
-  //                 distanceFromPath = d1.toInt();
-  //
-  //
-  //                 indexOnPath = user.path.indexOf(node);
-  //
-  //               }
-  //             });
-  //
-  //             if(distanceFromPath>5){
-  //               _timer.cancel();
-  //               repaintUser(nearestBeacon);
-  //               return false;//away from path
-  //             }else{
-  //               user.key = Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.sId!;
-  //
-  //               speak("You are near ${Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.name}");
-  //               user.moveToPointOnPath(indexOnPath!);
-  //               moveUser();
-  //               return true; //moved on path
-  //             }
-  //           }
-  //
-  //
-  //           //
-  //           //
-  //           //
-  //           //
-  //           //
-  //         }else{
-  //
-  //           speak("You have reached ${tools.numericalToAlphabetical(Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor!)} floor");
-  //           paintUser(nearestBeacon); //different floor
-  //           return true;
-  //         }
-  //
-  //       }
-  //     }else{
-  //
-  //
-  //
-  //       _timer.cancel();
-  //       repaintUser(nearestBeacon);
-  //       return false;
-  //     }
-  //   }
-  //   return false;
-  // }
 
   Map<String, double> sortMapByValue(Map<String, double> map) {
     var sortedEntries = map.entries.toList()

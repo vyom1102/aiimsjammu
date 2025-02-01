@@ -39,6 +39,7 @@ Future<List<List<int>>> dijkstra(Map<String, dynamic> graph, String start, Strin
         path.add(currentNode.split(',').map(int.parse).toList());
         currentNode = previous[currentNode]!;
       }
+      print("currentNode $currentNode");
       path.add(currentNode.split(',').map(int.parse).toList()); // Add the start node
       // if(isoutdoorPath){
         //return path.reversed.toList();
