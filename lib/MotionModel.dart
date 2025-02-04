@@ -1,6 +1,6 @@
-import '/navigationTools.dart';
 import 'UserState.dart';
 import 'buildingState.dart';
+import 'navigationTools.dart';
 
 class MotionModel{
   static int stuckCount = 0;

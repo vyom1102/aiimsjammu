@@ -15,9 +15,12 @@ import 'package:flutter_tts/flutter_tts.dart';
 import '../API/buildingAllApi.dart';
 import '../BluetoothScanAndroidClass.dart';
 
+
 import 'package:vibration/vibration.dart';
 
+import '../BluetoothScanIOSClass.dart';
 import '../Cell.dart';
+import '../ELEMENTS/UserCredential.dart';
 import '../UserState.dart';
 import '../bluetooth_scanning.dart';
 import '../buildingState.dart';
@@ -28,8 +31,6 @@ import '../Navigation.dart';
 import '../localization/locales.dart';
 import '../navigationTools.dart';
 import '../singletonClass.dart';
-import '/BluetoothScanIOSClass.dart';
-import 'UserCredential.dart';
 
 
 class DirectionHeader extends StatefulWidget {

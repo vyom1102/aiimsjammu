@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import '/DATABASE/BOXES/LandMarkApiModelBox.dart';
-import '/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
-import '/API/buildingAllApi.dart';
-import '/Elements/HelperClass.dart';
+
+import '../APIMODELS/landmark.dart';
+import '../DATABASE/BOXES/LandMarkApiModelBox.dart';
+import '../DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
+import '../ELEMENTS/HelperClass.dart';
+import '../api/buildingAllApi.dart';
 import '../config.dart';
-import '/APIMODELS/landmark.dart';
+
 import '../VersioInfo.dart';
 import 'RefreshTokenAPI.dart';
 import 'package:hive/hive.dart';

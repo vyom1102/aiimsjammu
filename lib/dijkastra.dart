@@ -2,7 +2,7 @@
 import 'dart:math';
 
 import 'package:collection/collection.dart';
-import '/path.dart';
+import 'package:iwaymaps/path.dart';
 
 import 'navigationTools.dart';
 
@@ -42,7 +42,7 @@ Future<List<List<int>>> dijkstra(Map<String, dynamic> graph, String start, Strin
       print("currentNode $currentNode");
       path.add(currentNode.split(',').map(int.parse).toList()); // Add the start node
       // if(isoutdoorPath){
-        //return path.reversed.toList();
+      //return path.reversed.toList();
       // }
       if(isoutdoorPath){
         return path.reversed.toList();

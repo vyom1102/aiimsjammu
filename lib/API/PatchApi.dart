@@ -4,11 +4,11 @@ import 'package:device_information/device_information.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
+
+import '../APIMODELS/patchDataModel.dart';
+import '../DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import '../api/buildingAllApi.dart';
 import '../config.dart';
-import '/APIMODELS/patchDataModel.dart';
-import '/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
-import '/Navigation.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 
@@ -132,7 +132,6 @@ class patchAPI {
     } else {
       print("PATCH API in else error");
       print(Exception);
-      print("${response.statusCode} in ${id??buildingAllApi.getStoredString()}");
       throw Exception('Failed to load data ${id??buildingAllApi.getStoredString()} ${response.statusCode} ${response.body}');
     }
   }

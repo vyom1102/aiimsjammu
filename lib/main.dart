@@ -9,6 +9,8 @@ import 'package:hive/hive.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/UserState.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
+import 'package:iwaymaps/websocket/interactionManager.dart';
+import 'package:iwaymaps/websocket/sessionManager.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -33,7 +35,8 @@ import 'Elements/deeplinks.dart';
 import 'LOGIN SIGNUP/SignIn.dart';
 import 'MainScreen.dart';
 
-
+final interactionManager = InteractionManager();
+final sessionManager = SessionManager();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // await Firebase.initializeApp();
@@ -62,6 +65,10 @@ Future<void> main() async {
   await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
   Hive.registerAdapter(LocalNotificationAPIDatabaseModelAdapter());
   await Hive.openBox<LocalNotificationAPIDatabaseModel>('LocalNotificationAPIDatabaseModel');
+
+  await interactionManager.initialize();
+
+  await sessionManager.initialize();
 
   await Hive.openBox('Favourites');
   await Hive.openBox('UserInformation');
@@ -102,7 +109,7 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
   late String googleSignInUserName='';
   final FlutterLocalization localization = FlutterLocalization.instance;
   late AppLinks _appLinks;
@@ -114,6 +121,8 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
+    SessionManager().startSession();
     configureLocalization();
     // _initDeepLinkListener();
 
@@ -136,6 +145,20 @@ class _MyAppState extends State<MyApp> {
   void configureLocalization(){
     localization.init(mapLocales: LOCALES, initLanguageCode: 'en');
     localization.onTranslatedLanguage = ontranslatedLanguage;
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      // App went to background
+      print("App is in the background");
+      InteractionManager().syncLogsToServer("");
+      SessionManager().endSession();
+    } else if (state == AppLifecycleState.resumed) {
+      // App came to foreground
+      print("App is in the foreground");
+    }
   }
 
   void ontranslatedLanguage(Locale? locale){

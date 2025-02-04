@@ -9,15 +9,15 @@ import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
 import 'package:iwaymaps/pannels/PinLandmarkPannel.dart';
-import 'package:iwaymaps/path_snapper.dart';
+import 'package:iwaymaps/path.dart';
+import 'package:iwaymaps/pathState.dart';
+import 'package:iwaymaps/realWorldModel.dart';
+import 'package:iwaymaps/routeOption.dart';
+import 'package:iwaymaps/singletonClass.dart';
+import 'package:iwaymaps/waypoint.dart';
 import 'package:iwaymaps/websocket/PushNotifications.dart';
-import '/ELEMENTS/PickupLocationPin.dart';
-import '/path.dart';
-import '/pathState.dart';
-import '/realWorldModel.dart';
-import '/routeOption.dart';
-import '/singletonClass.dart';
-import '/waypoint.dart';
+import 'package:iwaymaps/websocket/UserLog.dart';
+
 import 'package:vibration/vibration.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
@@ -31,41 +31,47 @@ import 'package:flutter_beep/flutter_beep.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:http/http.dart';
-import '/API/buildingAllApi.dart';
-import '/API/slackApi.dart';
-import '/APIMODELS/buildingAll.dart';
-import '/CLUSTERING/InitMarkerModel.dart';
-import '/CLUSTERING/MapHelper.dart';
-import '/CLUSTERING/MapMarkers.dart';
-import '/CONSTANTS.dart';
-import '/Elements/HelperClass.dart';
-import '/Elements/QRLandmarkScreen.dart';
-import '/Elements/UserCredential.dart';
-import '/Elements/landmarkPannelShimmer.dart';
-import '/Elements/locales.dart';
-import '/MODELS/FilterInfoModel.dart';
-import '/VenueSelectionScreen.dart';
-import '/websocket/UserLog.dart';
-import 'API/RatingsaveAPI.dart';
+import '../GPS.dart';
+
+import '../newSearchPage.dart';
+import '../path_snapper.dart';
+
 import 'API/DataVersionApi.dart';
 import 'API/GlobalAnnotationapi.dart';
 import 'API/PolyLineApi.dart';
+import 'API/RatingsaveAPI.dart';
+import 'API/buildingAllApi.dart';
 import 'API/outBuilding.dart';
 import 'API/waypoint.dart';
 import 'APIMODELS/DataVersion.dart';
+import 'APIMODELS/buildingAll.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/outdoormodel.dart';
 import 'BluetoothScanAndroidClass.dart';
+import 'BluetoothScanIOSClass.dart';
+import 'CLUSTERING/InitMarkerModel.dart';
+import 'CLUSTERING/MapHelper.dart';
+import 'CLUSTERING/MapMarkers.dart';
+import 'CONSTANTS.dart';
+import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
 import 'DebugToggle.dart';
 import 'ELEMENTS/DirectionHeader.dart';
 import 'ELEMENTS/DirectionInstruction.dart';
 import 'ELEMENTS/ExploreModeWidget.dart';
+import 'ELEMENTS/HelperClass.dart';
+import 'ELEMENTS/PickupLocationPin.dart';
+import 'ELEMENTS/UserCredential.dart';
 import 'Elements/AccessiblePathButton.dart';
-import 'GPS.dart';
+import 'Elements/QRLandmarkScreen.dart';
+import 'Elements/landmarkPannelShimmer.dart';
+import 'Elements/locales.dart';
 import 'GlobalAnnotation/global_annotation_controller.dart';
+import 'GlobalAnnotation/global_rendering.dart';
+import 'MODELS/FilterInfoModel.dart';
 import 'UserState.dart';
+import 'VenueSelectionScreen.dart';
 import 'VersioInfo.dart';
 import 'ViewModel/DirectionInstructionViewModel.dart';
 import 'centeroid.dart';
@@ -101,7 +107,7 @@ import 'APIMODELS/outbuildingmodel.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
 import 'Cell.dart';
-import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
+
 import 'DestinationSearchPage.dart';
 import 'Elements/HomepageSearch.dart';
 import 'Elements/NavigationFilterCard.dart';
@@ -125,9 +131,6 @@ import 'navigationTools.dart';
 
 import 'navigation_api_controller.dart';
 
-import '/RippleButton.dart';
-import '/BluetoothScanIOSClass.dart';
-import 'newSearchPage.dart';
 
 
 
@@ -1769,19 +1772,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       widget.directsourceID = '';
     }
     // If nearestBeacon is provided, localize the user to it
-    if (nearestBeacon != null && nearestBeacon.isNotEmpty && SingletonFunctionController.apibeaconmap[nearestBeacon] != null) {
-
-      print("Beacon localization $nearestBeacon");
+    if (nearestBeacon != null && nearestBeacon.isNotEmpty) {
       await _handleBeaconLocalization(nearestBeacon, speakTTS, render,providePinSelection);
     }
     // If polyID is provided, localize the user to the polygon
     else if (polyID != null && polyID.isNotEmpty) {
-      print("Polygon localization");
       await _handlePolygonLocalization(polyID, speakTTS, render);
     }
     // Fallback to global coordinates if neither nearestBeacon nor polyID is available
     else {
-      print("GPS localization");
       await _handleGlobalCoordinatesLocalization(speakTTS, render,providePinSelection);
     }
 
@@ -1885,7 +1884,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     await Future.delayed(const Duration(seconds: 9));
     subscription.cancel();
     gps.dispose();
-    print("User location is ${_kalmanFilter.latitudeEstimate},${_kalmanFilter.longitudeEstimate}");
+
     if(_kalmanFilter.latitudeEstimate != null && _kalmanFilter.longitudeEstimate != null) {
       UserState.geoLat = _kalmanFilter.latitudeEstimate;
       UserState.geoLng = _kalmanFilter.longitudeEstimate;
@@ -1907,7 +1906,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
 
   void unableToFindLocation(){
-    speak("Unable to find your location. Scan nearby QR to know your location", _currentLocale);
+    speak("Unable to find your location. Scan nearby QR to know your location",
+        _currentLocale);
     showLocationDialog(context);
     SingletonFunctionController.building.qrOpened = true;
   }
@@ -2129,8 +2129,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
       SingletonFunctionController.building
           .floor[userSetLocation.buildingID!] = userSetLocation.floor!;
-      if (widget.directLandID.length < 2 && userSetLocation.buildingID != buildingAllApi.outdoorID) {
-        createRooms(SingletonFunctionController.building.polyLineData!, userSetLocation.floor!);
+      if (widget.directLandID.length < 2) {
+        createRooms(SingletonFunctionController.building.polyLineData!,
+            userSetLocation.floor!);
       }
 
       SingletonFunctionController.building.landmarkdata!.then((value) {
@@ -2271,12 +2272,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
     if (speakTTS) {
       List<double> lvalue = tools.localtoglobal(
-          (userSetLocation.doorX??userSetLocation.coordinateX!).toInt(),
-          (userSetLocation.doorY??userSetLocation.coordinateY!).toInt(),
+          userSetLocation.doorX!.toInt(),
+          userSetLocation.doorY!.toInt(),
           SingletonFunctionController.building.patchData[user.bid]
       );
-
-      if(SingletonFunctionController.apibeaconmap[lastBeaconValue] != null){
+      try{
         List<double> uvalue = tools.localtoglobal(
             SingletonFunctionController.apibeaconmap[lastBeaconValue]!.coordinateX!.toInt(),
             SingletonFunctionController.apibeaconmap[lastBeaconValue]!.coordinateY!.toInt(),
@@ -2304,8 +2304,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             );
           });
         });
-      }
-
+      }finally{
         mapState.zoom = 22.0;
         _googleMapController.animateCamera(
           CameraUpdate.newLatLngZoom(
@@ -2313,6 +2312,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             22, // Specify your custom zoom level here
           ),
         );
+      }
 
     }
     Future.delayed(Duration(milliseconds: 5000)).then((value){
@@ -2961,54 +2961,55 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
 
     Future<void> allBuildingCalls = Future.wait(buildingAllApi.getStoredAllBuildingID().entries.map((entry) async {
-          var key = entry.key;
+      var key = entry.key;
 
-          // try{
-            if(key == buildingAllApi.outdoorID && buildingAllApi.outBuildingData != null && buildingAllApi.outBuildingData!.data!.globalAnnotation! ){
-              var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(key);
-              Building.GlobalAnnotation = globalData;
-              GlobalAnnotationController controller = GlobalAnnotationController(data: globalData, polygonTap: polygonTap, apiController: apiController);
+      // try{
+      if(key == buildingAllApi.outdoorID && buildingAllApi.outBuildingData != null && buildingAllApi.outBuildingData!.data!.globalAnnotation! ){
+        var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(key);
+        Building.GlobalAnnotation = globalData;
+        GlobalAnnotationController controller = GlobalAnnotationController(data: globalData, polygonTap: polygonTap, apiController: apiController);
 
-              controller.wrapPatch();
+        controller.wrapPatch();
 
-              List<Landmarks>? landmarks = await controller.wrapLandmarks();
-              if(landmarks != null && landmarks.isNotEmpty){
-                var otherLandmarkdata = await SingletonFunctionController.building.landmarkdata;
-                otherLandmarkdata?.mergeLandmarks(landmarks);
-                SingletonFunctionController.building.landmarkdata = Future.value(otherLandmarkdata);
-              }
+        //closing for a while
+        // List<Landmarks>? landmarks = await controller.wrapLandmarks();
+        // if(landmarks != null && landmarks.isNotEmpty){
+        //   var otherLandmarkdata = await SingletonFunctionController.building.landmarkdata;
+        //   otherLandmarkdata?.mergeLandmarks(landmarks);
+        //   SingletonFunctionController.building.landmarkdata = Future.value(otherLandmarkdata);
+        // }
 
-              List<PathModel>? waypoints = controller.wrapWayPoint();
-              if(waypoints != null){
-                Building.waypoint[buildingAllApi.outdoorID] = waypoints;
-              }
+        // List<PathModel>? waypoints = controller.wrapWayPoint();
+        // if(waypoints != null){
+        //   Building.waypoint[buildingAllApi.outdoorID] = waypoints;
+        // }
 
-              Set<Polygon>? campusRender = await controller.renderCampus();
-              if(campusRender != null){
-                setState(() {
-                  globalCampus = campusRender;
-                });
-              }
+        Set<Polygon>? campusRender = await controller.renderCampus();
+        if(campusRender != null){
+          setState(() {
+            globalCampus = campusRender;
+          });
+        }
 
-              return;
-            }
+        return;
+      }
 
-          try {
-              var waypointData = await waypointapi().fetchwaypoint(key, outdoor: key == buildingAllApi.outdoorID);
-              Building.waypoint[key] = waypointData;
-          } catch (_) {}
+      try {
+        var waypointData = await waypointapi().fetchwaypoint(key, outdoor: key == buildingAllApi.outdoorID);
+        Building.waypoint[key] = waypointData;
+      } catch (_) {}
 
-          if (key != buildingAllApi.getSelectedBuildingID()) {
-            
-            try {
-              await DataVersionApi().fetchDataVersionApiData(key);
-            } catch (e) {}
+      if (key != buildingAllApi.getSelectedBuildingID()) {
 
-            await apiController.patchAPIController(key, false);
-            await apiController.polylineAPIController(key, false);
-            await apiController.landmarkAPIController(key, false);
-          }
-        }));
+        try {
+          await DataVersionApi().fetchDataVersionApiData(key);
+        } catch (e) {}
+
+        await apiController.patchAPIController(key, false);
+        await apiController.polylineAPIController(key, false);
+        await apiController.landmarkAPIController(key, false);
+      }
+    }));
 
     if (SingletonFunctionController.timer != null) {
       await Future.wait([SingletonFunctionController.timer!, allBuildingCalls]);
@@ -3032,6 +3033,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
     SingletonFunctionController.building.buildingsLoaded = true;
   }
+
 
   var versionBox = Hive.box('VersionData');
   final DataVersionLocalModelBox = DataVersionLocalModelBOX.getData();
@@ -4957,7 +4959,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                             PathState = pathState.withValues(
                                 -1, -1, -1, -1, -1, -1, null, 0);
                             pathMarkers.clear();
-
                             PathState.path.clear();
                             PathState.sourcePolyID = "";
                             PathState.destinationPolyID = "";
@@ -5910,7 +5911,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         snapshot.data!.landmarksMap![
         SingletonFunctionController.building.selectedLandmarkID] ==
             null) {
-      print("${!snapshot.hasData} || ${snapshot.data?.landmarksMap == null} || ${snapshot.data?.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]}");
       print("landmark pannel got id ${SingletonFunctionController.building.selectedLandmarkID}");
       //
       // If the data is not available, return an empty container
@@ -8191,7 +8191,7 @@ bool _isPlaying=false;
 
 
   }
-
+  
   final FocusNode _directionFocus=FocusNode();
   final FocusNode _startbuttonFocus=FocusNode();
 
@@ -8650,30 +8650,32 @@ bool _isPlaying=false;
                                               textAlign: TextAlign.left,
                                             ),
                                           ),
-                                          !kIsWeb?Semantics(
-                                              excludeSemantics: true,
-                                              child: IconButton(
-                                                onPressed: () {
-                                                  setState((){
-                                                    _isPlaying=!_isPlaying;
-                                                    singleroute.clear();
-                                                    pathCovered.clear();
-                                                  });
-                                                  //currently using for play preview animation
-                                                  callPreviewAnimation().then((value){
-                                                    setState((){
-                                                      _isPlaying=false;
-                                                    });
-                                                  });
-                                                  // String msg=(pathState().sourceFloor!=pathState().destinationFloor)?tools.generateNarration(UserState.mapPathGuide,isMultiFloor: true):tools.generateNarration(UserState.mapPathGuide,isMultiFloor: false);
-                                                  // print("narration ${msg}");
-                                                  // speak(msg, _currentLocale).whenComplete((){
-                                                  //   setState(() {
-                                                  //     _isPlaying=false;
-                                                  //   });
-                                                  // });
-                                                },
-                                                icon:Icon(Icons.play_circle_outline_rounded),color: (_isPlaying)?Colors.blue:Colors.black,)):Container(),
+                                          // ),
+                                          // !kIsWeb?
+                                          // Semantics(
+                                          //     excludeSemantics: true,
+                                          //     child: IconButton(
+                                          //       onPressed: () {
+                                          //         setState((){
+                                          //           _isPlaying=!_isPlaying;
+                                          //           singleroute.clear();
+                                          //           pathCovered.clear();
+                                          //         });
+                                          //         //currently using for play preview animation
+                                          //         callPreviewAnimation().then((value){
+                                          //           setState((){
+                                          //             _isPlaying=false;
+                                          //           });
+                                          //         });
+                                          //         // String msg=(pathState().sourceFloor!=pathState().destinationFloor)?tools.generateNarration(UserState.mapPathGuide,isMultiFloor: true):tools.generateNarration(UserState.mapPathGuide,isMultiFloor: false);
+                                          //         // print("narration ${msg}");
+                                          //         // speak(msg, _currentLocale).whenComplete((){
+                                          //         //   setState(() {
+                                          //         //     _isPlaying=false;
+                                          //         //   });
+                                          //         // });
+                                          //       },
+                                          //       icon:Icon(Icons.play_circle_outline_rounded),color: (_isPlaying)?Colors.blue:Colors.black,)):Container(),
                                           Spacer(),
                                           Semantics(
                                             excludeSemantics: true,
@@ -9583,15 +9585,15 @@ bool _isPlaying=false;
                           UserCredentials().getuserName(),
                           PathState.sourcePolyID,
                           PathState.destinationPolyID,
-                          "com.iwayplus.accessibleashoka");
+                          "com.iwayplus.aiimsjammu");
                       if (_feedback.isNotEmpty) {}
-                      showFeedback = false;
-                      _feedbackController.hide();
-
-                      _feedbackTextController.clear();
-
-                      BuildingName = null;
-                      Navigator.pop(context);
+                      setState((){
+                        showFeedback = false;
+                        _feedbackController.hide();
+                        _feedbackTextController.clear();
+                        BuildingName = null;
+                        _rating=0;
+                      });
                     },
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 16),
@@ -11845,20 +11847,18 @@ bool _isPlaying=false;
   }
   String finalDestinationDirection="";
   void closeNavigation() {
+    if(_isreroutePannelOpen || !user.isnavigating){
+      return;
+    }
     String destname = PathState.destinationName;
     //String destPolyyy=PathState.destinationPolyID;
     destiName = destname;
     List<int> tv = tools.eightcelltransition(user.theta);
-    List<Cell> turnPoints =
-    tools.getCellTurnpoints(user.cellPath);
     double angle = tools.calculateAngle2(
         [user.showcoordX, user.showcoordY],
         [user.showcoordX + tv[0], user.showcoordY + tv[1]],
         [PathState.destinationX, PathState.destinationY]);
-    String direction = tools.angleToClocks4(angle, context);
-
-    finalDestinationDirection=direction;
-    //isSemanticEnabled? showDestinationDialog(context,user.convertTolng("You have reached ${destname}. It is ${direction}","", 0.0, context, angle, "", "",destname: destname)): ();
+    String direction = tools.angleToClocks3(angle, context);
     flutterTts.pause().then((value) {
       speak(
           user.convertTolng("You have reached ${destname}. It is ${direction}",
@@ -11866,16 +11866,8 @@ bool _isPlaying=false;
               destname: destname),
           _currentLocale);
     });
-    // if(isSemanticEnabled) {
-    //   showFeedback = true;
-    //   Future.delayed(Duration(seconds: 5));
-    //   _feedbackController.open();
-    //   _feedbackTextController.clear();
-    //   feedbackPanel(context);
-    //   //showDestinationDialog(context,user.convertTolng("You have reached ${destname}. It is ${direction}","", 0.0, context, angle, "", "",destname: destname));
-    // }
-    PDRTimer!.cancel();
     clearPathVariables();
+    PDRTimer!.cancel();
     StopPDR();
     PathState.didPathStart = true;
     _isnavigationPannelOpen = false;
@@ -11887,7 +11879,7 @@ bool _isPlaying=false;
     PathState.path.clear();
     PathState.sourcePolyID = "";
     PathState.destinationPolyID = "";
-    singleroute.clear(); pathCovered.clear();
+    singleroute.clear();
     fitPolygonInScreen(patch.first);
     Future.delayed(Duration.zero, () async {
       setState(() {
@@ -11916,100 +11908,94 @@ bool _isPlaying=false;
     _isBuildingPannelOpen = false;
 
     /// floor alignement
-      if (snapshot!.landmarksMap![ID]!.floor != 0) {
-        List<PolyArray> prevFloorLifts = findLift(
-            tools.numericalToAlphabetical(0),
-            SingletonFunctionController
-                .building
-                .polylinedatamap[snapshot!.landmarksMap![ID]!.buildingID!]!
-                .polyline!
-                .floors!);
-        List<PolyArray> currFloorLifts = findLift(
-            tools.numericalToAlphabetical(snapshot!.landmarksMap![ID]!.floor!),
-            SingletonFunctionController
-                .building
-                .polylinedatamap[snapshot!.landmarksMap![ID]!.buildingID!]!
-                .polyline!
-                .floors!);
+    if (snapshot!.landmarksMap![ID]!.floor != 0) {
+      List<PolyArray> prevFloorLifts = findLift(
+          tools.numericalToAlphabetical(0),
+          SingletonFunctionController
+              .building
+              .polylinedatamap[snapshot!.landmarksMap![ID]!.buildingID!]!
+              .polyline!
+              .floors!);
+      List<PolyArray> currFloorLifts = findLift(
+          tools.numericalToAlphabetical(snapshot!.landmarksMap![ID]!.floor!),
+          SingletonFunctionController
+              .building
+              .polylinedatamap[snapshot!.landmarksMap![ID]!.buildingID!]!
+              .polyline!
+              .floors!);
 
-        for (int i = 0; i < prevFloorLifts.length; i++) {}
+      for (int i = 0; i < prevFloorLifts.length; i++) {}
 
-        for (int i = 0; i < currFloorLifts.length; i++) {}
-        List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
+      for (int i = 0; i < currFloorLifts.length; i++) {}
+      List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
 
-        UserState.xdiff = dvalue[0];
-        UserState.ydiff = dvalue[1];
-      } else {
-        UserState.xdiff = 0;
-        UserState.ydiff = 0;
-      }
-      ///
-
-
-      List<int> value = [
-        snapshot!.landmarksMap![ID]!.coordinateX!,
-        snapshot!.landmarksMap![ID]!.coordinateY!
-      ];
-      List<double> coords = tools.localtoglobal(value[0], value[1], SingletonFunctionController.building.patchData[snapshot!.landmarksMap![ID]!.buildingID]);
-      int floor = snapshot!.landmarksMap![ID]!.floor!;
-
-      /// room selection
-      try {
-        List<Nodes>? nodes = SingletonFunctionController
-            .building
-            .polylinedatamap[snapshot.landmarksMap![ID]!.buildingID]!
-            .polyline!
-            .floors!
-            .firstWhere((element) =>
-        element.floor == tools.numericalToAlphabetical(floor))
-            .polyArray!
-            .firstWhere((element) =>
-        element.id == snapshot!.landmarksMap![ID]!.properties!.polyId)
-            .nodes;
-
-        List<LatLng> corners = [];
-        for (var element in nodes!) {
-          List<double> value = tools.localtoglobal(
-              element.coordx!,
-              element.coordy!,
-              SingletonFunctionController
-                  .building.patchData[snapshot.landmarksMap![ID]!.buildingID]);
-          corners.add(LatLng(value[0], value[1]));
-        }
-        _polygon.add(Polygon(
-          polygonId: PolygonId("$ID"),
-          points: corners,
-          fillColor: Colors.lightBlueAccent.withOpacity(0.4),
-          strokeColor: Colors.blue,
-          strokeWidth: 2,
-        ));
-        cachedPolygon.clear();
-      } catch (e) {}
+      UserState.xdiff = dvalue[0];
+      UserState.ydiff = dvalue[1];
+    } else {
+      UserState.xdiff = 0;
+      UserState.ydiff = 0;
+    }
     ///
 
-      _googleMapController.animateCamera(
-        CameraUpdate.newLatLngZoom(
-          LatLng(coords[0], coords[1]),
-          22,
-        ),
-      );
 
-      if (SingletonFunctionController
-          .building.floor[snapshot!.landmarksMap![ID]!.buildingID] !=
-          floor) {
-        SingletonFunctionController
-            .building.floor[snapshot!.landmarksMap![ID]!.buildingID!] = floor;
-        createRooms(
-            SingletonFunctionController.building
-                .polylinedatamap[snapshot!.landmarksMap![ID]!.buildingID]!,
-            floor);
-        createMarkers(snapshot!, floor);
-      }
+    List<int> value = [
+      snapshot!.landmarksMap![ID]!.coordinateX!,
+      snapshot!.landmarksMap![ID]!.coordinateY!
+    ];
+    List<double> coords = tools.localtoglobal(value[0], value[1], SingletonFunctionController.building.patchData[snapshot!.landmarksMap![ID]!.buildingID]);
+    int floor = snapshot!.landmarksMap![ID]!.floor!;
 
-      if(widget.directLandID.length > 2) {
-        await Future.delayed(const Duration(milliseconds: 2000));
+    /// room selection
+    try {
+      List<Nodes>? nodes = SingletonFunctionController
+          .building
+          .polylinedatamap[snapshot.landmarksMap![ID]!.buildingID]!
+          .polyline!
+          .floors!
+          .firstWhere((element) =>
+      element.floor == tools.numericalToAlphabetical(floor))
+          .polyArray!
+          .firstWhere((element) =>
+      element.id == snapshot!.landmarksMap![ID]!.properties!.polyId)
+          .nodes;
+
+      List<LatLng> corners = [];
+      for (var element in nodes!) {
+        List<double> value = tools.localtoglobal(
+            element.coordx!,
+            element.coordy!,
+            SingletonFunctionController
+                .building.patchData[snapshot.landmarksMap![ID]!.buildingID]);
+        corners.add(LatLng(value[0], value[1]));
       }
-      polygonTap(null,ID);
+      _polygon.add(Polygon(
+        polygonId: PolygonId("$ID"),
+        points: corners,
+        fillColor: Colors.lightBlueAccent.withOpacity(0.4),
+        strokeColor: Colors.blue,
+        strokeWidth: 2,
+      ));
+      cachedPolygon.clear();
+    } catch (e) {}
+    ///
+
+    _googleMapController.animateCamera(
+      CameraUpdate.newLatLngZoom(
+        LatLng(coords[0], coords[1]),
+        22,
+      ),
+    );
+
+    if (snapshot!.landmarksMap![ID]!.buildingID != buildingAllApi.outdoorID && SingletonFunctionController.building.floor[snapshot!.landmarksMap![ID]!.buildingID] != floor) {
+      SingletonFunctionController.building.floor[snapshot!.landmarksMap![ID]!.buildingID!] = floor;
+      createRooms(SingletonFunctionController.building.polylinedatamap[snapshot!.landmarksMap![ID]!.buildingID]!, floor);
+      createMarkers(snapshot!, floor);
+    }
+
+    if(widget.directLandID.length > 2) {
+      await Future.delayed(const Duration(milliseconds: 2000));
+    }
+    polygonTap(null,ID);
   }
 
   void fromSourceAndDestinationPage(List<String> value) {
@@ -12251,7 +12237,6 @@ bool _isPlaying=false;
   @override
   void dispose() {
     disposed = true;
-    _controller.dispose();
     UserState.geoLat=0.0;
     UserState.geoLng=0.0;
     flutterTts.stop();
@@ -12427,8 +12412,9 @@ bool _isPlaying=false;
     return Scaffold(
       body: Stack(
         children: [
-          detected ? Semantics(excludeSemantics: true, child: ExploreModePannel()) : Semantics(excludeSemantics: true, child: Container()),
-
+          detected
+              ? Semantics(excludeSemantics: true, child: ExploreModePannel())
+              : Semantics(excludeSemantics: true, child: Container()),
           Semantics(
             excludeSemantics: true,
             child: Container(
@@ -12437,7 +12423,7 @@ bool _isPlaying=false;
                 EdgeInsets.only(left: 20), // <--- padding added here
                 initialCameraPosition: _initialCameraPosition,
                 myLocationButtonEnabled: false,
-                myLocationEnabled: true,
+                myLocationEnabled: false,
                 zoomControlsEnabled: false,
                 zoomGesturesEnabled: true,
                 mapToolbarEnabled: false,
@@ -12536,7 +12522,8 @@ bool _isPlaying=false;
           //debug----
 
 
-          DebugToggle.PDRIcon ? Positioned(
+          DebugToggle.PDRIcon
+              ? Positioned(
               top: 150,
               right: 50,
               child: Container(
@@ -12999,7 +12986,37 @@ bool _isPlaying=false;
               ),
             ),
           ),
-
+          //-------
+          // (user.isnavigating && recenter)? Positioned(
+          //   bottom: 145,
+          //   right: 220,
+          //   child: Container(
+          //     height: 50,
+          //     width: 150, // Adjust width as needed
+          //     child: ElevatedButton(
+          //       onPressed: () {
+          //         // Implement recenter logic here
+          //         _recenterMap();
+          //       },
+          //       style: ElevatedButton.styleFrom(
+          //         foregroundColor: Colors.white, // Background color
+          //         backgroundColor: Colors.blueGrey.withOpacity(0.5), // Text color
+          //         shape: RoundedRectangleBorder(
+          //           borderRadius: BorderRadius.circular(30), // Rounded corners
+          //         ),
+          //       ),
+          //       child: Row(
+          //         mainAxisSize: MainAxisSize.min,
+          //         mainAxisAlignment: MainAxisAlignment.center,
+          //         children: [
+          //           Icon(Icons.my_location, size: 24),
+          //           SizedBox(width: 8), // Space between icon and text
+          //           Text('Recenter', style: TextStyle(fontSize: 16)),
+          //         ],
+          //       ),
+          //     ),
+          //   ),
+          // ):Container(),
           SafeArea(
             child: Stack(
               children:[
@@ -13048,7 +13065,6 @@ bool _isPlaying=false;
                   )) : Container()] ,
             ),
           ),
-
           FutureBuilder(
             future: SingletonFunctionController.building.landmarkdata,
             builder: (context, snapshot) {
@@ -13070,7 +13086,72 @@ bool _isPlaying=false;
           SafeArea(child: PinLandmarkPannel.getPanelWidget(context,updateNearbyLandmarkMarkers, localizeOnPinedLandmark, closePinnedLandmarkPannel, nearbyLandmarks,PinedLandmark)),
           detected ? Semantics(child: SafeArea(child: nearestLandmarkpannel())) : Container(),
           SizedBox(height: 28.0), // Adjust the height as needed
+          // FloatingActionButton(
+          //     onPressed: (){
+          //
+          //       //SingletonFunctionController.building.floor == 0 ? 'G' : '${SingletonFunctionController.building.floor}',
+          //
+          //       int firstKey = SingletonFunctionController.building.floor.values.first;
+          //
+          //
+          //
+          //
+          //
+          //
+          //
+          //     },
+          //     child: Icon(Icons.add)
+          // ),
 
+          // FloatingActionButton(
+          //   onPressed: () async {
+          //
+          //     //StopPDR();
+          //
+          //     if (user.initialallyLocalised) {
+          //       setState(() {
+          //         isLiveLocalizing = !isLiveLocalizing;
+          //       });
+          //       HelperClass.showToast("realTimeReLocalizeUser started");
+          //
+          //       Timer.periodic(
+          //           Duration(milliseconds: 5000),
+          //               (timer) async {
+          //
+          //             SingletonFunctionController.btadapter.startScanning(resBeacons);
+          //
+          //
+          //             // setState(() {
+          //             //   sumMap=  SingletonFunctionController.btadapter.calculateAverage();
+          //             // });
+          //
+          //
+          //             Future.delayed(Duration(milliseconds: 2000)).then((value) => {
+          //               realTimeReLocalizeUser(resBeacons)
+          //               // listenToBin()
+          //
+          //
+          //             });
+          //
+          //             setState(() {
+          //               debugPQ = SingletonFunctionController.btadapter.returnPQ();
+          //
+          //             });
+          //
+          //           });
+          //
+          //     }
+          //
+          //   },
+          //   child: Icon(
+          //     Icons.location_history_sharp,
+          //     color: (isLiveLocalizing)
+          //         ? Colors.cyan
+          //         : Colors.black,
+          //   ),
+          //   backgroundColor: Colors
+          //       .white, // Set the background color of the FAB
+          // ),
           (SingletonFunctionController.building.buildingsLoaded || SingletonFunctionController.building.destinationQr || user.initialallyLocalised || SingletonFunctionController.building.qrOpened || PinLandmarkPannel.isPanelOpened())
               ?Container(): Container(
             height: screenHeight,
@@ -13095,12 +13176,121 @@ bool _isPlaying=false;
               ],
             ),
           ),
-
           ExcludeSemantics(child: Visibility(visible:nearbyLandmarks.isNotEmpty,child: Center(child: PickupLocationPin())))
         ],
       ),
     );
   }
+
+  //
+  // int d=0;
+  // bool listenToBin(){
+  //   double highestweight = 0;
+  //   String nearestBeacon = "";
+  //   Map<String, double> sumMap = SingletonFunctionController.btadapter.calculateAverage();
+  //
+  //
+  //
+  //  // widget.direction = "";
+  //
+  //
+  //   for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
+  //     if(SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty){
+  //       SingletonFunctionController.btadapter.BIN[i]!.forEach((key, value) {
+  //         key = "";
+  //         value = 0.0;
+  //       });
+  //     }
+  //   }
+  //   SingletonFunctionController.btadapter.numberOfSample.clear();
+  //   SingletonFunctionController.btadapter.rs.clear();
+  //   Building.thresh = "";
+  //
+  //   d++;
+  //   sumMap.forEach((key, value) {
+  //
+  //     setState(() {
+  //      // direction = "${widget.direction}$key   $value\n";
+  //     });
+  //
+  //
+  //
+  //     if(value>highestweight){
+  //       highestweight =  value;
+  //       nearestBeacon = key;
+  //     }
+  //   });
+  //
+  //   //
+  //
+  //
+  //   if(nearestBeacon !=""){
+  //
+  //     if(user.pathobj.path[Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor] != null){
+  //       if(user.key != Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.sId){
+  //
+  //         if(user.floor == Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor  && highestweight >9){
+  //           List<int> beaconcoord = [Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.coordinateX!,Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.coordinateY!];
+  //           List<int> usercoord = [user.showcoordX, user.showcoordY];
+  //           double d = tools.calculateDistance(beaconcoord, usercoord);
+  //           if(d < 5){
+  //             //near to user so nothing to do
+  //             return true;
+  //           }else{
+  //             int distanceFromPath = 100000000;
+  //             int? indexOnPath = null;
+  //             int numCols = user.pathobj.numCols![user.Bid]![user.floor]!;
+  //             user.path.forEach((node) {
+  //               List<int> pathcoord = [node % numCols, node ~/ numCols];
+  //               double d1 = tools.calculateDistance(beaconcoord, pathcoord);
+  //               if(d1<distanceFromPath){
+  //                 distanceFromPath = d1.toInt();
+  //
+  //
+  //                 indexOnPath = user.path.indexOf(node);
+  //
+  //               }
+  //             });
+  //
+  //             if(distanceFromPath>5){
+  //               _timer.cancel();
+  //               repaintUser(nearestBeacon);
+  //               return false;//away from path
+  //             }else{
+  //               user.key = Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.sId!;
+  //
+  //               speak("You are near ${Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.name}");
+  //               user.moveToPointOnPath(indexOnPath!);
+  //               moveUser();
+  //               return true; //moved on path
+  //             }
+  //           }
+  //
+  //
+  //           //
+  //           //
+  //           //
+  //           //
+  //           //
+  //         }else{
+  //
+  //           speak("You have reached ${tools.numericalToAlphabetical(Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor!)} floor");
+  //           paintUser(nearestBeacon); //different floor
+  //           return true;
+  //         }
+  //
+  //       }
+  //     }else{
+  //
+  //
+  //
+  //       _timer.cancel();
+  //       repaintUser(nearestBeacon);
+  //       return false;
+  //     }
+  //   }
+  //   return false;
+  // }
 
   Map<String, double> sortMapByValue(Map<String, double> map) {
     var sortedEntries = map.entries.toList()

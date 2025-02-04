@@ -8,14 +8,13 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:iwaymaps/newSearchPage.dart';
-import '../localization/locales.dart';
-import '/SourceAndDestinationPage.dart';
-
 import '../DestinationSearchPage.dart';
 import 'package:animated_checkmark/animated_checkmark.dart';
 
+import '../ELEMENTS/HelperClass.dart';
+import '../SourceAndDestinationPage.dart';
 import '../UserState.dart';
-import 'HelperClass.dart';
+import '../localization/locales.dart';
 import 'HomepageFilter.dart';
 
 class HomepageSearch extends StatefulWidget {

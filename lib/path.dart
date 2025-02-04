@@ -230,12 +230,11 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import '/buildingState.dart';
-import '/pathState.dart';
 
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'Cell.dart';
+import 'buildingState.dart';
 import 'navigationTools.dart';
 
 class Node {

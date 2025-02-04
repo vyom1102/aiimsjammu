@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import '/singletonClass.dart';
+import 'package:iwaymaps/singletonClass.dart';
 
 class BluetoothScanIOSClass {
   static const MethodChannel _channel = MethodChannel('ble_scanner');

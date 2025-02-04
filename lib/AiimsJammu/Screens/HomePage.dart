@@ -39,6 +39,7 @@ import '../../config.dart';
 import '../../singletonClass.dart';
 import '../../websocket/NotifIcationSocket.dart';
 import '../../websocket/UserLog.dart';
+import '../../websocket/interactionManager.dart';
 import '../Widgets/Translator.dart';
 import '/DestinationSearchPage.dart';
 import '/AiimsJammu/Screens/ATMScreen.dart';
@@ -998,6 +999,7 @@ class _HomePageState extends State<HomePage> {
                       // label: "Search Bar",
                       child: GestureDetector(
                         onTap: () {
+                          InteractionManager().logInteraction('Search Bar');
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -1102,6 +1104,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                             GestureDetector(
                                 onTap: () {
+                                  InteractionManager().logInteraction('Doctor Category');
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -1116,6 +1119,7 @@ class _HomePageState extends State<HomePage> {
                             if(_pharmacyfilteredServices.isNotEmpty)
                             GestureDetector(
                                 onTap: () {
+                                  InteractionManager().logInteraction('Pharmacy Category');
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -1128,6 +1132,7 @@ class _HomePageState extends State<HomePage> {
                             if(_emergencyfilteredService.isNotEmpty)
                             GestureDetector(
                               onTap: () {
+                                InteractionManager().logInteraction('Emergency Category');
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -1142,6 +1147,7 @@ class _HomePageState extends State<HomePage> {
                             if(_atmfilteredServices.isNotEmpty)
                             GestureDetector(
                               onTap: () {
+                                InteractionManager().logInteraction('ATM Category');
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -1156,6 +1162,7 @@ class _HomePageState extends State<HomePage> {
                             if(_cafeteriafilteredServices.isNotEmpty)
                             GestureDetector(
                               onTap: () {
+                                InteractionManager().logInteraction('Cafeteria Category');
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -1170,6 +1177,7 @@ class _HomePageState extends State<HomePage> {
                             if(_countersfilteredServices.isNotEmpty)
                             GestureDetector(
                                 onTap: () {
+                                  InteractionManager().logInteraction('Counters Category');
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -1183,6 +1191,7 @@ class _HomePageState extends State<HomePage> {
                             if(_otherfilteredServices.isNotEmpty)
                             GestureDetector(
                                 onTap: () {
+                                  InteractionManager().logInteraction('Others Category');
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(

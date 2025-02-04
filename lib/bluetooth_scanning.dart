@@ -4,7 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import '/websocket/UserLog.dart';
+import 'package:iwaymaps/websocket/UserLog.dart';
 import 'APIMODELS/beaconData.dart';
 
 class BLueToothClass {

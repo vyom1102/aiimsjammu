@@ -1,8 +1,9 @@
 
 import 'package:flutter/material.dart';
 
+
+import '../ELEMENTS/HelperClass.dart';
 import '../navigationTools.dart';
-import 'HelperClass.dart';
 
 class SearchpageResults extends StatefulWidget {
   final Function(String name, String location, String ID, String bid) onClicked;

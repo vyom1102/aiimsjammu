@@ -2,10 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
-
+import '../API/buildingAllApi.dart';
 import '../Elements/locales.dart';
 import '../UserState.dart';
-import '/API/buildingAllApi.dart';
 import '../directionClass.dart';
 import '../navigationTools.dart';
 
@@ -203,12 +202,6 @@ class DirectionInstructionViewModel extends ChangeNotifier {
       }
 
     }
-
-
-
-
-
-
     return directionList;
   }
 }

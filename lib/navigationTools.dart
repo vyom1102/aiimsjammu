@@ -5,12 +5,9 @@ import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '/singletonClass.dart';
-import '/API/buildingAllApi.dart';
-import '/Elements/locales.dart';
-import 'Elements/UserCredential.dart';
-import '/UserState.dart';
-import '/pathState.dart';
+import 'package:iwaymaps/pathState.dart';
+import 'package:iwaymaps/singletonClass.dart';
+import 'API/buildingAllApi.dart';
 import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart' as PDM;
@@ -18,7 +15,10 @@ import 'API/PatchApi.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
 import 'Cell.dart';
+import 'ELEMENTS/UserCredential.dart';
+import 'Elements/locales.dart';
 import 'Navigation.dart';
+import 'UserState.dart';
 import 'directionClass.dart';
 
 
@@ -2516,7 +2516,6 @@ class tools {
       return '${feetToSteps(feet).toStringAsFixed(0)} ${LocaleData.steps.getString(context)}';
     }
   }
-
   static bool allElementsAreSame(List list) {
     if (list.isEmpty) return true;  // Consider an empty list as having all elements the same.
     var first = list.first;

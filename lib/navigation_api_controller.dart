@@ -1,16 +1,19 @@
-import '/singletonClass.dart';
+
 import 'dart:math' as math;
-import '/API/buildingAllApi.dart';
-import '/API/slackApi.dart';
+
+import 'package:iwaymaps/singletonClass.dart';
+
 import 'API/PatchApi.dart';
-import '/buildingState.dart';
+
 import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
 import 'API/PolyLineApi.dart';
 import 'API/ladmarkApi.dart';
+import 'API/slackApi.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
 import 'UserState.dart';
+import 'buildingState.dart';
 import 'navigationTools.dart';
 
 class NavigationAPIController {

@@ -8,6 +8,7 @@ import 'package:hive/hive.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/UserState.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
+import 'package:iwaymaps/websocket/interactionManager.dart';
 import 'package:new_version_plus/new_version_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:quickalert/models/quickalert_type.dart';
@@ -170,8 +171,19 @@ class _MainScreenState extends State<MainScreen> {
             backgroundColor: Color(0xffFFFFFF),
             selectedIndex: index,
             onDestinationSelected: (index)=>setState(() {
-              if (index==1){
 
+              if(index==0){
+                InteractionManager().logInteraction("Home Button");
+              }else if(index==1){
+                InteractionManager().logInteraction("Map Button");
+              }else if(index==2){
+                InteractionManager().logInteraction("Scan Button");
+              }else if(index==3){
+                InteractionManager().logInteraction("Favourite Button");
+              }else if(index==4){
+                InteractionManager().logInteraction("Profile Button");
+              }
+              if (index==1){
                   Navigator.push(context, MaterialPageRoute(builder: (context) => Navigation()));
 
               } else {

@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hive/hive.dart';
 import '../../config.dart';
+import '../../websocket/interactionManager.dart';
 import '../Widgets/Translator.dart';
 import '/AiimsJammu/Data/ServicesDemoData.dart';
 import 'package:share_plus/share_plus.dart';
@@ -306,6 +307,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                   child: GestureDetector(
                     // onTap:() {PassLocationId(service['locationId']);},
                     onTap: () {
+                      InteractionManager().logInteraction('${service['name']} Services');
                       Navigator.push(
                         context,
                         MaterialPageRoute(

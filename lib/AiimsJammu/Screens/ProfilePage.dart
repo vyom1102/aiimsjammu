@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../config.dart';
+import '../../websocket/interactionManager.dart';
 import '../Widgets/Translator.dart';
 import '/FavouriteScreen.dart';
 import '/LOGIN%20SIGNUP/SignIn.dart';
@@ -325,6 +326,7 @@ class _ProfilePageState extends State<ProfilePage> {
             label: "",
             child: InkWell(
               onTap: (){
+                InteractionManager().logInteraction("Edit Profile");
                 navigateToEditProfile();
               //   Navigator.push(
               //   context,
@@ -378,6 +380,7 @@ class _ProfilePageState extends State<ProfilePage> {
             label: "",
             child: InkWell(
               onTap: (){
+                InteractionManager().logInteraction("Favourite");
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -429,7 +432,9 @@ class _ProfilePageState extends State<ProfilePage> {
           Semantics(
             label: "",
             child: InkWell(
-              onTap: (){ Navigator.push(
+              onTap: (){
+                InteractionManager().logInteraction("Settings");
+                Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) =>SettingScreen()),
@@ -525,6 +530,7 @@ class _ProfilePageState extends State<ProfilePage> {
             label: '',
             child: InkWell(
               onTap: (){
+                InteractionManager().logInteraction("Help and Support");
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -626,12 +632,11 @@ class _ProfilePageState extends State<ProfilePage> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               Container(
                 width: MediaQuery.sizeOf(context).width*0.9,
                 child: OutlinedButton(
                   onPressed: () {
-
+                    InteractionManager().logInteraction("Logout");
                     logout();
                     // Navigator.pushReplacement(
                     //   context,

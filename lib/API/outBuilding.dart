@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import '/API/RefreshTokenAPI.dart';
-import '/DATABASE/BOXES/OutDoorModelBOX.dart';
+import '../APIMODELS/outdoormodel.dart';
+import '../DATABASE/BOXES/OutDoorModelBOX.dart';
+import '../api/RefreshTokenAPI.dart';
 import '../config.dart';
-import '/APIMODELS/outdoormodel.dart';
+
 import '../DATABASE/DATABASEMODEL/OutDoorModel.dart';
 
 class outBuilding {

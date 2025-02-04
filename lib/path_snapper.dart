@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:math';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
+import 'Cell.dart';
 import 'GPS.dart';
-import '/Cell.dart';
-import '/navigationTools.dart';
+import 'navigationTools.dart';
 
 class KalmanFilter {
   double? latitudeEstimate;

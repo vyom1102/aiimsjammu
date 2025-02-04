@@ -1,25 +1,20 @@
 import 'dart:convert';
+
 import 'package:easter_egg_trigger/easter_egg_trigger.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import '/API/ladmarkApi.dart';
-import '/ELEMENTS/SearchpageRecents.dart';
-import '/singletonClass.dart';
-
-import '/API/ladmarkApi.dart';
-
+import 'package:iwaymaps/singletonClass.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '/API/buildingAllApi.dart';
+import 'API/buildingAllApi.dart';
+import 'API/ladmarkApi.dart';
 import 'APIMODELS/landmark.dart';
 import 'DestinationSearchPage.dart';
+import 'ELEMENTS/SearchpageRecents.dart';
 import 'ELEMENTS/SearchpageResults.dart';
 import 'UserState.dart';
-
-
 class SourceAndDestinationPage extends StatefulWidget {
   String SourceID ;
   String DestinationID;

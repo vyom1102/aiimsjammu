@@ -4,8 +4,8 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/services.dart';
-import '/APIMODELS/Building.dart';
-import '/singletonClass.dart';
+import 'package:iwaymaps/singletonClass.dart';
+
 
 import 'APIMODELS/beaconData.dart';
 import 'ELEMENTS/BlurtoothDevice.dart';
@@ -179,6 +179,8 @@ class BluetoothScanAndroidClass{
     try {
       // Listen to the stream continuously
       subscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
+        print("Received device detail: $deviceDetail");
+
         BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
         if (apibeaconmap.containsKey(deviceDetails.DeviceName)) {
           print("Device found in apibeaconmap: ${deviceDetails.DeviceName}");
@@ -422,7 +424,7 @@ class BluetoothScanAndroidClass{
     print("findLowestRssiDevice");
     print(lowestValue);
 
-    return lowestKey ?? "";
+    return lowestKey ?? "No devices found";
   }
 
   String EM_findLowestRssiDevice(Map<String, double> rssiAverage) {
@@ -442,7 +444,7 @@ print(rssiAverage);
     print(lowestValue);
     print(lowestKey);
 
-    return lowestKey ?? "";
+    return lowestKey ?? "No devices found";
   }
 
 

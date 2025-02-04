@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
-import '/MotionModel.dart';
-import '/pathState.dart';
-import '/API/buildingAllApi.dart';
-import '/Elements/locales.dart';
-import '/websocket/UserLog.dart';
+import 'package:iwaymaps/pathState.dart';
+import 'package:iwaymaps/websocket/UserLog.dart';
 import '../path_snapper.dart';
+import 'API/buildingAllApi.dart';
+import 'Elements/locales.dart';
 import 'GPSStreamHandler.dart';
+import 'MotionModel.dart';
 import 'buildingState.dart' as b;
 
 import 'Cell.dart';

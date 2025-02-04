@@ -23,6 +23,13 @@ Future<Set<geo.Polygon>?> globalRendering(GlobalModel data, Function polygonTap)
             List<geo.LatLng> coordinates = [];
 
             for (var cords in element.geometry!.coordinates!.first) {
+              //coordinates.add(LatLng(node.lat!,node.lon!));
+              // List<double> globalCoordinates = tools.localtoglobal(
+              //     cords[0],
+              //     cords[1],
+              //     SingletonFunctionController.building.patchData[element.buildingID]
+              // );
+
               coordinates.add(geo.LatLng(cords[1], cords[0]));
             }
             coordinates.removeLast();
@@ -41,7 +48,7 @@ Future<Set<geo.Polygon>?> globalRendering(GlobalModel data, Function polygonTap)
                           element.properties?.fillColor != "undefined"
                           ? Color(int.parse(
                           '0xFF${(element.properties?.fillColor)!.replaceAll('#', '')}'))
-                          : Colors.transparent,
+                          : Colors.black,
                       consumeTapEvents: true,
                     onTap: (){
                       polygonTap(coordinates, element.id);

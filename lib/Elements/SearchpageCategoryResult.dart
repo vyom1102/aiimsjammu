@@ -4,8 +4,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../API/buildingAllApi.dart';
 import '../API/ladmarkApi.dart';
 import '../APIMODELS/landmark.dart';
+import '../ELEMENTS/HelperClass.dart';
 import '../FloorSelectionPage.dart';
-import 'HelperClass.dart';
 
 
 class SearchpageCategoryResults extends StatefulWidget {

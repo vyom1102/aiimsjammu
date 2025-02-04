@@ -2,16 +2,17 @@ import 'package:chips_choice/chips_choice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fuzzy/fuzzy.dart';
+import 'package:iwaymaps/singletonClass.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
-import '/API/buildingAllApi.dart';
-import '/Elements/HelperClass.dart';
-import '/API/ladmarkApi.dart';
-import '/APIMODELS/landmark.dart';
-import '/ELEMENTS/DestinationPageChipsWidget.dart';
-import '/ELEMENTS/SearchpageCategoryResult.dart';
-import '/ELEMENTS/SearchpageResults.dart';
-import '/singletonClass.dart';
+import 'API/buildingAllApi.dart';
+import 'API/ladmarkApi.dart';
+import 'APIMODELS/landmark.dart';
+import 'ELEMENTS/DestinationPageChipsWidget.dart';
+import 'ELEMENTS/HelperClass.dart';
+import 'ELEMENTS/SearchpageCategoryResult.dart';
+import 'ELEMENTS/SearchpageResults.dart';
+
 
 class NewSearchPage extends StatefulWidget {
   String hintText;
@@ -404,6 +405,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
 
 
   }
+
 
   @override
   Widget build(BuildContext context) {
