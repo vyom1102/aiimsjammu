@@ -339,8 +339,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     'Entry',
     'Lift',
     'Reception',
-
-
   ];
   List<String> _icons = [
     'assets/washroomIcon.png',
@@ -351,7 +349,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     'assets/liftIcon.png',
     'assets/receptionIcon.png'
   ];
-
   void onChipSelected(int index) {
     setState(() {
       selectedChipIndex = index;

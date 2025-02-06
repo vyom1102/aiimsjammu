@@ -126,6 +126,7 @@ class _HomePageState extends State<HomePage> {
     versionApiCall();
     isUserValid();
     callbackFunc();
+    requestNotificationPermission();
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
 
@@ -270,6 +271,32 @@ class _HomePageState extends State<HomePage> {
     }
 
   }
+
+  Future<bool> requestNotificationPermission() async {
+    // Check current platform
+    if (await Permission.notification.isGranted) {
+      print('Notification permission already granted');
+      return true;
+    }
+
+    // Request permission
+    PermissionStatus status = await Permission.notification.request();
+
+    if (status.isGranted) {
+      print('Notification permission granted');
+      return true;
+    } else if (status.isDenied) {
+      print('Notification permission denied');
+    } else if (status.isPermanentlyDenied) {
+      print('Notification permission permanently denied');
+      // Optionally, open app settings
+      //openAppSettings();
+    }
+
+    return false;
+  }
+
+
   Future<void> isUserValid() async{
     try{
      String refreshToken1= await RefreshTokenAPI.refresh();
