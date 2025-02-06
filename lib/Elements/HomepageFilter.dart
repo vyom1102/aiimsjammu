@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fuzzy/bitap/bitap.dart';
 import 'package:iwaymaps/newSearchPage.dart';
 
 import '../DestinationSearchPage.dart';
@@ -10,7 +11,7 @@ class HomepageFilter extends StatefulWidget {
   final String svgPath;
   final String text;
   bool selected;
-  IconData icon;
+  String icon;
   final Function(bool selected) onSelect;
 
   HomepageFilter({
@@ -46,7 +47,7 @@ class _HomepageFilterState extends State<HomepageFilter> {
       ),
       child: InkWell(
         borderRadius: BorderRadius.all(Radius.circular(10.0)), // Updated borderRadius
-        onTap: () {
+        onTap:(){
           Navigator.push(
               context,
               MaterialPageRoute(
@@ -60,7 +61,7 @@ class _HomepageFilterState extends State<HomepageFilter> {
           children: <Widget>[
             Container(
               margin: EdgeInsets.only(left: 4),
-              child: Icon(widget.icon,size: 18,),
+              child: Image.asset(widget.icon, width:  18,height: 18, color: widget.selected? Colors.white: Colors.black,),
             ),
             Container(
               margin: EdgeInsets.only(left: 8, right: 4),

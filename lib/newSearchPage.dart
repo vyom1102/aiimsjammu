@@ -2,17 +2,15 @@ import 'package:chips_choice/chips_choice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fuzzy/fuzzy.dart';
-import 'package:iwaymaps/singletonClass.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
-import 'API/buildingAllApi.dart';
-import 'API/ladmarkApi.dart';
-import 'APIMODELS/landmark.dart';
-import 'ELEMENTS/DestinationPageChipsWidget.dart';
-import 'ELEMENTS/HelperClass.dart';
-import 'ELEMENTS/SearchpageCategoryResult.dart';
-import 'ELEMENTS/SearchpageResults.dart';
-
+import '/API/buildingAllApi.dart';
+import '/Elements/HelperClass.dart';
+import '/API/ladmarkApi.dart';
+import '/APIMODELS/landmark.dart';
+import '/ELEMENTS/DestinationPageChipsWidget.dart';
+import '/ELEMENTS/SearchpageCategoryResult.dart';
+import '/ELEMENTS/SearchpageResults.dart';
 
 class NewSearchPage extends StatefulWidget {
   String hintText;
@@ -48,10 +46,26 @@ class _NewsearchpageState extends State<NewSearchPage> {
   String wordsSpoken = "";
   bool micselected = false;
   bool promptLoader = false;
-  bool isUpdated=true;
 
 
-  Set<String> optionListForUI ={};
+  List<String> optionListForUI = [
+    'Washroom',
+    'Cafeteria',
+    'Drinking water',
+    'ATM',
+    'Entry',
+    'Lift',
+    'Reception',
+  ];
+  List<String> _icons = [
+    'assets/washroomIcon.png',
+    'assets/cafeteria.png',
+    'assets/waterPoint.png',
+    'assets/atmIcon.png',
+    'assets/entryExit.png',
+    'assets/liftIcon.png',
+    'assets/receptionIcon.png'
+  ];
 
 
   IconData getIcon(String option) {
@@ -76,49 +90,6 @@ class _NewsearchpageState extends State<NewSearchPage> {
   }
 
 
-  Future<void> loadLandmarkData() async {
-    setState(() {
-      isUpdated=true;
-    });
-   try {
-     print("entered here");
-     await Future.forEach(
-         landmarkData.landmarksMap!.entries, (MapEntry keyValue) async {
-       var value = keyValue.value;
-       if (value.name != null &&
-           (value.element!.subType == "restRoom" ||
-               value.element!.subType == "Cafeteria" ||
-               value.element!.subType == "main entry" ||
-               value.element!.subType == "Help Desk | Reception" ||
-               value.element!.subType == "lift" ||
-               value.element!.subType == "ATM" ||
-               value.element!.subType == "Drinking Water")) {
-         print("entered here");
-         if (value.element!.subType == "restRoom") {
-           optionListForUI.add("Washroom");
-         } else if (value.element!.subType == "Cafeteria") {
-           print("landmark id is ${value.sId}  with building id ${value.buildingID}");
-           optionListForUI.add("Cafeteria");
-         } else if (value.element!.subType == "main entry") {
-           optionListForUI.add("Entry");
-         } else if (value.element!.subType == "lift") {
-           optionListForUI.add("Lift");
-         } else if (value.element!.subType == "Drinking Water") {
-           optionListForUI.add("Drinking Water");
-         } else if (value.element!.subType == "Help Desk | Reception") {
-           optionListForUI.add("Reception");
-         } else if (value.element!.subType == "ATM") {
-           optionListForUI.add("ATM");
-         }
-       }
-     });
-   }catch(e){
-     print("error in updating liist ${e}");
-   }
-    setState(() {
-      isUpdated=false;
-    });
-  }
 
   @override
   void initState() {
@@ -134,11 +105,8 @@ class _NewsearchpageState extends State<NewSearchPage> {
         search(_controller.text.toLowerCase());
       });
     }
-    loadLandmarkData();
     super.initState();
   }
-
-
   void fetchandBuild() async {
     await fetchlist();
     setState(() {
@@ -147,7 +115,6 @@ class _NewsearchpageState extends State<NewSearchPage> {
       } else {
         // print("Filter cleared");
         topSearchesFunc();
-        loadLandmarkData();
         searchResults = [];
       }
     });
@@ -203,19 +170,14 @@ class _NewsearchpageState extends State<NewSearchPage> {
   }
 
   Future<void> fetchlist() async {
-    land? singletonData = await SingletonFunctionController.building.landmarkdata;
-    
-    if(singletonData != null){
-      landmarkData = singletonData;
-      return;
-    }
-
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
       await landmarkApi().fetchLandmarkData(id: key).then((value) {
         landmarkData.mergeLandmarks(value.landmarks);
         //optionListForUI.addAll(fetchCategories(value));
       });
     });
+
+
   }
 
   List<String> fetchCategories(land value){
@@ -282,18 +244,8 @@ class _NewsearchpageState extends State<NewSearchPage> {
         // print(_controller.text);
       });
       wordsSpoken = "${result.recognizedWords}";
-
-      // if (result.recognizedWords == null) {
-      //   print("result.recognizedWords");
-      //
-      //
-      //   setState(() {
-      //     searchHintString = widget.hintText;
-      //   });
-      // }
     });
   }
-
   void stopListening() async {
     await speetchText.stop();
     micColor = Colors.black;
@@ -314,11 +266,11 @@ class _NewsearchpageState extends State<NewSearchPage> {
       searcCategoryhResults.clear();
       optionListItemBuildingName.clear();
     });
-    if (containsSearchText(optionListForUI.toList(), searchText)) {
+    if (containsSearchText(optionListForUI, searchText)) {
       setState(() {
         category = true;
       });
-      vall = indexOfCaseInsensitive(optionListForUI.toList(), searchText);
+      vall = indexOfCaseInsensitive(optionListForUI, searchText);
       if (landmarkData.landmarksMap != null) {
         landmarkData.landmarksMap!.forEach((key, value) {
           if (value.name != null && value.element!.subType != "beacons") {
@@ -362,50 +314,40 @@ class _NewsearchpageState extends State<NewSearchPage> {
           ),
         );
         // Search using Fuzzy and build results
-        var result = fuse.search(normalizedSearchText);
-        result.sort((a, b) => b.score.compareTo(a.score));
-        result = result.toSet().toList();
+        final result = fuse.search(normalizedSearchText);
         List<SearchpageResults> newResults = [];
         print("result11-${result}");
         result.forEach((fuseResult) {
           if (fuseResult.score <=0.5) {
-            final matchingValues = landmarkData.landmarksMap!.values.where(
-                  (v) => v.name != null &&
-                  v.element!.subType != "beacon" &&
-                  normalizeText(v.name!) == fuseResult.item,
-            ).toList(); // Convert to list to iterate safely
-
-            for (final value in matchingValues) {
-              newResults.add(SearchpageResults(
-                name: value.name!,
-                location: value.buildingID == buildingAllApi.outdoorID
-                    ? "${value.venueName}"
-                    : "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
-                onClicked: onVenueClicked,
-                ID: value.properties!.polyId!,
-                bid: value.buildingID!,
-                floor: value.floor!,
-                coordX: value.coordinateX!,
-                coordY: value.coordinateY!,
-                accessible: value.element!.subType == "restRoom" && value.properties!.washroomType == "Handicapped"
-                    ? "true"
-                    : "false",
-                distance: 0,
-              ));
-            }
-
+            final value = landmarkData.landmarksMap!.values
+                .firstWhere((v) => v.name != null && v.element!.subType != "beacon" && normalizeText(v.name!) == fuseResult.item);
+            newResults.add(SearchpageResults(
+              name: value.name!,
+              location: value.buildingID == buildingAllApi.outdoorID
+                  ? "${value.venueName}"
+                  : "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
+              onClicked: onVenueClicked,
+              ID: value.properties!.polyId!,
+              bid: value.buildingID!,
+              floor: value.floor!,
+              coordX: value.coordinateX!,
+              coordY: value.coordinateY!,
+              accessible: value.element!.subType == "restRoom" && value.properties!.washroomType == "Handicapped"
+                  ? "true"
+                  : "false",
+              distance: 0,
+            ));
           }
         });
-        List<SearchpageResults> reversed = newResults.reversed.toList();
+
         setState(() {
-          searchResults = reversed.take(25).toList(); // Limit results to 25
+          searchResults = newResults.take(25).toList(); // Limit results to 25
         });
       }
     }
 
 
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -565,67 +507,63 @@ class _NewsearchpageState extends State<NewSearchPage> {
               child: Semantics(
                 label: "Facilities Filter",
                 header: true,
-                child:(isUpdated==false)?
-                Container(
-                  margin: EdgeInsets.only(left: 7, top: 4),
+                child: Container(
+                  margin: EdgeInsets.only(left: 7,top: 4),
                   width: screenWidth,
                   child: ChipsChoice<int>.single(
                     value: vall,
                     onChanged: (val) {
                       print("this is working");
-                      if (HelperClass.SemanticEnabled) {
+                      if(HelperClass.SemanticEnabled) {
                         // speak("${optionListForUI[val]} selected");
                       }
-
-                      // Reset vall to -1 if input text is not empty and a valid option is selected
-                      if (_controller.text.isNotEmpty && vall != -1) {
-                        setState(() {
-                          vall = -1;
+                      if(_controller.text.isNotEmpty && vall!=-1){
+                        setState((){
+                          vall=-1;
                         });
                       }
-
-                      // Set the selected option
-                      selectedButton = optionListForUI.toList()[val];
-                      setState(() {
-                        vall = val;
-                      });
-
+                      selectedButton = optionListForUI[val];
+                      setState(() => vall = val);
                       lastval = val;
-                      _controller.text = optionListForUI.toList()[val];
-                      search(optionListForUI.toList()[val].toLowerCase());
+                      _controller.text = optionListForUI[val];
+                      search(optionListForUI[val].toLowerCase());
+
                     },
                     choiceItems: C2Choice.listFrom<int, String>(
-                      source: optionListForUI.toList(),
+                      source: optionListForUI,
                       value: (i, v) => i,
                       label: (i, v) => v,
                     ),
                     choiceBuilder: (item, i) {
+                      if(!item.selected){
+                        vall = -1;
+                      }
                       return DestinationPageChipsWidget(
-                        svgPath: '',
-                        text: optionListForUI.toList()[i],
-                        onSelect: item.select!,
-                        selected: item.selected,
-                        onTap: (String Text) {
-                          print("again tapped ${Text}");
-                          if (Text.isNotEmpty) {
-                            search(Text);
-                          } else {
-                            setState(() {
-                              _controller.text = "";
-                              searchResults = [];
-                              searcCategoryhResults = [];
-                              vall = -1;
-                            });
-                          }
-                        },
-                        icon: getIcon(optionListForUI.toList()[i].toLowerCase()),
+                          svgPath: '',
+                          text: optionListForUI[i],
+                          onSelect: item.select!,
+                          selected: item.selected,
+                          onTap: (String Text) {
+                            print("again tapped ${Text}");
+                            if (Text.isNotEmpty) {
+                              search(Text);
+                            } else {
+                              setState(() {
+                                _controller.text="";
+                                searchResults = [];
+                                searcCategoryhResults=[];
+                                vall = -1;
+                              });
+                              //searcCategoryhResults = [];
+
+                            }
+                          }, icon: _icons[i]
                       );
                     },
                     direction: Axis.horizontal,
                   ),
-                ):Container(),
+                ),
               ),
-
             ),
             Flexible(
                 flex: 1,
@@ -634,8 +572,8 @@ class _NewsearchpageState extends State<NewSearchPage> {
                     label: 'Available Buildings with ${_controller.text} Facilities',
                     header: true,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children:(searcCategoryhResults.isNotEmpty)?searcCategoryhResults:(searchResults.isNotEmpty)?searchResults:(topSearches.isNotEmpty)?topSearches:[]
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children:(searcCategoryhResults.isNotEmpty)?searcCategoryhResults:(searchResults.isNotEmpty)?searchResults:(topSearches.isNotEmpty)?topSearches:[]
                     ),
                   ),
                 )),

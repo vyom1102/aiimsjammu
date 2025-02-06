@@ -342,14 +342,14 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
 
   ];
-  List<IconData> _icons = [
-    Icons.wash_sharp,
-    Icons.local_cafe,
-    Icons.water_drop,
-    Icons.atm_sharp,
-    Icons.door_front_door_outlined,
-    Icons.elevator,
-    Icons.desk_sharp,
+  List<String> _icons = [
+    'assets/washroomIcon.png',
+    'assets/cafeteria.png',
+    'assets/waterPoint.png',
+    'assets/atmIcon.png',
+    'assets/entryExit.png',
+    'assets/liftIcon.png',
+    'assets/receptionIcon.png'
   ];
 
   void onChipSelected(int index) {

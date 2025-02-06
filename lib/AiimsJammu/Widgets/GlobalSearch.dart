@@ -103,12 +103,13 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
     'Entry',
 
   ];
-  List<IconData> _icons = [
-    Icons.wash_sharp,
-    Icons.local_cafe,
-    Icons.water_drop,
-    Icons.atm_sharp,
-    Icons.door_front_door_outlined,
+  List<String> _icons = [
+    'assets/washroomIcon.png',
+    'assets/cafeteria.png',
+    'assets/waterPoint.png',
+    'assets/atmIcon.png',
+    'assets/liftIcon.png',
+    'assets/entryExit.png',
   ];
   Set<String> optionListItemBuildingName = {};
   List<Widget> searcCategoryhResults = [];
