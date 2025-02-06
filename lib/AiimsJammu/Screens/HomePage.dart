@@ -217,7 +217,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () async {
                 // Add your app update logic here
                 final url = Theme.of(context).platform == TargetPlatform.iOS
-                    ? 'https://apps.apple.com/in/app/rgci-navigation/id6505062168'
+                    ? 'https://apps.apple.com/in/app/aiims-jammu-navigation/id6677034083'
                     : 'https://play.google.com/store/apps/details?id=com.iwayplus.aiimsjammu';
                 if (await canLaunch(url)) {
                   await launch(url);
