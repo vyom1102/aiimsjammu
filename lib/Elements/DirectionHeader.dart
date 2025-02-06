@@ -1435,28 +1435,28 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                   )
                 : Container(),
 
-            Container(
-              width: screenWidth,
-              height: 300,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    //Text("Beacon ${highestKey} - ${highestAverage}"),
-                    Text(debuglNearestbeacon),
-                    // Text(sumMap.entries.map((entry) => '${entry.key}: ${entry.value.join(", ")}').join("\n")),
-                    // //Text(displayString),
-                    // Text("-------"),
-                    // Text(sumMapAvg.toString()),
-                    // Text("${highestAverage} ${threshold.toString()}")
-                    //
-
-                    // Text(Building.apibeaconmap.containsKey(debuglNearestbeacon).toString()),
-                  ],
-                ),
-              ),
-            ),
+            // Container(
+            //   width: screenWidth,
+            //   height: 300,
+            //   child: SingleChildScrollView(
+            //     scrollDirection: Axis.horizontal,
+            //     child: Column(
+            //       crossAxisAlignment: CrossAxisAlignment.start,
+            //       children: [
+            //         //Text("Beacon ${highestKey} - ${highestAverage}"),
+            //         Text(debuglNearestbeacon),
+            //         // Text(sumMap.entries.map((entry) => '${entry.key}: ${entry.value.join(", ")}').join("\n")),
+            //         // //Text(displayString),
+            //         // Text("-------"),
+            //         // Text(sumMapAvg.toString()),
+            //         // Text("${highestAverage} ${threshold.toString()}")
+            //         //
+            //
+            //         // Text(Building.apibeaconmap.containsKey(debuglNearestbeacon).toString()),
+            //       ],
+            //     ),
+            //   ),
+            // ),
 
             // Container(
             //   width: 300,

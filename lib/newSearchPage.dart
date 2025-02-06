@@ -527,7 +527,6 @@ class _NewsearchpageState extends State<NewSearchPage> {
                       lastval = val;
                       _controller.text = optionListForUI[val];
                       search(optionListForUI[val].toLowerCase());
-
                     },
                     choiceItems: C2Choice.listFrom<int, String>(
                       source: optionListForUI,
