@@ -224,72 +224,321 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
             ? _buildShimmerLoading()
             : Column(
                 children: [
+                  // Semantics(
+                  //   header: true,
+                  //   container: true,
+                  //   label: "Filters",
+                  //   child: SizedBox(
+                  //     height: 60,
+                  //     child: ListView.builder(
+                  //       scrollDirection: Axis.horizontal,
+                  //       itemCount: specialities.length + 1,
+                  //       itemBuilder: (context, index) {
+                  //         if (index == 0) {
+                  //           return Padding(
+                  //             padding: const EdgeInsets.only(left: 8.0, right: 4),
+                  //             child: FilterChip(
+                  //               label: TranslatorWidget(
+                  //                 'All',
+                  //                 style: TextStyle(
+                  //                   color: _selectedSpeciality.isEmpty
+                  //                       ? Colors.white
+                  //                       : Color(0xFF1C2A3A),
+                  //                 ),
+                  //               ),
+                  //               showCheckmark: false,
+                  //               selectedColor: Color(0xFF1C2A3A),
+                  //               selected: _selectedSpeciality.isEmpty,
+                  //               onSelected: (value) {
+                  //                 setState(() {
+                  //                   _filterDoctors('');
+                  //                 });
+                  //               },
+                  //               shape: RoundedRectangleBorder(
+                  //                 borderRadius: BorderRadius.circular(20),
+                  //               ),
+                  //             ),
+                  //           );
+                  //         } else {
+                  //           final speciality = specialities[index - 1];
+                  //           return Padding(
+                  //             padding: const EdgeInsets.all(4.0),
+                  //             child: FilterChip(
+                  //               label: TranslatorWidget(
+                  //                 speciality,
+                  //                 style: TextStyle(
+                  //                   color: _selectedSpeciality == speciality
+                  //                       ? Colors.white
+                  //                       : Color(0xFF1C2A3A),
+                  //                 ),
+                  //               ),
+                  //               selectedColor: Color(0xFF1C2A3A),
+                  //               showCheckmark: false,
+                  //               selected: _selectedSpeciality == speciality,
+                  //               onSelected: (value) {
+                  //                 setState(() {
+                  //                   _filterDoctors(speciality);
+                  //                 });
+                  //               },
+                  //               shape: RoundedRectangleBorder(
+                  //                 borderRadius: BorderRadius.circular(20),
+                  //               ),
+                  //             ),
+                  //           );
+                  //         }
+                  //       },
+                  //     ),
+                  //   ),
+                  // ),
                   Semantics(
                     header: true,
                     container: true,
                     label: "Filters",
                     child: SizedBox(
                       height: 60,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: specialities.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == 0) {
-                            return Padding(
-                              padding: const EdgeInsets.only(left: 8.0, right: 4),
-                              child: FilterChip(
-                                label: TranslatorWidget(
-                                  'All',
-                                  style: TextStyle(
-                                    color: _selectedSpeciality.isEmpty
-                                        ? Colors.white
-                                        : Color(0xFF1C2A3A),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                                   ),
-                                ),
-                                showCheckmark: false,
-                                selectedColor: Color(0xFF1C2A3A),
-                                selected: _selectedSpeciality.isEmpty,
-                                onSelected: (value) {
-                                  setState(() {
-                                    _filterDoctors('');
-                                  });
-                                },
+                                  builder: (BuildContext context) {
+                                    return Container(
+                                      padding: const EdgeInsets.all(16.0),
+                                      constraints: BoxConstraints(
+                                        maxHeight: MediaQuery.of(context).size.height * 0.7,
+                                      ),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(bottom: 16.0),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text(
+                                                  'Select Department',
+                                                  style: TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                IconButton(
+                                                  icon: Icon(Icons.close),
+                                                  onPressed: () => Navigator.pop(context),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Flexible(
+                                            child: SingleChildScrollView(
+                                              child: Wrap(
+                                                spacing: 8.0,
+                                                runSpacing: 8.0,
+                                                children: [
+                                                  FilterChip(
+                                                    label: TranslatorWidget(
+                                                      'All',
+                                                      style: TextStyle(
+                                                        color: _selectedSpeciality.isEmpty
+                                                            ? Colors.white
+                                                            : Color(0xFF1C2A3A),
+                                                      ),
+                                                    ),
+                                                    showCheckmark: false,
+                                                    selectedColor: Color(0xFF1C2A3A),
+                                                    selected: _selectedSpeciality.isEmpty,
+                                                    onSelected: (value) {
+                                                      setState(() {
+                                                        _filterDoctors('');
+                                                      });
+                                                      Navigator.pop(context);
+                                                    },
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(20),
+                                                    ),
+                                                  ),
+                                                  ...specialities.map((speciality) {
+                                                    return FilterChip(
+                                                      label: TranslatorWidget(
+                                                        speciality,
+                                                        style: TextStyle(
+                                                          color: _selectedSpeciality == speciality
+                                                              ? Colors.white
+                                                              : Color(0xFF1C2A3A),
+                                                        ),
+                                                      ),
+                                                      selectedColor: Color(0xFF1C2A3A),
+                                                      showCheckmark: false,
+                                                      selected: _selectedSpeciality == speciality,
+                                                      onSelected: (value) {
+                                                        setState(() {
+                                                          _filterDoctors(speciality);
+                                                        });
+                                                        Navigator.pop(context);
+                                                      },
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(20),
+                                                      ),
+                                                    );
+                                                  }).toList(),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFF1C2A3A),
+                                foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                               ),
-                            );
-                          } else {
-                            final speciality = specialities[index - 1];
-                            return Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: FilterChip(
-                                label: TranslatorWidget(
-                                  speciality,
-                                  style: TextStyle(
-                                    color: _selectedSpeciality == speciality
-                                        ? Colors.white
-                                        : Color(0xFF1C2A3A),
+                              child: Row(
+                                children: [
+                                  TranslatorWidget(
+                                    _selectedSpeciality.isEmpty ? 'Departments' : _selectedSpeciality,
+                                    style: TextStyle(color: Colors.white),
                                   ),
-                                ),
-                                selectedColor: Color(0xFF1C2A3A),
-                                showCheckmark: false,
-                                selected: _selectedSpeciality == speciality,
-                                onSelected: (value) {
-                                  setState(() {
-                                    _filterDoctors(speciality);
-                                  });
-                                },
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
+                                  const SizedBox(width: 8),
+                                  const Icon(Icons.arrow_drop_down, color: Colors.white),
+                                ],
                               ),
-                            );
-                          }
-                        },
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
+                  // Semantics(
+                  //   header: true,
+                  //   container: true,
+                  //   label: "Filters",
+                  //   child: SizedBox(
+                  //     height: 60,
+                  //     child: Row(
+                  //       children: [
+                  //         Padding(
+                  //           padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  //           child: ElevatedButton(
+                  //             onPressed: () {
+                  //               showModalBottomSheet(
+                  //                 context: context,
+                  //                 shape: const RoundedRectangleBorder(
+                  //                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  //                 ),
+                  //                 builder: (BuildContext context) {
+                  //                   return Container(
+                  //                     padding: const EdgeInsets.all(16.0),
+                  //                     child: Column(
+                  //                       mainAxisSize: MainAxisSize.min,
+                  //                       crossAxisAlignment: CrossAxisAlignment.start,
+                  //                       children: [
+                  //                         Padding(
+                  //                           padding: const EdgeInsets.only(bottom: 16.0),
+                  //                           child: Text(
+                  //                             'Select Department',
+                  //                             style: TextStyle(
+                  //                               fontSize: 18,
+                  //                               fontWeight: FontWeight.bold,
+                  //                             ),
+                  //                           ),
+                  //                         ),
+                  //                         Wrap(
+                  //                           spacing: 8.0,
+                  //                           runSpacing: 8.0,
+                  //                           children: [
+                  //                             FilterChip(
+                  //                               label: TranslatorWidget(
+                  //                                 'All',
+                  //                                 style: TextStyle(
+                  //                                   color: _selectedSpeciality.isEmpty
+                  //                                       ? Colors.white
+                  //                                       : Color(0xFF1C2A3A),
+                  //                                 ),
+                  //                               ),
+                  //                               showCheckmark: false,
+                  //                               selectedColor: Color(0xFF1C2A3A),
+                  //                               selected: _selectedSpeciality.isEmpty,
+                  //                               onSelected: (value) {
+                  //                                 setState(() {
+                  //                                   _filterDoctors('');
+                  //                                 });
+                  //                                 Navigator.pop(context);
+                  //                               },
+                  //                               shape: RoundedRectangleBorder(
+                  //                                 borderRadius: BorderRadius.circular(20),
+                  //                               ),
+                  //                             ),
+                  //                             ...specialities.map((speciality) {
+                  //                               return FilterChip(
+                  //                                 label: TranslatorWidget(
+                  //                                   speciality,
+                  //                                   style: TextStyle(
+                  //                                     color: _selectedSpeciality == speciality
+                  //                                         ? Colors.white
+                  //                                         : Color(0xFF1C2A3A),
+                  //                                   ),
+                  //                                 ),
+                  //                                 selectedColor: Color(0xFF1C2A3A),
+                  //                                 showCheckmark: false,
+                  //                                 selected: _selectedSpeciality == speciality,
+                  //                                 onSelected: (value) {
+                  //                                   setState(() {
+                  //                                     _filterDoctors(speciality);
+                  //                                   });
+                  //                                   Navigator.pop(context);
+                  //                                 },
+                  //                                 shape: RoundedRectangleBorder(
+                  //                                   borderRadius: BorderRadius.circular(20),
+                  //                                 ),
+                  //                               );
+                  //                             }).toList(),
+                  //                           ],
+                  //                         ),
+                  //                       ],
+                  //                     ),
+                  //                   );
+                  //                 },
+                  //               );
+                  //             },
+                  //             style: ElevatedButton.styleFrom(
+                  //               backgroundColor: Color(0xFF1C2A3A),
+                  //               foregroundColor: Colors.white,
+                  //               shape: RoundedRectangleBorder(
+                  //                 borderRadius: BorderRadius.circular(20),
+                  //               ),
+                  //               padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  //             ),
+                  //             child: Row(
+                  //               children: [
+                  //                 TranslatorWidget(
+                  //                   _selectedSpeciality.isEmpty ? 'Departments' : _selectedSpeciality,
+                  //                   style: TextStyle(color: Colors.white),
+                  //                 ),
+                  //                 const SizedBox(width: 8),
+                  //                 const Icon(Icons.arrow_drop_down, color: Colors.white),
+                  //               ],
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
                   SizedBox(
                     height: 4,
                   ),

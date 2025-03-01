@@ -45,12 +45,14 @@ class GlobalSearchPage extends StatefulWidget {
   String previousFilter;
   bool voiceInputEnabled;
   String userLocalized;
-
+  bool frombottombar;
   GlobalSearchPage(
       {this.hintText = "",
       this.previousFilter = "",
       required this.voiceInputEnabled,
-      this.userLocalized = ""});
+      this.userLocalized = "",
+      this.frombottombar = false,
+      });
 
   @override
   State<GlobalSearchPage> createState() => _GlobalSearchPageState();
@@ -979,6 +981,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             SizedBox(width: 6),
+                            if(!widget.frombottombar)
                             Container(
                               width: 48,
                               height: 48,
