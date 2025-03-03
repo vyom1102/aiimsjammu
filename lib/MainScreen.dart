@@ -225,7 +225,9 @@ class _MainScreenState extends State<MainScreen> {
             },
             backgroundColor: Color(0xFFFEAB01),
             shape: CircleBorder(),
-            child: Lottie.asset('assets/images/floatingmap.json'),
+            child: Semantics(
+                label: "Map",
+                child: Lottie.asset('assets/images/floatingmap.json')),
           ),
       ),
     );

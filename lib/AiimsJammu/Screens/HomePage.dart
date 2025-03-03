@@ -1539,10 +1539,10 @@ class _HomePageState extends State<HomePage> {
                         child: _buildAmenities(),
                       ),
                       SizedBox(
-                        height: 10,
+                        height: 16,
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(left: 16.0, bottom: 12),
+                        padding: const EdgeInsets.only(left: 16.0),
                         child: Row(
                           children: [
                             Semantics(
@@ -2131,10 +2131,10 @@ class _HomePageState extends State<HomePage> {
   }
   Widget _buildAmenities() {
     final List<Map<String, dynamic>> amenities = [
-      {'icon': Icons.local_atm, 'bg': Colors.blue[50], 'title': 'ATM','type':'ATM'},
-      {'icon': Icons.local_drink, 'bg': Colors.blue[50], 'title': 'Water','type':'drinkingwater'},
-      {'icon': Icons.directions_bus, 'bg': Colors.blue[50], 'title': 'Transport','type':'transport'},
-      {'icon': Icons.wc, 'bg': Colors.blue[50], 'title': 'Washroom','type':'washroom'},
+      {'icon': Icons.local_atm, 'bg': Colors.blue[50], 'title': 'ATM','type':'ATM','image':'assets/images/Homepage-Category.svg'},
+      {'icon': Icons.local_drink, 'bg': Colors.blue[50], 'title': 'Water','type':'drinkingwater','image':'assets/images/water.svg'},
+      {'icon': Icons.directions_bus, 'bg': Colors.blue[50], 'title': 'Transport','type':'transport','image':'assets/images/Transport.svg'},
+      {'icon': Icons.wc, 'bg': Colors.blue[50], 'title': 'Washroom','type':'washroom','image':'assets/images/Washroom.svg'},
     ];
 
     return Row(
@@ -2156,11 +2156,12 @@ class _HomePageState extends State<HomePage> {
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  child: Icon(
-                    amenity['icon'],
-                    color: Color(0xff003666),
-                    size: 30,
-                  ),
+                  child: SvgPicture.asset(amenity['image']),
+                  // Icon(
+                  //   amenity['icon'],
+                  //   color: Color(0xff003666),
+                  //   size: 30,
+                  // ),
                 ),
               ),
               const SizedBox(height: 8),
