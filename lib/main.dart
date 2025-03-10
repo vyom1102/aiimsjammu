@@ -10,6 +10,7 @@ import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/UserState.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:iwaymaps/websocket/interactionManager.dart';
+import 'package:iwaymaps/websocket/navigationLogManager.dart';
 import 'package:iwaymaps/websocket/sessionManager.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_localization/flutter_localization.dart';
@@ -38,6 +39,7 @@ import 'MainScreen.dart';
 
 final interactionManager = InteractionManager();
 final sessionManager = SessionManager();
+final navigationManager=NavigationLogManager();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // await Firebase.initializeApp();
@@ -68,8 +70,8 @@ Future<void> main() async {
   await Hive.openBox<LocalNotificationAPIDatabaseModel>('LocalNotificationAPIDatabaseModel');
 
   await interactionManager.initialize();
-
   await sessionManager.initialize();
+  await navigationManager.initialize();
 
   await Hive.openBox('Favourites');
   await Hive.openBox('UserInformation');
@@ -156,6 +158,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
       print("App is in the background");
       InteractionManager().syncLogsToServer("");
       SessionManager().endSession();
+      NavigationLogManager().syncLogsToServer();
     } else if (state == AppLifecycleState.resumed) {
       // App came to foreground
       print("App is in the foreground");
