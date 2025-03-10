@@ -19,6 +19,7 @@ import '/localization/locales.dart';
 import 'API/buildingAllApi.dart';
 import 'AiimsJammu/Screens/DoctorProfile1.dart';
 import 'AiimsJammu/Screens/ServiceInfo1.dart';
+import 'AiimsJammu/Screens/SplashScreen.dart';
 import 'DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
@@ -221,7 +222,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
           if (!isUserAuthenticated) {
             var signInDatabaseBox = Hive.box('SignInDatabase');
             if (!signInDatabaseBox.containsKey("accessToken")) {
-              return SignIn();
+              return SplashScreen();
             } else {
               _initDeepLinkListener(context);
               if (initialDocId != null) {

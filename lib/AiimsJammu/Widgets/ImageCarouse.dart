@@ -69,7 +69,7 @@ class _ImageCarouselWidgetState extends State<ImageCarouselWidget> {
       decoration: BoxDecoration(
         border: Border.all(color: Color(0xFFE0E0E0), width: 1),
       ),
-      height: 180,
+      height: 130,
       child: Stack(
         children: [
           PageView(

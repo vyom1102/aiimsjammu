@@ -1,10 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
+import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:iwaymaps/AiimsJammu/Screens/BuildingLandmarks.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/GlobalSearch.dart';
 import 'package:iwaymaps/LOGIN%20SIGNUP/SignIn.dart';
+import 'package:lottie/lottie.dart';
 import 'package:new_version_plus/new_version_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:quickalert/models/quickalert_type.dart';
@@ -20,9 +25,14 @@ import 'package:iwaymaps/API/DataVersionApi.dart';
 import 'package:iwaymaps/API/buildingAllApi.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/NoInternetConnection.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/OpeningClosingStatus.dart';
+import '../../API/PatchApi.dart';
+import '../../API/PolyLineApi.dart';
 import '../../API/RefreshTokenAPI.dart';
 import '../../API/UsergetAPI.dart';
+import '../../API/ladmarkApi.dart';
+import '../../API/waypoint.dart';
 import '../../APIMODELS/DataVersion.dart';
+import '../../APIMODELS/landmark.dart';
 import '../../DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import '../../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import '../../DATABASE/BOXES/DataVersionLocalModelBOX.dart';
@@ -32,6 +42,7 @@ import '../../DATABASE/BOXES/PatchAPIModelBox.dart';
 import '../../DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import '../../DATABASE/BOXES/WayPointModelBOX.dart';
 import '../../Elements/HelperClass.dart';
+import '../../Navigation.dart';
 import '../../UserState.dart';
 import '../../VersioInfo.dart';
 import '../../buildingState.dart';
@@ -40,7 +51,9 @@ import '../../singletonClass.dart';
 import '../../websocket/NotifIcationSocket.dart';
 import '../../websocket/UserLog.dart';
 import '../../websocket/interactionManager.dart';
+import '../Widgets/MapPreview.dart';
 import '../Widgets/Translator.dart';
+import '../Widgets/defaultMap.dart';
 import '/DestinationSearchPage.dart';
 import '/AiimsJammu/Screens/ATMScreen.dart';
 import '/AiimsJammu/Screens/AllAnnouncementScreen.dart';
@@ -73,7 +86,14 @@ class _HomePageState extends State<HomePage> {
   List<dynamic> carouselImages = [];
   // List<AnnouncementAData> AnnounceData = [];
   List<dynamic> announcements = [];
-
+  Map<String, dynamic> allLandmarkData = {};
+  List<String> globalBuildingIds = [];
+  List<String> AiimsJammuBuildingIds = ["67986e4114ef508e9429a5ad", "66794105b80a6778c53c4856", "6798c6df96af63c3e82659ec", "6798c81c96af63c3e826add3", "6798c8fa96af63c3e8277db2", "6798c99e96af63c3e828203d", "6798ca0396af63c3e828c472", "6798ce3596af63c3e8294dbc", "679ca3fde7e7001d98497002"];
+  bool _isLoading = false;
+  List<dynamic> filteredLandmarks = [];
+  String? selectedlandmarkpolyId;
+  double? buildingstartX = 32.5637551;
+  double? buildingstartY = 75.0341691;
   PageController _pageController = PageController();
   List<dynamic> _services = [];
   List<dynamic> _filteredServices = [];
@@ -108,6 +128,7 @@ class _HomePageState extends State<HomePage> {
   bool isOnline = true;
   List<dynamic> _doctors = [];
   List<dynamic> _filteredDoctors = [];
+  Widget? mapPreview;
 
 
   @override
@@ -124,6 +145,9 @@ class _HomePageState extends State<HomePage> {
     versionApiCheck();
     checkForReload();
     versionApiCall();
+    dataDownload();
+    fetchAndStoreBuildingIds();
+    // fetchAllLandmarkData();
     isUserValid();
     callbackFunc();
     requestNotificationPermission();
@@ -131,6 +155,325 @@ class _HomePageState extends State<HomePage> {
     _scrollController = ScrollController(initialScrollOffset: 140.0);
 
   }
+  Future<void> fetchAllLandmarkData() async {
+
+    if (globalBuildingIds.isEmpty) {
+      await fetchAndStoreBuildingIds();
+    }
+
+
+    for (var buildingId in globalBuildingIds) {
+      await fetchLandmarkData(buildingId);
+    }
+  }
+  Future<void> fetchAndStoreBuildingIds() async {
+    // Open the Hive box
+    var buildingIdsBox = await Hive.openBox('BuildingIds');
+
+    // Retrieve building IDs from the box
+    if (buildingIdsBox.containsKey("buildingId")) {
+      globalBuildingIds = List<String>.from(
+          buildingIdsBox.get('buildingId')
+      );
+    }else{
+      print("Aiims jammu ids");
+      setState(() {
+        globalBuildingIds = AiimsJammuBuildingIds;
+
+      });
+    }
+
+
+    setState(() {
+      _isLoading = true;
+    });
+    await DataVersionCheckForLandmarks();
+    setState(() {
+      _isLoading = false;
+    });
+
+    print("Global Building IDs: $globalBuildingIds");
+  }
+  Future<void>DataVersionCheckForLandmarks() async {
+    print("in data version");
+    for(String buildingId in globalBuildingIds){
+      print("building data version for $buildingId");
+      await fetchDataVersion(buildingId: buildingId);
+    }
+  }
+  Future<Map<String, dynamic>> fetchDataVersion({
+    required String buildingId,
+  }) async {
+    try {
+      final Uri url = Uri.parse('${AppConfig.baseUrl}/secured/data-version');
+      final headers = {
+        'Content-Type': 'application/json',
+        'x-access-token': '$accessToken',
+      };
+      final body = json.encode({
+        "building_ID": buildingId,
+      });
+
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: body,
+      );
+      print("status code for data version ${response.statusCode}");
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        if (responseData["status"] == true) {
+          final versionData = responseData["versionData"];
+          final int polylineVersion = versionData["polylineDataVersion"];
+          final int landmarksVersion = versionData["landmarksDataVersion"];
+
+          var box = await Hive.openBox('DataVersion');
+          final storedPolylineVersion = box.get('${buildingId}_polylineVersion', defaultValue: -1);
+          final storedLandmarksVersion = box.get('${buildingId}_landmarksVersion', defaultValue: -1);
+          print("storedLandmarksVersion for $buildingId is $storedLandmarksVersion");
+          print("storedPolylineVersion for $buildingId is $storedPolylineVersion");
+
+          if ( landmarksVersion != storedLandmarksVersion) {
+            print("data changed for $buildingId");
+            await box.put('${buildingId}_landmarksVersion', landmarksVersion);
+            await fetchLandmarkData(buildingId);
+          }else{
+
+            var landmarkDataBox = await Hive.openBox('LandmarkDataBox');
+            var data = await landmarkDataBox.get('landmarkData_$buildingId');
+            setState(() {
+              allLandmarkData[buildingId] = data;
+            });
+            print("no data changed in landmark $buildingId");
+          }
+        }
+        return responseData;
+      }else if(response.statusCode == 403){
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        return fetchDataVersion(buildingId: buildingId);
+      } else {
+        throw HttpException('Failed to fetch data version: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching data version: $e');
+    }
+  }
+  Future<void> fetchLandmarkData(String buildingId) async {
+
+    var headers = {
+      'Content-Type': 'application/json',
+      'x-access-token': '$accessToken'
+    };
+
+    var request = http.Request(
+      'POST',
+      Uri.parse('${AppConfig.baseUrl}/secured/landmarks'),
+    );
+    request.body = json.encode({"id": buildingId});
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      String responseData = await response.stream.bytesToString();
+      var data = jsonDecode(responseData);
+
+      // Save data in Hive for caching
+      var landmarkDataBox = await Hive.openBox('LandmarkDataBox');
+      await landmarkDataBox.put('landmarkData_$buildingId', data);
+      print("Landmark data stored for building a $buildingId");
+
+      // Update state and store landmark data
+      setState(() {
+        allLandmarkData[buildingId] = data;
+        // landmarkData = data;
+      });
+
+
+    } else if (response.statusCode == 403) {
+      // Refresh the access token and retry the request
+      accessToken = await RefreshTokenAPI.refresh();
+      await fetchLandmarkData(buildingId);
+    } else {
+      print("Error: ${response.reasonPhrase}");
+    }
+
+    // Add landmarks for the specified floor
+    // await addLandmarksForFloor(buildingId, currentFloor);
+  }
+
+  Future<void> filterLandmarks(String? type, int floorInt,{String? washroomType}) async {
+    print("in filter landmark $type , $floorInt");
+    if (allLandmarkData.isEmpty) return;
+
+    print("in all landmarkdata");
+    List<dynamic> landmarks = [];
+
+    // final landmarks = allLandmarkData[globalBuildingIds[1]]?['landmarks'] as List;
+    for (var buildingId in globalBuildingIds) {
+      if (allLandmarkData[buildingId]?['landmarks'] != null) {
+        landmarks.addAll(allLandmarkData[buildingId]['landmarks'] as List);
+      }
+    }
+    String? selectedWashroomType =washroomType??"male";
+
+    // // If the user selected washroom, ask for male or female
+    // if (type?.toLowerCase() == 'washroom') {
+    //   selectedWashroomType = await showDialog<String>(
+    //     context: context,
+    //     builder: (BuildContext context) {
+    //       return AlertDialog(
+    //         title: const Text('Select Washroom Type'),
+    //         content: Column(
+    //           mainAxisSize: MainAxisSize.min,
+    //           children: [
+    //             ListTile(
+    //               title: const Text('Male'),
+    //               onTap: () {
+    //                 Navigator.pop(context, 'male');
+    //               },
+    //             ),
+    //             ListTile(
+    //               title: const Text('Female'),
+    //               onTap: () {
+    //                 Navigator.pop(context, 'female');
+    //               },
+    //             ),
+    //           ],
+    //         ),
+    //       );
+    //     },
+    //   );
+    //
+    //   // If the user cancels the selection, exit the function
+    //   if (selectedWashroomType == null) return;
+    // }
+
+    filteredLandmarks = landmarks.where((landmark) {
+      bool floorMatch = landmark['floor'] == floorInt;
+      String landmarkType = landmark['element']['subType']?.toString().toLowerCase() ?? '';
+
+      // Check washroom type if washroom is selected
+      if (type?.toLowerCase() == 'washroom') {
+        String washroomType = landmark['properties']['washroomType']?.toString().toLowerCase() ?? '';
+        return floorMatch && landmarkType == 'restroom' && washroomType == selectedWashroomType;
+      }
+
+      switch (type?.toLowerCase()) {
+        case 'lift':
+          return floorMatch && landmarkType == 'lift';
+        case 'entry':
+          return floorMatch && landmarkType == 'main entry';
+        case 'pharmacy':
+          return floorMatch && landmarkType == 'pharmacy';
+        case 'drinkingwater':
+          return floorMatch && landmarkType == 'drinkingwater';
+        case 'food and drinks':
+          return floorMatch && landmarkType == 'food and drinks';
+        case 'atm':
+          return floorMatch && landmarkType == "atm";
+        case 'transport':
+          return floorMatch && landmarkType == "transportation service till building";
+        default:
+          return floorMatch;
+      }
+    }).toList();
+
+    if (filteredLandmarks.isNotEmpty) {
+      // Find nearest landmark based on current position
+      Map<dynamic, dynamic> nearestLandmark = filteredLandmarks[0];
+      double minDistance = double.infinity;
+      buildingstartY = userLoc!.longitude;
+      buildingstartX = userLoc!.latitude;
+      print("user loccc");
+      print(buildingstartX);
+      print(buildingstartY);
+      print(nearestLandmark);
+      for (var landmark in filteredLandmarks) {
+        // double landmarkX = landmark['doorX']?.toDouble() ??
+        //     landmark['coordinateX']?.toDouble() ??
+        //     0.0;
+        double landmarkX = double.parse(landmark['properties']['latitude']);
+        double landmarkY = double.parse(landmark['properties']['longitude']);
+        // double landmarkY = landmark['doorY']?.toDouble() ??
+        //     landmark['coordinateY']?.toDouble() ??
+        //     0.0;
+
+        // Calculate Euclidean distance from current position
+        double distance = sqrt(
+            pow(buildingstartX! - landmarkX, 2) +
+                pow(buildingstartY! - landmarkY, 2)
+        );
+
+        if (distance < minDistance) {
+          minDistance = distance;
+          nearestLandmark = landmark;
+        }
+      }
+
+      print('Nearest ${type ?? 'all'} landmark on floor $floorInt in building :');
+      print(nearestLandmark);
+
+      setState(() {
+        selectedlandmarkpolyId = nearestLandmark['properties']['polyId'];
+        // selectedLandmark = nearestLandmark;
+        // selectedlandmarkName = nearestLandmark["name"];
+      });
+      print('selectedlandmarkpolyId');
+      print(selectedlandmarkpolyId);
+      if(selectedlandmarkpolyId!=null)
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Navigation(directLandID: selectedlandmarkpolyId!,),
+        ),
+      );
+      // if(selectedlandmarkpolyId!=null)
+      // PassLocationId(context, selectedlandmarkpolyId!);
+
+      // handleLandmarkClick(selectedLandmark!);
+
+      // selectedLandmarkType = type;
+      // buildingAnnotationManagers[focusedBuildingId]!.deleteAll();
+      // addedLandmarks.remove(focusedBuildingId);
+
+      // setState(() {
+      //   selectedlandmarkName = selectedLandmark!['name'];
+      //   selectedlandmarkpolyId = selectedLandmark!['properties']['polyId'];
+      //   selectedlandmarkImage = selectedLandmark!['properties']['filename'];
+      //   selectedlandmarkFloor = selectedLandmark!['floor'].toString();
+      //   selectedlandmarkBuilding = selectedLandmark!['buildingName'];
+      // });
+      //
+      // double endX = selectedLandmark['doorX']?.toDouble() ??
+      //     selectedLandmark['coordinateX']?.toDouble() ??
+      //     0.0;
+      // double endY = selectedLandmark['doorY']?.toDouble() ??
+      //     selectedLandmark['coordinateY']?.toDouble() ??
+      //     0.0;
+
+      // await fetchRouteSingleFloor(
+      //     buildingID: selectedLandmark["building_ID"],
+      //     floor: floorMapping[kioskFloor.toLowerCase()] ?? 0,
+      //     source: [buildingstartX!, buildingstartY!],
+      //     destination: [endX, endY]
+      // );
+      // await fetchGlobalRoute(
+      //   destinationFloor: selectedLandmark["floor"],
+      //   destinationLat: selectedLandmark['properties']['latitude'],
+      //   destinationLong: selectedLandmark['properties']['longitude'],
+      // );
+      // showRoute(currentFloorByBuilding[selectedLandmark["building_ID"]]!);
+      // setState(() {
+      //   isShowingRoute = true;
+      //   isShowingRoutePreview = true;
+      // });
+    } else {
+      print('No landmarks found of type: ${type ?? 'all'} on floor $floorInt in building');
+    }
+  }
+
   Future<void> getUserDataFromHive() async {
     final signInBox = await Hive.openBox('SignInDatabase');
     setState(() {
@@ -270,6 +613,47 @@ class _HomePageState extends State<HomePage> {
       return pos;
     }
 
+  }
+  Future<List<dynamic>> dataDownload() async {
+    List<dynamic> polylines = [];
+    List<dynamic> landmarks = [];
+    List<dynamic> patches = [];
+    land? mergedLandmarkData;
+
+    // Helper function to fetch and process data for a building ID
+    Future<void> fetchDataForBuilding(String id) async {
+      try {
+        var patchData = await patchAPI().fetchPatchData(id: id);
+        var polylineData = await PolyLineApi().fetchPolyData(id: id);
+        var landmarkData = await landmarkApi().fetchLandmarkData(id: id);
+        var waypointData = await waypointapi().fetchwaypoint(id);
+
+        polylines.add(polylineData);
+        patches.add(patchData);
+        landmarks.add(landmarkData);
+
+        if (mergedLandmarkData == null) {
+          mergedLandmarkData = landmarkData;
+        } else {
+          mergedLandmarkData!.mergeLandmarks(landmarkData.landmarks);
+        }
+      } catch (e) {
+        print("Error fetching data for building ID $id: $e");
+      }
+    }
+
+    // Fetch data for all building IDs in parallel
+    await Future.wait(buildingAllApi.allBuildingID.keys.map(fetchDataForBuilding));
+
+    // Fetch outdoor data
+    await fetchDataForBuilding(buildingAllApi.outdoorID);
+
+    // Update state and return polylines
+    setState(() {
+      mapPreview = MapPreview(polylines, landmarks, patches);
+    });
+
+    return polylines;
   }
 
   Future<bool> requestNotificationPermission() async {
@@ -930,44 +1314,73 @@ class _HomePageState extends State<HomePage> {
           title: Column(
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // Column(
+                  //   mainAxisAlignment: MainAxisAlignment.start,
+                  //   crossAxisAlignment: CrossAxisAlignment.start,
+                  //   children: [
+                  //     Row(
+                  //           children: [
+                  //             TranslatorWidget("Hello, "),
+                  //             nameLoading
+                  //                 ? CircularProgressIndicator()
+                  //                 : TranslatorWidget(
+                  //                                   "$userName",
+                  //                                   style: const TextStyle(
+                  //             fontFamily: "Roboto",
+                  //             fontSize: 20,
+                  //             fontWeight: FontWeight.w700,
+                  //             color: Color(0xff18181b),
+                  //             height: 26 / 20,
+                  //                                   ),
+                  //                                   textAlign: TextAlign.left,
+                  //                                 ),
+                  //           ],
+                  //         ),
+                  //     TranslatorWidget(
+                  //       "How can we help you today?",
+                  //       style: TextStyle(
+                  //         fontFamily: "Roboto",
+                  //         fontSize: 14,
+                  //         fontWeight: FontWeight.w400,
+                  //         color: Color(0xff5e5e5f),
+                  //         height: 20 / 14,
+                  //       ),
+                  //       textAlign: TextAlign.left,
+                  //     )
+                  //   ],
+                  // ),
+                  // SvgPicture.asset('assets/images/dashboardlogo.svg',height: 40,width: 40,),
+                  Image.asset('assets/images/dashboardlogo.png',height: 40,width: 40,),
                   Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                            children: [
-                              TranslatorWidget("Hello, "),
-                              nameLoading
-                                  ? CircularProgressIndicator()
-                                  : TranslatorWidget(
-                                                    "$userName",
-                                                    style: const TextStyle(
-                              fontFamily: "Roboto",
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xff18181b),
-                              height: 26 / 20,
-                                                    ),
-                                                    textAlign: TextAlign.left,
-                                                  ),
-                            ],
-                          ),
-                      TranslatorWidget(
-                        "How can we help you today?",
+                      Text(
+                        'AIIMS JAMMU',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xff5e5e5f),
-                          height: 20 / 14,
+                          color: Color(0xFF003666),
+                          fontSize: 24,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.w700,
+                          height: 1.20,
+                          letterSpacing: 0.24,
                         ),
-                        textAlign: TextAlign.left,
+                      ),
+                      Text(
+                        'Navigation for All',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Color(0xFF333333),
+                          fontSize: 14,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.w400,
+                          height: 1.50,
+                          letterSpacing: 0.01,
+                        ),
                       )
                     ],
                   ),
-                  Spacer(),
                   IconButton(
                     icon: Icon(Icons.notifications_none_outlined),
                     color: Color(0xff18181b),
@@ -1079,21 +1492,24 @@ class _HomePageState extends State<HomePage> {
                   Column(
                     children: [
 
+                      // Padding(
+                      //   padding: const EdgeInsets.symmetric(
+                      //       vertical: 8.0, horizontal: 16),
+                      //   child:ImageCarouselWidget(
+                      //     imagesWithText: carouselImages.map((item) => ImageTextPair(
+                      //       webUrl: item['webUrl'],
+                      //       image: item['image'],
+                      //       text: item['text'],
+                      //       subText: item['subText'],
+                      //     )).toList(),
+                      //   ),
+                      //       // ImageCarouselWidget(imagesWithText: carouselImages),
+                      //
+                      // ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 16),
-                        child:ImageCarouselWidget(
-                          imagesWithText: carouselImages.map((item) => ImageTextPair(
-                            webUrl: item['webUrl'],
-                            image: item['image'],
-                            text: item['text'],
-                            subText: item['subText'],
-                          )).toList(),
-                        ),
-                            // ImageCarouselWidget(imagesWithText: carouselImages),
-
+                        padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 16),
+                        child: _buildMainServices(),
                       ),
-
                       SizedBox(
                         height: 10,
                       ),
@@ -1104,7 +1520,35 @@ class _HomePageState extends State<HomePage> {
                             Semantics(
                               header: true,
                               child: TranslatorWidget(
-                                "Categories",
+                                "Nearby Amenities",
+                                style: TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xff18181b),
+                                  height: 23 / 16,
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16.0,right: 16),
+                        child: _buildAmenities(),
+                      ),
+                      SizedBox(
+                        height: 16,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16.0),
+                        child: Row(
+                          children: [
+                            Semantics(
+                              header: true,
+                              child: TranslatorWidget(
+                                "Hospital Services",
                                 style: TextStyle(
                                   fontFamily: "Roboto",
                                   fontSize: 16,
@@ -1233,15 +1677,17 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                       ),
+                      SizedBox(
+                        height: 10,
+                      ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 16),
+                        padding: const EdgeInsets.only(left: 16.0, bottom: 12),
                         child: Row(
                           children: [
                             Semantics(
                               header: true,
                               child: TranslatorWidget(
-                                "Nearby Services",
+                                "Hospital Navigation",
                                 style: TextStyle(
                                   fontFamily: "Roboto",
                                   fontSize: 16,
@@ -1252,271 +1698,408 @@ class _HomePageState extends State<HomePage> {
                                 textAlign: TextAlign.left,
                               ),
                             ),
-                            Spacer(),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => ServiceListScreen()),
-                                );
-                              },
-                              child: TranslatorWidget(
-                                "View all",
-                                style: TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xff000000),
-                                  height: 20 / 14,
-                                ),
-                                textAlign: TextAlign.left,
-                              ),
-                            )
                           ],
                         ),
                       ),
+                      Semantics(
+                        onTap: (){
+                          InteractionManager().logInteraction('Map');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Navigation(),
+                            ),
+                          );
+                        },
+                        header: true,
+                        label: "Map",
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: GestureDetector(
+                            onPanStart: (details) {
+                              showDialog(
+                                context: context,
+                                barrierColor: Colors.black.withOpacity(0.5),
+                                builder: (BuildContext context) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Stack(
+                                      children: [
+                                        BackdropFilter(
+                                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                                          child: Container(
+                                            color: Colors.black.withOpacity(0),
+                                          ),
+                                        ),
+                                        Center(
+                                          child: GestureDetector(
+                                            onTap: () {
 
-
-
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        height: 270,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: _services.map<Widget>((service) {
-                            return Padding(
-                              padding: const EdgeInsets.only(left: 12.0),
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ServiceInfo(
-                                        imagePath:  '${service['image']}',
-                                        name: '${service['name']}',
-                                        location: '${service['locationName']}',
-                                        accessibility: '${service['accessibility']}',
-                                        locationId: '${service['locationId']}',
-                                        type: '${service['type']}',
-                                        startTime: '${service['startTime']}',
-                                        endTime: '${service['endTime']}',
-                                        contact: '${service['contact']}',
-                                        about: '${service['about']}',
-                                        id: '${service['_id']}',
-                                        longitude: '${service['longitude']}',
-                                        latitude: '${service['latitude']}',
-                                      ),
+                                            },
+                                            child: Dialog(
+                                              insetPadding: EdgeInsets.zero,
+                                              backgroundColor: Colors.transparent,
+                                              child: Container(
+                                                width: MediaQuery.sizeOf(context).width * 0.7,
+                                                height: MediaQuery.sizeOf(context).height * 0.45,
+                                                child: mapPreview ?? defaultMap(),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   );
                                 },
-                                child: SizedBox(
-                                  child: NearbyServiceWidget(
-                                    id: '${service['_id']}',
-                                    imagePath:
-                                    '${service['image']}',
-                                    name:
-                                    '${service['name']}',
-                                    location:
-                                    '${service['locationName']}',
-                                    locationId:
-                                    '${service['locationId']}',
-                                    type:
-                                    '${service['type']}',
-                                    startTime:
-                                    '${service['startTime']}',
-                                    endTime:
-                                    '${service['endTime']}',
-                                    accessibility:
-                                    '${service['accessibility']}',
-                                    contact: '${service['contact']}',
-                                    about: '${service['about']}',
-                                    weekDays:
-                                    List<String>.from(service['weekDays']),
-                                    longitude: '${service['longitude']}',
-                                    latitude: '${service['latitude']}',
-                                    // '${service['locationId']}',
-                                  ),
-                                ),
+                              );
+                            },
+                            onLongPress: () {
+                              showDialog(
+                                context: context,
+                                barrierColor: Colors.black.withOpacity(0.5),
+                                builder: (BuildContext context) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Stack(
+                                      children: [
+                                        BackdropFilter(
+                                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                                          child: Container(
+                                            color: Colors.black.withOpacity(0),
+                                          ),
+                                        ),
+                                        Center(
+                                          child: GestureDetector(
+                                            onTap: () {
+                                            },
+                                            child: Dialog(
+                                              insetPadding: EdgeInsets.zero,
+                                              backgroundColor: Colors.transparent,
+                                              child: Container(
+                                                width: MediaQuery.sizeOf(context).width * 0.7,
+                                                height: MediaQuery.sizeOf(context).height * 0.5,
+                                                child: mapPreview ?? defaultMap(),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                            );
-                          }).toList(),
+                              height: 160,
+                              child: mapPreview ?? defaultMap(),
+                            ),
+                          ),
                         ),
                       ),
-
 
                       Padding(
-                        padding: const EdgeInsets.only(left: 16,right: 16,top: 16,bottom: 8),
-                        child: Row(
-                          children: [
-                            Semantics(
-                              header:true,
-                              child: TranslatorWidget(
-                                "Announcements",
-                                style: TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xff18181b),
-                                ),
-                                textAlign: TextAlign.left,
-                              ),
-                            ),
-                            Spacer(),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => AllAnnouncementScreen()),
-                                );
-                              },
-                              child: TranslatorWidget(
-                                "View all",
-                                style: TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xff000000),
-
-                                ),
-                                textAlign: TextAlign.left,
-                              ),
-                            )
-                          ],
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 16),
+                        child:ImageCarouselWidget(
+                          imagesWithText: carouselImages.map((item) => ImageTextPair(
+                            webUrl: item['webUrl'],
+                            image: item['image'],
+                            text: item['text'],
+                            subText: item['subText'],
+                          )).toList(),
                         ),
+                            // ImageCarouselWidget(imagesWithText: carouselImages),
+
                       ),
-
-                      Container(
-                        height: 140,
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          scrollDirection: Axis.vertical,
-                          itemCount: announcements.length,
-                          itemBuilder: (BuildContext context, int index) {
-                             final announcement = announcements[index];
-                            return AnnouncementCard(
-                              image: announcement['image']??"",
-                              title: announcement['title']??"",
-                              department: announcement['department']?? "",
-                              dateTime: announcement['dateTime']??"",
-                              article: announcement['article']??"",
-
-                            );
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        height: 16,
-                      ),
-                      Padding(
-                        padding:
-                        const EdgeInsets.only(left: 16, right: 16, bottom: 8),
-                        child: Row(
-                          children: [
-                            TranslatorWidget(
-                              'Connect with us',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-
-                            ),
-
-                          ],
-                        ),
-                      ),
-
-                      Row(
-                        children: [
-                          SizedBox(
-                            width: 16,
-                          ),
-                          InkWell(
-                            onTap: () {
-                              _launchInWebView(Uri.parse(twitter));
-                            },
-                            child: Container(
-                              height: 40,
-                              width: 40,
-                              child: Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: Container(
-                                  height: 24,
-                                  width: 24,
-                                  child: SvgPicture.asset(
-                                      "assets/images/twitter.svg"),
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            width: 8,
-                          ),
-                          InkWell(
-                            onTap: () {
-                              _launchInWebView(Uri.parse(youtube));
-                            },
-                            child: Container(
-                              height: 40,
-                              width: 40,
-                              child: Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: Container(
-                                    height: 24,
-                                    width: 24,
-                                    child: SvgPicture.asset(
-                                        "assets/images/youtube.svg")),
-                              ),
-                            ),
-                          ),
-
-                          SizedBox(
-                            width: 8,
-                          ),
-                          InkWell(
-                            onTap: () {
-                              _launchInWebView(Uri.parse(facebook));
-                            },
-                            child: Container(
-                              height: 40,
-                              width: 40,
-                              child: Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: Container(
-                                  height: 24,
-                                  width: 24,
-                                  child: SvgPicture.asset(
-                                      "assets/images/facebook.svg"),
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          SizedBox(
-                            width: 8,
-                          ),
-                          InkWell(
-                            onTap: () {
-                              _launchInWebView(Uri.parse(instagram));
-                            },
-                            child: Container(
-                              height: 40,
-                              width: 40,
-                              child: Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: Container(
-                                    height: 24,
-                                    width: 24,
-                                    child: SvgPicture.asset(
-                                        "assets/images/instagram.svg")),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                      // Padding(
+                      //   padding: const EdgeInsets.symmetric(
+                      //       horizontal: 16.0, vertical: 16),
+                      //   child: Row(
+                      //     children: [
+                      //       Semantics(
+                      //         header: true,
+                      //         child: TranslatorWidget(
+                      //           "Nearby Services",
+                      //           style: TextStyle(
+                      //             fontFamily: "Roboto",
+                      //             fontSize: 16,
+                      //             fontWeight: FontWeight.w500,
+                      //             color: Color(0xff18181b),
+                      //             height: 23 / 16,
+                      //           ),
+                      //           textAlign: TextAlign.left,
+                      //         ),
+                      //       ),
+                      //       Spacer(),
+                      //       GestureDetector(
+                      //         onTap: () {
+                      //           Navigator.push(
+                      //             context,
+                      //             MaterialPageRoute(
+                      //                 builder: (context) => ServiceListScreen()),
+                      //           );
+                      //         },
+                      //         child: TranslatorWidget(
+                      //           "View all",
+                      //           style: TextStyle(
+                      //             fontFamily: "Roboto",
+                      //             fontSize: 14,
+                      //             fontWeight: FontWeight.w500,
+                      //             color: Color(0xff000000),
+                      //             height: 20 / 14,
+                      //           ),
+                      //           textAlign: TextAlign.left,
+                      //         ),
+                      //       )
+                      //     ],
+                      //   ),
+                      // ),
+                      //
+                      // Container(
+                      //   decoration: BoxDecoration(
+                      //     borderRadius: BorderRadius.circular(20),
+                      //   ),
+                      //   height: 270,
+                      //   child: ListView(
+                      //     scrollDirection: Axis.horizontal,
+                      //     children: _services.map<Widget>((service) {
+                      //       return Padding(
+                      //         padding: const EdgeInsets.only(left: 12.0),
+                      //         child: GestureDetector(
+                      //           onTap: () {
+                      //             Navigator.push(
+                      //               context,
+                      //               MaterialPageRoute(
+                      //                 builder: (context) => ServiceInfo(
+                      //                   imagePath:  '${service['image']}',
+                      //                   name: '${service['name']}',
+                      //                   location: '${service['locationName']}',
+                      //                   accessibility: '${service['accessibility']}',
+                      //                   locationId: '${service['locationId']}',
+                      //                   type: '${service['type']}',
+                      //                   startTime: '${service['startTime']}',
+                      //                   endTime: '${service['endTime']}',
+                      //                   contact: '${service['contact']}',
+                      //                   about: '${service['about']}',
+                      //                   id: '${service['_id']}',
+                      //                   longitude: '${service['longitude']}',
+                      //                   latitude: '${service['latitude']}',
+                      //                 ),
+                      //               ),
+                      //             );
+                      //           },
+                      //           child: SizedBox(
+                      //             child: NearbyServiceWidget(
+                      //               id: '${service['_id']}',
+                      //               imagePath:
+                      //               '${service['image']}',
+                      //               name:
+                      //               '${service['name']}',
+                      //               location:
+                      //               '${service['locationName']}',
+                      //               locationId:
+                      //               '${service['locationId']}',
+                      //               type:
+                      //               '${service['type']}',
+                      //               startTime:
+                      //               '${service['startTime']}',
+                      //               endTime:
+                      //               '${service['endTime']}',
+                      //               accessibility:
+                      //               '${service['accessibility']}',
+                      //               contact: '${service['contact']}',
+                      //               about: '${service['about']}',
+                      //               weekDays:
+                      //               List<String>.from(service['weekDays']),
+                      //               longitude: '${service['longitude']}',
+                      //               latitude: '${service['latitude']}',
+                      //               // '${service['locationId']}',
+                      //             ),
+                      //           ),
+                      //         ),
+                      //       );
+                      //     }).toList(),
+                      //   ),
+                      // ),
+                      //
+                      //
+                      // Padding(
+                      //   padding: const EdgeInsets.only(left: 16,right: 16,top: 16,bottom: 8),
+                      //   child: Row(
+                      //     children: [
+                      //       Semantics(
+                      //         header:true,
+                      //         child: TranslatorWidget(
+                      //           "Announcements",
+                      //           style: TextStyle(
+                      //             fontFamily: "Roboto",
+                      //             fontSize: 16,
+                      //             fontWeight: FontWeight.w500,
+                      //             color: Color(0xff18181b),
+                      //           ),
+                      //           textAlign: TextAlign.left,
+                      //         ),
+                      //       ),
+                      //       Spacer(),
+                      //       GestureDetector(
+                      //         onTap: () {
+                      //           Navigator.push(
+                      //             context,
+                      //             MaterialPageRoute(
+                      //                 builder: (context) => AllAnnouncementScreen()),
+                      //           );
+                      //         },
+                      //         child: TranslatorWidget(
+                      //           "View all",
+                      //           style: TextStyle(
+                      //             fontFamily: "Roboto",
+                      //             fontSize: 14,
+                      //             fontWeight: FontWeight.w500,
+                      //             color: Color(0xff000000),
+                      //
+                      //           ),
+                      //           textAlign: TextAlign.left,
+                      //         ),
+                      //       )
+                      //     ],
+                      //   ),
+                      // ),
+                      //
+                      // Container(
+                      //   height: 140,
+                      //   child: ListView.builder(
+                      //     controller: _scrollController,
+                      //     scrollDirection: Axis.vertical,
+                      //     itemCount: announcements.length,
+                      //     itemBuilder: (BuildContext context, int index) {
+                      //        final announcement = announcements[index];
+                      //       return AnnouncementCard(
+                      //         image: announcement['image']??"",
+                      //         title: announcement['title']??"",
+                      //         department: announcement['department']?? "",
+                      //         dateTime: announcement['dateTime']??"",
+                      //         article: announcement['article']??"",
+                      //
+                      //       );
+                      //     },
+                      //   ),
+                      // ),
+                      // SizedBox(
+                      //   height: 16,
+                      // ),
+                      // Padding(
+                      //   padding:
+                      //   const EdgeInsets.only(left: 16, right: 16, bottom: 8),
+                      //   child: Row(
+                      //     children: [
+                      //       TranslatorWidget(
+                      //         'Connect with us',
+                      //         style: TextStyle(
+                      //           fontSize: 16,
+                      //           fontWeight: FontWeight.w500,
+                      //         ),
+                      //
+                      //       ),
+                      //
+                      //     ],
+                      //   ),
+                      // ),
+                      //
+                      // Row(
+                      //   children: [
+                      //     SizedBox(
+                      //       width: 16,
+                      //     ),
+                      //     InkWell(
+                      //       onTap: () {
+                      //         _launchInWebView(Uri.parse(twitter));
+                      //       },
+                      //       child: Container(
+                      //         height: 40,
+                      //         width: 40,
+                      //         child: Padding(
+                      //           padding: const EdgeInsets.all(6.0),
+                      //           child: Container(
+                      //             height: 24,
+                      //             width: 24,
+                      //             child: SvgPicture.asset(
+                      //                 "assets/images/twitter.svg"),
+                      //           ),
+                      //         ),
+                      //       ),
+                      //     ),
+                      //     SizedBox(
+                      //       width: 8,
+                      //     ),
+                      //     InkWell(
+                      //       onTap: () {
+                      //         _launchInWebView(Uri.parse(youtube));
+                      //       },
+                      //       child: Container(
+                      //         height: 40,
+                      //         width: 40,
+                      //         child: Padding(
+                      //           padding: const EdgeInsets.all(6.0),
+                      //           child: Container(
+                      //               height: 24,
+                      //               width: 24,
+                      //               child: SvgPicture.asset(
+                      //                   "assets/images/youtube.svg")),
+                      //         ),
+                      //       ),
+                      //     ),
+                      //
+                      //     SizedBox(
+                      //       width: 8,
+                      //     ),
+                      //     InkWell(
+                      //       onTap: () {
+                      //         _launchInWebView(Uri.parse(facebook));
+                      //       },
+                      //       child: Container(
+                      //         height: 40,
+                      //         width: 40,
+                      //         child: Padding(
+                      //           padding: const EdgeInsets.all(6.0),
+                      //           child: Container(
+                      //             height: 24,
+                      //             width: 24,
+                      //             child: SvgPicture.asset(
+                      //                 "assets/images/facebook.svg"),
+                      //           ),
+                      //         ),
+                      //       ),
+                      //     ),
+                      //
+                      //     SizedBox(
+                      //       width: 8,
+                      //     ),
+                      //     InkWell(
+                      //       onTap: () {
+                      //         _launchInWebView(Uri.parse(instagram));
+                      //       },
+                      //       child: Container(
+                      //         height: 40,
+                      //         width: 40,
+                      //         child: Padding(
+                      //           padding: const EdgeInsets.all(6.0),
+                      //           child: Container(
+                      //               height: 24,
+                      //               width: 24,
+                      //               child: SvgPicture.asset(
+                      //                   "assets/images/instagram.svg")),
+                      //         ),
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
                       SizedBox(
                         height: 16,
                       ),
@@ -1527,11 +2110,179 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ):TranslatorWidget("Offline"),
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: (){
+        //     Navigator.push(
+        //       context,
+        //       MaterialPageRoute(
+        //         builder: (context) => Navigation(),
+        //       ),
+        //     );
+        //   },
+        //   backgroundColor: Color(0xFFFEAB01),
+        //   shape: CircleBorder(),
+        //   child: Lottie.asset('assets/images/floatingmap.json'),
+        // )
+        // FloatingActionButton(onPressed: (){},
+        // child: Lottie.asset('assets/images/floatingmap.json'),
+        // ),
       ),
     );
   }
-}
+  Widget _buildAmenities() {
+    final List<Map<String, dynamic>> amenities = [
+      {'icon': Icons.local_atm, 'bg': Colors.blue[50], 'title': 'ATM','type':'ATM','image':'assets/images/Homepage-Category.svg'},
+      {'icon': Icons.local_drink, 'bg': Colors.blue[50], 'title': 'Water','type':'drinkingwater','image':'assets/images/water.svg'},
+      {'icon': Icons.directions_bus, 'bg': Colors.blue[50], 'title': 'Transport','type':'transport','image':'assets/images/Transport.svg'},
+      {'icon': Icons.wc, 'bg': Colors.blue[50], 'title': 'Washroom','type':'washroom','image':'assets/images/Washroom.svg'},
+    ];
 
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: amenities.map((amenity) {
+        return GestureDetector(
+          onTap:(){
+            print("amenity['type']");
+            print("${amenity['type']}");
+            filterLandmarks(amenity['type'],0);
+          },
+          child: Column(
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: amenity['bg'],
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: SvgPicture.asset(amenity['image']),
+                  // Icon(
+                  //   amenity['icon'],
+                  //   color: Color(0xff003666),
+                  //   size: 30,
+                  // ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TranslatorWidget(
+                amenity['title'],
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+  Widget _buildMainServices() {
+    final List<Map<String, dynamic>> services = [
+      {
+        'image': 'assets/images/opd.svg',
+        'color': Color(0xFFEAF2FF),
+        'iconColor': Color(0xFF003366),
+        'title': 'OPD',
+        'buildingId':['66794105b80a6778c53c4856'],
+      },
+      {
+        'image':  'assets/images/emergency.svg',
+        'color': Color(0xFFFAE9E9),
+        'iconColor': Colors.red,
+        'title': 'Emergency',
+        'buildingId':['6798c6df96af63c3e82659ec'],
+
+      },
+      {
+        'image':  'assets/images/ward.svg',
+        'color': Color(0xFFFAF8E9),
+        'iconColor': Color(0xFF6B8E23),
+        'title': 'Ward',
+        'buildingId':['6798c99e96af63c3e828203d','6798c81c96af63c3e826add3'],
+          // ,'6798c99e96af63c3e828203d'],
+
+      },
+      {
+        'image':  'assets/images/diagnostic.svg',
+        'color': Color(0xFFE4F8EB),
+        'iconColor': Color(0xFF00796B),
+        'title': 'Diagnostic',
+        'buildingId':['6798c8fa96af63c3e8277db2'],
+
+      },
+    ];
+
+    return GridView.count(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
+      childAspectRatio: 1.2,
+      children: services.map((service) {
+        return InkWell(
+          onTap: (){
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) => Buildinglandmarks(buildingName: service['title'], buildingId: service['buildingId'],landmarkData: allLandmarkData[service['buildingId']],),
+            //   ),
+            // );
+            List<String> buildingIds = service['buildingId'];
+
+            // Combine landmark data for multiple buildings
+            Map<dynamic, dynamic> combinedLandmarkData = {};
+            for (var id in buildingIds) {
+              print("addinggggggg $id");
+              if (allLandmarkData.containsKey(id)) {
+                combinedLandmarkData.addAll(allLandmarkData[id]);
+              }
+            }
+
+            // Navigate to Buildinglandmarks with combined data
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => Buildinglandmarks(
+                  buildingName: service['title'],
+                  buildingId: buildingIds.join(','), // Passing all IDs as a comma-separated string
+                  landmarkData: combinedLandmarkData,
+                ),
+              ),
+            );
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: service['color'],
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Icon(
+                //   service['icon'],
+                //   size: 40,
+                //   color: service['iconColor'],
+                // ),
+                SvgPicture.asset(service['image'],),
+                // const SizedBox(height: 8),
+                Text(
+                  service['title'],
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+}
 Widget _buildCard(String imagePath, String text) {
   return Card(
     color: Colors.white,
@@ -1540,10 +2291,10 @@ Widget _buildCard(String imagePath, String text) {
       borderRadius: BorderRadius.circular(12),
     ),
     child: Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Color(0xFFE0E0E0), width: 1),
-      ),
+      // decoration: BoxDecoration(
+      //   borderRadius: BorderRadius.circular(12),
+      //   border: Border.all(color: Color(0xFFE0E0E0), width: 1),
+      // ),
       width: 80,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -1554,10 +2305,10 @@ Widget _buildCard(String imagePath, String text) {
             height: 43,
           ),
           SizedBox(height: 5),
-          Container(
-            height: 1,
-            color: Color(0xFFE0E0E0),
-          ),
+          // Container(
+          //   height: 1,
+          //   color: Color(0xFFE0E0E0),
+          // ),
           SizedBox(
             height: 5,
           ),
