@@ -83,8 +83,6 @@
 		<string>processing</string>
 		<string>remote-notification</string>
 	</array>
-	<key>NSUserTrackingUsageDescription</key>
-    <string>We use this to send personalized notifications.</string>
     <key>UNUserNotificationCenter</key>
     <true/>
     <key>UIBackgroundModes</key>
