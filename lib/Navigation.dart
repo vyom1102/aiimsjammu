@@ -17,6 +17,8 @@ import 'package:iwaymaps/singletonClass.dart';
 import 'package:iwaymaps/waypoint.dart';
 import 'package:iwaymaps/websocket/PushNotifications.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
+import 'package:iwaymaps/websocket/navigationLogManager.dart';
+import 'package:iwaymaps/websocket/navigationLogModel.dart';
 
 import 'package:vibration/vibration.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
@@ -442,6 +444,39 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   late AnimationController PB_controller;
   late Animation<double> PBanimation;
   bool PB_isProgressing = false;
+
+  NavigationLog? currentNavigationLog;
+  void startNavigationLog(String userId, String source, String destination) {
+    currentNavigationLog = NavigationLog(
+      userId: userId,
+      source: source,
+      destination: destination,
+      startTime: DateTime.now(),
+    );
+  }
+  void markNavigationSuccessful(){
+    if (currentNavigationLog != null) {
+      currentNavigationLog!.markSuccessful();
+      saveLog(currentNavigationLog!);
+      NavigationLogManager().logNavigation(currentNavigationLog!);
+    }
+  }
+  void markNavigationUnsuccessful(){
+    if (currentNavigationLog != null) {
+      currentNavigationLog!.markUnsuccessful("User exited navigation");
+      saveLog(currentNavigationLog!);
+      NavigationLogManager().logNavigation(currentNavigationLog!);
+    }
+  }
+  void incrementRerouteCount() {
+    if (currentNavigationLog != null) {
+      currentNavigationLog!.incrementReroute();
+    }
+  }
+  void saveLog(NavigationLog log) {
+    // Save log to database or local storage
+    print("Navigation Log: ${log.toJson()}");
+  }
 
   //--------------------------------------------------------------------------------------
   double _progressValue = 0.0;
@@ -8965,11 +9000,7 @@ bool _isPlaying=false;
     return Semantics(
       label: "Start Navigation",
       hint: "Button. Double tap to activate",
-
-
-
       sortKey: const OrdinalSortKey(1),
-
       child: Focus(
         focusNode: _startbuttonFocus,
         child: Semantics(
@@ -8978,9 +9009,14 @@ bool _isPlaying=false;
             icon: Icon(Icons.navigation, color: Colors.white),
             label: Text('Start', style: TextStyle(color: Colors.white)),
             onPressed: () async {
-
-
               if(startingNavigation){
+                if(currentNavigationLog==null){
+                  startNavigationLog(
+                      UserCredentials()
+                          .getUserId(),
+                      PathState.sourcePolyID,
+                      PathState.destinationPolyID);
+                }
                 tools.setBuildingAngle(
                     SingletonFunctionController
                         .building
@@ -10103,6 +10139,8 @@ bool _isPlaying=false;
         _feedbackTextController.clear();
       }
     });
+    markNavigationUnsuccessful();
+    currentNavigationLog=null;
     markerSldShown = true;
     focusturnArrow.clear();
     clearPathVariables();
@@ -11913,6 +11951,8 @@ bool _isPlaying=false;
               destname: destname),
           _currentLocale);
     });
+    markNavigationSuccessful();
+    currentNavigationLog=null;
     clearPathVariables();
     PDRTimer!.cancel();
     StopPDR();
@@ -12292,6 +12332,7 @@ bool _isPlaying=false;
     SingletonFunctionController.building.qrOpened = false;
     SingletonFunctionController.building.dispose();
     SingletonFunctionController.apibeaconmap.clear();
+    NavigationLogManager().syncLogsToServer();
     magneticValues.clear();
     _googleMapController.dispose();
     for (final subscription in _streamSubscriptions) {
