@@ -19,6 +19,8 @@ class BLueToothClass {
   bool _isScanning = false;
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
   late StreamSubscription<bool> _isScanningSubscription;
+  final ws = WebSocketService();
+
 
 
   PriorityQueue<MapEntry<String, double>> priorityQueue = PriorityQueue((a, b) => a.value.compareTo(b.value));
@@ -71,8 +73,9 @@ class BLueToothClass {
   }
 
   void startScanning(HashMap<String, beacon> apibeaconmap) {
-    wsocket.message["AppInitialization"]["bleScanResults"] = {};
-    // print("himanshu 1");
+    ws.updateMessage({
+      "AppInitialization.bleScanResults": {},
+    });    // print("himanshu 1");
     startbin();
     // print("himanshu 2");
     FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
@@ -84,7 +87,9 @@ class BLueToothClass {
         //  print("himanshu 5 ${result}");
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
-          wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
+          ws.updateMessage({
+            "AppInitialization.bleScanResults.$MacId": Rssi,
+          });
           if (apibeaconmap.containsKey(MacId)) {
             //print(MacId);
             //print("mac1 $MacId    rssi $Rssi");

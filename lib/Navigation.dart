@@ -486,7 +486,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Completer<GoogleMapController> gpsTrackingController = Completer();
   LatLng gpsTrackingUserPosition = LatLng(28.6139, 77.2090); // Default location (Delhi)
   Set<Marker> gpsTrackingMarker = {};
-  
+
+  final ws = WebSocketService();
+
+
   @override
   void initState() {
     super.initState();
@@ -505,9 +508,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       UserState.ttsOnlyTurns = false;
       UserState.ttsAllStop = false;
     }
-    _messageTimer = Timer.periodic(Duration(seconds: 5), (timer) {
-      wsocket.sendmessg();
-
+    _messageTimer = Timer.periodic(Duration(seconds: 3), (timer) {
+      //ws.sendMessage();
+      ws.receiveMessage();
     });
     listenToMagnetometer();
 
@@ -837,8 +840,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Future<void> getDeviceManufacturer() async {
     try {
       manufacturer = await DeviceInformation.deviceManufacturer;
-      wsocket.message["deviceInfo"]["deviceManufacturer"] =
-          manufacturer.toString();
+      ws.updateMessage({"deviceInfo.deviceManufacturer":manufacturer.toString()});
       if (manufacturer.toLowerCase().contains("samsung")) {
         step_threshold = 0.12;
       } else if (manufacturer.toLowerCase().contains("oneplus")) {
@@ -909,8 +911,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   void handleCompassEvents() {
     compassSubscription = FlutterCompass.events!.listen((event) {
-      wsocket.message["deviceInfo"]["permissions"]["compass"] = true;
-      wsocket.message["deviceInfo"]["sensors"]["compass"] = true;
+      ws.updateMessage({
+        "deviceInfo.permissions.compass": true,
+        "deviceInfo.sensors.compass": true,
+      });
       double? compassHeading = event.heading!;
 
       setState(() {
@@ -934,8 +938,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         }
       });
     }, onError: (error) {
-      wsocket.message["deviceInfo"]["permissions"]["compass"] = false;
-      wsocket.message["deviceInfo"]["sensors"]["compass"] = false;
+      ws.updateMessage({
+        "deviceInfo.permissions.compass": true,
+        "deviceInfo.sensors.compass": true,
+      });
     });
   }
 
@@ -1061,8 +1067,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         if (pdr == null) {
           return; // Exit the event listener if subscription is canceled
         }
-        wsocket.message["deviceInfo"]["permissions"]["activity"] = true;
-        wsocket.message["deviceInfo"]["sensors"]["activity"] = true;
+        ws.updateMessage({
+          "deviceInfo.permissions.compass": true,
+          "deviceInfo.sensors.compass": true,
+        });
         // Apply low-pass filter
         if (detectStep(event.x, event.y, event.z)) {
           setState(() {
@@ -1169,8 +1177,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
       },
       onError: (error) {
-        wsocket.message["deviceInfo"]["permissions"]["activity"] = false;
-        wsocket.message["deviceInfo"]["sensors"]["activity"] = false;
+        ws.updateMessage({
+          "deviceInfo.permissions.compass": true,
+          "deviceInfo.sensors.compass": true,
+        });
       },
     ));
   }
@@ -1882,8 +1892,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       bool providePinSelection
       ) async {
     try {
-      wsocket.message["AppInitialization"]["localizedOn"] = nearestBeacon;
-
+      ws.updateMessage({
+        "AppInitialization.localizedOn": nearestBeacon,
+      });
       final beaconData = SingletonFunctionController.apibeaconmap[nearestBeacon];
       if (beaconData != null) {
         print("beacon debug: $beaconData");
@@ -2920,28 +2931,24 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     final PermissionStatus permissionStatus = await Permission.bluetoothScan.request();
 
     if (permissionStatus.isGranted) {
-      wsocket.message["deviceInfo"]["permissions"]["BLE"] = true;
-      wsocket.message["deviceInfo"]["sensors"]["BLE"] = true;
-
-      //widget.bluetoothGranted = true;
-      // Permission granted, you can now perform Bluetooth operations
+      ws.updateMessage({
+        "deviceInfo.permissions.BLE": true,
+        "deviceInfo.sensors.BLE": true,
+      });
     } else {
-      wsocket.message["deviceInfo"]["permissions"]["BLE"] = false;
-      wsocket.message["deviceInfo"]["sensors"]["BLE"] = false;
-
-      // Permission denied, handle accordingly
+      ws.updateMessage({
+        "deviceInfo.permissions.BLE": false,
+        "deviceInfo.sensors.BLE": false,
+      });
     }
   }
 
   Future<void> requestLocationPermission() async {
     final status = await Permission.locationWhenInUse.request();
-    if (status.isGranted) {
-      wsocket.message["deviceInfo"]["permissions"]["location"] = true;
-      wsocket.message["deviceInfo"]["sensors"]["location"] = true;
-    } else {
-      wsocket.message["deviceInfo"]["permissions"]["location"] = false;
-      wsocket.message["deviceInfo"]["sensors"]["location"] = false;
-    }
+    ws.updateMessage({
+      "deviceInfo.permissions.location": status.isGranted,
+      "deviceInfo.sensors.location": status.isGranted,
+    });
   }
 
   List<FilterInfoModel> landmarkListForFilter = [];
@@ -7737,12 +7744,9 @@ int currentCols=0;
     //         destinationY);
     //   }
     // }
-    if (path.isEmpty) {
-      wsocket.message["path"]["didPathForm"] = false;
-    } else {
-      wsocket.message["path"]["didPathForm"] =
-          path[0] == sourceIndex && path[path.length - 1] == destinationIndex;
-    }
+    ws.updateMessage({
+      "path.didPathForm": path.isNotEmpty && path.first == sourceIndex && path.last == destinationIndex,
+    });
 
     if(bid == buildingAllApi.outdoorID){
       path.forEach((turn) => getPoints.add([turn % numCols, turn ~/ numCols]));
@@ -9080,13 +9084,10 @@ bool _isPlaying=false;
 
                 //detected=false;
                 //user.SingletonFunctionController.building = SingletonFunctionController.building;
-                wsocket.message["path"]
-                ["source"] =
-                    PathState.sourceName;
-                wsocket.message["path"]
-                ["destination"] =
-                    PathState
-                        .destinationName;
+                ws.updateMessage({
+                  "path.source": PathState.sourceName,
+                  "path.destination": PathState.destinationName,
+                });
                 // user.ListofPaths = PathState.listofPaths;
                 // user.patchData = SingletonFunctionController.building.patchData;
                 // user.buildingNumber = PathState.listofPaths.length-1;

@@ -43,8 +43,9 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-
   late int index;
+  final ws = WebSocketService();
+
 
   final screens = [
     HomePage(),
@@ -66,7 +67,9 @@ class _MainScreenState extends State<MainScreen> {
   void setIDforWebSocket()async{
     final signInBox = await Hive.openBox('SignInDatabase');
     print("user id ${signInBox.get("userId")}");
-    wsocket.message["userId"] = signInBox.get("userId");
+    ws.updateMessage({
+      "userId": signInBox.get("userId"),
+    });
   }
 
   Future<void> checkForUpdate() async {

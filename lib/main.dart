@@ -120,7 +120,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
   String? initialDocId;
   String? initialServiceId;
   bool isLocating=false;
-  wsocket sc=wsocket('com.iwayplus.aiimsjammu');
 
   @override
   void initState() {
