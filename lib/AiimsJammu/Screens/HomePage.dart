@@ -2096,7 +2096,7 @@ class _HomePageState extends State<HomePage> {
       {'icon': Icons.local_atm, 'bg': Colors.blue[50], 'title': 'ATM','type':'ATM','image':'assets/images/Homepage-Category.svg'},
       {'icon': Icons.local_drink, 'bg': Colors.blue[50], 'title': 'Water','type':'drinkingwater','image':'assets/images/water.svg'},
       {'icon': Icons.directions_bus, 'bg': Colors.blue[50], 'title': 'Transport','type':'transport','image':'assets/images/Transport.svg'},
-      {'icon': Icons.wc, 'bg': Colors.blue[50], 'title': 'Washroom','type':'washroom','image':'assets/images/Washroom.svg'},
+      {'icon': Icons.wc, 'bg': Colors.blue[50], 'title': 'Restroom','type':'washroom','image':'assets/images/Washroom.svg'},
     ];
 
     return Row(
@@ -2229,7 +2229,7 @@ class _HomePageState extends State<HomePage> {
                 // ),
                 SvgPicture.asset(service['image'],),
                 // const SizedBox(height: 8),
-                Text(
+                TranslatorWidget(
                   service['title'],
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
