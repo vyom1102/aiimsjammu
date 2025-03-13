@@ -3588,7 +3588,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   Future<BitmapDescriptor> bitmapDescriptorFromTextAndImageForPatchTransition(
       String text, String imagePath,
-      {Size imageSize = const Size(50, 50)}) async {
+      {Size imageSize = const Size(50, 50),
+        double strokeWidth = 3.0, // Control stroke width
+        Color strokeColor = Colors.white}) async {
     // Load the base marker image
     final ByteData baseImageBytes = await rootBundle.load(imagePath);
     final ui.Codec markerImageCodec = await ui.instantiateImageCodec(
@@ -3599,27 +3601,49 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     final ui.Image markerImage = markerImageFrame.image;
 
     // Set the text style and layout
-    final TextPainter textPainter = TextPainter(
+    final TextPainter strokePainter = TextPainter(
       textDirection: TextDirection.ltr,
     );
-    textPainter.text = TextSpan(
+
+    strokePainter.text = TextSpan(
       text: text,
       style: TextStyle(
-        fontSize: 40.0, // Increased font size
-        color: Colors.black,
-        fontFamily: "Roboto",
+        fontSize: 35.0, // Increased font size
         fontWeight: FontWeight.w500,
-        height: 23 / 16,
+        fontFamily: "Roboto",
+        foreground: Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..color = strokeColor, // Stroke color
       ),
     );
-    textPainter.layout(
+
+    final TextPainter fillPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+
+    fillPainter.text = TextSpan(
+      text: text,
+      style: TextStyle(
+        fontSize: 35.0, // Increased font size
+        fontWeight: FontWeight.w500,
+        fontFamily: "Roboto",
+        color: Colors.black, // Fill color
+      ),
+    );
+
+    strokePainter.layout(
+      minWidth: 0,
+      maxWidth: double.infinity,
+    );
+    fillPainter.layout(
       minWidth: 0,
       maxWidth: double.infinity,
     );
 
     // Calculate the overall canvas size
-    final double textWidth = textPainter.width;
-    final double textHeight = textPainter.height;
+    final double textWidth = strokePainter.width;
+    final double textHeight = strokePainter.height;
     final double canvasWidth =
     textWidth > imageSize.width ? textWidth : imageSize.width;
     final double canvasHeight =
@@ -3628,10 +3652,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     final PictureRecorder pictureRecorder = PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
 
-    // Draw the text centered above the marker image
+    // Draw the stroke text
     final double textX = (canvasWidth - textWidth) / 2;
     final double textY = 0.0;
-    textPainter.paint(canvas, Offset(textX, textY));
+    strokePainter.paint(canvas, Offset(textX, textY));
+
+    // Draw the fill text on top of stroke
+    fillPainter.paint(canvas, Offset(textX, textY));
 
     // Draw the base marker image below the text
     final double imageX = (canvasWidth - imageSize.width) / 2;
@@ -3650,6 +3677,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
     return BitmapDescriptor.fromBytes(pngBytes!);
   }
+
 
   renderCampusPatchTransition(List<String> IDS, {String? outdoorID}){
     print("renderCampusPatchTransition");
@@ -3679,8 +3707,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   fillColor: Color(0xffE5F9FF),
                   geodesic: false,
                   consumeTapEvents: true,
-                  zIndex: 5,
-
+                  zIndex: 0,
                 ),
               );
               cachedPolygon.clear();
