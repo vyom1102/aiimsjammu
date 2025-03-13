@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -418,13 +419,12 @@ class _HomePageState extends State<HomePage> {
 
       print('Nearest ${type ?? 'all'} landmark on floor $floorInt in building :');
       print(nearestLandmark);
-
+      print(nearestLandmark['_id']);
       setState(() {
-        selectedlandmarkpolyId = nearestLandmark['properties']['polyId'];
-        // selectedLandmark = nearestLandmark;
-        // selectedlandmarkName = nearestLandmark["name"];
+        selectedlandmarkpolyId = nearestLandmark['properties']['polyId']??nearestLandmark['_id'];
+
       });
-      print('selectedlandmarkpolyId');
+      print('selectedlandmarkpolyId from nearby amenities');
       print(selectedlandmarkpolyId);
       if(selectedlandmarkpolyId!=null)
       Navigator.push(
@@ -433,48 +433,10 @@ class _HomePageState extends State<HomePage> {
           builder: (context) => Navigation(directLandID: selectedlandmarkpolyId!,),
         ),
       );
-      // if(selectedlandmarkpolyId!=null)
-      // PassLocationId(context, selectedlandmarkpolyId!);
 
-      // handleLandmarkClick(selectedLandmark!);
-
-      // selectedLandmarkType = type;
-      // buildingAnnotationManagers[focusedBuildingId]!.deleteAll();
-      // addedLandmarks.remove(focusedBuildingId);
-
-      // setState(() {
-      //   selectedlandmarkName = selectedLandmark!['name'];
-      //   selectedlandmarkpolyId = selectedLandmark!['properties']['polyId'];
-      //   selectedlandmarkImage = selectedLandmark!['properties']['filename'];
-      //   selectedlandmarkFloor = selectedLandmark!['floor'].toString();
-      //   selectedlandmarkBuilding = selectedLandmark!['buildingName'];
-      // });
-      //
-      // double endX = selectedLandmark['doorX']?.toDouble() ??
-      //     selectedLandmark['coordinateX']?.toDouble() ??
-      //     0.0;
-      // double endY = selectedLandmark['doorY']?.toDouble() ??
-      //     selectedLandmark['coordinateY']?.toDouble() ??
-      //     0.0;
-
-      // await fetchRouteSingleFloor(
-      //     buildingID: selectedLandmark["building_ID"],
-      //     floor: floorMapping[kioskFloor.toLowerCase()] ?? 0,
-      //     source: [buildingstartX!, buildingstartY!],
-      //     destination: [endX, endY]
-      // );
-      // await fetchGlobalRoute(
-      //   destinationFloor: selectedLandmark["floor"],
-      //   destinationLat: selectedLandmark['properties']['latitude'],
-      //   destinationLong: selectedLandmark['properties']['longitude'],
-      // );
-      // showRoute(currentFloorByBuilding[selectedLandmark["building_ID"]]!);
-      // setState(() {
-      //   isShowingRoute = true;
-      //   isShowingRoutePreview = true;
-      // });
     } else {
       print('No landmarks found of type: ${type ?? 'all'} on floor $floorInt in building');
+      Fluttertoast.showToast(msg: "Error finding nearby $type ");
     }
   }
 
