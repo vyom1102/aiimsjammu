@@ -131,6 +131,8 @@ class _HomePageState extends State<HomePage> {
   List<dynamic> _filteredDoctors = [];
   Widget? mapPreview;
 
+  final ws = WebSocketService();
+
 
   @override
   void initState() {
@@ -140,8 +142,11 @@ class _HomePageState extends State<HomePage> {
     checkForUpdate();
     _pageController = PageController(initialPage: _currentPage);
     getLocs();
-    wsocket.message["AppInitialization"]["BID"]=buildingAllApi.allBuildingID;
-    wsocket.message["AppInitialization"]["buildingName"]="AIIMS JAMMU";
+
+    ws.updateMessage({
+      "AppInitialization.BID": buildingAllApi.allBuildingID,
+      "AppInitialization.buildingName": "AIIMS JAMMU",
+    });
     SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID);
     versionApiCheck();
     checkForReload();
@@ -192,7 +197,6 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _isLoading = false;
     });
-
     print("Global Building IDs: $globalBuildingIds");
   }
   Future<void>DataVersionCheckForLandmarks() async {

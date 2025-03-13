@@ -63,6 +63,8 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   // Replace with your actual document ID
   bool checkedForBuildingAllUpdated = false;
   bool isLocating=false;
+  final ws = WebSocketService();
+
 
 
   @override
@@ -89,8 +91,9 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
           print("mac $MacId    rssi $Rssi");
-          wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
-        }
+          ws.updateMessage({
+            "AppInitialization.bleScanResults.$MacId": Rssi,
+          });        }
       }
     });
   }

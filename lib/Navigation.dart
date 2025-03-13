@@ -486,7 +486,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Completer<GoogleMapController> gpsTrackingController = Completer();
   LatLng gpsTrackingUserPosition = LatLng(28.6139, 77.2090); // Default location (Delhi)
   Set<Marker> gpsTrackingMarker = {};
-  
+
+  final ws = WebSocketService();
+
+
   @override
   void initState() {
     super.initState();
@@ -505,9 +508,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       UserState.ttsOnlyTurns = false;
       UserState.ttsAllStop = false;
     }
-    _messageTimer = Timer.periodic(Duration(seconds: 5), (timer) {
-      wsocket.sendmessg();
-
+    _messageTimer = Timer.periodic(Duration(seconds: 3), (timer) {
+      ws.sendMessage();
+      ws.receiveMessage();
     });
     listenToMagnetometer();
 
@@ -837,8 +840,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Future<void> getDeviceManufacturer() async {
     try {
       manufacturer = await DeviceInformation.deviceManufacturer;
-      wsocket.message["deviceInfo"]["deviceManufacturer"] =
-          manufacturer.toString();
+      ws.updateMessage({"deviceInfo.deviceManufacturer":manufacturer.toString()});
       if (manufacturer.toLowerCase().contains("samsung")) {
         step_threshold = 0.12;
       } else if (manufacturer.toLowerCase().contains("oneplus")) {
@@ -909,8 +911,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   void handleCompassEvents() {
     compassSubscription = FlutterCompass.events!.listen((event) {
-      wsocket.message["deviceInfo"]["permissions"]["compass"] = true;
-      wsocket.message["deviceInfo"]["sensors"]["compass"] = true;
+      ws.updateMessage({
+        "deviceInfo.permissions.compass": true,
+        "deviceInfo.sensors.compass": true,
+      });
       double? compassHeading = event.heading!;
 
       setState(() {
@@ -934,8 +938,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         }
       });
     }, onError: (error) {
-      wsocket.message["deviceInfo"]["permissions"]["compass"] = false;
-      wsocket.message["deviceInfo"]["sensors"]["compass"] = false;
+      ws.updateMessage({
+        "deviceInfo.permissions.compass": true,
+        "deviceInfo.sensors.compass": true,
+      });
     });
   }
 
@@ -1061,8 +1067,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         if (pdr == null) {
           return; // Exit the event listener if subscription is canceled
         }
-        wsocket.message["deviceInfo"]["permissions"]["activity"] = true;
-        wsocket.message["deviceInfo"]["sensors"]["activity"] = true;
+        ws.updateMessage({
+          "deviceInfo.permissions.compass": true,
+          "deviceInfo.sensors.compass": true,
+        });
         // Apply low-pass filter
         if (detectStep(event.x, event.y, event.z)) {
           setState(() {
@@ -1169,8 +1177,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
       },
       onError: (error) {
-        wsocket.message["deviceInfo"]["permissions"]["activity"] = false;
-        wsocket.message["deviceInfo"]["sensors"]["activity"] = false;
+        ws.updateMessage({
+          "deviceInfo.permissions.compass": true,
+          "deviceInfo.sensors.compass": true,
+        });
       },
     ));
   }
@@ -1882,8 +1892,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       bool providePinSelection
       ) async {
     try {
-      wsocket.message["AppInitialization"]["localizedOn"] = nearestBeacon;
-
+      ws.updateMessage({
+        "AppInitialization.localizedOn": nearestBeacon,
+      });
       final beaconData = SingletonFunctionController.apibeaconmap[nearestBeacon];
       if (beaconData != null) {
         print("beacon debug: $beaconData");
@@ -2920,28 +2931,24 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     final PermissionStatus permissionStatus = await Permission.bluetoothScan.request();
 
     if (permissionStatus.isGranted) {
-      wsocket.message["deviceInfo"]["permissions"]["BLE"] = true;
-      wsocket.message["deviceInfo"]["sensors"]["BLE"] = true;
-
-      //widget.bluetoothGranted = true;
-      // Permission granted, you can now perform Bluetooth operations
+      ws.updateMessage({
+        "deviceInfo.permissions.BLE": true,
+        "deviceInfo.sensors.BLE": true,
+      });
     } else {
-      wsocket.message["deviceInfo"]["permissions"]["BLE"] = false;
-      wsocket.message["deviceInfo"]["sensors"]["BLE"] = false;
-
-      // Permission denied, handle accordingly
+      ws.updateMessage({
+        "deviceInfo.permissions.BLE": false,
+        "deviceInfo.sensors.BLE": false,
+      });
     }
   }
 
   Future<void> requestLocationPermission() async {
     final status = await Permission.locationWhenInUse.request();
-    if (status.isGranted) {
-      wsocket.message["deviceInfo"]["permissions"]["location"] = true;
-      wsocket.message["deviceInfo"]["sensors"]["location"] = true;
-    } else {
-      wsocket.message["deviceInfo"]["permissions"]["location"] = false;
-      wsocket.message["deviceInfo"]["sensors"]["location"] = false;
-    }
+    ws.updateMessage({
+      "deviceInfo.permissions.location": status.isGranted,
+      "deviceInfo.sensors.location": status.isGranted,
+    });
   }
 
   List<FilterInfoModel> landmarkListForFilter = [];
@@ -3581,7 +3588,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   Future<BitmapDescriptor> bitmapDescriptorFromTextAndImageForPatchTransition(
       String text, String imagePath,
-      {Size imageSize = const Size(50, 50)}) async {
+      {Size imageSize = const Size(50, 50),
+        double strokeWidth = 3.0, // Control stroke width
+        Color strokeColor = Colors.white}) async {
     // Load the base marker image
     final ByteData baseImageBytes = await rootBundle.load(imagePath);
     final ui.Codec markerImageCodec = await ui.instantiateImageCodec(
@@ -3592,27 +3601,49 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     final ui.Image markerImage = markerImageFrame.image;
 
     // Set the text style and layout
-    final TextPainter textPainter = TextPainter(
+    final TextPainter strokePainter = TextPainter(
       textDirection: TextDirection.ltr,
     );
-    textPainter.text = TextSpan(
+
+    strokePainter.text = TextSpan(
       text: text,
       style: TextStyle(
-        fontSize: 40.0, // Increased font size
-        color: Colors.black,
-        fontFamily: "Roboto",
+        fontSize: 35.0, // Increased font size
         fontWeight: FontWeight.w500,
-        height: 23 / 16,
+        fontFamily: "Roboto",
+        foreground: Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..color = strokeColor, // Stroke color
       ),
     );
-    textPainter.layout(
+
+    final TextPainter fillPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+
+    fillPainter.text = TextSpan(
+      text: text,
+      style: TextStyle(
+        fontSize: 35.0, // Increased font size
+        fontWeight: FontWeight.w500,
+        fontFamily: "Roboto",
+        color: Colors.black, // Fill color
+      ),
+    );
+
+    strokePainter.layout(
+      minWidth: 0,
+      maxWidth: double.infinity,
+    );
+    fillPainter.layout(
       minWidth: 0,
       maxWidth: double.infinity,
     );
 
     // Calculate the overall canvas size
-    final double textWidth = textPainter.width;
-    final double textHeight = textPainter.height;
+    final double textWidth = strokePainter.width;
+    final double textHeight = strokePainter.height;
     final double canvasWidth =
     textWidth > imageSize.width ? textWidth : imageSize.width;
     final double canvasHeight =
@@ -3621,10 +3652,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     final PictureRecorder pictureRecorder = PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
 
-    // Draw the text centered above the marker image
+    // Draw the stroke text
     final double textX = (canvasWidth - textWidth) / 2;
     final double textY = 0.0;
-    textPainter.paint(canvas, Offset(textX, textY));
+    strokePainter.paint(canvas, Offset(textX, textY));
+
+    // Draw the fill text on top of stroke
+    fillPainter.paint(canvas, Offset(textX, textY));
 
     // Draw the base marker image below the text
     final double imageX = (canvasWidth - imageSize.width) / 2;
@@ -3643,6 +3677,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
     return BitmapDescriptor.fromBytes(pngBytes!);
   }
+
 
   renderCampusPatchTransition(List<String> IDS, {String? outdoorID}){
     print("renderCampusPatchTransition");
@@ -3672,8 +3707,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   fillColor: Color(0xffE5F9FF),
                   geodesic: false,
                   consumeTapEvents: true,
-                  zIndex: 5,
-
+                  zIndex: 0,
                 ),
               );
               cachedPolygon.clear();
@@ -7737,12 +7771,9 @@ int currentCols=0;
     //         destinationY);
     //   }
     // }
-    if (path.isEmpty) {
-      wsocket.message["path"]["didPathForm"] = false;
-    } else {
-      wsocket.message["path"]["didPathForm"] =
-          path[0] == sourceIndex && path[path.length - 1] == destinationIndex;
-    }
+    ws.updateMessage({
+      "path.didPathForm": path.isNotEmpty && path.first == sourceIndex && path.last == destinationIndex,
+    });
 
     if(bid == buildingAllApi.outdoorID){
       path.forEach((turn) => getPoints.add([turn % numCols, turn ~/ numCols]));
@@ -9080,13 +9111,10 @@ bool _isPlaying=false;
 
                 //detected=false;
                 //user.SingletonFunctionController.building = SingletonFunctionController.building;
-                wsocket.message["path"]
-                ["source"] =
-                    PathState.sourceName;
-                wsocket.message["path"]
-                ["destination"] =
-                    PathState
-                        .destinationName;
+                ws.updateMessage({
+                  "path.source": PathState.sourceName,
+                  "path.destination": PathState.destinationName,
+                });
                 // user.ListofPaths = PathState.listofPaths;
                 // user.patchData = SingletonFunctionController.building.patchData;
                 // user.buildingNumber = PathState.listofPaths.length-1;

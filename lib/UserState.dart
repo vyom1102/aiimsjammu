@@ -70,6 +70,8 @@ class UserState {
   static Function createCircle = (double lat, double lng) {};
   static Function addDebugMarkers = (geo.LatLng point, {double? hue,int? id}){};
   PathSnapper snapper = PathSnapper();
+  final ws = WebSocketService();
+
 
 
   UserState(
@@ -281,9 +283,12 @@ class UserState {
   }
 
   void userLogData() {
-    wsocket.message["userPosition"]["X"] = coordX;
-    wsocket.message["userPosition"]["Y"] = coordY;
-    wsocket.message["userPosition"]["floor"] = floor;
+    ws.updateMessage({
+      "userPosition.X": coordX,
+      "userPosition.Y": coordY,
+      "userPosition.floor": floor,
+    });
+
   }
 
   bool shouldTerminateNavigation() {

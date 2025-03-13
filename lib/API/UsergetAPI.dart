@@ -31,9 +31,12 @@ class UsergetAPI{
     if (response.statusCode == 200) {
       Map<String, dynamic> responseBody = json.decode(response.body);
       print('UsergetAPI FROM API');
+      print(responseBody);
       UsergetAPIModel currentUsergetAPI = UsergetAPIModel.fromJson(responseBody);
       print("response.statusCode--");
       print(currentUsergetAPI);
+      print("userTracking");
+      print(currentUsergetAPI.userTracking);
       UserCredentials().setUserId(currentUsergetAPI.sId!);
       userInfoBox.put("sId", currentUsergetAPI.sId);
       userInfoBox.put("name", currentUsergetAPI.name);
