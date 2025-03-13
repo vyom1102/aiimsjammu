@@ -18,6 +18,8 @@ class UsergetAPIModel {
   String? createdAt;
   String? updatedAt;
   int? iV;
+  bool? userTracking;
+
 
   UsergetAPIModel(
       {this.sId,
@@ -38,7 +40,7 @@ class UsergetAPIModel {
         this.favourites,
         this.createdAt,
         this.updatedAt,
-        this.iV});
+        this.iV,this.userTracking});
 
   UsergetAPIModel.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
@@ -70,6 +72,7 @@ class UsergetAPIModel {
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
+    userTracking = json['userTracking'];
   }
 
   Map<String, dynamic> toJson() {
@@ -97,6 +100,7 @@ class UsergetAPIModel {
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
+    data['userTracking'] = userTracking;
     return data;
   }
 }

@@ -509,7 +509,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       UserState.ttsAllStop = false;
     }
     _messageTimer = Timer.periodic(Duration(seconds: 3), (timer) {
-      //ws.sendMessage();
+      ws.sendMessage();
       ws.receiveMessage();
     });
     listenToMagnetometer();

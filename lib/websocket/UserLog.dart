@@ -12,6 +12,7 @@ import '../config.dart';
 class WebSocketService {
   static final WebSocketService _instance = WebSocketService._internal();
   late io.Socket _socket;
+  late io.Socket _receiveSocket;
   static String appId = "com.iwayplus.aiimsjammu";
 
   final StreamController<Map<String, dynamic>> _messageController = StreamController.broadcast();
@@ -19,7 +20,7 @@ class WebSocketService {
 
 
   Map<String, dynamic> message = {
-    "appId": "",
+    "appId": "com.iwayplus.aiimsjammu",
     "userId": "",
     "deviceInfo": {
       "sensors": {
@@ -87,6 +88,22 @@ class WebSocketService {
         _messageController.add(data); // Send data to stream listeners
       }
     });
+    _receiveSocket = io.io(AppConfig.baseUrl, <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': true, // Automatically connects on app start
+      'reconnection': true, // Enables auto-reconnect
+      'reconnectionAttempts': 5, // Tries reconnecting 5 times
+      'reconnectionDelay': 2000, // 2s delay between retries
+    });
+
+    _receiveSocket.onConnect((_) {
+      print('✅ Connected to WebSocket Server');
+      //sendMessage(); // Send initial message upon connection
+    });
+
+    _receiveSocket.onDisconnect((_) => print('⚠️ Disconnected from WebSocket Server'));
+    _receiveSocket.onError((data) => print('❌ WebSocket Error: $data'));
+    _receiveSocket.onReconnect((_) => print('🔄 Reconnecting...'));
   }
 
   void updateMessage(Map<String, dynamic> updates) {
@@ -120,7 +137,7 @@ class WebSocketService {
 
   void receiveMessage() {
     print("receiveMessage");
-    _socket.on("client-log", (data) {
+    _receiveSocket.on("client-log-com.iwayplus.aiimsjammu", (data) {
       print("📩 Received in Timer: ${data}");
     });
   }
