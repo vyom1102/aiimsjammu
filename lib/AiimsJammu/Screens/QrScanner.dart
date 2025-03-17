@@ -364,6 +364,22 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   }
 
 
+  String? extractLandmarkId(String url) {
+    try {
+      // Using RegExp to find the landmark parameter
+      final RegExp regExp = RegExp(r'[?&]landmark=([^&#]*)');
+      final Match? match = regExp.firstMatch(url);
+
+      if (match != null && match.groupCount >= 1) {
+        return match.group(1);
+      }
+
+      return null; // Return null if no landmark ID is found
+    } catch (e) {
+      print('Error extracting landmark ID: $e');
+      return null;
+    }
+  }
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) async {
@@ -375,16 +391,45 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           print("qrCode");
           print(qrCode);
 
+          bool isHandled = false;
           List<QRDataAPIModel>? qrData = await QRDataAPI().fetchQRData(buildingAllApi.allBuildingID.keys.toList());
-          qrData?.forEach((e){
-            if(e.code == qrCode){
-              if(e.landmarkId == null){
-                HelperClass.launchURL(scanData.code!);
-              }else{
-                PassLocationId(context,e.landmarkId!);
+
+          if (qrData != null) {
+            for (var e in qrData) {
+              if (e.code == qrCode) {
+                if (e.landmarkId == null) {
+                  HelperClass.launchURL(scanData.code!);
+                } else {
+                  PassLocationId(context, e.landmarkId!);
+                }
+                isHandled = true;
+                break;
               }
             }
-          });
+          }
+
+          if (!isHandled && uri.toString().contains("/aiimsj.com/landmark")) {
+            final b = uri.queryParameters['bid'];
+            final l = uri.queryParameters['landmark'];
+
+            if (b != null) bid = b;
+            if (l != null) landmarkID = l;
+            String? id = extractLandmarkId(uri.toString());
+            print(id);
+            print("bid  landmarkID  source $bid <-----> $landmarkID <------> $source");
+
+            await buildingAllApi().fetchBuildingAllData().then((value) async {
+              buildingAllApi.findBuildings(value);
+              print("deeplink $bid ${uri.queryParameters['bid']}");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Navigation(directLandID: id ?? "")),
+                );
+
+            });
+          }
+
           print(qrData);
           print("qrScanner");
           print(uri);
