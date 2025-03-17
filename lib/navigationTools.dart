@@ -125,8 +125,9 @@ class tools {
 
   static bool gotBhart = false;
 
-  static List<double> localtoglobal(int x, int y,PDM.patchDataModel? patchData) {
-
+  static List<double> localtoglobal(int intX, int intY,PDM.patchDataModel? patchData, {double? centerX, double? centerY}) {
+    double x = centerX??intX.toDouble();
+    double y = centerY??intY.toDouble();
     x = x - UserState.xdiff;
     y = y - UserState.ydiff;
 

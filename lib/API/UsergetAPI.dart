@@ -53,6 +53,7 @@ class UsergetAPI{
       userInfoBox.put("mobile", currentUsergetAPI.mobile);
       userInfoBox.put("mobileVerification", currentUsergetAPI.mobileVerification);
       userInfoBox.put("username", currentUsergetAPI.username);
+      userInfoBox.put("userTracking", currentUsergetAPI.userTracking);
       print(userInfoBox.keys);
 
 

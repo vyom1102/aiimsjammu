@@ -790,7 +790,64 @@ class _HomePageState extends State<HomePage> {
 
     UsergetAPI().getUserDetailsApi(infoBox.get('userId'));
 
+    if(!userInfoBox.containsKey("userTrackingOn")){
+      promptLocationAccess();
+    }
   }
+
+  var userInfoBox=Hive.box('UserInformation');
+
+  void promptLocationAccess() {
+    if(userInfoBox.containsKey("userTracking")){
+      print("userTracking on");
+      showLocationTrackingDialog(context);
+    }else{
+      print("userTracking off");
+    }
+  }
+
+  void showLocationTrackingDialog(BuildContext context) {
+    userInfoBox.put("userTrackingOn", "yes");
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevents closing the dialog by tapping outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0), // Google-style rounded corners
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.location_on, color: Colors.blue,size: 40,), // Google Maps-like icon
+              SizedBox(width: 8),
+              Text("Location Tracking"),
+              SizedBox(width: 8),
+            ],
+          ),
+          content: Text(
+            "To enhance your experience, this app continuously tracks your location, even when closed or not in use.",
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+              child: Text("OK", style: TextStyle(fontSize: 16, color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   var versionBox = Hive.box('VersionData');
   void versionApiCall() async{
     try {
