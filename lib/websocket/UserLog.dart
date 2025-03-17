@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:convert';
 import 'package:socket_io_client/socket_io_client.dart' as io;
@@ -119,7 +120,6 @@ class WebSocketService {
           return;
         }
       }
-
       current[keys.last] = value;
     });
 

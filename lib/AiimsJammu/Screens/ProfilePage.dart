@@ -86,7 +86,7 @@ class _ProfilePageState extends State<ProfilePage> {
       if (response.statusCode == 200) {
         final signInBox = await Hive.openBox('SignInDatabase');
         await signInBox.clear();
-
+        userListBox.clear();
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => SignIn()),

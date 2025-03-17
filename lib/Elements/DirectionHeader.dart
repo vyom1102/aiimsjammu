@@ -157,7 +157,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       _timer = Timer.periodic(Duration(milliseconds: 1000), (timer) {
         // print("widget.user.pathobj.index");
         // print(widget.user.pathobj.index);
-
         if (widget.user.pathobj.index > 3) {
           listenToBin();
         }
@@ -337,7 +336,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       // print(nearestBeacon);
       debuglNearestbeacon = nearestBeacon;
       sumMap = bluetoothScanAndroidClass.giveSumMapCallBack();
-      // print("listenToBin${sumMap} ");
+      print("listenToBin${sumMap} ");
 
       sumMap.forEach((key, value) {
         if (value.isNotEmpty) {
@@ -1435,28 +1434,28 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                   )
                 : Container(),
 
-            // Container(
-            //   width: screenWidth,
-            //   height: 300,
-            //   child: SingleChildScrollView(
-            //     scrollDirection: Axis.horizontal,
-            //     child: Column(
-            //       crossAxisAlignment: CrossAxisAlignment.start,
-            //       children: [
-            //         //Text("Beacon ${highestKey} - ${highestAverage}"),
-            //         Text(debuglNearestbeacon),
-            //         // Text(sumMap.entries.map((entry) => '${entry.key}: ${entry.value.join(", ")}').join("\n")),
-            //         // //Text(displayString),
-            //         // Text("-------"),
-            //         // Text(sumMapAvg.toString()),
-            //         // Text("${highestAverage} ${threshold.toString()}")
-            //         //
-            //
-            //         // Text(Building.apibeaconmap.containsKey(debuglNearestbeacon).toString()),
-            //       ],
-            //     ),
-            //   ),
-            // ),
+            Container(
+              width: screenWidth,
+              height: 300,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    //Text("Beacon ${highestKey} - ${highestAverage}"),
+                    Text(debuglNearestbeacon),
+                    Text(sumMap.entries.map((entry) => '${entry.key}: ${entry.value.join(", ")}').join("\n")),
+                    // //Text(displayString),
+                    // Text("-------"),
+                    // Text(sumMapAvg.toString()),
+                    // Text("${highestAverage} ${threshold.toString()}")
+                    //
+
+                    // Text(Building.apibeaconmap.containsKey(debuglNearestbeacon).toString()),
+                  ],
+                ),
+              ),
+            ),
 
             // Container(
             //   width: 300,

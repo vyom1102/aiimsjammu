@@ -29,6 +29,10 @@ class BLueToothClass {
     return priorityQueue;
   }
 
+  Map<String, List<int>> latesILMap = {};
+  Map<String, List<DateTime>> latesILMapTimeStamp = {};
+  late DateTime SourceTSP;
+
 
   BLueToothClass(){
     if(!kIsWeb){
@@ -73,24 +77,41 @@ class BLueToothClass {
   }
 
   void startScanning(HashMap<String, beacon> apibeaconmap) {
+    latesILMap.clear();
+    latesILMapTimeStamp.clear();
+    print("proof $latesILMap ${latesILMapTimeStamp}");
+    SourceTSP = DateTime.now();
+    print("SourceTSP set to : $SourceTSP");
     ws.updateMessage({
       "AppInitialization.bleScanResults": {},
-    });    // print("himanshu 1");
+    });
     startbin();
-    // print("himanshu 2");
     FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
-    //  print("himanshu 3");
-    FlutterBluePlus.scanResults.listen((results) async {
-      // print("himanshu 4 $apibeaconmap");
+
+    _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) async {
+      print("resultsrun");
       for (ScanResult result in results) {
         if(result.device.platformName.length > 2){
-        //  print("himanshu 5 ${result}");
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
           ws.updateMessage({
-            "AppInitialization.bleScanResults.$MacId": Rssi,
+            "AppInitialization.bleScanResults": {MacId: Rssi},
           });
           if (apibeaconmap.containsKey(MacId)) {
+            if (result.timeStamp.difference(SourceTSP).inSeconds>=0 && result.timeStamp.difference(SourceTSP).inSeconds < 10) {
+              print("result.timeStamp.difference(SourceTSP) ${result.timeStamp.difference(SourceTSP)}  ${result.timeStamp.difference(SourceTSP).inSeconds}");
+
+              latesILMap.putIfAbsent(MacId,() => []);
+              latesILMapTimeStamp.putIfAbsent(MacId,() => []);
+
+              if(!latesILMapTimeStamp[MacId]!.contains(result.timeStamp)) {
+                latesILMapTimeStamp[MacId]!.add(result.timeStamp);
+                latesILMap[MacId]!.add(Rssi);
+              }
+              print("Beacon $MacId $Rssi ${result.timeStamp.difference(SourceTSP)} ${result.timeStamp} ${SourceTSP}");
+
+            }
+
             //print(MacId);
             //print("mac1 $MacId    rssi $Rssi");
             beacondetail[MacId] = Rssi * -1;
@@ -99,11 +120,13 @@ class BLueToothClass {
           }
         }
       }
+      print("latesILMap $latesILMap");
+      print("latesILMapTimeStamp $latesILMapTimeStamp");
     });
+
 
     calculateAverage();
   }
-
 
 
   // void getDevicesList()async{

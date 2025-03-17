@@ -162,12 +162,9 @@ class _HomePageState extends State<HomePage> {
 
   }
   Future<void> fetchAllLandmarkData() async {
-
     if (globalBuildingIds.isEmpty) {
       await fetchAndStoreBuildingIds();
     }
-
-
     for (var buildingId in globalBuildingIds) {
       await fetchLandmarkData(buildingId);
     }
@@ -175,7 +172,6 @@ class _HomePageState extends State<HomePage> {
   Future<void> fetchAndStoreBuildingIds() async {
     // Open the Hive box
     var buildingIdsBox = await Hive.openBox('BuildingIds');
-
     // Retrieve building IDs from the box
     if (buildingIdsBox.containsKey("buildingId")) {
       globalBuildingIds = List<String>.from(
@@ -761,7 +757,6 @@ class _HomePageState extends State<HomePage> {
 
 
     if (status.isGranted) {
-
       print('location permission granted');
     return true;
 

@@ -228,10 +228,6 @@ class BluetoothScanAndroidClass{
     SingletonFunctionController.SC_LOCALIZED_BEACON = closestDeviceDetails;
     stopScan();
     return closestDeviceDetails;
-
-
-
-
   }
 
 
@@ -457,20 +453,22 @@ print(rssiAverage);
     if (Rssi <= 65) {
       print("getBinNumber0");
       return 0;
-    } else if (Rssi <= 75) {
+    } else if (Rssi <= 70) {
       print("getBinNumber1");
       return 1;
-    } else if (Rssi <= 80) {
+    } else if (Rssi <= 75) {
       print("getBinNumber2");
       return 2;
-    } else if (Rssi <= 85) {
+    } else if (Rssi <= 80) {
       return 3;
-    } else if (Rssi <= 90) {
+    } else if (Rssi <= 85) {
       return 4;
-    } else if (Rssi <= 95) {
+    } else if (Rssi <= 90) {
       return 5;
-    } else {
+    } else if (Rssi <= 95) {
       return 6;
+    } else {
+      return 7;
     }
   }
 
