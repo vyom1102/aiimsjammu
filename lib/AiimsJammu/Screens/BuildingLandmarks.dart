@@ -29,7 +29,7 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
   bool isSearching = false;
   String searchQuery = '';
   TextEditingController searchController = TextEditingController();
-
+  List<String>uniqueBuildingIds=[];
   @override
   void initState() {
     super.initState();
@@ -44,7 +44,14 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
       landmark['properties'] != null &&
           landmark['element']['type'] == 'Rooms')
           .toList();
+      for (var landmark in roomLandmarks) {
+        if (landmark['building_ID'] != null) {
+          uniqueBuildingIds.add(landmark['building_ID'].toString());
+        }
+      }
 
+      // Print unique building_IDs
+      print("Unique Building IDs: ${uniqueBuildingIds.toList().toSet()}");
       // Get unique department names
       Set<String> uniqueDepartments = {'All Departments'};
       for (var landmark in roomLandmarks) {
@@ -67,6 +74,7 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
     "6798c81c96af63c3e826add3": "PRIVATE WARD 1",
     '6798c99e96af63c3e828203d': 'PRIVATE WARD 2',
     "6798c6df96af63c3e82659ec": "EMERGENCY BLOCK",
+    "679ca3fde7e7001d98497002":"AYUSH BLOCK"
   };
 
   void filterLandmarks() {
