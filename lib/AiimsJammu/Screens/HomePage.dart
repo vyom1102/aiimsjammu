@@ -2201,7 +2201,7 @@ class _HomePageState extends State<HomePage> {
         'image': 'assets/images/opd.svg',
         'color': Color(0xFFEAF2FF),
         'iconColor': Color(0xFF003366),
-        'title': 'OPD & AYUSH',
+        'title': 'OPD & Ayush',
         'buildingId':['66794105b80a6778c53c4856','679ca3fde7e7001d98497002'],
       },
       {
