@@ -24,7 +24,12 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
-class MainActivity: FlutterActivity() {
+import android.annotation.SuppressLint
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+
+class MainActivity : FlutterActivity() {
 
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var bluetoothLeScanner: BluetoothLeScanner
@@ -105,6 +110,7 @@ class MainActivity: FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
+        // Bluetooth MethodChannel
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "startScan" -> {
@@ -122,19 +128,45 @@ class MainActivity: FlutterActivity() {
             }
         }
 
-        EventChannel(flutterEngine.dartExecutor.binaryMessenger, EVENT_CHANNEL).setStreamHandler(object : EventChannel.StreamHandler {
-            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                eventSink = events
-            }
+        // Bluetooth EventChannel
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, EVENT_CHANNEL).setStreamHandler(
+                object : EventChannel.StreamHandler {
+                    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                        eventSink = events
+                    }
 
-            override fun onCancel(arguments: Any?) {
-                eventSink = null
-            }
-        })
+                    override fun onCancel(arguments: Any?) {
+                        eventSink = null
+                    }
+                }
+        )
+
+        // GPS EventChannel
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setStreamHandler(
+                object : EventChannel.StreamHandler {
+                    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                        Log.d("startLocationUpdates", "starting");
+                        GpseventSink = events
+                        startLocationUpdates()
+                    }
+
+                    override fun onCancel(arguments: Any?) {
+                        stopLocationUpdates()
+                    }
+                }
+        )
     }
+
 
     private fun startScan() {
         if (!isScanning) {
+            if (!bluetoothAdapter.isEnabled) {
+                Log.d("BluetoothScan--", "Bluetooth is OFF")
+                return
+            } else {
+                Log.d("BluetoothScan--", "Bluetooth is ON")
+            }
+
             if (!bluetoothAdapter.isEnabled) {
                 Toast.makeText(this, "Bluetooth is not enabled", Toast.LENGTH_SHORT).show()
                 return
@@ -207,5 +239,79 @@ class MainActivity: FlutterActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(discoveryReceiver)
+    }
+
+
+    private val CHANNEL = "gps_scan"
+    private var locationManager: LocationManager? = null
+    private var GpseventSink: EventChannel.EventSink? = null
+
+    @SuppressLint("MissingPermission")
+    private fun startLocationUpdates() {
+        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+        Log.d("startLocationUpdates", "Initializing location updates")
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.d("startLocationUpdates", "Permission denied for location updates")
+            GpseventSink?.error("PERMISSION_DENIED", "Location permission not granted", null)
+            return
+        }
+
+        // Check if GPS or Network provider is enabled
+        val isGpsEnabled = locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) ?: false
+        val isNetworkEnabled = locationManager?.isProviderEnabled(LocationManager.NETWORK_PROVIDER) ?: false
+
+        if (!isGpsEnabled && !isNetworkEnabled) {
+            Log.d("startLocationUpdates", "No location provider enabled")
+            GpseventSink?.error("NO_PROVIDER", "No location provider enabled", null)
+            return
+        }
+
+        if (isGpsEnabled) {
+            locationManager?.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    200, // Time interval in milliseconds
+                    0f,  // Distance interval in meters
+                    locationListener
+            )
+        }
+
+        if (isNetworkEnabled) {
+            locationManager?.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    200,
+                    0f,
+                    locationListener
+            )
+        }
+    }
+
+
+    // Persistent LocationListener to prevent garbage collection
+    private val locationListener = object : LocationListener {
+        override fun onLocationChanged(location: Location) {
+            Log.d("GPS", "New location received: $location")
+            val data = mapOf(
+                    "latitude" to location.latitude,
+                    "longitude" to location.longitude,
+                    "accuracy" to location.accuracy,
+            )
+            GpseventSink?.success(data)
+        }
+
+        override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+        override fun onProviderEnabled(provider: String) {
+            Log.d("GPS", "GPS Provider enabled")
+        }
+
+        override fun onProviderDisabled(provider: String) {
+            Log.d("GPS", "GPS Provider disabled")
+            GpseventSink?.error("GPS_DISABLED", "GPS provider is disabled", null)
+        }
+    }
+
+
+    private fun stopLocationUpdates() {
+        locationManager?.removeUpdates { }
     }
 }

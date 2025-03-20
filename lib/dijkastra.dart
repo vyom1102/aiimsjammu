@@ -329,14 +329,29 @@ List<String> masterFindNearestAndSecondNearestVertices(Map<String, dynamic> path
   print("Source and destination points are $coord1 and $coord2");
 
   List<int> coord1Parsed = _extractCoordinates(coord1);
+  int coord1Floor = coord1Parsed[2];
+  String coord1Bid = tools.extractBid(coord1);
+
   List<int> coord2Parsed = _extractCoordinates(coord2);
+  int coord2Floor = coord2Parsed[2];
+  String coord2Bid = tools.extractBid(coord2);
+
   print("Source and destination points extracted are $coord1Parsed and $coord2Parsed  $pathNetwork");
   // Iterate through each vertex in the pathNetwork
   pathNetwork.forEach((vertex, neighbors) {
     List<int> v = _extractCoordinates(vertex);
+    String vBid = tools.extractBid(vertex);
+
     // Calculate distances from coord1 and coord2 to vertex v
     double distToCoord1 = sqrt(pow(v[0] - coord1Parsed[0], 2) + pow(v[1] - coord1Parsed[1], 2));
+    if(v[2] != coord1Floor || vBid != coord1Bid){
+      distToCoord1 = double.infinity;
+    }
+
     double distToCoord2 = sqrt(pow(v[0] - coord2Parsed[0], 2) + pow(v[1] - coord2Parsed[1], 2));
+    if(v[2] != coord2Floor || vBid != coord2Bid){
+      distToCoord2 = double.infinity;
+    }
 
     // Update nearest and second nearest vertices for coord1
     if (distToCoord1 < minDistToCoord1) {
@@ -609,6 +624,19 @@ Future<List<String>> masterFindShortestPath (Map<String, dynamic> graph, int sou
       temppath = temppath1;
     }
   }
+
+  var zerothElement = tools.extractCoordinates(temppath[0]);
+  var firstElement = tools.extractCoordinates(temppath[1]);
+
+  if(sourceY != zerothElement[1] || sourceX != zerothElement[0]){
+    var distance1 = tools.calculateDistance([sourceX,sourceY], [firstElement[0],firstElement[1]]);
+    var distance2 = tools.calculateDistance([zerothElement[0],zerothElement[1]], [firstElement[0],firstElement[1]]);
+    if(distance1<distance2){
+      temppath.removeAt(0);
+    }
+    temppath.insert(0,"$sourceBid,$sourceX,$sourceY,$sourceFloor");
+  }
+
   List<List<String>> paths = segmentPath(temppath);
 
 

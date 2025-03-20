@@ -964,6 +964,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   bool isPdr = false;
   // Function to start the timer
   void StartPDR() {
+    final stackTrace = StackTrace.current;
+    print("StartPDR Stack: \n$stackTrace");
     PDRTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
       //
       setState(() {
@@ -985,7 +987,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         isPdrStop = true;
         isPdr = false;
       });
-      PDRTimer!.cancel();
+      PDRTimer?.cancel();
+      PDRTimer = null;
       for (final subscription in pdr) {
         subscription.cancel();
       }
@@ -1014,78 +1017,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
 // late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount() {
-    pdr.add(accelerometerEventStream().listen(
-          (AccelerometerEvent event) {
-        if (pdr == null) {
-          return; // Exit the event listener if subscription is canceled
-        }
-        ws.updateMessage({
-          "deviceInfo.permissions.activity": true,
-          "deviceInfo.sensors.activity": true,
-        });
-
-        // Apply low-pass filter
-        if (detectStep(event.x, event.y, event.z)) {
-          setState(() {
-            lastPeakTime = DateTime
-                .now()
-                .millisecondsSinceEpoch;
-            stepCount++;
-            bool isvalid = MotionModel.isValidStep(
-                user,
-                SingletonFunctionController
-                    .building.floorDimenssion[user.bid]![user.floor]![0],
-                SingletonFunctionController
-                    .building.floorDimenssion[user.bid]![user.floor]![1],
-                SingletonFunctionController
-                    .building.nonWalkable[user.bid]![user.floor]!,
-                reroute, context);
-            if (isvalid) {
-              user.move(context).then((value) {
-                renderHere();
-              });
-            } else {
-              if (user.isnavigating) {
-                // reroute();
-                // showToast("You are out of path");
-              }
-            }
-          });
-        }
-        else {
-          filteredX = alpha * filteredX + (1 - alpha) * event.x;
-          filteredY = alpha * filteredY + (1 - alpha) * event.y;
-          filteredZ = alpha * filteredZ + (1 - alpha) * event.z;
-          // Compute orientation angle from accelerometer data (e.g., pitch or roll)
-          double orientation = atan2(filteredY,
-              sqrt(filteredX * filteredX + filteredZ * filteredZ))
-          ;
-          // Add orientation to history and check variability
-          orientationHistory.add(orientation);
-          if (orientationHistory.length > orientationWindowSize) {
-            orientationHistory.removeAt(0); // Maintain a fixed window size
-
-            // Calculate standard deviation of orientation
-            double avgOrientation = orientationHistory.reduce((a, b) =>
-            a + b) / orientationWindowSize;
-            double orientationVariance = orientationHistory.fold(
-                0, (sum, value) => sum +
-                pow(value - avgOrientation, 2).toInt()) /
-                orientationWindowSize;
-            double orientationStability = sqrt(orientationVariance);
-
-            // Suppress step detection if orientation is too variable
-            if (orientationStability > orientationThreshold) {
-              // Too random, assume the user is stationary or talking, ignore steps
-              return;
-            }
+    if(user.isnavigating){
+      pdr.add(accelerometerEventStream().listen(
+            (AccelerometerEvent event) {
+          if (pdr == null) {
+            return; // Exit the event listener if subscription is canceled
           }
-          // Compute magnitude of acceleration vector
-          double magnitude = sqrt((filteredX * filteredX +
-              filteredY * filteredY +
-              filteredZ * filteredZ));
-          // Detect peak and valley
-          if (magnitude > peakThreshold && DateTime.now().millisecondsSinceEpoch - lastPeakTime > peakInterval) {
+          ws.updateMessage({
+            "deviceInfo.permissions.activity": true,
+            "deviceInfo.sensors.activity": true,
+          });
+
+          // Apply low-pass filter
+          if (detectStep(event.x, event.y, event.z)) {
             setState(() {
               lastPeakTime = DateTime
                   .now()
@@ -1111,27 +1055,88 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 }
               }
             });
-          } else if (magnitude < valleyThreshold &&
-              DateTime
-                  .now()
-                  .millisecondsSinceEpoch - lastValleyTime >
-                  valleyInterval) {
-            setState(() {
-              lastValleyTime = DateTime
-                  .now()
-                  .millisecondsSinceEpoch;
-            });
           }
-        }
+          else {
+            filteredX = alpha * filteredX + (1 - alpha) * event.x;
+            filteredY = alpha * filteredY + (1 - alpha) * event.y;
+            filteredZ = alpha * filteredZ + (1 - alpha) * event.z;
+            // Compute orientation angle from accelerometer data (e.g., pitch or roll)
+            double orientation = atan2(filteredY,
+                sqrt(filteredX * filteredX + filteredZ * filteredZ))
+            ;
+            // Add orientation to history and check variability
+            orientationHistory.add(orientation);
+            if (orientationHistory.length > orientationWindowSize) {
+              orientationHistory.removeAt(0); // Maintain a fixed window size
 
-      },
-      onError: (error) {
-        ws.updateMessage({
-          "deviceInfo.permissions.activity": false,
-          "deviceInfo.sensors.activity": false,
-        });
-      },
-    ));
+              // Calculate standard deviation of orientation
+              double avgOrientation = orientationHistory.reduce((a, b) =>
+              a + b) / orientationWindowSize;
+              double orientationVariance = orientationHistory.fold(
+                  0, (sum, value) => sum +
+                  pow(value - avgOrientation, 2).toInt()) /
+                  orientationWindowSize;
+              double orientationStability = sqrt(orientationVariance);
+
+              // Suppress step detection if orientation is too variable
+              if (orientationStability > orientationThreshold) {
+                // Too random, assume the user is stationary or talking, ignore steps
+                return;
+              }
+            }
+            // Compute magnitude of acceleration vector
+            double magnitude = sqrt((filteredX * filteredX +
+                filteredY * filteredY +
+                filteredZ * filteredZ));
+            // Detect peak and valley
+            if (magnitude > peakThreshold && DateTime.now().millisecondsSinceEpoch - lastPeakTime > peakInterval) {
+              setState(() {
+                lastPeakTime = DateTime
+                    .now()
+                    .millisecondsSinceEpoch;
+                stepCount++;
+                bool isvalid = MotionModel.isValidStep(
+                    user,
+                    SingletonFunctionController
+                        .building.floorDimenssion[user.bid]![user.floor]![0],
+                    SingletonFunctionController
+                        .building.floorDimenssion[user.bid]![user.floor]![1],
+                    SingletonFunctionController
+                        .building.nonWalkable[user.bid]![user.floor]!,
+                    reroute, context);
+                if (isvalid) {
+                  user.move(context).then((value) {
+                    renderHere();
+                  });
+                } else {
+                  if (user.isnavigating) {
+                    // reroute();
+                    // showToast("You are out of path");
+                  }
+                }
+              });
+            } else if (magnitude < valleyThreshold &&
+                DateTime
+                    .now()
+                    .millisecondsSinceEpoch - lastValleyTime >
+                    valleyInterval) {
+              setState(() {
+                lastValleyTime = DateTime
+                    .now()
+                    .millisecondsSinceEpoch;
+              });
+            }
+          }
+
+        },
+        onError: (error) {
+          ws.updateMessage({
+            "deviceInfo.permissions.activity": false,
+            "deviceInfo.sensors.activity": false,
+          });
+        },
+      ));
+    }
   }
   DateTime? lastStepTime; // To track the last step detection time
   final Duration stepCooldown = Duration(milliseconds: 800);
@@ -1419,6 +1424,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     Map<String, List<dynamic>> adj = model.pathNetwork ?? {};
     Map<String, List<dynamic>> adjGlobal = model.pathNetworkGlobal ?? {};
 
+    print("adj $adj");
     polylineData[buildingAllApi.outdoorID]?.polyline?.floors?.forEach((floor) {
       print("got campus floors object");
       floor.polyArray?.forEach((polyline) {
@@ -2765,7 +2771,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         //  if(user.isnavigating==false){
         clearPathVariables();
         // }
-        PDRTimer!.cancel();
+        PDRTimer?.cancel();
+        PDRTimer = null;
         PathState.clear();
         PathState.sourceX = user.coordX;
         PathState.sourceY = user.coordY;
@@ -2859,6 +2866,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   void reroute({String? acc}) {
     final stackTrace = StackTrace.current;
     print("reroute Stack: \n$stackTrace");
+    StopPDR();
     _isnavigationPannelOpen = false;
     _isRoutePanelOpen = false;
     _isLandmarkPanelOpen = false;
@@ -3956,7 +3964,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   Set<Polygon> _polygon = Set();
   PolygonId matchPolygonId = PolygonId("");
-  List<LatLng> matchPolygonPoints = [];
   AnimationController? _controller12;
   Animation<double>? _sizeAnimation;
   late Animation<double> _zoomAnimation;
@@ -4015,7 +4022,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     _controller12 = null;
     selectedroomMarker.clear(); // Clear existing markers
     matchPolygonId = PolygonId("$polygonPoints");
-    matchPolygonPoints = polygonPoints;
     _polygon.clear();
     _polygon.add(Polygon(
       polygonId: PolygonId("$polygonPoints"),
@@ -4629,7 +4635,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     return false;
   }
 
-  int currentToggleFloor =0;
 
   Future<void> polygonTap(List<LatLng>? coordinates, String id) async {
     print("called polygonTap $id");
@@ -7102,6 +7107,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       fitTwoPoints(points);
     }
   }
+
   Future<void> fitTwoPoints(List<LatLng> points) async {
     LatLng point1 = points.first;
     LatLng point2 = points.last;
@@ -7304,7 +7310,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           PathState.destinationY,
           PathState.destinationFloor,
           bid: PathState.destinationBid));
-      runPaths(fetchrouteFutures);
+      runPaths(fetchrouteFutures,autoStart: autoStart);
 
     }else if (PathState.sourceBid == PathState.destinationBid) {
       if (PathState.sourceFloor == PathState.destinationFloor) {
@@ -7935,91 +7941,100 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     List<double> svalue = [Cellpath.first.lat,Cellpath.first.lng];
     List<double> dvalue = [Cellpath.last.lat, Cellpath.last.lng];
 
+    if(mastergraph){
+      List<LatLng> points = [
+        LatLng(svalue[0], svalue[1]),
+        LatLng(dvalue[0], dvalue[1])
+      ];
+      fitTwoPoints(points);
+    }
+
 
     if (path.isNotEmpty) {
       SingletonFunctionController.building.floor[bid] = floor;
 
       List<LatLng> coordinates1 = [];
-      Map<String,int> globalFloor = Map();
-      Map<String, Map<int, List<LatLng>>> line = Map();
+      Map<String, int> globalFloor = {};
+      Map<String, Map<int, List<LatLng>>> tempPolylineData = {};
+      String? prevBid;
+
       for (var node in path) {
         List<int> point = tools.extractCoordinates(node);
-        String bid = tools.extractBid(node);
+        String buildingId = tools.extractBid(node);
         int floor = point[2];
-        globalFloor.putIfAbsent(bid, ()=>0);
-        if(globalFloor[bid] != floor && bid != buildingAllApi.outdoorID){
+        globalFloor.putIfAbsent(buildingId, () => 0);
+
+        if (globalFloor[buildingId] != floor && buildingId != buildingAllApi.outdoorID) {
           if (floor != 0) {
-            print("changing floor of $bid to $floor");
-            List<PolyArray> prevFloorLifts = findLift(
+            print("Changing floor of $buildingId to $floor");
+            List<PolyArray> previousFloorLifts = findLift(
                 tools.numericalToAlphabetical(0),
-                SingletonFunctionController
-                    .building.polylinedatamap[bid]!.polyline!.floors!);
-            List<PolyArray> currFloorLifts = findLift(
+                SingletonFunctionController.building.polylinedatamap[buildingId]!.polyline!.floors!);
+            List<PolyArray> currentFloorLifts = findLift(
                 tools.numericalToAlphabetical(floor),
-                SingletonFunctionController
-                    .building.polylinedatamap[bid]!.polyline!.floors!);
-            List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
+                SingletonFunctionController.building.polylinedatamap[buildingId]!.polyline!.floors!);
+            List<int> dvalue = findCommonLift(previousFloorLifts, currentFloorLifts);
             UserState.xdiff = dvalue[0];
             UserState.ydiff = dvalue[1];
           } else {
             UserState.xdiff = 0;
             UserState.ydiff = 0;
           }
-          globalFloor[bid] = floor;
+          globalFloor[buildingId] = floor;
         }
-        if (PathState.sourceBid == bid && floor == PathState.sourceFloor){
-          numCols = SingletonFunctionController.building.floorDimenssion[bid]![floor]![0];
-          int row = point[0];
-          int col = point[1];
-          List<double> value = tools.localtoglobal(row, col, SingletonFunctionController.building.patchData[bid]);
-          coordinates1.add(LatLng(value[0], value[1]));
-          singleroute.putIfAbsent(bid, () => Map());
-          if (singleroute[bid]![floor] != null) {
-            gmap.Polyline oldPolyline = singleroute[bid]![floor]!.firstWhere(
-                  (polyline) => polyline.polylineId.value == bid,
-            );
+
+        int row = point[0];
+        int col = point[1];
+        List<double> globalCoords = tools.localtoglobal(
+            row, col, SingletonFunctionController.building.patchData[buildingId]);
+
+        if (PathState.sourceBid == buildingId && floor == PathState.sourceFloor) {
+          coordinates1.add(LatLng(globalCoords[0], globalCoords[1]));
+          singleroute.putIfAbsent(buildingId, () => {});
+          singleroute[buildingId]!.putIfAbsent(floor, () => {});
+
+          setState(() {
             gmap.Polyline updatedPolyline = gmap.Polyline(
-              polylineId: oldPolyline.polylineId,
+              polylineId: PolylineId(buildingId),
               points: coordinates1,
-              color: oldPolyline.color,
-              width: oldPolyline.width,
+              color: Colors.blueAccent,
+              width: 8,
             );
+            singleroute[buildingId]![floor]!..clear()..add(updatedPolyline);
+          });
+          await Future.delayed(const Duration(microseconds: 1500));
+        } else {
+          tempPolylineData.putIfAbsent(buildingId, () => {});
+          tempPolylineData[buildingId]!.putIfAbsent(floor, () => []);
+          tempPolylineData[buildingId]![floor]!.add(LatLng(globalCoords[0], globalCoords[1]));
+          if(prevBid != buildingId){
+            prevBid = buildingId;
             setState(() {
-              // Remove the old polyline and add the updated polyline
-              singleroute[bid]![floor]!.remove(oldPolyline);
-              singleroute[bid]![floor]!.add(updatedPolyline);
-            });
-          } else {
-            setState(() {
-              singleroute[bid]!.putIfAbsent(floor, () => Set());
-              print("adding on floor $floor");
-              singleroute[bid]![floor]?.add(gmap.Polyline(
-                polylineId: PolylineId("$bid"),
-                points: coordinates1,
-                color: Colors.blueAccent,
-                width: 8,
-              ));
+              tempPolylineData.forEach((buildingId, floorMap) {
+                floorMap.forEach((floor, coordinates) {
+                  singleroute.putIfAbsent(buildingId, () => {});
+                  singleroute[buildingId]!.putIfAbsent(floor, () => {});
+                  singleroute[buildingId]![floor]!.add(gmap.Polyline(
+                    polylineId: PolylineId("$buildingId ${DateTime.now()}"),
+                    points: coordinates,
+                    color: Colors.blueAccent,
+                    width: 8,
+                  ));
+                });
+              });
+              tempPolylineData.clear();
             });
           }
-          await Future.delayed(Duration(microseconds: 1500));
-        }else{
-          singleroute.putIfAbsent(bid, () => Map());
-          line.putIfAbsent(bid, () => Map());
-          int row = point[0];
-          int col = point[1];
-          List<double> value = tools.localtoglobal(
-              row, col, SingletonFunctionController.building.patchData[bid]);
-          singleroute[bid]!.putIfAbsent(floor, () => Set());
-          line[bid]!.putIfAbsent(floor, () => []);
-          line[bid]![floor]?.add(LatLng(value[0], value[1]));
         }
       }
 
-      line.forEach((bid,map){
-        map.forEach((floor,coordinates){
-          setState(() {
-            singleroute[bid]![floor]?.add(gmap.Polyline(
-              polylineId: PolylineId("$bid"),
+      setState(() {
+        tempPolylineData.forEach((buildingId, floorMap) {
+          floorMap.forEach((floor, coordinates) {
+            singleroute.putIfAbsent(buildingId, () => {});
+            singleroute[buildingId]!.putIfAbsent(floor, () => {});
+            singleroute[buildingId]![floor]!.add(gmap.Polyline(
+              polylineId: PolylineId("$buildingId ${DateTime.now()}"),
               points: coordinates,
               color: Colors.blueAccent,
               width: 8,
@@ -8027,6 +8042,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           });
         });
       });
+
 
       final Uint8List tealtorch =
       await getImagesFromMarker('assets/tealtorch.png', 35);
@@ -12197,7 +12213,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     //   //showDestinationDialog(context,user.convertTolng("You have reached ${destname}. It is ${direction}","", 0.0, context, angle, "", "",destname: destname));
     // }
 
-    PDRTimer!.cancel();
+    PDRTimer?.cancel();
+    PDRTimer = null;
     clearPathVariables();
     StopPDR();
     PathState.didPathStart = true;
@@ -12580,7 +12597,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     UserState.geoLat=0.0;
     UserState.geoLng=0.0;
     flutterTts.stop();
-    PDRTimer!.cancel();
+    PDRTimer?.cancel();
+    PDRTimer = null;
     _controller12?.dispose();
     SingletonFunctionController.building.qrOpened = false;
     SingletonFunctionController.building.dispose();
@@ -13041,22 +13059,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       activeIcon: Icons.close,
                       backgroundColor: Colors.white,
                       children: List.generate(
-                        (Building.numberOfFloorsDelhi[
-                        buildingAllApi.getStoredString()] ??
-                            [0])
-                            .length,
-                            (int i) {
-                          //
-                          List<int> floorList = Building
-                              .numberOfFloorsDelhi[
-                          buildingAllApi.getStoredString()] ??
-                              [0];
+                        user.isnavigating?(Building.numberOfFloorsDelhi.values.map((list) => list.length).fold(0, (a, b) => a > b ? a : b)):(Building.numberOfFloorsDelhi[buildingAllApi.getStoredString()] ?? [0]).length, (int i) {
+
+                          List<int> floorList = user.isnavigating?Building.numberOfFloorsDelhi.values.reduce((a, b) => a.length > b.length ? a : b):Building.numberOfFloorsDelhi[buildingAllApi.getStoredString()] ?? [0];
                           List<int> revfloorList = floorList;
                           revfloorList.sort();
-                          // SingletonFunctionController.building.numberOfFloors[buildingAllApi
-                          //     .getStoredString()];
-                          //
-                          //
+
                           return SpeedDialChild(
                             child: Semantics(
                               label: "${revfloorList[i]}",
@@ -13076,24 +13084,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                 ? Colors.white
                                 : Color(0xff24b9b0),
                             onTap: () {
-                              if(revfloorList[i] == PathState.destinationFloor){
-                                _polygon.clear();
-                                _polygon.add(Polygon(
-                                  polygonId: PolygonId("$matchPolygonPoints"),
-                                  points: matchPolygonPoints,
-                                  fillColor: Colors.lightBlueAccent.withOpacity(0.4),
-                                  strokeColor:Colors.blue,
-                                  strokeWidth: 2,
-                                ));
-                              }else{
-                                _polygon.clear();
-                              }
-
-
-                              //_polygon.clear();
-                              print("_polygon.length");
-                              print(_polygon.length);
-
+                              _polygon.clear();
                               cachedPolygon.clear();
                               circles.clear();
 
@@ -13101,37 +13092,32 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                               _markerLocationsMap.clear();
                               _markerLocationsMapLanName.clear();
 
-                              currentToggleFloor = revfloorList[i];
-
-                              SingletonFunctionController
-                                  .building.floor[
-                              buildingAllApi
-                                  .getStoredString()] =
-                              revfloorList[i];
-                              createRooms(
-                                SingletonFunctionController
-                                    .building.polylinedatamap[
-                                buildingAllApi.getStoredString()]!,
-                                SingletonFunctionController
-                                    .building.floor[
-                                buildingAllApi.getStoredString()]!,
-                              );
-                              if (pathMarkers[i] != null) {
-                                //setCameraPosition(pathMarkers[i]!);
+                              if(PathState.singleCellListPath.isNotEmpty){
+                                List<String> intermediatesBids = tools.findIntermediateBuildings(PathState.singleCellListPath);
+                                for (var bid in intermediatesBids) {
+                                  SingletonFunctionController.building.floor[bid] = revfloorList[i];
+                                  createRooms(
+                                    SingletonFunctionController.building.polylinedatamap[bid]!,
+                                    SingletonFunctionController.building.floor[bid]!,
+                                  );
+                                }
+                              }else{
+                                SingletonFunctionController.building.floor[buildingAllApi.getStoredString()] = revfloorList[i];
+                                createRooms(
+                                  SingletonFunctionController.building.polylinedatamap[buildingAllApi.getStoredString()]!,
+                                  SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]!,
+                                );
                               }
-                              // Markers.clear();
-                              SingletonFunctionController
-                                  .building.landmarkdata!
-                                  .then((value) {
-                                createMarkers(
-                                    value,
-                                    SingletonFunctionController
-                                        .building.floor[
-                                    buildingAllApi
-                                        .getStoredString()]!,
-                                    bid: buildingAllApi
-                                        .getStoredString());
-                              });
+
+                              if(!user.isnavigating){
+                                SingletonFunctionController.building.landmarkdata!.then((value) {
+                                  createMarkers(
+                                      value,
+                                      SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]!,
+                                      bid: buildingAllApi.getStoredString()
+                                  );
+                                });
+                              }
 
 
                             },

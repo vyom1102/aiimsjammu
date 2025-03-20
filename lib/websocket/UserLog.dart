@@ -155,7 +155,7 @@ class WebSocketService {
           appId = "com.iwayplus.aiimsjammu";
         }
       }      _socket.emit("user-log-socket", _initializeMessage(appId));
-      print("📤 Sent message: $message");
+      // print("📤 Sent message: $message");
     } else {
       print("⚠️ WebSocket not connected. Cannot send message.");
     }
