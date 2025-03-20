@@ -4,8 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_svg/svg.dart';
+import '/Elements/locales.dart';
 import '../directionClass.dart';
-import '../localization/locales.dart';
 
 class DirectionInstructionWidget extends StatefulWidget {
 
@@ -67,7 +67,6 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    print("widget.IsMultiFloor");
     print(widget.IsMultiFloor);
     print(widget.IsMultiBuilding);
 
@@ -77,13 +76,6 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
       child: GestureDetector(
         onTap: (){
           ListExpand = !ListExpand;
-          print("widget.StartName");
-          print(widget.StartName);
-          print(widget.StartBuildingName);
-          print(widget.EndName);
-          print(widget.EndBuildingName);
-
-
         },
         child: Container(
           margin: EdgeInsets.only(top: !widget.IsMultiBuilding? 20:10,),

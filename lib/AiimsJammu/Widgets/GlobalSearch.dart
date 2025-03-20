@@ -947,6 +947,27 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
     Navigator.pop(context, ID);
   }
 
+  IconData getIcon(String option) {
+    switch (option.toLowerCase()) {
+      case 'washroom':
+        return Icons.wash_sharp;
+      case 'cafeteria':
+        return Icons.local_cafe;
+      case 'drinking water':
+        return Icons.water_drop;
+      case 'atm':
+        return Icons.atm_sharp;
+      case 'entry':
+        return Icons.door_front_door_outlined;
+      case 'lift':
+        return Icons.elevator;
+      case 'reception':
+        return Icons.desk_sharp;
+      default:
+        return Icons.help_outline; // Return a default icon if no match is found
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -1141,7 +1162,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
                                     vall = -1;
                                   });
                                 }
-                              }, icon: _icons[i],
+                              }, icon: getIcon(optionListForUI.toList()[i].toLowerCase()),
                             );
                           },
                           direction: Axis.horizontal,

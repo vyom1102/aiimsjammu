@@ -14,11 +14,11 @@ class WebSocketService {
   static final WebSocketService _instance = WebSocketService._internal();
   late io.Socket _socket;
   late io.Socket _receiveSocket;
-  var userInfoBox=Hive.box('UserInformation');
+  var userInfoBox = Hive.box('UserInformation');
 
 
 
-  static String appId = Hive.box('UserInformation').get("userTracking")==true? "com.iwayplus.aiimsjammu-driver":"com.iwayplus.aiimsjammu";
+
 
   final StreamController<Map<String, dynamic>> _messageController = StreamController.broadcast();
   Stream<Map<String, dynamic>> get messageStream => _messageController.stream;
@@ -26,45 +26,49 @@ class WebSocketService {
   static double driverLat = 0.0;
   static double driverLng = 0.0;
 
+  Map<String, dynamic> message = {};
 
 
-  Map<String, dynamic> message = {
-    "appId": appId,
-    "userId": "",
-    "deviceInfo": {
-      "sensors": {
-        "BLE": false,
-        "location": false,
-        "activity": false,
-        "compass": false
+  Map<String, dynamic> _initializeMessage(String appId) {
+    message = {
+      "appId": appId, // Now appId is dynamically assigned
+      "userId": "",
+      "deviceInfo": {
+        "sensors": {
+          "BLE": false,
+          "location": false,
+          "activity": false,
+          "compass": false
+        },
+        "permissions": {
+          "BLE": false,
+          "location": false,
+          "activity": false,
+          "compass": false
+        },
+        "deviceManufacturer": ""
       },
-      "permissions": {
-        "BLE": false,
-        "location": false,
-        "activity": false,
-        "compass": false
+      "AppInitialization": {
+        "BID": "",
+        "buildingName": "",
+        "bleScanResults": {},
+        "localizedOn": ""
       },
-      "deviceManufacturer": ""
-    },
-    "AppInitialization": {
-      "BID": "",
-      "buildingName": "",
-      "bleScanResults": {},
-      "localizedOn": ""
-    },
-    "userPosition": {
-      "X": 0,
-      "Y": 0,
-      "floor": 0,
-      "latitude": 32.5628399,
-      "longitude": 75.0385137
-    },
-    "path": {
-      "source": "",
-      "destination": "",
-      "didPathForm": false
-    }
-  };
+      "userPosition": {
+        "X": 0,
+        "Y": 0,
+        "floor": 0,
+        "latitude": 32.5628399,
+        "longitude": 75.0385137
+      },
+      "path": {
+        "source": "",
+        "destination": "",
+        "didPathForm": false
+      }
+    };
+    return message;
+  }
 
   factory WebSocketService() {
     return _instance;
@@ -116,9 +120,17 @@ class WebSocketService {
   }
 
   void updateMessage(Map<String, dynamic> updates) {
+    String appId = "";
+    if(userInfoBox.containsKey("userTracking")){
+      if(userInfoBox.get("userTracking")){
+        appId = "com.iwayplus.aiimsjammu-driver";
+      }else{
+        appId = "com.iwayplus.aiimsjammu";
+      }
+    }
     updates.forEach((key, value) {
       List<String> keys = key.split('.');
-      Map<String, dynamic> current = message;
+      Map<String, dynamic> current = _initializeMessage(appId);
 
       for (int i = 0; i < keys.length - 1; i++) {
         if (current[keys[i]] is Map<String, dynamic>) {
@@ -130,14 +142,13 @@ class WebSocketService {
       }
       current[keys.last] = value;
     });
-
     //print("🔄 Updated message: $message");
   }
 
   void sendMessage() {
     if (_socket.connected) {
-      print("appId$appId");
-      _socket.emit("user-log-socket", message);
+      String appId = userInfoBox.get("userTracking")? "com.iwayplus.aiimsjammu-driver":"com.iwayplus.aiimsjammu";
+      _socket.emit("user-log-socket", _initializeMessage(appId));
       print("📤 Sent message: $message");
     } else {
       print("⚠️ WebSocket not connected. Cannot send message.");

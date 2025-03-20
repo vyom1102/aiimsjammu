@@ -7,14 +7,16 @@ import 'package:flutter_tts/flutter_tts.dart';
 //import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:iwaymaps/newSearchPage.dart';
+import '/newSearchPage.dart';
+import '/Elements/HelperClass.dart';
+import '/Elements/locales.dart';
+import '/SourceAndDestinationPage.dart';
+
+import '/APIMODELS/landmark.dart';
 import '../DestinationSearchPage.dart';
 import 'package:animated_checkmark/animated_checkmark.dart';
 
-import '../ELEMENTS/HelperClass.dart';
-import '../SourceAndDestinationPage.dart';
 import '../UserState.dart';
-import '../localization/locales.dart';
 import 'HomepageFilter.dart';
 
 class HomepageSearch extends StatefulWidget {
@@ -234,24 +236,24 @@ class _HomepageSearchState extends State<HomepageSearch> {
   }
 }
 
-String getIcon(String option) {
+IconData getIcon(String option) {
   switch (option.toLowerCase()) {
     case 'washroom':
-      return 'assets/washroomIcon.png';
+      return Icons.wash_sharp;
     case 'cafeteria':
-      return 'assets/cafeteria.png';
+      return Icons.local_cafe;
     case 'drinking water':
-      return 'assets/waterPoint.png';
+      return Icons.water_drop;
     case 'atm':
-      return 'assets/atmIcon.png';
+      return Icons.atm_sharp;
     case 'entry':
-      return 'assets/entryExit.png';
+      return Icons.door_front_door_outlined;
     case 'lift':
-      return 'assets/liftIcon.png';
+      return Icons.elevator;
     case 'reception':
-      return 'assets/receptionIcon.png';
+      return Icons.desk_sharp;
     default:
-      return ''; // Return a default icon if no match is found
+      return Icons.help_outline; // Return a default icon if no match is found
   }
 }
 

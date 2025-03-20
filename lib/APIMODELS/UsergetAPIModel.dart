@@ -73,6 +73,7 @@ class UsergetAPIModel {
     updatedAt = json['updatedAt'];
     iV = json['__v'];
     userTracking = json['userTracking'];
+
   }
 
   Map<String, dynamic> toJson() {

@@ -1,8 +1,7 @@
 
 import 'package:flutter/material.dart';
 
-
-import '../ELEMENTS/HelperClass.dart';
+import '/Elements/HelperClass.dart';
 import '../navigationTools.dart';
 
 class SearchpageResults extends StatefulWidget {

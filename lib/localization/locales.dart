@@ -59,6 +59,7 @@ mixin LocaleData {
   static const String ttssharpleft='ttsSharpLeft';
   static const String ttsuturn='ttsUTurn';
 
+  static const String changingaccessiblepath= 'Calculating new path.';
 
 
   static const String uturn='U Turn';

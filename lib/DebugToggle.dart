@@ -6,15 +6,17 @@ class DebugToggle extends StatefulWidget {
   static bool Slider = kDebugMode?false:false;
   static bool StepButton = kDebugMode?false:false;
   static bool PDRIcon = kDebugMode?false:false;
+  static bool kalman = kDebugMode?false:false;
   const DebugToggle({super.key});
   @override
   State<DebugToggle> createState() => _DebugToggleState();
 }
 
 class _DebugToggleState extends State<DebugToggle> {
-  bool Slider = true;
-  bool StepButton = true;
-  bool PDRIcon = false;
+  bool Slider = DebugToggle.Slider;
+  bool StepButton = DebugToggle.StepButton;
+  bool PDRIcon = DebugToggle.PDRIcon;
+  bool kalman = DebugToggle.kalman;
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -63,7 +65,19 @@ class _DebugToggleState extends State<DebugToggle> {
                     });
                   })
                 ],
-              )
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Kalman"),
+                  Switch(value: kalman, onChanged: (value){
+                    setState(() {
+                      kalman = value;
+                      DebugToggle.kalman = value;
+                    });
+                  })
+                ],
+              ),
             ],
           ),
         ),

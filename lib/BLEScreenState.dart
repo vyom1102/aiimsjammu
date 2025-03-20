@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'BluetoothScanIOSClass.dart';
+import '/BluetoothScanIOSClass.dart';
 
 
 class BLEScreen extends StatefulWidget {

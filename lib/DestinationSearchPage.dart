@@ -12,18 +12,17 @@ import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:iwaymaps/singletonClass.dart';
-
+import '/API/buildingAllApi.dart';
+import '/singletonClass.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
-import 'API/buildingAllApi.dart';
+import '/Elements/HelperClass.dart';
 import 'API/ladmarkApi.dart';
 import 'APIMODELS/landmark.dart';
-import 'ELEMENTS/HelperClass.dart';
 import 'Elements/DestinationPageChipsWidget.dart';
 import 'Elements/HomepageFilter.dart';
 
@@ -339,16 +338,19 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     'Entry',
     'Lift',
     'Reception',
+
+
   ];
-  List<String> _icons = [
-    'assets/washroomIcon.png',
-    'assets/cafeteria.png',
-    'assets/waterPoint.png',
-    'assets/atmIcon.png',
-    'assets/entryExit.png',
-    'assets/liftIcon.png',
-    'assets/receptionIcon.png'
+  List<IconData> _icons = [
+    Icons.wash_sharp,
+    Icons.local_cafe,
+    Icons.water_drop,
+    Icons.atm_sharp,
+    Icons.door_front_door_outlined,
+    Icons.elevator,
+    Icons.desk_sharp,
   ];
+
   void onChipSelected(int index) {
     setState(() {
       selectedChipIndex = index;

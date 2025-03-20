@@ -6,12 +6,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../API/QRDataAPI.dart';
 import '../API/buildingAllApi.dart';
-import '../APIMODELS/QRDataAPIModel.dart';
-import '../Navigation.dart';
-import '/pathState.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 
+import '../APIMODELS/QRDataAPIModel.dart';
+import '../Navigation.dart';
 import 'HelperClass.dart';
 
 class QRViewExample extends StatefulWidget {

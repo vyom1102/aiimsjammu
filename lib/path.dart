@@ -230,6 +230,7 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:iwaymaps/singletonClass.dart';
 
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart';
@@ -248,7 +249,7 @@ class Node {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Node && runtimeType == other.runtimeType && index == other.index;
+          other is Node && runtimeType == other.runtimeType && index == other.index;
 
   @override
   int get hashCode => index.hashCode;
@@ -332,12 +333,12 @@ Future<List<int>> findBestPathAmongstBoth(
 }
 
 Future<List<int>> findPath(
-  int numRows,
-  int numCols,
-  List<int> nonWalkableCells,
-  int sourceIndex,
-  int destinationIndex,
-)async{
+    int numRows,
+    int numCols,
+    List<int> nonWalkableCells,
+    int sourceIndex,
+    int destinationIndex,
+    )async{
   sourceIndex -= 1;
   destinationIndex -= 1;
 
@@ -375,7 +376,7 @@ Future<List<int>> findPath(
     }
 
     for (int neighborIndex
-        in getNeighbors(currentIdx, numRows, numCols, nonWalkableSet)) {
+    in getNeighbors(currentIdx, numRows, numCols, nonWalkableSet)) {
       if (closedSet.contains(neighborIndex)) continue;
 
       Node neighbor = nodes[neighborIndex];
@@ -716,8 +717,8 @@ double pointLineDistance(Node point, Node start, Node end) {
     return distance(point, start);
   } else {
     double n = ((end.x - start.x) * (start.y - point.y) -
-                (start.x - point.x) * (end.y - start.y))
-            .abs() +
+        (start.x - point.x) * (end.y - start.y))
+        .abs() +
         0.0;
     double d = sqrt(pow(end.x - start.x, 2) + pow(end.y - start.y, 2));
     return n / d;
@@ -747,9 +748,9 @@ List<Node> rdp(List<Node> points, double epsilon, Set<int> nonWalkableIndices) {
   List<Node> result = [];
   if (dmax > epsilon) {
     List<Node> recursiveResults1 =
-        rdp(points.sublist(0, index + 1), epsilon, nonWalkableIndices);
+    rdp(points.sublist(0, index + 1), epsilon, nonWalkableIndices);
     List<Node> recursiveResults2 =
-        rdp(points.sublist(index, end + 1), epsilon, nonWalkableIndices);
+    rdp(points.sublist(index, end + 1), epsilon, nonWalkableIndices);
     result = [
       ...recursiveResults1.sublist(0, recursiveResults1.length - 1),
       ...recursiveResults2
@@ -1193,7 +1194,7 @@ List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
         }
 
 
-        
+
 
         //path=getOptiPath(getTurns, numCols, path);
       }
@@ -1241,45 +1242,45 @@ List<int> getFinalOptimizedPath(List<int> path, List<int> nonWalkableCells,
 // }
 
 List<List<int>> findIntersection(List<int> p1, List<int> p2, List<int> p3,List<int> p11,List<int> p22,List<int> nonWalkableCells,int numCols) {
- double m1=(p11[1]-p1[1])/(p11[0]-p1[0]);
- double m2=(p22[1]-p2[1])/(p22[0]-p2[0]);
+  double m1=(p11[1]-p1[1])/(p11[0]-p1[0]);
+  double m2=(p22[1]-p2[1])/(p22[0]-p2[0]);
 //
-if(m1.isInfinite || m1.isNaN){
-  m1=p1[0]+0.0;
-}
- if(m2.isInfinite || m2.isNaN){
-   m2=p2[0]+0.0;
- }
+  if(m1.isInfinite || m1.isNaN){
+    m1=p1[0]+0.0;
+  }
+  if(m2.isInfinite || m2.isNaN){
+    m2=p2[0]+0.0;
+  }
 //
 //
- //eq of parallel lines
- double node1=(m1);
- double node2=(m2);
+  //eq of parallel lines
+  double node1=(m1);
+  double node2=(m2);
 
- //checking vertical and horizontal condition
+  //checking vertical and horizontal condition
 
 
- List<List<int>> intersections =[
-   [node1.toInt(), p3[1]],
-   [node2.toInt(), p3[1]]];
+  List<List<int>> intersections =[
+    [node1.toInt(), p3[1]],
+    [node2.toInt(), p3[1]]];
 
- int index1=intersections[0][0]+intersections[0][1]*numCols;
- int index2=intersections[1][0]+intersections[1][1]*numCols;
- //
- //
- if(nonWalkableCells.contains(index1)|| nonWalkableCells.contains(index2)){
-   node1=p1[1]+0.0;
-   node2=p2[1]+0.0;
-   intersections=[[p3[0], node1.toInt()],
-     [p3[0],node2.toInt()],[p1[0],p1[1]],[p2[0],p2[1]]];
- }else{
-   intersections=[
-     [node1.toInt(), p3[1]],
-     [node2.toInt(), p3[1]],
-     [p1[0],p1[1]],[p2[0],p2[1]]
-   ];
- }
- //noww new points areeee
+  int index1=intersections[0][0]+intersections[0][1]*numCols;
+  int index2=intersections[1][0]+intersections[1][1]*numCols;
+  //
+  //
+  if(nonWalkableCells.contains(index1)|| nonWalkableCells.contains(index2)){
+    node1=p1[1]+0.0;
+    node2=p2[1]+0.0;
+    intersections=[[p3[0], node1.toInt()],
+      [p3[0],node2.toInt()],[p1[0],p1[1]],[p2[0],p2[1]]];
+  }else{
+    intersections=[
+      [node1.toInt(), p3[1]],
+      [node2.toInt(), p3[1]],
+      [p1[0],p1[1]],[p2[0],p2[1]]
+    ];
+  }
+  //noww new points areeee
 
   return intersections;
 }
@@ -1361,16 +1362,27 @@ bool isWithinRange(List<int> target, List<int> p1, List<int> p2, double range) {
 }
 
 List<Cell> findCorridorSegments(
-    List<int> path, List<int> nonWalkable, int numCols,String? bid, int floor,Map<String,patchDataModel> patchData) {
-  int? coorridorWidth=(patchData[bid]!.patchData!.corridorWidth!=null)?int.parse(patchData[bid]!.patchData!.corridorWidth!):10;
-  print("coorirdor width");
-  print(coorridorWidth);
+    List<String> path, Map<String, Map<int, List<int>>> nonWalkables, Map<String,patchDataModel> patchData) {
   List<Cell> single = [];
-  List<int> turnPoints = tools.getTurnpoints(path, numCols);
+  List<String> turns = tools.getTurnPointsFromString(path);
   for (int i = 0; i < path.length; i++) {
-    int pos = path[i];
-    int row = pos % numCols;
-    int col = pos ~/ numCols;
+    String stringPoint = path[i];
+    List<int> point = tools.extractCoordinates(stringPoint);
+    String bid = tools.extractBid(stringPoint);
+    int? coorridorWidth=(patchData[bid]!.patchData!.corridorWidth!=null)?int.parse(patchData[bid]!.patchData!.corridorWidth!):10;
+    int floor = point[2];
+    var nonWalkable = SingletonFunctionController.building.nonWalkable[bid]![floor]!;
+    print("cellpathdebug $stringPoint bid $bid $floor ${SingletonFunctionController.building.floorDimenssion[bid]}");
+    int numCols = 0;
+    try{
+      numCols = SingletonFunctionController.building.floorDimenssion[bid]![floor]![0];
+    }catch(e){
+      numCols = SingletonFunctionController.building.floorDimenssion[bid]!.values.first[0];
+    }
+
+    int row = point[0];
+    int col = point[1];
+    int pos = (point[1]*numCols)+point[0];
 
     int nextrow = row;
     int nextcol = col;
@@ -1379,8 +1391,9 @@ List<Cell> findCorridorSegments(
     double lat = v[0];
     double lng = v[1];
     if (i + 1 < path.length) {
-      nextrow = path[i + 1] % numCols;
-      nextcol = path[i + 1] ~/ numCols;
+      List<int> nextpoint = tools.extractCoordinates(path[i+1]);
+      nextrow = nextpoint[0];
+      nextcol = nextpoint[1];
     }
 
     bool northCollision =
@@ -1404,7 +1417,7 @@ List<Cell> findCorridorSegments(
     } else if (nextrow != row && nextcol != col) {
       //
       single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,bid,floor,numCols,ttsEnabled: false));
-    } else if (turnPoints.contains(pos)) {
+    } else if (turns.contains(stringPoint)) {
       //
       single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,bid,floor,numCols,ttsEnabled: false));
     } else if ((northCollision && southCollision)) {

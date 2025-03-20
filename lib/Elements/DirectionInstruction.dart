@@ -5,9 +5,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-import '../API/buildingAllApi.dart';
+import '/API/buildingAllApi.dart';
+import '/Elements/locales.dart';
 import '../ViewModel/DirectionInstructionViewModel.dart';
-import '../localization/locales.dart';
 import 'DirectionInstructionWidget.dart';
 import 'OutDoorInstructionWidget.dart';
 
@@ -87,7 +87,7 @@ class _DirectionInstructionState extends State<DirectionInstruction> {
               vm.isMultiBuilding && vm.destinationBID == buildingAllApi.outdoorID && vm.isSourceMultiFloor && !vm.isDestinationMultiFloor? OutDoorInstructionWidget(ListHeight: vm.outdoorWidgetHeight+screenHeight*0.14, TotalOutDoorInFeet: vm.totalOutdoorLength, EndBuildingName: vm.destinationBuildingName, directions: vm.outdoorDirection,ShowLandmark: true,endName: vm.destinationName): Container(),
 
               //Destination OutDoor Source SingleFloor
-              vm.isMultiBuilding && vm.destinationBID == buildingAllApi.outdoorID && !vm.isSourceMultiFloor && !vm.isDestinationMultiFloor? DirectionInstructionWidget(StartName: vm.sourceBuildingName, StartBuildingName: vm.sourceBuildingName, StartFloor: vm.sourceFloor, directionList: vm.sourceDirection, IsMultiFloor: false, IsMultiBuilding: true,FirstHeight: (vm.sourceUPHeight/2)+screenHeight*0.125,SecondHeight: vm.sourceUPHeight/2+screenHeight*0.1,ThirdHeight: vm.sourceDownHeight/2,ForthHeight: vm.sourceDownHeight/2, LiftString: vm.sourceLiftString,EndBuildingName: vm.destinationBuildingName,EndFloor: vm.destionationFloor,EndName: vm.destinationName,TotalDistanceInFeet: vm.totalDestinationDistance,Turns: vm.totalDestinationTurns,reverse: false,BuildingID: vm.sourceBID): Container(),
+              vm.isMultiBuilding && vm.destinationBID == buildingAllApi.outdoorID && !vm.isSourceMultiFloor && !vm.isDestinationMultiFloor? DirectionInstructionWidget(StartName: vm.sourceBuildingName, StartBuildingName: vm.sourceBuildingName, StartFloor: vm.sourceFloor, directionList: vm.sourceDirection, IsMultiFloor: false, IsMultiBuilding: true,FirstHeight: (vm.sourceUPHeight/2)+screenHeight*0.125,SecondHeight: vm.sourceUPHeight/2+screenHeight*0.1,ThirdHeight: vm.sourceDownHeight/2,ForthHeight: vm.sourceDownHeight/2, LiftString: vm.sourceLiftString,EndBuildingName: vm.destinationBuildingName,EndFloor: vm.destionationFloor,EndName: vm.destinationName,TotalDistanceInFeet: vm.totalDestinationDistance,Turns: vm.totalSourceTurns,reverse: false,BuildingID: vm.sourceBID): Container(),
               vm.isMultiBuilding && vm.destinationBID == buildingAllApi.outdoorID && !vm.isSourceMultiFloor && !vm.isDestinationMultiFloor? SizedBox(height: 20,): Container(),
               vm.isMultiBuilding && vm.destinationBID == buildingAllApi.outdoorID && !vm.isSourceMultiFloor && !vm.isDestinationMultiFloor? OutDoorInstructionWidget(ListHeight: vm.outdoorWidgetHeight+screenHeight*0.14, TotalOutDoorInFeet: vm.totalOutdoorLength, EndBuildingName: vm.destinationBuildingName, directions: vm.outdoorDirection,ShowLandmark: true,endName: vm.destinationName): Container(),
 

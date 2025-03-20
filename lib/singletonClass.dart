@@ -2,14 +2,13 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
 import 'API/buildingAllApi.dart';
 import 'BluetoothScanAndroidClass.dart';
-import 'BluetoothScanIOSClass.dart';
 import 'buildingState.dart';
 
 import 'API/beaconapi.dart';
@@ -17,6 +16,7 @@ import 'API/beaconapi.dart';
 import 'APIMODELS/beaconData.dart';
 import 'VersioInfo.dart';
 import 'bluetooth_scanning.dart';
+import '/BluetoothScanIOSClass.dart';
 
 class SingletonFunctionController {
   bool _isRunning = false;
@@ -110,6 +110,7 @@ class SingletonFunctionController {
         // }
         //-------------
         if(Platform.isAndroid){
+
           btadapter.startScanning(apibeaconmap);
         }else{
           btadapter.startScanningIOS(apibeaconmap);

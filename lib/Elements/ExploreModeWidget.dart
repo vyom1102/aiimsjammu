@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '/Elements/HelperClass.dart';
 import '../APIMODELS/landmark.dart';
-import '../ELEMENTS/HelperClass.dart';
 import '../navigationTools.dart';
 import '../APIMODELS/landmark.dart';
 

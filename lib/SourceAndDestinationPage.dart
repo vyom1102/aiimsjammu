@@ -6,13 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:iwaymaps/singletonClass.dart';
+import '/API/ladmarkApi.dart';
+import '/ELEMENTS/SearchpageRecents.dart';
+import '/singletonClass.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'API/buildingAllApi.dart';
-import 'API/ladmarkApi.dart';
+
+import '/API/buildingAllApi.dart';
 import 'APIMODELS/landmark.dart';
 import 'DestinationSearchPage.dart';
-import 'ELEMENTS/SearchpageRecents.dart';
 import 'ELEMENTS/SearchpageResults.dart';
 import 'UserState.dart';
 class SourceAndDestinationPage extends StatefulWidget {

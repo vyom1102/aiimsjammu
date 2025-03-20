@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '/API/buildingAllApi.dart';
+import '/Elements/HelperClass.dart';
 
-import '../API/buildingAllApi.dart';
 import '../API/ladmarkApi.dart';
-import '../APIMODELS/landmark.dart';
-import '../ELEMENTS/HelperClass.dart';
+import '/APIMODELS/landmark.dart';
 import '../FloorSelectionPage.dart';
 
 

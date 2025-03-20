@@ -8,7 +8,7 @@ import '/Elements/HelperClass.dart';
 class SendOTPAPI{
 
   final String baseUrl = "${AppConfig.baseUrl}/auth/otp/send";
-  final String xaccesstoken = AppConfig.xaccesstoken;
+  final String xaccesstoken = AppConfig.Authorization;
   Future<bool> sendOTP(String username) async {
     final Map<String, dynamic> data = {
       "username": username,
@@ -25,7 +25,7 @@ class SendOTPAPI{
       },
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       return true;
       // return HelperClass.showToast("OTP sent successfully");
     } else {

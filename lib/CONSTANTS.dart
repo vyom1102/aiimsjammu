@@ -1,5 +1,5 @@
 class CONSTANTS{
-  String playStore = "com.iwayplus.aiimsjammu";
-  String appStore = "aiims-jammu-navigation/id6677034083";
-  String prefix = "aiimsj.com";
+  String playStore = "com.iwayplus.candor";
+  String appStore = "sp%C4%93ja/id6737500295";
+  String prefix = "candor.com";
 }

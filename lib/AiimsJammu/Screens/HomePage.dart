@@ -793,7 +793,7 @@ class _HomePageState extends State<HomePage> {
   var userInfoBox=Hive.box('UserInformation');
 
   void promptLocationAccess() {
-    if(userInfoBox.containsKey("userTracking")){
+    if(userInfoBox.containsKey("userTracking") && userInfoBox.get("userTracking")){
       print("userTracking on");
       showLocationTrackingDialog(context);
     }else{

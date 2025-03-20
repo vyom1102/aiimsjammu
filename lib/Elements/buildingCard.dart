@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hive/hive.dart';
 import '../API/buildingAllApi.dart';
-import '../Navigation.dart';
 
 class buildingCard extends StatelessWidget {
   String imageURL;
