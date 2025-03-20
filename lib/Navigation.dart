@@ -12806,12 +12806,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   if (cameraPosition.zoom > 16.8) {
                     focusBuildingChecker(cameraPosition);
                   } else if (cameraPosition.zoom > 15.5) {
-                    // renderCampusPatchTransition(
-                    //   buildingAllApi.allBuildingID.keys.toList(),
-                    //   outdoorID: buildingAllApi.outdoorID,
-                    // );
+                    renderCampusPatchTransition(
+                      buildingAllApi.allBuildingID.keys.toList(),
+                      outdoorID: buildingAllApi.outdoorID,
+                    );
                   } else {
-                    //renderCampusPatchTransition([buildingAllApi.outdoorID]);
+                    renderCampusPatchTransition([buildingAllApi.outdoorID]);
                   }
 
                   // Update map alignment based on camera position
