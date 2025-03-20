@@ -293,7 +293,7 @@ class tools {
     }
     String currentDir = UserCredentials().getuserNavigationModeSetting();
     if (angle >= 337.5 || angle <= 22.5) {
-      return (currentDir == 'Natural Direction') ? "Ahead" : "12 o'clock";
+      return (currentDir == 'Natural Direction') ? "Straight" : "12 o'clock";
     } else if (angle > 22.5 && angle <= 67.5) {
       return (currentDir == 'Natural Direction')
           ? "Slight Right"
@@ -305,7 +305,7 @@ class tools {
           ? "Sharp Right"
           : "4-5 o'clock";
     } else if (angle > 157.5 && angle <= 202.5) {
-      return (currentDir == 'Natural Direction') ? "Back" : "6 o'clock";
+      return (currentDir == 'Natural Direction') ? "U Turn" : "6 o'clock";
     } else if (angle > 202.5 && angle <= 247.5) {
       return (currentDir == 'Natural Direction') ? "Sharp Left" : "7-8 o'clock";
     } else if (angle > 247.5 && angle <= 292.5) {
