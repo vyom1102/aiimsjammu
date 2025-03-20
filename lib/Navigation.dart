@@ -510,13 +510,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       UserState.ttsOnlyTurns = false;
       UserState.ttsAllStop = false;
     }
-    _messageTimer = Timer.periodic(Duration(seconds: 3), (timer) {
-      if(userInfoBox.containsKey("userTracking")){
-        ws.sendMessage();
-      }else{
+    _messageTimer = Timer.periodic(Duration(seconds: 3), (timer) async {
+      ws.sendMessage();
+      print("userInfoBox.get");
+      print(userInfoBox.get("userTracking"));
+      if(!userInfoBox.get("userTracking")){//is user
+        print("userTracking");
         ws.receiveMessage();
+        navigationStartFunction();
+      }else{
+        await gpsTrackingService.startTracking();
+        print("userInfoBox.containsKey(userTracking)");
+        print(userInfoBox.get("userTracking"));
       }
-
     });
     listenToMagnetometer();
 
@@ -617,39 +623,31 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     } catch (E) {}
     // fetchlist();
     // filterItems();
-    navigationStartFunction();
+
   }
 
+  late Timer drivelLocTrackingForUser;
+
   Future<void> navigationStartFunction() async {
+
     Uint8List iconMarker = await getImagesFromMarker('assets/GolfCart.png', 155);
 
-    Position? previousPosition;
-    double rotation = 0;
+    double lat = WebSocketService.driverLat;
+    double lng = WebSocketService.driverLng;
+    gpsTrackingUserPosition = LatLng(lat,lng);
+    gpsTrackingMarker?.clear();
+    gpsTrackingMarker?.add(Marker(
+      markerId: MarkerId("userLocation"),
+      position: gpsTrackingUserPosition,
+      icon: BitmapDescriptor.fromBytes(iconMarker),
+    ));
+    if(lat != 0.0 && lng != 0.0){
+      print("gotNewposition");
 
-    await gpsTrackingService.startTracking();
-    gpsTrackingService.gps.positionStream.listen((Position position) {
-      if (previousPosition != null) {
-        rotation = Geolocator.bearingBetween(
-          previousPosition!.latitude,
-          previousPosition!.longitude,
-          position.latitude,
-          position.longitude,
-        );
-      }
-      previousPosition = position;
+    }else{
+      print("elseeee$lat $lng");
+    }
 
-      setState(() {
-        gpsTrackingUserPosition = LatLng(position.latitude, position.longitude);
-        gpsTrackingMarker?.clear();
-        gpsTrackingMarker?.add(Marker(
-          markerId: MarkerId("userLocation"),
-          position: gpsTrackingUserPosition,
-          icon: BitmapDescriptor.fromBytes(iconMarker),
-        ));
-      });
-
-      gpsTrackingMoveCamera();
-    });
   }
 
   Future<void> gpsTrackingMoveCamera() async {

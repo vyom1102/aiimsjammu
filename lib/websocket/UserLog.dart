@@ -14,14 +14,22 @@ class WebSocketService {
   static final WebSocketService _instance = WebSocketService._internal();
   late io.Socket _socket;
   late io.Socket _receiveSocket;
-  static String appId = "com.iwayplus.aiimsjammu";
+  var userInfoBox=Hive.box('UserInformation');
+
+
+
+  static String appId = Hive.box('UserInformation').get("userTracking")==true? "com.iwayplus.aiimsjammu-driver":"com.iwayplus.aiimsjammu";
 
   final StreamController<Map<String, dynamic>> _messageController = StreamController.broadcast();
   Stream<Map<String, dynamic>> get messageStream => _messageController.stream;
 
+  static double driverLat = 0.0;
+  static double driverLng = 0.0;
+
+
 
   Map<String, dynamic> message = {
-    "appId": "com.iwayplus.aiimsjammu",
+    "appId": appId,
     "userId": "",
     "deviceInfo": {
       "sensors": {
@@ -48,8 +56,8 @@ class WebSocketService {
       "X": 0,
       "Y": 0,
       "floor": 0,
-      "latitude": 0.0,
-      "longitude": 0.0
+      "latitude": 32.5628399,
+      "longitude": 75.0385137
     },
     "path": {
       "source": "",
@@ -128,6 +136,7 @@ class WebSocketService {
 
   void sendMessage() {
     if (_socket.connected) {
+      print("appId$appId");
       _socket.emit("user-log-socket", message);
       print("📤 Sent message: $message");
     } else {
@@ -137,8 +146,16 @@ class WebSocketService {
 
   void receiveMessage() {
     print("receiveMessage");
-    _receiveSocket.on("client-log-com.iwayplus.aiimsjammu", (data) {
+    _socket.on("client-log-com.iwayplus.aiimsjammu-driver", (data) {
       print("📩 Received in Timer: ${data}");
+      print(data["userPosition"]["latitude"]);
+      print(data["userPosition"]["longitude"]);
+      if(data["userPosition"]["latitude"] != 0.0 || data["userPosition"]["latitude"] != 0){
+        driverLat = data["userPosition"]["latitude"];
+      }
+      if(data["userPosition"]["longitude"] != 0.0 || data["userPosition"]["longitude"] != 0){
+        driverLng = data["userPosition"]["longitude"];
+      }
     });
   }
 

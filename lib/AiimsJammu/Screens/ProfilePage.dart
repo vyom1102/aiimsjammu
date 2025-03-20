@@ -87,6 +87,9 @@ class _ProfilePageState extends State<ProfilePage> {
         final signInBox = await Hive.openBox('SignInDatabase');
         await signInBox.clear();
         userListBox.clear();
+        var userInfoBox=Hive.box('UserInformation');
+        userInfoBox.clear();
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => SignIn()),
