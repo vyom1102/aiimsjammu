@@ -147,8 +147,14 @@ class WebSocketService {
 
   void sendMessage() {
     if (_socket.connected) {
-      String appId = userInfoBox.get("userTracking")? "com.iwayplus.aiimsjammu-driver":"com.iwayplus.aiimsjammu";
-      _socket.emit("user-log-socket", _initializeMessage(appId));
+      String appId = "";
+      if(userInfoBox.containsKey("userTracking")){
+        if(userInfoBox.get("userTracking")){
+          appId = "com.iwayplus.aiimsjammu-driver";
+        }else{
+          appId = "com.iwayplus.aiimsjammu";
+        }
+      }      _socket.emit("user-log-socket", _initializeMessage(appId));
       print("📤 Sent message: $message");
     } else {
       print("⚠️ WebSocket not connected. Cannot send message.");

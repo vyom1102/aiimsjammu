@@ -469,12 +469,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
     _messageTimer = Timer.periodic(Duration(seconds: 3), (timer) async {
       ws.sendMessage();
-      if(!userInfoBox.get("userTracking")){//is user
+      if(!userInfoBox.containsKey("userTracking")){
         ws.receiveMessage();
         navigationStartFunction();
       }else{
-        await gpsTrackingService.startTracking();
-        print(userInfoBox.get("userTracking"));
+        if(userInfoBox.get("userTracking")){
+          await gpsTrackingService.startTracking();
+          print(userInfoBox.get("userTracking"));
+        }
       }
     });
 
@@ -600,13 +602,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       position: gpsTrackingUserPosition,
       icon: BitmapDescriptor.fromBytes(iconMarker),
     ));
-    if(lat != 0.0 && lng != 0.0){
-      print("gotNewposition");
-
-    }else{
-      print("elseeee$lat $lng");
-    }
-
   }
 
   Future<void> gpsTrackingMoveCamera() async {
@@ -12791,7 +12786,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                     .union(_markers)
                     .union(focusturnArrow)
                     .union(Markers)
-                    .union(restBuildingMarker).union(debugMarker).union(GpsMarker).union(nearbyLandmarks.values.toSet()).union(_exploreModeMarker)
+                    .union(restBuildingMarker).union(debugMarker).union(GpsMarker).union(nearbyLandmarks.values.toSet()).union(_exploreModeMarker).union(gpsTrackingMarker)
                     .union(_exploreModeDebugBeaconMarker),
                 buildingsEnabled: false,
                 compassEnabled: false,
