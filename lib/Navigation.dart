@@ -1017,7 +1017,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
 // late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount() {
-    if(user.isnavigating){
+    if(true){
       pdr.add(accelerometerEventStream().listen(
             (AccelerometerEvent event) {
           if (pdr == null) {
@@ -1095,6 +1095,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                     .now()
                     .millisecondsSinceEpoch;
                 stepCount++;
+                print("${SingletonFunctionController.building.floorDimenssion}");
                 bool isvalid = MotionModel.isValidStep(
                     user,
                     SingletonFunctionController
@@ -1382,7 +1383,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   // land userSetLandmarkMap = land().landmarksMap;
   Future<Landmarks?> getGlobalCoords(LatLng coordinates) async {
     Landmarks? closestLandmark;
-    double minDistance = 100;
+    double minDistance = 1000;
 
     // Fetch landmark data
     final landmarkData = await SingletonFunctionController.building.landmarkdata;
@@ -1424,16 +1425,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     Map<String, List<dynamic>> adj = model.pathNetwork ?? {};
     Map<String, List<dynamic>> adjGlobal = model.pathNetworkGlobal ?? {};
 
-    print("adj $adj");
     polylineData[buildingAllApi.outdoorID]?.polyline?.floors?.forEach((floor) {
-      print("got campus floors object");
       floor.polyArray?.forEach((polyline) {
-        print("got campus polyline object with type ${polyline.polygonType} ${polyline.floor}");
         if (polyline.polygonType == "Waypoints" && polyline.floor == tools.numericalToAlphabetical(closestLandmark?.floor ?? 0)) {
           for (var node in polyline.nodes ?? []) {
             double dist = tools.calculateAerialDist(node.lat!, node.lon!, coordinates.latitude, coordinates.longitude);
             if (adj.containsKey("${node.coordx},${node.coordy}")) {
-              print("adding a node");
               waypoints[dist] = node;
             }
           }
@@ -1446,7 +1443,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       sortedEntries.sort((a, b) => a.key.compareTo(b.key)); // Sort in-place
 
       return sortedEntries
-          .take(6) // Take the first 3 entries
+          .take(3) // Take the first 3 entries
           .map((e) => e.value) // Extract Cell objects
           .toList(); // Convert to List<Cell>
     }
@@ -3975,43 +3972,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     Duration duration = const Duration(milliseconds:100),
     int steps = 50,
   }) async {
-    print("runnningggg");
-    // Get the current camera position
-    final LatLng currentTarget;
-    if(tappedPolygonCoordinates.isNotEmpty){
-      currentTarget=tools.calculateRoomCenterinLatLng(tappedPolygonCoordinates);
-    }else{
-      currentTarget=currTarget;
-    }
-    // Assume the current zoom level
-    double currentZoom = await controller.getZoomLevel();
-    // Extract details for interpolation
-    final double latIncrement =
-        (targetPosition.target.latitude - currentTarget.latitude) / steps;
-    final double lngIncrement =
-        (targetPosition.target.longitude - currentTarget.longitude) / steps;
-    final double zoomIncrement = (targetPosition.zoom - currentZoom) / steps;
-
-    // Gradually update camera position
-    for (int i = 1; i <= steps; i++) {
-      final LatLng intermediateTarget = LatLng(
-        currentTarget.latitude + (latIncrement * i),
-        currentTarget.longitude + (lngIncrement * i),
-      );
-      final double intermediateZoom = currentZoom + (zoomIncrement * i);
-
-      await controller.moveCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: intermediateTarget,
-            zoom: intermediateZoom,
-          ),
-        ),
-      );
-
-      // Add a delay between each step
-      await Future.delayed(duration ~/ steps);
-    }
+    _googleMapController.animateCamera(
+      CameraUpdate.newLatLngZoom(
+        targetPosition.target,
+        22,
+      ),
+    );
   }
 
 
@@ -6771,7 +6737,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       ),
                       onPressed: () async {
                         if(tappedPolygonCoordinates.isNotEmpty){
-                          moveCameraSmoothly(controller: _googleMapController, targetPosition: CameraPosition(target: LatLng(user.lat,user.lng),zoom: 22), currTarget: tools.calculateRoomCenterinLatLng(tappedPolygonCoordinates));
+                          // First move to an intermediate zoom level for a smooth effect
+                          await _googleMapController.animateCamera(CameraUpdate.zoomOut());
+                          await Future.delayed(Duration(milliseconds: 500));
+                          _googleMapController.animateCamera(
+                            CameraUpdate.newLatLngZoom(
+                              LatLng(user.lat, user.lng),
+                              20, // Specify your custom zoom level here
+                            ),
+                          );
                         }
                         _polygon.clear();
                         cachedPolygon.clear();
@@ -7084,6 +7058,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   .building.polylinedatamap[PathState.sourceBid]!,
               PathState.sourceFloor);
         }
+      }else{
+        SingletonFunctionController.building.floor[bid] = 0;
       }
     }
   }
@@ -7988,17 +7964,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         List<double> globalCoords = tools.localtoglobal(
             row, col, SingletonFunctionController.building.patchData[buildingId]);
 
-        if (PathState.sourceBid == buildingId && floor == PathState.sourceFloor) {
+        if (PathState.sourceBid == buildingId && floor == PathState.sourceFloor && buildingId != buildingAllApi.outdoorID) {
           coordinates1.add(LatLng(globalCoords[0], globalCoords[1]));
           singleroute.putIfAbsent(buildingId, () => {});
           singleroute[buildingId]!.putIfAbsent(floor, () => {});
 
           setState(() {
+            print("adding path for3 $buildingId $floor");
             gmap.Polyline updatedPolyline = gmap.Polyline(
               polylineId: PolylineId(buildingId),
               points: coordinates1,
               color: Colors.blueAccent,
               width: 8,
+              zIndex: 10
             );
             singleroute[buildingId]![floor]!..clear()..add(updatedPolyline);
           });
@@ -8019,6 +7997,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                     points: coordinates,
                     color: Colors.blueAccent,
                     width: 8,
+                      zIndex: 10
                   ));
                 });
               });
@@ -8033,11 +8012,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           floorMap.forEach((floor, coordinates) {
             singleroute.putIfAbsent(buildingId, () => {});
             singleroute[buildingId]!.putIfAbsent(floor, () => {});
+            print("adding path for2 $buildingId $floor");
             singleroute[buildingId]![floor]!.add(gmap.Polyline(
               polylineId: PolylineId("$buildingId ${DateTime.now()}"),
               points: coordinates,
               color: Colors.blueAccent,
               width: 8,
+                zIndex: 10
             ));
           });
         });
@@ -8936,30 +8917,30 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                               textAlign: TextAlign.left,
                                             ),
                                           ),
-                                          !kIsWeb?Semantics(
-                                              excludeSemantics: true,
-                                              child: IconButton(
-                                                onPressed: () {
-                                                  setState((){
-                                                    _isPlaying=!_isPlaying;
-                                                    singleroute.clear();
-                                                    pathCovered.clear();
-                                                  });
-                                                  //currently using for play preview animation
-                                                  callPreviewAnimation().then((value){
-                                                    setState((){
-                                                      _isPlaying=false;
-                                                    });
-                                                  });
-                                                  // String msg=(pathState().sourceFloor!=pathState().destinationFloor)?tools.generateNarration(UserState.mapPathGuide,isMultiFloor: true):tools.generateNarration(UserState.mapPathGuide,isMultiFloor: false);
-                                                  // print("narration ${msg}");
-                                                  // speak(msg, _currentLocale).whenComplete((){
-                                                  //   setState(() {
-                                                  //     _isPlaying=false;
-                                                  //   });
-                                                  // });
-                                                },
-                                                icon:Icon(Icons.play_circle_outline_rounded),color: (_isPlaying)?Colors.blue:Colors.black,)):Container(),
+                                          // !kIsWeb?Semantics(
+                                          //     excludeSemantics: true,
+                                          //     child: IconButton(
+                                          //       onPressed: () {
+                                          //         setState((){
+                                          //           _isPlaying=!_isPlaying;
+                                          //           singleroute.clear();
+                                          //           pathCovered.clear();
+                                          //         });
+                                          //         //currently using for play preview animation
+                                          //         callPreviewAnimation().then((value){
+                                          //           setState((){
+                                          //             _isPlaying=false;
+                                          //           });
+                                          //         });
+                                          //         // String msg=(pathState().sourceFloor!=pathState().destinationFloor)?tools.generateNarration(UserState.mapPathGuide,isMultiFloor: true):tools.generateNarration(UserState.mapPathGuide,isMultiFloor: false);
+                                          //         // print("narration ${msg}");
+                                          //         // speak(msg, _currentLocale).whenComplete((){
+                                          //         //   setState(() {
+                                          //         //     _isPlaying=false;
+                                          //         //   });
+                                          //         // });
+                                          //       },
+                                          //       icon:Icon(Icons.play_circle_outline_rounded),color: (_isPlaying)?Colors.blue:Colors.black,)):Container(),
                                           Spacer(),
                                           Semantics(
                                             excludeSemantics: true,
@@ -9432,6 +9413,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           .moveToStartofPath(context)
           .then((value) async {
         setState(() {
+          PathState.index = user.pathobj.index;
           markers.clear();
           List<double> val = tools.localtoglobal(
               user.showcoordX
@@ -9883,7 +9865,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                           UserCredentials().getuserName(),
                           PathState.sourcePolyID,
                           PathState.destinationPolyID,
-                          "com.iwayplus.accessibleashoka");
+                          CONSTANTS().playStore);
                       if (_feedback.isNotEmpty) {}
                       showFeedback = false;
                       _feedbackController.hide();
@@ -10124,20 +10106,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
           List<int> c = [node % col, node ~/ col];
           int val = tools.calculateAngleSecond(a, b, c).toInt();
-          print("val $val $c");
 
-          if (user.bid == buildingAllApi.outdoorID) {
-            double a = user.theta<0?user.theta+360:user.theta;
-            val = (tools.calculateBearing_fromLatLng(
-                LatLng(user.cellPath[index].lat, user.cellPath[index].lng),
-                LatLng(user.cellPath[index + 1].lat,
-                    user.cellPath[index + 1].lng)) - a).toInt().abs();
-            print("val $val");
+          try {
+            if (user.bid == buildingAllApi.outdoorID) {
+              double a = user.theta<0?user.theta+360:user.theta;
+              val = (tools.calculateBearing_fromLatLng(
+                  LatLng(user.cellPath[index].lat, user.cellPath[index].lng),
+                  LatLng(user.cellPath[index + 1].lat,
+                      user.cellPath[index + 1].lng)) - a).toInt().abs();
 
-            if(val<10 && val>-10){
-              val = 0;
+              if(val<10 && val>-10){
+                val = 0;
+              }
             }
-          }
+          }catch(_){}
           for (int i = 0; i < getPoints.length; i++) {
             if (isPdrStop && (val == 0 || (val<60 && val>-60))) {
               Future.delayed(Duration(milliseconds: 1500)).then((value) => {
@@ -12041,6 +12023,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       }
     });
 
+    if (singleroute[buildingAllApi.outdoorID] != null &&
+        singleroute[buildingAllApi.outdoorID]![SingletonFunctionController.building.floor[buildingAllApi.outdoorID]] !=
+            null) {
+      poly = poly.union(singleroute[buildingAllApi.outdoorID]![
+      SingletonFunctionController.building.floor[buildingAllApi.outdoorID]]!);
+    }
+
     buildingAllApi.allBuildingID.forEach((key, value) {
       if (pathCovered[key] != null &&
           pathCovered[key]![SingletonFunctionController.building.floor[key]] !=
@@ -12179,6 +12168,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
   String finalDestinationDirection="";
   void closeNavigation() {
+    final closeNavigation = StackTrace.current;
+    print("closeNavigation Stack: \n$closeNavigation");
     if(_isreroutePannelOpen || !user.isnavigating){
       return;
     }
@@ -12223,6 +12214,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     user.reset();
     PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
     selectedroomMarker.clear();
+    user.isnavigating = false;
     pathMarkers.clear();
     PathState.path.clear();
     PathState.sourcePolyID = "";
@@ -12598,7 +12590,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     UserState.geoLng=0.0;
     flutterTts.stop();
     PDRTimer?.cancel();
-    PDRTimer = null;
     _controller12?.dispose();
     SingletonFunctionController.building.qrOpened = false;
     SingletonFunctionController.building.dispose();

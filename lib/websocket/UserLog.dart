@@ -164,9 +164,9 @@ class WebSocketService {
   void receiveMessage() {
     print("receiveMessage");
     _socket.on("client-log-com.iwayplus.aiimsjammu-driver", (data) {
-      print("📩 Received in Timer: ${data}");
-      print(data["userPosition"]["latitude"]);
-      print(data["userPosition"]["longitude"]);
+      // print("📩 Received in Timer: ${data}");
+      // print(data["userPosition"]["latitude"]);
+      // print(data["userPosition"]["longitude"]);
       if(data["userPosition"]["latitude"] != 0.0 || data["userPosition"]["latitude"] != 0){
         driverLat = data["userPosition"]["latitude"];
       }

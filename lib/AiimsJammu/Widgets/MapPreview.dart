@@ -6,20 +6,23 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
 
 import '../../API/PolyLineApi.dart';
+import '../../APIMODELS/GlobalAnnotationModel.dart';
 import '../../APIMODELS/landmark.dart';
 import '../../APIMODELS/patchDataModel.dart';
 import '../../APIMODELS/polylinedata.dart';
+import '../../GlobalAnnotation/global_rendering.dart';
 import '../../Navigation.dart';
 import '../../navigationTools.dart';
 import '../../singletonClass.dart';
 
 class MapPreview extends StatefulWidget {
 
-  MapPreview(this.polylineData, this.landmarkData, this.patchdata);
+  MapPreview(this.polylineData, this.landmarkData, this.patchdata, this.globalData);
 
   List<dynamic> polylineData = [];
   List<dynamic> landmarkData = [];
   List<dynamic> patchdata = [];
+  GlobalModel? globalData;
 
   @override
   State<MapPreview> createState() => _MapPreviewState();
@@ -564,7 +567,7 @@ class _MapPreviewState extends State<MapPreview> {
               zoomGesturesEnabled: true,
               mapToolbarEnabled: false,
               buildingsEnabled: false,
-              onMapCreated: (controller) {
+              onMapCreated: (controller) async {
                 DefaultAssetBundle.of(context)
                     .loadString("assets/mapstyle.json")
                     .then((value) {
@@ -579,6 +582,9 @@ class _MapPreviewState extends State<MapPreview> {
                 }
                 for (var landmarkData in widget.landmarkData) {
                   createARPatch(landmarkData);
+                }
+                if(widget.globalData != null){
+                  closedpolygons[widget.globalData!.mappingElements!.first.buildingID!] = await globalRendering(widget.globalData!,null)??Set();
                 }
               },
               initialCameraPosition: CameraPosition(

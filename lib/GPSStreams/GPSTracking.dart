@@ -15,7 +15,7 @@ class GpsService {
   Future<void> startTracking() async {
     await gps.startGpsUpdates();
     _subscription = gps.positionStream.listen((position) {
-      print("New Lat ${position.latitude} ${position.longitude}");
+      //print("New Lat ${position.latitude} ${position.longitude}");
       if(position.latitude != uniqueLat && position.longitude != uniqueLng){
         ws.updateMessage({
           "userPosition.latitude": position.latitude,

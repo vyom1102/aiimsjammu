@@ -26,11 +26,13 @@ import 'package:iwaymaps/API/DataVersionApi.dart';
 import 'package:iwaymaps/API/buildingAllApi.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/NoInternetConnection.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/OpeningClosingStatus.dart';
+import '../../API/GlobalAnnotationapi.dart';
 import '../../API/PatchApi.dart';
 import '../../API/PolyLineApi.dart';
 import '../../API/RefreshTokenAPI.dart';
 import '../../API/UsergetAPI.dart';
 import '../../API/ladmarkApi.dart';
+import '../../API/outBuilding.dart';
 import '../../API/waypoint.dart';
 import '../../APIMODELS/DataVersion.dart';
 import '../../APIMODELS/landmark.dart';
@@ -607,12 +609,17 @@ class _HomePageState extends State<HomePage> {
     // Fetch data for all building IDs in parallel
     await Future.wait(buildingAllApi.allBuildingID.keys.map(fetchDataForBuilding));
 
+    try {
+      var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(buildingAllApi.outdoorID);
+      Building.GlobalAnnotation = globalData;
+    }catch(_){}
+
     // Fetch outdoor data
     await fetchDataForBuilding(buildingAllApi.outdoorID);
 
     // Update state and return polylines
     setState(() {
-      mapPreview = MapPreview(polylines, landmarks, patches);
+      mapPreview = MapPreview(polylines, landmarks, patches, Building.GlobalAnnotation);
     });
 
     return polylines;

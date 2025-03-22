@@ -224,18 +224,18 @@ class UserState {
               // if(DebugToggle.kalman){
 
               // if(d>33){
-              //addDebugMarkers(geo.LatLng(cell.lat,cell.lng));
-              // List<Cell>? points = tools.findSegmentContainingPoint(cellPath, pathobj.index);
-              // List<Cell> allPointsofSegment = tools.findAllPointsOfSegment(cellPath, points!);
-              // allPointsofSegment.add(cell);
-              // List<Cell> sorted = tools.sortCollinearPoints(allPointsofSegment);
-              // int index = sorted.indexWhere((node)=>node.x == cell.x && node.y == cell.y);
-              // index = index + cellPath.indexWhere((node)=>node.x == points[0].x && node.y == points[0].y);
-              // path.insert(index, (cell.y*cell.numCols)+cell.x);
-              // cellPath.insert(index, cell);
-              // moveToPointOnPath(index, context);
-              // pathobj.index = index;
-              // renderHere();
+              addDebugMarkers(geo.LatLng(cell.lat,cell.lng));
+              List<Cell>? points = tools.findSegmentContainingPoint(cellPath, pathobj.index);
+              List<Cell> allPointsofSegment = tools.findAllPointsOfSegment(cellPath, points!);
+              allPointsofSegment.add(cell);
+              List<Cell> sorted = tools.sortCollinearPoints(allPointsofSegment);
+              int index = sorted.indexWhere((node)=>node.x == cell.x && node.y == cell.y);
+              index = index + cellPath.indexWhere((node)=>node.x == points[0].x && node.y == points[0].y);
+              path.insert(index, (cell.y*cell.numCols)+cell.x);
+              cellPath.insert(index, cell);
+              moveToPointOnPath(index, context);
+              pathobj.index = index;
+              renderHere();
               // }
 
               // }
@@ -576,12 +576,12 @@ class UserState {
     );
 
     if (!UserState.ttsOnlyTurns) {
-      String direction = tools.angleToClocks(angle, context);
+      String direction = tools.angleToClocks2(angle, context);
       if (direction == "Ahead") {
         speak("${element.name} door ahead", lngCode);
       } else {
         speak(
-            "${element.name} door is on your ${LocaleData.getProperty5(direction, context)}",
+            "${element.name} door is ${LocaleData.getProperty5(direction, context)}",
             lngCode
         );
       }
@@ -607,7 +607,7 @@ class UserState {
     if (!UserState.ttsOnlyTurns) {
       speak(
           convertTolng(
-              "${element.name} is on your ${LocaleData.getProperty5(tools.angleToClocks(angle, context), context)}",
+              "${element.name} is ${LocaleData.getProperty5(tools.angleToClocks2(angle, context), context)}",
               element.name!,
               0.0,
               context,
@@ -896,22 +896,23 @@ class UserState {
   }
 
 
-  Future<void> moveToNearestTurn(int index) async {
+  Future<int> moveToNearestTurn(int index) async {
+    double d = Appconstants.moveToNearestTurn;
     List<Cell> turnPoints = tools.getCellTurnpoints(cellPath);
+    print("moveToNearestTurn calculated ${turnPoints.length} turns");
+    for (var turn in turnPoints) {
+      double distance = tools.calculateDistance(
+        [cellPath[pathobj.index].x, cellPath[pathobj.index].y],
+        [turn.x, turn.y],
+      );
 
-    for (int i = index; i < cellPath.length; i++) {
-      if (turnPoints.contains(cellPath[i])) {
-        double distance = tools.calculateDistance(
-          [cellPath[pathobj.index].x, cellPath[pathobj.index].y],
-          [cellPath[i].x, cellPath[i].y],
-        );
-
-        if (distance <= Appconstants.moveToNearestTurn) {
-          pathobj.index = i;
-        }
-        return;
+      if (distance <= d) {
+        d = distance;
+        pathobj.index = cellPath.indexWhere((cell)=>cell.x == turn.x && cell.y == turn.y && cell.floor == turn.floor && cell.bid == turn.bid);
+        print("distance calculated to ${turn.x},${turn.y} is $distance index ${pathobj.index}");
       }
     }
+    return pathobj.index;
   }
 
   Future<int?> findTurnPointAround() async {
@@ -958,7 +959,7 @@ class UserState {
       announceLiftUsage(context);
     }else{
       i = await moveToNearestPoint();
-      await moveToNearestTurn(i);
+      i = await moveToNearestTurn(i);
     }
     floor = pathobj.sourceFloor;
     bid = cellPath[pathobj.index].bid??bid;

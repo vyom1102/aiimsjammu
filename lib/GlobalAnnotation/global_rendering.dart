@@ -7,7 +7,7 @@ import '../navigationTools.dart';
 import '../singletonClass.dart';
 
 
-Future<Set<geo.Polygon>?> globalRendering(GlobalModel data, Function polygonTap) async {
+Future<Set<geo.Polygon>?> globalRendering(GlobalModel data, Function? polygonTap) async {
 
   Set<geo.Polygon> polygons = Set();
 
@@ -51,8 +51,11 @@ Future<Set<geo.Polygon>?> globalRendering(GlobalModel data, Function polygonTap)
                           : Colors.black,
                       consumeTapEvents: true,
                     onTap: (){
-                      polygonTap(coordinates, element.id);
-                    }
+                        if(polygonTap != null){
+                          polygonTap(coordinates, element.id);
+                        }
+                    },
+                    zIndex: 0
                   ));
                 }
             }

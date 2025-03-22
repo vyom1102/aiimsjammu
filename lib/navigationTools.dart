@@ -2047,6 +2047,7 @@ class tools {
         bids.add(node.bid!);
       }
     }
+    print("findIntermediateBuildings ${bids.toList()}");
     return bids.toList();
   }
 
