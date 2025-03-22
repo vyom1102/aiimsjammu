@@ -166,6 +166,43 @@ class _SettingScreenState extends State<SettingScreen> {
   //
   //   )
   // ];
+  void _showTooltip(BuildContext context, String message, GlobalKey key) {
+    final RenderBox renderBox =
+    key.currentContext!.findRenderObject() as RenderBox;
+    final Offset position = renderBox.localToGlobal(Offset.zero);
+
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: position.dy - 35, // Position tooltip just above the icon
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.black87,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              message,
+              style: TextStyle(color: Colors.white, fontSize: 14),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+
+    Future.delayed(Duration(seconds: 2), () {
+      overlayEntry.remove();
+    });
+  }
+
+  final GlobalKey _infoIconKey = GlobalKey();
+  final GlobalKey _infoIconKey1 = GlobalKey();
+  final GlobalKey _infoIconKey2 = GlobalKey();
+  final GlobalKey _infoIconKey3 = GlobalKey();
   Future<bool> willPopScope() async {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
@@ -416,23 +453,12 @@ class _SettingScreenState extends State<SettingScreen> {
                               ),
                             ),
                             SizedBox(width: 5,),
-                            Text("(${currentVersion!})",style: TextStyle(
+                            Text("(Version:${currentVersion!})",style: TextStyle(
                               color: Colors.grey,
                             ),),
                           ],
                         ),
-                      // Text(
-                      //   // 'Update Available',
-                      //   LocaleData.updateAvailable.getString(context),
-                      //
-                      //   style: TextStyle(
-                      //     color: Color(0xFF0B6B94),
-                      //     fontSize: 14,
-                      //     fontFamily: 'Roboto',
-                      //     fontWeight: FontWeight.w400,
-                      //     height: 0.10,
-                      //   ),
-                      // )
+
                     ],
                   ),
                 ),
@@ -730,11 +756,16 @@ class _SettingScreenState extends State<SettingScreen> {
                         ),
                       ),
                       Spacer(),
-                      Container(
-                        width: 13,
-                        height: 13,
-                        // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                        child: SvgPicture.asset('assets/images/info.svg'),
+                      GestureDetector(
+                        key: _infoIconKey,
+                        onTap: () => _showTooltip(
+                            context, "Select your height to improve navigation",_infoIconKey),
+                        child: Container(
+                          width: 13,
+                          height: 13,
+                          // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                          child: SvgPicture.asset('assets/images/info.svg'),
+                        ),
                       ),
                     ],
                   ),
@@ -817,7 +848,7 @@ class _SettingScreenState extends State<SettingScreen> {
                     children: [
                       Text(
                         // 'Navigation Mode',
-                        LocaleData.navigationMode.getString(context),
+                        LocaleData.orientationSetting.getString(context),
 
                         style: TextStyle(
                           color: Color(0xFF18181B),
@@ -828,11 +859,17 @@ class _SettingScreenState extends State<SettingScreen> {
                         ),
                       ),
                       Spacer(),
-                      Container(
-                        width: 13,
-                        height: 13,
-                        // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                        child: SvgPicture.asset('assets/images/info.svg'),
+                      GestureDetector(
+                        key: _infoIconKey1,
+                        onTap: () => _showTooltip(
+                            context, "Adjust your orientation preference for accurate guidance", _infoIconKey1),
+
+                        child: Container(
+                          width: 13,
+                          height: 13,
+                          // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                          child: SvgPicture.asset('assets/images/info.svg'),
+                        ),
                       ),
                     ],
                   ),
@@ -959,7 +996,7 @@ class _SettingScreenState extends State<SettingScreen> {
                     children: [
                       Text(
                         // 'Orientation Setting',
-                        LocaleData.orientationSetting.getString(context),
+                        LocaleData.navigationMode.getString(context),
 
                         style: TextStyle(
                           color: Color(0xFF18181B),
@@ -970,11 +1007,16 @@ class _SettingScreenState extends State<SettingScreen> {
                         ),
                       ),
                       Spacer(),
-                      Container(
-                        width: 13,
-                        height: 13,
-                        // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                        child: SvgPicture.asset('assets/images/info.svg'),
+                      GestureDetector(
+                        key: _infoIconKey2,
+                        onTap: () => _showTooltip(
+                            context, "Select your preferred navigation mode for a better experience", _infoIconKey2),
+                        child: Container(
+                          width: 13,
+                          height: 13,
+                          // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                          child: SvgPicture.asset('assets/images/info.svg'),
+                        ),
                       ),
                     ],
                   ),
@@ -1111,11 +1153,16 @@ class _SettingScreenState extends State<SettingScreen> {
                         ),
                       ),
                       Spacer(),
-                      Container(
-                        width: 13,
-                        height: 13,
-                        // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
-                        child: SvgPicture.asset('assets/images/info.svg'),
+                      GestureDetector(
+                        key: _infoIconKey3,
+                        onTap: () => _showTooltip(
+                            context, "Show distance in meters or steps.", _infoIconKey3),
+                        child: Container(
+                          width: 13,
+                          height: 13,
+                          // decoration: BoxDecoration(color: Color(0xFFD9D9D9)),
+                          child: SvgPicture.asset('assets/images/info.svg'),
+                        ),
                       ),
                     ],
                   ),
