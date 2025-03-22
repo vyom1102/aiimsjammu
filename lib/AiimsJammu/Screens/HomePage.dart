@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/BuildingLandmarks.dart';
+import 'package:iwaymaps/AiimsJammu/Screens/DirectoryScreen.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/GlobalSearch.dart';
 import 'package:iwaymaps/LOGIN%20SIGNUP/SignIn.dart';
 import 'package:lottie/lottie.dart';
@@ -26,11 +27,13 @@ import 'package:iwaymaps/API/DataVersionApi.dart';
 import 'package:iwaymaps/API/buildingAllApi.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/NoInternetConnection.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/OpeningClosingStatus.dart';
+import '../../API/GlobalAnnotationapi.dart';
 import '../../API/PatchApi.dart';
 import '../../API/PolyLineApi.dart';
 import '../../API/RefreshTokenAPI.dart';
 import '../../API/UsergetAPI.dart';
 import '../../API/ladmarkApi.dart';
+import '../../API/outBuilding.dart';
 import '../../API/waypoint.dart';
 import '../../APIMODELS/DataVersion.dart';
 import '../../APIMODELS/landmark.dart';
@@ -87,6 +90,7 @@ class _HomePageState extends State<HomePage> {
   List<dynamic> carouselImages = [];
   // List<AnnouncementAData> AnnounceData = [];
   List<dynamic> announcements = [];
+  List<dynamic> directory=[];
   Map<String, dynamic> allLandmarkData = {};
   List<String> globalBuildingIds = [];
   List<String> AiimsJammuBuildingIds = ["67986e4114ef508e9429a5ad", "66794105b80a6778c53c4856", "6798c6df96af63c3e82659ec", "6798c81c96af63c3e826add3", "6798c8fa96af63c3e8277db2", "6798c99e96af63c3e828203d", "6798ca0396af63c3e828c472", "6798ce3596af63c3e8294dbc", "679ca3fde7e7001d98497002"];
@@ -115,6 +119,7 @@ class _HomePageState extends State<HomePage> {
   int serviceVersion = 0;
   int corousalVersion = 0;
   int announcementVersion = 0;
+  int directoryVersion = 0;
   int _currentPage = 0;
   late int index;
   late ScrollController _scrollController;
@@ -607,12 +612,17 @@ class _HomePageState extends State<HomePage> {
     // Fetch data for all building IDs in parallel
     await Future.wait(buildingAllApi.allBuildingID.keys.map(fetchDataForBuilding));
 
+    try {
+      var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(buildingAllApi.outdoorID);
+      Building.GlobalAnnotation = globalData;
+    }catch(_){}
+
     // Fetch outdoor data
     await fetchDataForBuilding(buildingAllApi.outdoorID);
 
     // Update state and return polylines
     setState(() {
-      mapPreview = MapPreview(polylines, landmarks, patches);
+      mapPreview = MapPreview(polylines, landmarks, patches, Building.GlobalAnnotation);
     });
 
     return polylines;
@@ -689,6 +699,7 @@ class _HomePageState extends State<HomePage> {
           int newServiceVersion = responseData['versionData']['serviceDataVersion'] ?? 0;
           int newCorousalVersion = responseData['versionData']['corousalDataVersion'] ?? 0;
           int newAnnouncementVersion = responseData['versionData']['announcementDataVersion'] ?? 0;
+          int newDirectoryVersion = responseData['versionData']['directoryDataVersion']??0;
 
           // Update the state with the new version values
           setState(() {
@@ -696,6 +707,7 @@ class _HomePageState extends State<HomePage> {
             serviceVersion = newServiceVersion;
             corousalVersion = newCorousalVersion;
             announcementVersion = newAnnouncementVersion;
+            directoryVersion = newDirectoryVersion;
           });
 
           if (dashboarddataversion.get('doctorVersion') != doctorVersion) {
@@ -739,6 +751,14 @@ class _HomePageState extends State<HomePage> {
           } else {
             print("No updates for announcement data");
           }
+          if (dashboarddataversion.get('directoryVersion') != directoryVersion) {
+            print("Updating directory data...");
+            await fetchDirectories();
+            print("directory data updated");
+            dashboarddataversion.put('directoryVersion', directoryVersion);
+          } else {
+          print("No updates for announcement data");
+        }
         }
       } else if (response.statusCode == 403) {
         String newAccessToken = await RefreshTokenAPI.refresh();
@@ -748,6 +768,37 @@ class _HomePageState extends State<HomePage> {
       }
     } catch (e) {
       print("Error during version API call: $e");
+    }
+  }
+  Future<void> fetchDirectories() async {
+    try {
+      final response = await http.get(
+        Uri.parse('${AppConfig.baseUrl}/secured/hospital/all-directory/6673e7a3b92e69bc7f4b40ae'),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': '$accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = json.decode(response.body);
+
+        if (responseData['status'] == true) {
+          List<dynamic> data = responseData['data'];
+         directory = data;
+          DashboardListBox.put('directories', json.encode(data));
+        }
+      } else if (response.statusCode == 403) {
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        fetchDirectories();
+      } else {
+
+        print('Failed to load directories: ${response.statusCode}');
+      }
+    } catch (e) {
+
+      print('Error fetching directories: $e');
     }
   }
 
@@ -946,6 +997,14 @@ class _HomePageState extends State<HomePage> {
     }else{
       _loadAnnouncementsFromAPI();
       print('_loadAnnouncementsFromAPI API CALL');
+
+    }
+    if(DashboardListBox.containsKey('directories')){
+      print(DashboardListBox.get('directories'));
+      print('directories FROM DATABASE');
+    }else{
+      fetchDirectories();
+      print('directories API CALL');
 
     }
     if(DashboardListBox.containsKey('_doctors')){
@@ -1602,6 +1661,17 @@ class _HomePageState extends State<HomePage> {
                                 },
                                 child: _buildCard(
                                     'assets/images/Doctor.svg', 'Doctor')),
+                            GestureDetector(
+                                onTap: () {
+                                  InteractionManager().logInteraction('Directrory Category');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => HospitalDirectory()),
+                                  );
+                                },
+                                child: _buildCard(
+                                    'assets/images/Directory.svg', 'Directory')),
                             if(_pharmacyfilteredServices.isNotEmpty)
                             SizedBox(width: 12),
 
@@ -1698,129 +1768,129 @@ class _HomePageState extends State<HomePage> {
                       SizedBox(
                         height: 10,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16.0, bottom: 12),
-                        child: Row(
-                          children: [
-                            Semantics(
-                              header: true,
-                              child: TranslatorWidget(
-                                "Hospital Navigation",
-                                style: TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xff18181b),
-                                  height: 23 / 16,
-                                ),
-                                textAlign: TextAlign.left,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Semantics(
-                        onTap: (){
-                          InteractionManager().logInteraction('Map');
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Navigation(),
-                            ),
-                          );
-                        },
-                        header: true,
-                        label: "Map",
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: GestureDetector(
-                            onPanStart: (details) {
-                              showDialog(
-                                context: context,
-                                barrierColor: Colors.black.withOpacity(0.5),
-                                builder: (BuildContext context) {
-                                  return GestureDetector(
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: Stack(
-                                      children: [
-                                        BackdropFilter(
-                                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                                          child: Container(
-                                            color: Colors.black.withOpacity(0),
-                                          ),
-                                        ),
-                                        Center(
-                                          child: GestureDetector(
-                                            onTap: () {
-
-                                            },
-                                            child: Dialog(
-                                              insetPadding: EdgeInsets.zero,
-                                              backgroundColor: Colors.transparent,
-                                              child: Container(
-                                                width: MediaQuery.sizeOf(context).width * 0.7,
-                                                height: MediaQuery.sizeOf(context).height * 0.45,
-                                                child: mapPreview ?? defaultMap(),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                            onLongPress: () {
-                              showDialog(
-                                context: context,
-                                barrierColor: Colors.black.withOpacity(0.5),
-                                builder: (BuildContext context) {
-                                  return GestureDetector(
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: Stack(
-                                      children: [
-                                        BackdropFilter(
-                                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                                          child: Container(
-                                            color: Colors.black.withOpacity(0),
-                                          ),
-                                        ),
-                                        Center(
-                                          child: GestureDetector(
-                                            onTap: () {
-                                            },
-                                            child: Dialog(
-                                              insetPadding: EdgeInsets.zero,
-                                              backgroundColor: Colors.transparent,
-                                              child: Container(
-                                                width: MediaQuery.sizeOf(context).width * 0.7,
-                                                height: MediaQuery.sizeOf(context).height * 0.5,
-                                                child: mapPreview ?? defaultMap(),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              height: 160,
-                              child: mapPreview ?? defaultMap(),
-                            ),
-                          ),
-                        ),
-                      ),
+                      // Padding(
+                      //   padding: const EdgeInsets.only(left: 16.0, bottom: 12),
+                      //   child: Row(
+                      //     children: [
+                      //       Semantics(
+                      //         header: true,
+                      //         child: TranslatorWidget(
+                      //           "Hospital Navigation",
+                      //           style: TextStyle(
+                      //             fontFamily: "Roboto",
+                      //             fontSize: 16,
+                      //             fontWeight: FontWeight.w500,
+                      //             color: Color(0xff18181b),
+                      //             height: 23 / 16,
+                      //           ),
+                      //           textAlign: TextAlign.left,
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
+                      // Semantics(
+                      //   onTap: (){
+                      //     InteractionManager().logInteraction('Map');
+                      //     Navigator.push(
+                      //       context,
+                      //       MaterialPageRoute(
+                      //         builder: (context) => Navigation(),
+                      //       ),
+                      //     );
+                      //   },
+                      //   header: true,
+                      //   label: "Map",
+                      //   child: Padding(
+                      //     padding: const EdgeInsets.all(16.0),
+                      //     child: GestureDetector(
+                      //       onPanStart: (details) {
+                      //         showDialog(
+                      //           context: context,
+                      //           barrierColor: Colors.black.withOpacity(0.5),
+                      //           builder: (BuildContext context) {
+                      //             return GestureDetector(
+                      //               onTap: () {
+                      //                 Navigator.pop(context);
+                      //               },
+                      //               child: Stack(
+                      //                 children: [
+                      //                   BackdropFilter(
+                      //                     filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                      //                     child: Container(
+                      //                       color: Colors.black.withOpacity(0),
+                      //                     ),
+                      //                   ),
+                      //                   Center(
+                      //                     child: GestureDetector(
+                      //                       onTap: () {
+                      //
+                      //                       },
+                      //                       child: Dialog(
+                      //                         insetPadding: EdgeInsets.zero,
+                      //                         backgroundColor: Colors.transparent,
+                      //                         child: Container(
+                      //                           width: MediaQuery.sizeOf(context).width * 0.7,
+                      //                           height: MediaQuery.sizeOf(context).height * 0.45,
+                      //                           child: mapPreview ?? defaultMap(),
+                      //                         ),
+                      //                       ),
+                      //                     ),
+                      //                   ),
+                      //                 ],
+                      //               ),
+                      //             );
+                      //           },
+                      //         );
+                      //       },
+                      //       onLongPress: () {
+                      //         showDialog(
+                      //           context: context,
+                      //           barrierColor: Colors.black.withOpacity(0.5),
+                      //           builder: (BuildContext context) {
+                      //             return GestureDetector(
+                      //               onTap: () {
+                      //                 Navigator.pop(context);
+                      //               },
+                      //               child: Stack(
+                      //                 children: [
+                      //                   BackdropFilter(
+                      //                     filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                      //                     child: Container(
+                      //                       color: Colors.black.withOpacity(0),
+                      //                     ),
+                      //                   ),
+                      //                   Center(
+                      //                     child: GestureDetector(
+                      //                       onTap: () {
+                      //                       },
+                      //                       child: Dialog(
+                      //                         insetPadding: EdgeInsets.zero,
+                      //                         backgroundColor: Colors.transparent,
+                      //                         child: Container(
+                      //                           width: MediaQuery.sizeOf(context).width * 0.7,
+                      //                           height: MediaQuery.sizeOf(context).height * 0.5,
+                      //                           child: mapPreview ?? defaultMap(),
+                      //                         ),
+                      //                       ),
+                      //                     ),
+                      //                   ),
+                      //                 ],
+                      //               ),
+                      //             );
+                      //           },
+                      //         );
+                      //       },
+                      //       child: Container(
+                      //         decoration: BoxDecoration(
+                      //           borderRadius: BorderRadius.circular(12),
+                      //         ),
+                      //         height: 160,
+                      //         child: mapPreview ?? defaultMap(),
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
 
                       Padding(
                         padding: const EdgeInsets.symmetric(
@@ -2170,44 +2240,47 @@ class _HomePageState extends State<HomePage> {
       {'icon': Icons.wc, 'bg': Colors.blue[50], 'title': 'Restroom','type':'washroom','image':'assets/images/Washroom.svg'},
     ];
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: amenities.map((amenity) {
-        return GestureDetector(
-          onTap:(){
-            print("amenity['type']");
-            print("${amenity['type']}");
-            filterLandmarks(amenity['type'],0);
-          },
-          child: Column(
-            children: [
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: amenity['bg'],
-                  shape: BoxShape.circle,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal:16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: amenities.map((amenity) {
+          return GestureDetector(
+            onTap:(){
+              print("amenity['type']");
+              print("${amenity['type']}");
+              filterLandmarks(amenity['type'],0);
+            },
+            child: Column(
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: amenity['bg'],
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: SvgPicture.asset(amenity['image']),
+                    // Icon(
+                    //   amenity['icon'],
+                    //   color: Color(0xff003666),
+                    //   size: 30,
+                    // ),
+                  ),
                 ),
-                child: Center(
-                  child: SvgPicture.asset(amenity['image']),
-                  // Icon(
-                  //   amenity['icon'],
-                  //   color: Color(0xff003666),
-                  //   size: 30,
-                  // ),
+                const SizedBox(height: 8),
+                TranslatorWidget(
+                  amenity['title'],
+                  style: TextStyle(
+                    fontSize: 14,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              TranslatorWidget(
-                amenity['title'],
-                style: TextStyle(
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
   Widget _buildMainServices() {

@@ -12,8 +12,7 @@ class defaultMap extends StatefulWidget {
 
 class _defaultMapState extends State<defaultMap> {
   final LatLng _center =
-  const LatLng(32.5637551,
-      75.0341691);
+  const LatLng(32.5637551, 75.0341691);
 
   late GoogleMapController mapController;
 

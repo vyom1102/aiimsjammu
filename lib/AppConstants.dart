@@ -11,7 +11,7 @@ class Appconstants{
   static const int passingByElementDistance = 6; // in feet
   static const int mergingPositionsInOutdoor = 15; // in feet
   static const int mergingPositionsInIndoor = 6; // in feet
-  static const int moveToNearestTurn = 10; // in feet
+  static const double moveToNearestTurn = 10; // in feet
   static const double radiusForNearestTurnPoint = 11; // in feet
   static const int distanceForSwitchingToNextBuilding = 5; // in feet
 

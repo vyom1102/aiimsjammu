@@ -10,7 +10,6 @@ class GpsService {
 
 
   Future<void> startTracking() async {
-    print("startTracking");
     _gpsSubscription = GPSService.locationStream.listen((Location location) {
       print("New Lat ${location.latitude} ${location.longitude}");
       if(location.latitude != uniqueLat && location.longitude != uniqueLng){

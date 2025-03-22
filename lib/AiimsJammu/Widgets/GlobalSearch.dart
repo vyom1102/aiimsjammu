@@ -18,7 +18,6 @@ import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-// import 'package:iwayplusashoka/ashoka/Screens/CourseDetailScreen.dart';
 import '../../API/RefreshTokenAPI.dart';
 import '../../APIMODELS/landmark.dart';
 import '../../Elements/SearchpageCategoryResult.dart';

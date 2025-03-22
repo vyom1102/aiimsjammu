@@ -25,7 +25,7 @@ class GlobalAnnotation {
         'x-access-token': newaccesstoken??accessToken
       },
     );
-    print("globalannotation data ${response.body}");
+    print("globalannotation data ${response.body} id");
     print("globalannotation data ${response.statusCode}");
     if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);

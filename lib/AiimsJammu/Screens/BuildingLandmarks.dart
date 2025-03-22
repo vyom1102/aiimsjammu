@@ -22,14 +22,24 @@ class Buildinglandmarks extends StatefulWidget {
 }
 
 class _BuildinglandmarksState extends State<Buildinglandmarks> {
-  String selectedDepartment = 'All Departments';
-  List<String> departments = ['All Departments'];
+  String selectedFilter = 'All';
+  List<String> filterOptions = ['All'];
   List<dynamic> roomLandmarks = [];
   List<dynamic> filteredLandmarks = [];
   bool isSearching = false;
   String searchQuery = '';
   TextEditingController searchController = TextEditingController();
-  List<String>uniqueBuildingIds=[];
+  List<String> uniqueBuildingIds = [];
+
+  final Map<String, String> buildingNames = {
+    "66794105b80a6778c53c4856": "OPD BLOCK",
+    "6798c8fa96af63c3e8277db2": "DIAGNOSTIC BLOCK",
+    "6798c81c96af63c3e826add3": "PRIVATE WARD 1",
+    '6798c99e96af63c3e828203d': 'PRIVATE WARD 2',
+    "6798c6df96af63c3e82659ec": "EMERGENCY BLOCK",
+    "679ca3fde7e7001d98497002": "AYUSH BLOCK"
+  };
+
   @override
   void initState() {
     super.initState();
@@ -44,50 +54,89 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
       landmark['properties'] != null &&
           landmark['element']['type'] == 'Rooms')
           .toList();
+
+      // Get unique building IDs from landmarks
       for (var landmark in roomLandmarks) {
         if (landmark['building_ID'] != null) {
           uniqueBuildingIds.add(landmark['building_ID'].toString());
         }
       }
 
-      // Print unique building_IDs
-      print("Unique Building IDs: ${uniqueBuildingIds.toList().toSet()}");
-      // Get unique department names
-      Set<String> uniqueDepartments = {'All Departments'};
+      // Initialize filter options with "All"
+      Set<String> uniqueFilters = {'All'};
+
+      // Add department filters
       for (var landmark in roomLandmarks) {
         if (landmark['properties'] != null &&
             landmark['properties']['assignedTo'] != null &&
             landmark['properties']['assignedTo'].toString().isNotEmpty) {
-          uniqueDepartments.add(landmark['properties']['assignedTo'].toString());
+          if (landmark['properties']['assignedTo'] != "null")
+            uniqueFilters.add("Dept: ${landmark['properties']['assignedTo']}");
         }
       }
-      departments = uniqueDepartments.toList();
+
+      // Add building name filters if multiple buildings present
+      if (uniqueBuildingIds.length > 1) {
+        for (var buildingId in uniqueBuildingIds.toSet()) {
+          if (buildingNames.containsKey(buildingId)) {
+            uniqueFilters.add("Building: ${buildingNames[buildingId]!}");
+          }
+        }
+      }
+
+      // Convert to list and sort (keeping "All" at the top)
+      filterOptions = uniqueFilters.toList();
+      filterOptions.sort((a, b) {
+        if (a == 'All') return -1;
+        if (b == 'All') return 1;
+
+        // Sort by type (Building first, then Department)
+        bool aIsBuilding = a.startsWith('Building:');
+        bool bIsBuilding = b.startsWith('Building:');
+
+        if (aIsBuilding && !bIsBuilding) return -1;
+        if (!aIsBuilding && bIsBuilding) return 1;
+
+        return a.compareTo(b);
+      });
 
       // Initialize filtered landmarks
       filteredLandmarks = List.from(roomLandmarks);
     }
   }
 
-  final Map<String, String> buildingNames = {
-    "66794105b80a6778c53c4856": "OPD BLOCK",
-    "6798c8fa96af63c3e8277db2": "DIAGNOSTIC BLOCK",
-    "6798c81c96af63c3e826add3": "PRIVATE WARD 1",
-    '6798c99e96af63c3e828203d': 'PRIVATE WARD 2',
-    "6798c6df96af63c3e82659ec": "EMERGENCY BLOCK",
-    "679ca3fde7e7001d98497002":"AYUSH BLOCK"
-  };
-
   void filterLandmarks() {
     setState(() {
-      if (selectedDepartment == 'All Departments') {
+      if (selectedFilter == 'All') {
         filteredLandmarks = roomLandmarks;
-      } else {
+      } else if (selectedFilter.startsWith('Dept:')) {
+        // Filter by department
+        String department = selectedFilter.substring(6); // Remove 'Dept: ' prefix
         filteredLandmarks = roomLandmarks
             .where((landmark) =>
         landmark['properties'] != null &&
             landmark['properties']['assignedTo'] != null &&
-            landmark['properties']['assignedTo'].toString() == selectedDepartment)
+            landmark['properties']['assignedTo'].toString() == department)
             .toList();
+      } else if (selectedFilter.startsWith('Building:')) {
+        // Filter by building
+        String buildingName = selectedFilter.substring(10); // Remove 'Building: ' prefix
+
+        // Get building ID from name
+        String? selectedBuildingId;
+        buildingNames.forEach((key, value) {
+          if (value == buildingName) {
+            selectedBuildingId = key;
+          }
+        });
+
+        if (selectedBuildingId != null) {
+          filteredLandmarks = roomLandmarks
+              .where((landmark) =>
+          landmark['building_ID'] != null &&
+              landmark['building_ID'].toString() == selectedBuildingId)
+              .toList();
+        }
       }
 
       // Apply search filter if search query exists
@@ -194,6 +243,7 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: Column(
           children: [
+            // Combined filter dropdown
             Container(
               margin: const EdgeInsets.only(top: 8.0, bottom: 16.0),
               decoration: BoxDecoration(
@@ -207,28 +257,47 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
                   borderRadius: BorderRadius.circular(24),
                   icon: const Icon(Icons.arrow_drop_down),
                   isExpanded: true,
-                  value: selectedDepartment,
+                  value: selectedFilter,
                   onChanged: (String? newValue) {
                     if (newValue != null) {
                       setState(() {
-                        selectedDepartment = newValue;
+                        selectedFilter = newValue;
                         filterLandmarks();
                       });
                     }
                   },
-                  items: departments
+                  items: filterOptions
                       .map<DropdownMenuItem<String>>((String value) {
+                    // Add appropriate icons based on filter type
+                    Widget leading;
+                    if (value.startsWith('Building:')) {
+                      leading = Icon(Icons.apartment, size: 16, color: Colors.blue[900]);
+                    } else if (value.startsWith('Dept:')) {
+                      leading = Icon(Icons.medical_services, size: 16, color: Colors.blue[900]);
+                    } else {
+                      leading = Icon(Icons.filter_list, size: 16, color: Colors.blue[900]);
+                    }
+
                     return DropdownMenuItem<String>(
                       value: value,
-                      child: TranslatorWidget(value),
+                      child: Row(
+                        children: [
+                          leading,
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TranslatorWidget(value),
+                          ),
+                        ],
+                      ),
                     );
                   }).toList(),
                 ),
               ),
             ),
+
             Expanded(
               child: filteredLandmarks.isEmpty
-                  ?  Center(
+                  ? Center(
                 child: TranslatorWidget(
                   'No landmarks found',
                   style: TextStyle(fontSize: 16),
@@ -302,7 +371,7 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                               Icon(Icons.location_on, size: 16, color: Colors.blue[900]),
+                              Icon(Icons.location_on, size: 16, color: Colors.blue[900]),
                               const SizedBox(width: 5),
                               Expanded(
                                 child: TranslatorWidget(
@@ -312,9 +381,8 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
                               ),
                             ],
                           ),
-
                           const SizedBox(height: 8),
-                           TranslatorWidget(
+                          TranslatorWidget(
                             'Open Now',
                             style: TextStyle(
                               color: Colors.green,
