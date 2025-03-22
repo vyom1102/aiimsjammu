@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:chips_choice/chips_choice.dart';
 import 'package:easter_egg_trigger/easter_egg_trigger.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -80,6 +81,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
   void initState()  {
     super.initState();
+    print("called destinationsearch page");
     fetchandBuild();
     _controller.addListener(_onSearchChanged);
     // //optionListItemBuildingNameNew.clear();
@@ -324,6 +326,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   }
 
   void fetchandBuild() async {
+    print("fetchandBuild");
     await fetchlist();
     setState(() {
       if (_controller.text.isNotEmpty) {
@@ -339,10 +342,12 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   }
 
   Future<void> fetchlist() async {
+    print("fetchlist");
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
       await landmarkApi().fetchLandmarkData(id: key).then((value) {
         landmarkData.mergeLandmarks(value.landmarks);
         optionListItemBuildingNameNew.add(value.landmarks!.first.buildingName!);
+        _iconsBuilding.add(Icons.home_work_outlined);
         print("optionListItemBuildingNameNew${optionListItemBuildingNameNew}");
       });
     });
@@ -404,7 +409,9 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     Icons.elevator,
     Icons.desk_sharp,
   ];
+  List<IconData> _iconsBuilding = [
 
+  ];
 
 
   void onChipSelected(int index) {
@@ -773,6 +780,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                         height: 48,
                         child: IconButton(
                           onPressed: () {
+                            SystemChannels.textInput.invokeMethod('TextInput.hide');
                             Navigator.pop(context);
                           },
                           icon: Semantics(
@@ -783,46 +791,42 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                         ),
                       ),
                       Expanded(
-                        child: FocusScope(
-                          autofocus: true,
-                          child: Focus(
-                            child: Container(
-                                child: TextField(
-                                  autofocus: true,
-                                  controller: _controller,
-                                  decoration: InputDecoration(
-                                    hintText: "${searchHintString}",
-                                    border: InputBorder.none, // Remove default border
-                                  ),
-                                  style: const TextStyle(
-                                    fontFamily: "Roboto",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xff18181b),
-                                    height: 25 / 16,
-                                  ),
-                                  onTap: () {
-                                    if (containerBoxColor == Color(0xffA1A1AA)) {
-                                      containerBoxColor = Color(0xff24B9B0);
-                                    } else {
-                                      containerBoxColor = Color(0xffA1A1AA);
-                                    }
-                                  },
-                                  onSubmitted: (value) {
-
-                                    search(value);
-                                  },
-                                  onChanged: (value) {
-                                    search(value);
-                                    if(_controller.text.isEmpty){
-                                      topSearches.clear();
-                                      topSearchesFunc();
-                                    }
-                                    // print("Final Set");
-                                    // print(cardSet);
-                                  },
-                                )),
-                          ),
+                        child: Container(
+                            child: TextField(
+                              controller: _controller,
+                              decoration: InputDecoration(
+                                hintText: "${searchHintString}",
+                                border: InputBorder.none, // Remove default border
+                              ),
+                              style: const TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xff18181b),
+                                height: 25 / 16,
+                              ),
+                              onTap: () {
+                                FocusScope.of(context).requestFocus(FocusNode());
+                                SystemChannels.textInput.invokeMethod('TextInput.show');
+                                if (containerBoxColor == Color(0xffA1A1AA)) {
+                                  containerBoxColor = Color(0xff24B9B0);
+                                } else {
+                                  containerBoxColor = Color(0xffA1A1AA);
+                                }
+                              },
+                              onSubmitted: (value) {
+                                search(value);
+                              },
+                              onChanged: (value) {
+                                search(value);
+                                if(_controller.text.isEmpty){
+                                  topSearches.clear();
+                                  topSearchesFunc();
+                                }
+                                print("Final Set");
+                                // print(cardSet);
+                              },
+                            )
                         ),
                       ),
                       Container(
@@ -873,33 +877,33 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     ],
                   )),
             ),
-            (searchHintString.toLowerCase().contains("source") && widget.userLocalized != "")?
-            InkWell(
-              onTap: (){
-                Navigator.pop(context, widget.userLocalized);
-              },
-              child: Container(
-                margin: EdgeInsets.only(top:24,left: 17,right: 17,bottom: 8),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        SizedBox(width: 16,),
-                        Image.asset("assets/rw.png"),
-                        SizedBox(width: 24,),
-                        Text(style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xff000000),
-                        ),"Your Current Location")
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ):Container(),
+            // (searchHintString.toLowerCase().contains("source") && widget.userLocalized != "")?
+            // InkWell(
+            //   onTap: (){
+            //     Navigator.pop(context, widget.userLocalized);
+            //   },
+            //   child: Container(
+            //     margin: EdgeInsets.only(top:24,left: 17,right: 17,bottom: 8),
+            //     child: Column(
+            //       children: [
+            //         Row(
+            //           mainAxisAlignment: MainAxisAlignment.start,
+            //           children: [
+            //             SizedBox(width: 16,),
+            //             Image.asset("assets/rw.png"),
+            //             SizedBox(width: 24,),
+            //             Text(style: const TextStyle(
+            //               fontFamily: "Roboto",
+            //               fontSize: 16,
+            //               fontWeight: FontWeight.w400,
+            //               color: Color(0xff000000),
+            //             ),"Your Current Location")
+            //           ],
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ):Container(),
             searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
 
             InkWell(
@@ -990,62 +994,62 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                 ),
               ),
             ),
-            !category && _controller.text.isNotEmpty ? Semantics(
-              header: true,
-              label: "Building Filter section",
-              child: Container(
-                margin: EdgeInsets.only(left: 7,top: 4),
-                width: screenWidth,
-                child: ChipsChoice<int>.single(
-                  value: newvall,
-                  onChanged: (val) {
-
-                    // if(HelperClass.SemanticEnabled) {
-                    //   speak("${optionListItemBuildingName.toList()[val]} selected");
-                    // }
-                    //
-                    // selectedButton = optionListItemBuildingName.toList()[val];
-                    setState(() => newvall = val);
-                    //
-                    //
-                    // //_controller.text = optionListItemBuildingName.toList()[val];
-                    // search(optionListItemBuildingName.toList()[val]);
-                  },
-                  choiceItems: C2Choice.listFrom<int, String>(
-                    source: optionListItemBuildingNameNew.toList(),
-                    value: (i, v) => i,
-                    label: (i, v) => v,
-                  ),
-                  choiceBuilder: (item, i) {
-                    if(!item.selected){
-                      newvall = -1;
-                    }
-                    return DestinationPageChipsWidget(
-                      svgPath: '',
-                      text: optionListItemBuildingNameNew.toList()[i],
-                      onSelect: item.select!,
-                      selected: item.selected,
-
-                      onTap: (String Text) {
-                        print("tapped$Text");
-
-                        if (Text.isNotEmpty) {
-                          search(_controller.text,wantToFilter: Text);
-                        }
-                        // else {
-                        //   search(Text,wantToFilter: optionListItemBuildingName.toList()[i]);
-                        //   _controller.text="";
-                        //   searchResults = [];
-                        //   searcCategoryhResults = [];
-                        //   newvall = -1;
-                        // }
-                      }, icon: _icons[i]
-                    );
-                  },
-                  direction: Axis.horizontal,
-                ),
-              ),
-            ) : Container(),
+            // !category && _controller.text.isNotEmpty ? Semantics(
+            //   header: true,
+            //   label: "Building Filter section",
+            //   child: Container(
+            //     margin: EdgeInsets.only(left: 7,top: 4),
+            //     width: screenWidth,
+            //     child: ChipsChoice<int>.single(
+            //       value: newvall,
+            //       onChanged: (val) {
+            //
+            //         // if(HelperClass.SemanticEnabled) {
+            //         //   speak("${optionListItemBuildingName.toList()[val]} selected");
+            //         // }
+            //         //
+            //         // selectedButton = optionListItemBuildingName.toList()[val];
+            //         setState(() => newvall = val);
+            //         //
+            //         //
+            //         // //_controller.text = optionListItemBuildingName.toList()[val];
+            //         // search(optionListItemBuildingName.toList()[val]);
+            //       },
+            //       choiceItems: C2Choice.listFrom<int, String>(
+            //         source: optionListItemBuildingNameNew.toList(),
+            //         value: (i, v) => i,
+            //         label: (i, v) => v,
+            //       ),
+            //       choiceBuilder: (item, i) {
+            //         if(!item.selected){
+            //           newvall = -1;
+            //         }
+            //         return DestinationPageChipsWidget(
+            //           svgPath: '',
+            //           text: optionListItemBuildingNameNew.toList()[i],
+            //           onSelect: item.select!,
+            //           selected: item.selected,
+            //
+            //           onTap: (String Text) {
+            //             print("tapped$Text");
+            //
+            //             if (Text.isNotEmpty) {
+            //               search(_controller.text,wantToFilter: Text);
+            //             }
+            //             // else {
+            //             //   search(Text,wantToFilter: optionListItemBuildingName.toList()[i]);
+            //             //   _controller.text="";
+            //             //   searchResults = [];
+            //             //   searcCategoryhResults = [];
+            //             //   newvall = -1;
+            //             // }
+            //           }, icon: _iconsBuilding[i]
+            //         );
+            //       },
+            //       direction: Axis.horizontal,
+            //     ),
+            //   ),
+            // ) : Container(),
             SizedBox(height: 4,),
             Divider(thickness: 6,color: Color(0xfff2f3f5)),
             Flexible(
@@ -1090,7 +1094,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     )
                   ]
               )
-
           ],
         ) : Center(
           child: CircularProgressIndicator(
@@ -1102,7 +1105,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   }
   @override
   void dispose() {
-    _controller.removeListener(_onSearchChanged);
+    // _controller.removeListener(_onSearchChanged);
     _controller.dispose();
     _searchDebounce?.cancel();
     super.dispose();

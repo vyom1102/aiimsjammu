@@ -3,9 +3,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import '/singletonClass.dart';
 
 import 'APIMODELS/beaconData.dart';
@@ -58,7 +56,7 @@ class BluetoothScanAndroidClass{
     try {
       await methodChannel.invokeMethod('stopScan');
       isScanning = false;
-      cleanupTimer.cancel();
+      if(cleanupTimer.isActive) cleanupTimer.cancel();
     } on PlatformException catch (e) {
       print("Failed to stop scan: ${e.message}");
     }
@@ -260,22 +258,127 @@ class BluetoothScanAndroidClass{
     return closestDeviceDetails;
   }
 
+  bool _isScanning = false;
+  Map<String, List<MapEntry<int, DateTime>>> nameAndRssiMap = {};
+  Map<String,double> nameAndWeightMap = {};
+
+  void bluetoothDebug(HashMap<String, beacon> apibeaconmap){
+
+    if(!_isScanning){
+      startScan();
+      _scanSubscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
+        BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
+        nameAndRssiMap.putIfAbsent(deviceDetails.DeviceName, ()=>[]);
+        nameAndRssiMap[deviceDetails.DeviceName]!.add(MapEntry(int.parse(deviceDetails.DeviceRssi),DateTime.now()));
+      }, onError: (error) {
+        print('Error receiving device updates: $error');
+      });
+    }
+
+  }
+
+  MapEntry<String, double>? fetchBeaconMap(){
+    nameAndWeightMap.clear();
+    nameAndRssiMap.forEach((name, values){
+      double totalWeight = 0.0;
+      int numberOfValues = 0;
+      for (var rssi in values) {
+        if(DateTime.now().difference(rssi.value).inSeconds <= 5){
+          print("fetchBeaconMap ${rssi.key}");
+          nameAndWeightMap.putIfAbsent(name, ()=>0.0);
+          totalWeight += getWeight(getBinNumber(rssi.key*-1));
+          numberOfValues ++;
+        }
+      }
+      if(nameAndWeightMap[name] != null){
+        nameAndWeightMap[name] = (totalWeight/numberOfValues) * (1 + log(numberOfValues + 1));
+      }
+    });
+    if(nameAndWeightMap.isNotEmpty){
+      var sortedEntries = nameAndWeightMap.entries.toList()
+        ..sort((a, b) => a.value.compareTo(b.value));
+      nameAndWeightMap = Map.fromEntries(sortedEntries);
+      MapEntry<String, double>? maxEntry = nameAndWeightMap.entries
+          .reduce((a, b) => a.value > b.value ? a : b);
+      print("bluetoothDebugWeight $nameAndWeightMap");
+      return maxEntry;
+    }
+    return null;
+  }
+
+
+
+  int getBinNumber(int Rssi){
+    if (Rssi <= 70) {
+      print("getBinNumber0");
+      return 0;
+    }else if (Rssi <= 75) {
+      print("getBinNumber1");
+      return 1;
+    } else if (Rssi <= 80) {
+      print("getBinNumber2");
+      return 2;
+    } else if (Rssi <= 85) {
+      print("getBinNumber3");
+      return 3;
+    } else if (Rssi <= 90) {
+      return 4;
+    } else if (Rssi <= 95) {
+      return 5;
+    } else if (Rssi <= 100) {
+      return 6;
+    } else {
+      return 7;
+    }
+  }
+
+
+  double getWeight(int num){
+    switch(num) {
+      case 0:
+        return 25.0;
+      case 1:
+        return 12.0;
+      case 2:
+        return 6.0;
+      case 3:
+        return 4.0;
+      case 4:
+        return 0.5;
+      case 5:
+        return 0.25;
+      case 6:
+        return 0.15;
+      case 7:
+        return 0.1;
+      default:
+        return 0.0;
+    }
+  }
+
+
+
 
   void listenToScanUpdates(HashMap<String, beacon> apibeaconmap) {
     startScan();
     startCleanupTimer();
     print("listenToScanUpdates");
+    print("apibeaconmap");
+    print(apibeaconmap.keys);
+
 
 
     String deviceMacId = "";
     // Start listening to the stream continuously
     _scanSubscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
       BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
+
       if(apibeaconmap.containsKey(deviceDetails.DeviceName)) {
         if(int.parse(deviceDetails.DeviceRssi)<rssiValueNeglect) {
           DateTime currentTime = DateTime.now();
           deviceMacId = deviceDetails.DeviceAddress;
           print("iffffff");
+          print("Device ${deviceDetails.DeviceName} ${deviceDetails.DeviceRssi} ${currentTime}");
           print(deviceDetails.DeviceName);
           deviceNames[deviceDetails.DeviceAddress] = deviceDetails.DeviceName;
           lastSeenTimestamps[deviceDetails.DeviceAddress] = currentTime;
@@ -300,6 +403,15 @@ class BluetoothScanAndroidClass{
             rssiWeight[deviceDetails.DeviceAddress]!.removeAt(0);
           }
 
+          print("rssiValues-- $rssiValues");
+
+          rssiValues.forEach((key,value){
+            print("Rssivaluess ${deviceNames[key]} ${value}");
+          });
+          // print("rssiValues-- $rssiValues");
+          // print("rssiWeight-- $rssiWeight");
+
+
 
           // rssiAverage = calculateAverageFromRssi(rssiValues,deviceNames,rssiWeight);
           //
@@ -314,7 +426,9 @@ class BluetoothScanAndroidClass{
 
           //addtoBin(deviceDetails.DeviceAddress, int.parse(deviceDetails.DeviceRssi));
         }else{
-          print("BeaconELse ${int.parse(deviceDetails.DeviceRssi)} ${deviceDetails.DeviceRssi}");
+          DateTime currentTime = DateTime.now();
+
+          print("BeaconELse ${int.parse(deviceDetails.DeviceRssi)} ${deviceDetails.DeviceName} ${currentTime}");
         }
       }else{
 
@@ -330,7 +444,7 @@ class BluetoothScanAndroidClass{
 
   void startCleanupTimer(){
     print("proofstartCleanupTimer");
-    cleanupTimer = Timer.periodic(Duration(seconds: 2), (timer)  {
+    cleanupTimer = Timer.periodic(Duration(seconds: 3), (timer)  {
       print("startCleanupTimer");
       DateTime currTime = DateTime.now();
 
@@ -376,6 +490,7 @@ class BluetoothScanAndroidClass{
   }
 
   Map<String, double> calculateCandorAverage(Map<String, List<double>> data) {
+    print("calculateCandorAverage $data");
     Map<String, double> averageMap = {};
 
     data.forEach((key, values) {
@@ -479,8 +594,8 @@ class BluetoothScanAndroidClass{
   String EM_findLowestRssiDevice(Map<String, double> rssiAverage) {
     String? lowestKey;
     double? lowestValue = 3;
-print("rssiAverage");
-print(rssiAverage);
+    print("rssiAverage");
+    print(rssiAverage);
     rssiAverage.forEach((key, value) {
 
       if (lowestValue == null || value > lowestValue!) {
@@ -501,54 +616,6 @@ print(rssiAverage);
   HashMap<String,int> numberOfSample = HashMap();
   HashMap<String,List<int>> rs = HashMap();
   HashMap<int, double> weight = HashMap();
-
-  int getBinNumber(int Rssi){
-    if (Rssi <= 55) {
-      print("getBinNumber0");
-      return 0;
-    }else if (Rssi <= 65) {
-      print("getBinNumber1");
-      return 1;
-    } else if (Rssi <= 75) {
-      print("getBinNumber2");
-      return 2;
-    } else if (Rssi <= 80) {
-      print("getBinNumber3");
-      return 3;
-    } else if (Rssi <= 85) {
-      return 4;
-    } else if (Rssi <= 90) {
-      return 5;
-    } else if (Rssi <= 95) {
-      return 6;
-    } else {
-      return 7;
-    }
-  }
-
-
-  double getWeight(int num){
-    switch(num) {
-      case 0:
-        return 25.0;
-      case 1:
-        return 12.0;
-      case 2:
-        return 6.0;
-      case 3:
-        return 4.0;
-      case 4:
-        return 0.5;
-      case 5:
-        return 0.25;
-      case 6:
-        return 0.15;
-      case 7:
-        return 0.1;
-      default:
-        return 0.0;
-    }
-  }
 
 
   void addtoBin(String MacId, int rssi) {
@@ -620,4 +687,9 @@ print(rssiAverage);
     numberOfSample.clear();
     rs.clear();
   }
+}
+
+class BeaconMaps{
+  Map<String,List<int>> nameAndRssiMap = {};
+  Map<String,double> nameAndWeightMap = {};
 }

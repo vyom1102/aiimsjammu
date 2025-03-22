@@ -1,35 +1,40 @@
 import 'dart:async';
-import 'package:geolocator/geolocator.dart';
-
-import '../../GPS.dart';
+import '../GPSService.dart';
 import '../websocket/UserLog.dart';
 
 class GpsService {
-  final GPS gps = GPS();
-  StreamSubscription<Position>? _subscription;
+  StreamSubscription<Location>? _gpsSubscription;
   double uniqueLat = 0.0;
   double uniqueLng = 0.0;
   final ws = WebSocketService();
 
 
   Future<void> startTracking() async {
-    await gps.startGpsUpdates();
-    _subscription = gps.positionStream.listen((position) {
-      print("New Lat ${position.latitude} ${position.longitude}");
-      if(position.latitude != uniqueLat && position.longitude != uniqueLng){
+    print("startTracking");
+    _gpsSubscription = GPSService.locationStream.listen((Location location) {
+      print("New Lat ${location.latitude} ${location.longitude}");
+      if(location.latitude != uniqueLat && location.longitude != uniqueLng){
         ws.updateMessage({
-          "userPosition.latitude": position.latitude,
-          "userPosition.longitude": position.longitude,
+          "userPosition.latitude": location.latitude,
+          "userPosition.longitude": location.longitude,
         });
+        print("WebSocketService().message");
+        print(WebSocketService().message);
 
-        uniqueLat = position.latitude;
-        uniqueLng = position.longitude;
+        uniqueLat = location.latitude;
+        uniqueLng = location.longitude;
+        print("uniqueLat $uniqueLat $uniqueLng ${WebSocketService().message["userPosition.latitude"]}");
+
       }
 
+    }, onError: (error) {
+      print("Error receiving GPS data: $error");
     });
+
   }
 
   void stopTracking() {
-    _subscription?.cancel();
+    _gpsSubscription?.cancel();
+    _gpsSubscription = null;
   }
 }

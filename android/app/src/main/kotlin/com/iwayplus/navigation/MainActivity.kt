@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
+import android.bluetooth.le.ScanSettings
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.BroadcastReceiver
@@ -177,8 +178,17 @@ class MainActivity : FlutterActivity() {
                 return
             }
 
+            val scanSettings = ScanSettings.Builder()
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY) // Aggressive scanning
+                .setReportDelay(0) // Get results instantly
+                .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE) // Detects more advertisements
+                .setNumOfMatches(ScanSettings.MATCH_NUM_MAX_ADVERTISEMENT) // Capture max advertisements
+                .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES) // Get all advertisements
+                .build()
+
+
             Log.d("BluetoothScan", "Starting BLE scan...")
-            bluetoothLeScanner.startScan(scanCallback)
+            bluetoothLeScanner.startScan(null, scanSettings, scanCallback)
 
             isScanning = true
         }
@@ -270,7 +280,7 @@ class MainActivity : FlutterActivity() {
         if (isGpsEnabled) {
             locationManager?.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER,
-                    200, // Time interval in milliseconds
+                    1000, // Time interval in milliseconds
                     0f,  // Distance interval in meters
                     locationListener
             )
@@ -279,7 +289,7 @@ class MainActivity : FlutterActivity() {
         if (isNetworkEnabled) {
             locationManager?.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER,
-                    200,
+                    1000,
                     0f,
                     locationListener
             )

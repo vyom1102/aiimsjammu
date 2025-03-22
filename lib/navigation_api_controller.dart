@@ -76,10 +76,13 @@ class NavigationAPIController {
   Future<void> landmarkAPIController(String id, bool selected) async {
     var landmarkData = await landmarkApi().fetchLandmarkData(id: id);
     if(selected){
+      print("landmarkAPIControllerif");
       SingletonFunctionController.building.landmarkdata = Future.value(landmarkData);
     }else{
+      print("landmarkAPIControllerelse");
       var otherLandmarkdata = await SingletonFunctionController.building.landmarkdata;
       otherLandmarkdata?.mergeLandmarks(landmarkData.landmarks);
+      // SingletonFunctionController.building.landmarkdata = otherLandmarkdata.;
     }
     LandmarkPool.add(id);
 

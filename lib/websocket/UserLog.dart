@@ -26,10 +26,10 @@ class WebSocketService {
   static double driverLat = 0.0;
   static double driverLng = 0.0;
 
-  Map<String, dynamic> message = {};
+  Map<dynamic, dynamic> message = {};
 
 
-  Map<String, dynamic> _initializeMessage(String appId) {
+  Map<dynamic, dynamic> _initializeMessage(String appId) {
     message = {
       "appId": appId, // Now appId is dynamically assigned
       "userId": "",
@@ -58,8 +58,8 @@ class WebSocketService {
         "X": 0,
         "Y": 0,
         "floor": 0,
-        "latitude": 32.5628399,
-        "longitude": 75.0385137
+        "latitude": 0.0,
+        "longitude": 0.0
       },
       "path": {
         "source": "",
@@ -69,6 +69,7 @@ class WebSocketService {
     };
     return message;
   }
+
 
   factory WebSocketService() {
     return _instance;
@@ -119,43 +120,46 @@ class WebSocketService {
     _receiveSocket.onReconnect((_) => print('🔄 Reconnecting...'));
   }
 
+  bool send = false;
   void updateMessage(Map<String, dynamic> updates) {
     String appId = "";
-    if(userInfoBox.containsKey("userTracking")){
-      if(userInfoBox.get("userTracking")){
+    if (userInfoBox.containsKey("userTracking")) {
+      if (userInfoBox.get("userTracking")) {
         appId = "com.iwayplus.aiimsjammu-driver";
-      }else{
+      } else {
         appId = "com.iwayplus.aiimsjammu";
       }
     }
-    updates.forEach((key, value) {
-      List<String> keys = key.split('.');
-      Map<String, dynamic> current = _initializeMessage(appId);
 
-      for (int i = 0; i < keys.length - 1; i++) {
-        if (current[keys[i]] is Map<String, dynamic>) {
-          current = current[keys[i]];
-        } else {
-          print("⚠️ Invalid path: $key");
-          return;
-        }
-      }
-      current[keys.last] = value;
+    // Ensure message is initialized only once, not reset on every update
+    if (message.isEmpty) {
+      message = _initializeMessage(appId);
+    }
+
+    updates.forEach((key,value){
+      updateNestedMap(message,key,value);
     });
-    //print("🔄 Updated message: $message");
+
+    // print("🔄 Updated message: ${message["userPosition"]}");
+
+    // sendMessage(message);
   }
 
-  void sendMessage() {
+  void updateNestedMap(Map<dynamic, dynamic> map, String key, dynamic value) {
+    List<String> keys = key.split('.');
+    Map<dynamic, dynamic> temp = map;
+
+    for (int i = 0; i < keys.length - 1; i++) {
+      temp = temp.putIfAbsent(keys[i], () => {}) as Map<String, dynamic>;
+    }
+
+    temp[keys.last] = value;
+  }
+
+  void sendMessage(Map<dynamic, dynamic> message) {
     if (_socket.connected) {
-      String appId = "";
-      if(userInfoBox.containsKey("userTracking")){
-        if(userInfoBox.get("userTracking")){
-          appId = "com.iwayplus.aiimsjammu-driver";
-        }else{
-          appId = "com.iwayplus.aiimsjammu";
-        }
-      }      _socket.emit("user-log-socket", _initializeMessage(appId));
-      // print("📤 Sent message: $message");
+      _socket.emit("user-log-socket", message);
+      print("📤 Sent message: $message");
     } else {
       print("⚠️ WebSocket not connected. Cannot send message.");
     }

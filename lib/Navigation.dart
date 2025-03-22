@@ -467,18 +467,21 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       UserState.ttsAllStop = false;
     }
 
-    _messageTimer = Timer.periodic(Duration(seconds: 3), (timer) async {
-      ws.sendMessage();
-      if(!userInfoBox.containsKey("userTracking")){
-        ws.receiveMessage();
-        navigationStartFunction();
-      }else{
+      // ws.sendMessage(WebSocketService().message);
+    // print("WebSocketService().message ${WebSocketService().message}");
+      if(userInfoBox.containsKey("userTracking")){
         if(userInfoBox.get("userTracking")){
-          await gpsTrackingService.startTracking();
+          gpsTrackingService.startTracking();
           print(userInfoBox.get("userTracking"));
+        }else{
+            print("Is Driver not found");
+            print("Is User");
+            ws.receiveMessage();
+            navigationStartFunction();
         }
+      }else{
+        print("Is containsKeyfalse");
       }
-    });
 
     if(!kIsWeb){
       print("kIsWeb");
@@ -572,19 +575,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               //   }
               // });
               _userAccelerometerUpdateTime = now;
-            }, onError: (e) {
-          showDialog(
-              context: context,
-              builder: (context) {
-                return const AlertDialog(
-                  title: Text("Sensor Not Found"),
-                  content: Text(
-                      "It seems that your device doesn't support User Accelerometer Sensor"),
-                );
-              });
-          cancelOnError:
-          true;
-        }),
+            }),
       );
     } catch (E) {}
     // fetchlist();
@@ -592,9 +583,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
   Future<void> navigationStartFunction() async {
+
     Uint8List iconMarker = await getImagesFromMarker('assets/GolfCart.png', 155);
     double lat = WebSocketService.driverLat;
     double lng = WebSocketService.driverLng;
+    print("navigationStartFunction ${WebSocketService.driverLat} ${WebSocketService.driverLng}");
     gpsTrackingUserPosition = LatLng(lat,lng);
     gpsTrackingMarker?.clear();
     gpsTrackingMarker?.add(Marker(
@@ -3680,7 +3673,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     textPainter.text = TextSpan(
       text: text,
       style: TextStyle(
-        fontSize: 40.0, // Increased font size
+        fontSize: 36.0, // Increased font size
         color: Colors.black,
         fontFamily: "Roboto",
         fontWeight: FontWeight.w500,
@@ -10268,6 +10261,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                               ),
                               child: TextButton(
                                   onPressed: () {
+                                    int stackSize = getStackSize(context);
+                                    print("Active Screens: $stackSize");
                                     setState(() {
                                       StopPDR();
                                       onStart=false;
@@ -10342,6 +10337,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             )
           ],
         ));
+  }
+  int getStackSize(BuildContext context) {
+    int count = 0;
+    Navigator.popUntil(context, (route) {
+      count++;
+      return true;
+    });
+    print("Current Stack Size: $count");
+    return count;
   }
 
   final FocusNode _focusNodeB = FocusNode();
@@ -12821,9 +12825,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   mapState.cameraposition = cameraPosition; // User has started panning
 
                   //Check zoom level and decide rendering strategy
-                  if (cameraPosition.zoom > 16.8) {
+                  if (cameraPosition.zoom > 17.8) {
                     focusBuildingChecker(cameraPosition);
-                  } else if (cameraPosition.zoom > 15.5) {
+                  } else if (cameraPosition.zoom > 16.5) {
                     renderCampusPatchTransition(
                       buildingAllApi.allBuildingID.keys.toList(),
                       outdoorID: buildingAllApi.outdoorID,
@@ -13264,23 +13268,22 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       Colors.white, // Set the background color of the FAB
                     ),
                   ) : Container(),
-                  // FloatingActionButton(
-                  //   onPressed: () async {
-                  //     StreamSubscription<Location>? _gpsSubscription;
-                  //     _gpsSubscription = GPSService.locationStream.listen((Location location) {
-                  //       addGpsMarkers(location);
-                  //     }, onError: (error) {
-                  //       print("Error receiving GPS data: $error");
-                  //     });
-                  //   },
-                  //   child: Icon(Icons.pin_drop_rounded),
-                  //   shape: RoundedRectangleBorder(
-                  //     borderRadius:
-                  //     BorderRadius.circular(26.0), // Change radius here
-                  //   ),
-                  //   backgroundColor:
-                  //   Colors.white, // Set the background color of the FAB
-                  // ),
+                  FloatingActionButton(
+                    onPressed: () async {
+                      bluetoothScanAndroidClass.startbin();
+                      bluetoothScanAndroidClass.emptyBin();
+                      setState(() {
+                        bluetoothScanAndroidClass.bluetoothDebug(SingletonFunctionController.apibeaconmap);
+                      });
+                    },
+                    child: Icon(Icons.pin_drop_rounded),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                      BorderRadius.circular(26.0), // Change radius here
+                    ),
+                    backgroundColor:
+                    Colors.white, // Set the background color of the FAB
+                  ),
                   SizedBox(height: 28.0),
                   (!kIsWeb &&  Platform.isAndroid) && !user.isnavigating &&
                       (!_isLandmarkPanelOpen &&

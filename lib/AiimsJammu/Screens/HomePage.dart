@@ -2128,6 +2128,21 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ):TranslatorWidget("Offline"),
+        floatingActionButton: FloatingActionButton(
+          onPressed: (){
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => Navigation(),
+              ),
+            );
+          },
+          backgroundColor: Color(0xFFFEAB01),
+          shape: CircleBorder(),
+          child: Semantics(
+              label: "Map",
+              child: Lottie.asset('assets/images/floatingmap.json')),
+        ),
         // floatingActionButton: FloatingActionButton(
         //   onPressed: (){
         //     Navigator.push(
