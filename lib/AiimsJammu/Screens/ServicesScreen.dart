@@ -374,7 +374,8 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                                         height: 140,
                                         color: Colors.grey[200],
                                         child:Image.asset(
-                                          'assets/images/placeholder.png',
+                                          'assets/images/DefaultCorousalImage.png',
+                                          // 'assets/images/placeholder.png',
                                           fit: BoxFit.cover,
                                         ),
                                       ),

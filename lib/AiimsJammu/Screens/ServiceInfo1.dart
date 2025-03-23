@@ -413,7 +413,8 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
                         height: 140,
                         color: Colors.grey[200],
                         child:Image.asset(
-                          'assets/images/placeholder.png',
+                          // 'assets/images/placeholder.png',
+                          'assets/images/DefaultCorousalImage.png',
                           fit: BoxFit.cover,
                         ),
                       ),
