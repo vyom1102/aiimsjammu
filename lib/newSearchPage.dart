@@ -375,22 +375,24 @@ class _NewsearchpageState extends State<NewSearchPage> {
             ).toList(); // Convert to list to iterate safely
 
             for (final value in matchingValues) {
-              newResults.add(SearchpageResults(
-                name: value.name!,
-                location: value.buildingID == buildingAllApi.outdoorID
-                    ? "${value.venueName}"
-                    : "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
-                onClicked: onVenueClicked,
-                ID: value.properties!.polyId!,
-                bid: value.buildingID!,
-                floor: value.floor!,
-                coordX: value.coordinateX!,
-                coordY: value.coordinateY!,
-                accessible: value.element!.subType == "restRoom" && value.properties!.washroomType == "Handicapped"
-                    ? "true"
-                    : "false",
-                distance: 0,
-              ));
+              if(value.element!.subType != "AR"){
+                newResults.add(SearchpageResults(
+                  name: value.name!,
+                  location: value.buildingID == buildingAllApi.outdoorID
+                      ? "${value.venueName}"
+                      : "Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
+                  onClicked: onVenueClicked,
+                  ID: value.properties!.polyId!,
+                  bid: value.buildingID!,
+                  floor: value.floor!,
+                  coordX: value.coordinateX!,
+                  coordY: value.coordinateY!,
+                  accessible: value.element!.subType == "restRoom" && value.properties!.washroomType == "Handicapped"
+                      ? "true"
+                      : "false",
+                  distance: 0,
+                ));
+              }
             }
 
           }
@@ -484,7 +486,9 @@ class _NewsearchpageState extends State<NewSearchPage> {
                                       search(value);
                                     },
                                     onChanged: (value) {
-                                      search(value);
+                                      if(_controller.text.length % 3 == 0){
+                                        search(value);
+                                      }
                                       if(_controller.text.isEmpty){
                                         isTyping=true;
                                         topSearches.clear();
@@ -605,7 +609,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
                         selected: item.selected,
                         onTap: (String Text) {
                           print("again tapped ${Text}");
-                          if (Text.isNotEmpty) {
+                          if (Text.isNotEmpty && Text.length%3 == 0) {
                             search(Text);
                           } else {
                             setState(() {

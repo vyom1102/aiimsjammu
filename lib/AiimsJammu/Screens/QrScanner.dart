@@ -246,6 +246,7 @@ import '../../API/QRDataAPI.dart';
 import '../../APIMODELS/QRDataAPIModel.dart';
 import '../../APIMODELS/buildingAll.dart';
 import '../../Elements/HelperClass.dart';
+import '../../MainScreen.dart';
 import '../../Navigation.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/Translator.dart';
@@ -392,6 +393,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           print(qrCode);
 
           bool isHandled = false;
+          bool isSecondHandled = false;
           List<QRDataAPIModel>? qrData = await QRDataAPI().fetchQRData(buildingAllApi.allBuildingID.keys.toList());
 
           if (qrData != null) {
@@ -421,6 +423,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             await buildingAllApi().fetchBuildingAllData().then((value) async {
               buildingAllApi.findBuildings(value);
               print("deeplink $bid ${uri.queryParameters['bid']}");
+              isSecondHandled = true;
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -428,7 +431,16 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 );
 
             });
+          }else{
+            HelperClass.showToast("Invalid/Unassigned QR");
+            print("qr pop");
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        MainScreen(initialIndex: 0,)));
           }
+
 
           print(qrData);
           print("qrScanner");

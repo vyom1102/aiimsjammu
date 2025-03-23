@@ -510,6 +510,7 @@ class UserState {
   }
 
   void announceLiftUsage(BuildContext context) {
+    print("announceLiftUsage called");
     onConnection = true;
     createCircle(lat, lng);
     speak(
