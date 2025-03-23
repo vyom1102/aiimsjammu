@@ -82,7 +82,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
   void initState()  {
     super.initState();
-    print("called destinationsearch page");
     fetchandBuild();
     _controller.addListener(_onSearchChanged);
     // //optionListItemBuildingNameNew.clear();
@@ -863,7 +862,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                               if (!micselected) {
                                 micColor = Color(0xff24B9B0);
                               }
-                              setState(() {});
                             },
                             icon: Semantics(
                               label: "Voice Search",
@@ -878,40 +876,33 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     ],
                   )),
             ),
-            // (searchHintString.toLowerCase().contains("source") && widget.userLocalized != "")?
-            // InkWell(
-            //   onTap: (){
-            //     Navigator.pop(context, widget.userLocalized);
-            //   },
-            //   child: Container(
-            //     margin: EdgeInsets.only(top:24,left: 17,right: 17,bottom: 8),
-            //     child: Column(
-            //       children: [
-            //         Row(
-            //           mainAxisAlignment: MainAxisAlignment.start,
-            //           children: [
-            //             SizedBox(width: 16,),
-            //             Image.asset("assets/rw.png"),
-            //             SizedBox(width: 24,),
-            //             Text(style: const TextStyle(
-            //               fontFamily: "Roboto",
-            //               fontSize: 16,
-            //               fontWeight: FontWeight.w400,
-            //               color: Color(0xff000000),
-            //             ),"Your Current Location")
-            //           ],
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ):Container(),
-            TextField(
-              controller: _test,
-              decoration: InputDecoration(
-                labelText: "Enter your text",
-                border: OutlineInputBorder(),
+            (searchHintString.toLowerCase().contains("source") && widget.userLocalized != "")?
+            InkWell(
+              onTap: (){
+                Navigator.pop(context, widget.userLocalized);
+              },
+              child: Container(
+                margin: EdgeInsets.only(top:24,left: 17,right: 17,bottom: 8),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(width: 16,),
+                        Image.asset("assets/rw.png"),
+                        SizedBox(width: 24,),
+                        Text(style: const TextStyle(
+                          fontFamily: "Roboto",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xff000000),
+                        ),"Your Current Location")
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
+            ):Container(),
             searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
 
             // InkWell(

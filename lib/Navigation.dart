@@ -8,6 +8,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:geolocator/geolocator.dart';
+import 'package:iwaymaps/AiimsJammu/Widgets/GlobalSearch.dart';
 import 'package:iwaymaps/websocket/PushNotifications.dart';
 import 'package:iwaymaps/websocket/navigationLogManager.dart';
 import 'package:iwaymaps/websocket/navigationLogModel.dart';
@@ -8672,7 +8673,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                DestinationSearchPage(
+                                                GlobalSearchPage(
                                                   hintText: 'Source location',
                                                   voiceInputEnabled: false,
                                                   userLocalized: user.key,
@@ -8719,10 +8720,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                DestinationSearchPage(
+                                                GlobalSearchPage(
                                                   hintText: 'Destination location',
                                                   voiceInputEnabled: false,
-                                                ))).then((value) {
+                                                )))
+                                        .then((value) {
                                       _isBuildingPannelOpen = false;
 
                                       onDestinationVenueClicked(value);
