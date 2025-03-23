@@ -422,7 +422,6 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
                                     ) : Container(
                                       height: 35,
                                       width: 35,
-
                                       child: getCustomIcon((direction.turnDirection??""), context),
                                     ),
 
@@ -435,8 +434,6 @@ class _DirectionInstructionWidgetState extends State<DirectionInstructionWidget>
                                 //     margin: EdgeInsets.only(top:10),
                                 //     child: Divider(thickness: 1,color: Color(0xffE5E7EB),indent: 20,endIndent: 30,)): Container(),
                                 widget.IsMultiFloor && (direction.turnDirection??"").substring(0,4)=="Take"? SizedBox(height: 20,): Container(),
-
-
                               ],
                             ),
                           );

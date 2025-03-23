@@ -94,12 +94,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   bool disposed = false;
   BluetoothScanAndroidClass bluetoothScanAndroidClass = BluetoothScanAndroidClass();
 
+  Map<String, double> ShowsumMap = Map();
   int DirectionIndex = 1;
   int nextTurnIndex = 0;
   bool isSpeaking = false;
-  MapEntry<String, double>? previousBeaconScanned;
-  bool isSemanticEnabled = false;
+  String? threshold;
 
+  late Timer Device_timer;
 
 
 
@@ -115,29 +116,61 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   void initState() {
     super.initState();
 
+    // initTts();
+
     _flutterLocalization = FlutterLocalization.instance;
     _currentLocale = _flutterLocalization.currentLocale!.languageCode;
 
-    bluetoothScanAndroidClass.bluetoothDebug(SingletonFunctionController.apibeaconmap);
+    for (int i = 0; i < widget.user.pathobj.directions.length; i++) {
+      direction element = widget.user.pathobj.directions[i];
+      //DirectionWidgetList.add(scrollableDirection("${element.turnDirection == "Straight"?"Go Straight":"Turn ${element.turnDirection??""}, and Go Straight"}", '${((element.distanceToNextTurn??1)/UserState.stepSize).ceil()} steps', getCustomIcon(element.turnDirection!)));
+    }
+
+    // btadapter.emptyBin();
+    // for (int i = 0; i < btadapter.BIN.length; i++) {
+    //   if (btadapter.BIN[i]!.isNotEmpty) {
+    //     btadapter.BIN[i]!.forEach((key, value) {
+    //       key = "";
+    //       value = 0.0;
+    //     });
+    //   }
+    // }
+    if(Platform.isAndroid) {
+      Future.delayed(Duration(seconds: 4)).then((_) {
+        bluetoothScanAndroidClass.startbin();
+        bluetoothScanAndroidClass.emptyBin();
+        setState(() {
+          bluetoothScanAndroidClass.listenToScanUpdates(Building.apibeaconmap);
+        });
+      });
+    }else if(Platform.isIOS){
+      final scannedDevices = BluetoothScanIOSClass.startScan();
+    }
+
+
+
+
 
     setState(() {});
+    //btadapter.startScanning(Building.apibeaconmap);
+    if(Platform.isAndroid) {
+      _timer = Timer.periodic(Duration(milliseconds: 1000), (timer) {
+        // print("widget.user.pathobj.index");
+        // print(widget.user.pathobj.index);
 
-    _timer = Timer.periodic(Duration(milliseconds: 3000), (timer) {
         if (widget.user.pathobj.index > 3) {
-          MapEntry<String, double>? beaconScanned = bluetoothScanAndroidClass.fetchBeaconMap();
-          if(beaconScanned != null){
-            previousBeaconScanned ??= beaconScanned;
-            if(beaconScanned.value >= 69 || (previousBeaconScanned!.key == beaconScanned.key && previousBeaconScanned!.value>beaconScanned.value)){
-              previousBeaconScanned = beaconScanned;
-              listenToBin(beaconScanned);
-            }else{
-              previousBeaconScanned = beaconScanned;
-            }
-
-          }
+          listenToBin();
         }
       });
-
+    }else if(Platform.isIOS){
+      Device_timer = Timer.periodic(Duration(milliseconds: 1000), (timer)  {
+        try {
+          listenToBin();
+        } catch (e) {
+          print("Error getting best device: $e");
+        }
+      });
+    }
 
     btadapter.numberOfSample.clear();
     btadapter.rs.clear();
@@ -159,7 +192,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               ""),
           _currentLocale,
           prevpause: true);
-    } else if (widget.user.pathobj.numCols?[widget.user.bid]?[widget.user.floor] != null) {
+    } else if (widget
+        .user.pathobj.numCols![widget.user.bid]![widget.user.floor] !=
+        null) {
       turnPoints = tools.getTurnpoints_inCell(widget.user.cellPath);
       turnPoints.add(widget.user.cellPath.last);
 
@@ -215,8 +250,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       });
     }
 
-    // print("direction${widget.direction}");
-
     try {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
           systemNavigationBarColor: Colors.white // Set the icon color to dark
@@ -226,11 +259,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
   @override
   void dispose() {
-    if(Platform.isIOS){
-      BluetoothScanIOSClass.stopScan();
-    }else{
-      bluetoothScanAndroidClass.stopScan();
-    }
+    bluetoothScanAndroidClass.stopScan();
+    BluetoothScanIOSClass.stopScan();
+    Device_timer.cancel();
     disposed = true;
     flutterTts.stop();
     _timer.cancel();
@@ -241,22 +272,223 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     return widget.getSemanticValue;
   }
 
-  Future<bool> listenToBin(MapEntry<String, double> beaconScanned)  async {
+  String debuglastNearestbeacon = "";
+  String debuglNearestbeacon = "";
+  Map<String, double> sortedsumMap = {};
+  Map<String, List<double>> sumMap = {};
+  Map<String, double> sumMapAvg = {};
 
+  var newMap = <String, double>{};
+  String displayString = "";
+  String? highestKey;
+  double highestAverage = double.negativeInfinity;
+
+
+
+  double highestweight = Platform.isIOS?2.8 : 3.25;
+
+  String? parseString(String input) {
+    final regex = RegExp(r'Optional\("(.+?)"\)\s+(\d+\.\d+)');
+    final match = regex.firstMatch(input);
+
+    if (match != null) {
+      final device = match.group(1); // Extracts "IW622"
+      final value = double.tryParse(match.group(2) ?? '0'); // Extracts 6.0 as a double
+
+      // print("Device: $device");
+      // print("Value: $value");
+      return device;
+    } else {
+      print("No match found!");
+      return "";
+    }
+  }
+
+  String? parseStringT(String input) {
+    final regex = RegExp(r'Optional\("(.+?)"\)\s+(\d+\.\d+)');
+    final match = regex.firstMatch(input);
+
+    if (match != null) {
+      final device = match.group(1); // Extracts "IW622"
+      final value = double.tryParse(match.group(2) ?? '0'); // Extracts 6.0 as a double
+
+      // print("Device: $device");
+      // print("Value: $value");
+      return value.toString();
+    } else {
+      print("No match found!");
+      return "";
+    }
+  }
+
+
+  Future<bool> listenToBin()  async {
+    // print("listentobin");
+
+    String nearestBeacon = "";
+
+    if(Platform.isAndroid) {
+      sumMap.clear();
+      // sumMap = btadapter.calculateAverage();
+      nearestBeacon = bluetoothScanAndroidClass.closestDeviceDetails;
+      sumMapAvg = bluetoothScanAndroidClass.rssiAverage;
+      threshold = bluetoothScanAndroidClass.closestRSSI;
+      // print("---nearestBeacon");
+      // print(nearestBeacon);
+      debuglNearestbeacon = nearestBeacon;
+      sumMap = bluetoothScanAndroidClass.giveSumMapCallBack();
+      // print("listenToBin${sumMap} ");
+
+      sumMap.forEach((key, value) {
+        if (value.isNotEmpty) {
+          double average = value.reduce((a, b) => a + b) / value.length;
+          // print("--average");
+          // print(average);
+          if (average > highestAverage) {
+            highestAverage = average;
+            highestKey = key;
+          }
+        } else {
+          print("else---");
+        }
+      });
+    }else if(Platform.isIOS){
+      String receivedStringFromIOS = await BluetoothScanIOSClass.getBestDevice();
+      print("receivedStringFromIOS");
+      print(receivedStringFromIOS);
+      nearestBeacon = parseString(receivedStringFromIOS)??"";
+
+      threshold = parseStringT(receivedStringFromIOS)??"";
+      debuglNearestbeacon = "${nearestBeacon} ${threshold}";
+    }
+    print("highestweight");
+    print(highestweight);
+
+
+
+    // setState(() {
+    //   // displayString = sumMap.entries
+    //   //     .map((entry) => '${entry.key}: ${entry.value.join(", ")}')
+    //   //     .join("\n");
+    //
+    //
+    // });
+
+
+    // print("threshold");
+    // print(Building.apibeaconmap);
+    // print(sumMap);
+    // // threshold = widget.user.building!.patchData[widget.user.bid]!.patchData!.realtimeLocalisationThreshold??'5';
+    // //threshold = '3.5';
+    // print(widget.user.building!.patchData[widget.user.bid]!.patchData!
+    //     .realtimeLocalisationThreshold);
+    // print(threshold);
+    //
+    sortedsumMap.clear();
+    //
+
+    // sumMap.forEach((key, value) {
+    //   if (highestweight <= value) {
+    //     nearestBeacon = key;
+    //     highestweight = value;
+    //   }
+    // });
+    //
+    // setState(() {
+    //   sumMap;
+    //   ShowsumMap = HelperClass().sortMapByValue(sumMap);
+    // });
+
+    // btadapter.emptyBin();
+    // btadapter.priorityQueue.clear();
+    // btadapter.stopScanning();
+    // btadapter.startScanning(Building.apibeaconmap);
+
+    // sortedsumMap.entries.forEach((element) {
+    //   if (Building.apibeaconmap[element.key]!.floor ==
+    //           widget.user.pathobj.destinationFloor &&
+    //       element.value >= 0.05) {
+    //     nearestBeacon = Building.apibeaconmap[element.key]!.name.toString();
+    //     highestweight = element.value;
+    //   }
+    // });
+    // highestweight = 12;
+
+    // //
+    // //
+
+    // for (int i = 0; i < btadapter.BIN.length; i++) {
+    //   if (btadapter.BIN[i]!.isNotEmpty) {
+    //
+    //     btadapter.BIN[i]!.forEach((key, value) {
+    //       //
+    //       //
+    //       //
+    //
+    //       setState(() {
+    //             widget.direction = "${widget.direction}$key   $value\n";
+    //           });
+    //
+    //       //
+    //
+    //       if (value > highestweight) {
+    //         highestweight = value;
+    //         //nearestBeacon = key;
+    //       }
+    //     });
+    //     break;
+    //   }
+    // }
+
+    // btadapter.emptyBin();
+    //
+
+    // sortedsumMap.forEach((key, value) {
+    //
+    //   setState(() {
+    //     widget.direction = "${widget.direction}$key   $value\n";
+    //   });
+    //
+    //   //
+    //
+    //   if(value>highestweight){
+    //     highestweight =  value;
+    //     nearestBeacon = key;
+    //   }
+    // });
+    // setState(() {
+    //   debuglNearestbeacon = nearestBeacon;
+    //   if (debuglastNearestbeacon != nearestBeacon) {
+    //     debuglastNearestbeacon = nearestBeacon;
+    //   }
+    // });
+    // nearestBeacon = bluetoothScanAndroidClass.closestrssiDevice;
+    // setState(() {});
+    // print("nearestBeacon");
+    // print(nearestBeacon);
+    // print(Building.apibeaconmap[nearestBeacon]!);
+
+    ////
+
+    //
     try {
-          if (widget.user.key != Building.apibeaconmap[beaconScanned.key]!.sId) {
+      if (nearestBeacon != "") {
+          if (widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId) {
             //widget.user.pathobj.destinationFloor
             if (widget.user.floor != widget.user.pathobj.destinationFloor &&
-                widget.user.pathobj.destinationFloor != widget.user.pathobj.sourceFloor &&
-                widget.user.pathobj.destinationFloor == Building.apibeaconmap[beaconScanned.key]!.floor) {
+                widget.user.pathobj.destinationFloor !=
+                    widget.user.pathobj.sourceFloor &&
+                widget.user.pathobj.destinationFloor ==
+                    Building.apibeaconmap[nearestBeacon]!.floor) {
               List<int> beaconcoord = [
-                Building.apibeaconmap[beaconScanned.key]!.coordinateX!,
-                Building.apibeaconmap[beaconScanned.key]!.coordinateY!
+                Building.apibeaconmap[nearestBeacon]!.coordinateX!,
+                Building.apibeaconmap[nearestBeacon]!.coordinateY!
               ];
               int distanceFromPath = 100000000;
               widget.user.cellPath.forEach((node) {
-                if (node.floor == Building.apibeaconmap[beaconScanned.key]!.floor ||
-                    node.bid == Building.apibeaconmap[beaconScanned.key]!.buildingID) {
+                if (node.floor == Building.apibeaconmap[nearestBeacon]!.floor ||
+                    node.bid ==
+                        Building.apibeaconmap[nearestBeacon]!.buildingID) {
                   List<int> pathcoord = [node.x, node.y];
                   double d1 = tools.calculateDistance(beaconcoord, pathcoord);
                   if (d1 < distanceFromPath) {
@@ -265,9 +497,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                 }
               });
 
-              if (distanceFromPath > 25) {
+              if (distanceFromPath > 10) {
+
                 _timer.cancel();
-                widget.repaint(beaconScanned.key);
+                widget.repaint(nearestBeacon);
                 widget.reroute;
                 DirectionIndex = 1;
                 nextTurnIndex = 1;
@@ -275,20 +508,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               } else {
                 widget.user.onConnection = false;
 
-                widget.user.key = Building.apibeaconmap[beaconScanned.key]!.sId!;
+                widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
                 UserState.createCircle(widget.user.lat, widget.user.lng);
-
                 speak(
-                    "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[beaconScanned.key]!.floor!)} floor",
-                    _currentLocale
-                );
+                    "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor",
+                    _currentLocale);
                 DirectionIndex = nextTurnIndex;
                 //need to render on beacon for aiims jammu
                 print("calling expected function");
-                widget.paint(beaconScanned.key, null, null, render: false);
+                widget.paint(nearestBeacon, null, null, render: false);
                 return true;
               }
             }
+
             // else if(widget.user.floor != Building.apibeaconmap[nearestBeacon]!.floor &&  highestweight >= 1.1){
             //   widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
             //   speak("You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor");
@@ -296,13 +528,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             //   return true;
             // }
 
-            else if (widget.user.floor == Building.apibeaconmap[beaconScanned.key]!.floor) {
-              print("calling expected function 2${beaconScanned.key} -- ${beaconScanned.value}");
+            else if (widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor && double.parse(threshold!) >= highestweight) {
+              print("calling expected function 2${highestweight} -- ${threshold}");
               widget.user.onConnection = false;
               //
               List<int> beaconcoord = [
-                Building.apibeaconmap[beaconScanned.key]!.coordinateX!,
-                Building.apibeaconmap[beaconScanned.key]!.coordinateY!
+                Building.apibeaconmap[nearestBeacon]!.coordinateX!,
+                Building.apibeaconmap[nearestBeacon]!.coordinateY!
               ];
               List<int> usercoord = [
                 widget.user.showcoordX,
@@ -317,7 +549,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     beaconcoord[0],
                     beaconcoord[1],
                     SingletonFunctionController.building.patchData[
-                    Building.apibeaconmap[beaconScanned.key]!.buildingID!]);
+                    Building.apibeaconmap[nearestBeacon]!.buildingID!]);
                 List<Cell> nearPoints = findTwoNearestPoints(
                     beaconLatLng, widget.user.cellPath, widget.user.bid);
                 for (var point in nearPoints) {
@@ -329,7 +561,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     nearPoints[0],
                     nearPoints[1],
                     widget.user.pathobj.numCols![widget.user.bid]![
-                    Building.apibeaconmap[beaconScanned.key]!.floor]!);
+                    Building.apibeaconmap[nearestBeacon]!.floor]!);
 
                 List<int> np = tools.findLocalCoordinates(
                     nearPoints[0], nearPoints[1], newPoint);
@@ -365,29 +597,31 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                   }
                 });
               }
-              if (distanceFromPath > 25) {
+              if (distanceFromPath > 10) {
                 _timer.cancel();
-                widget.repaint(beaconScanned.key);
+                widget.repaint(nearestBeacon);
                 widget.reroute;
                 DirectionIndex = 1;
                 nextTurnIndex = 1;
                 return false; //away from path
               } else {
-                widget.user.key = Building.apibeaconmap[beaconScanned.key]!.sId!;
+                widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
                 if (!UserState.ttsOnlyTurns) {
                   speak(
                       "${widget.direction} ${tools.convertFeet(widget.distance, widget.context)}",
                       _currentLocale);
                 }
-                widget.user.moveToPointOnPath(indexOnPath!, context);
+                widget.user.moveToPointOnPath(indexOnPath!,context);
                 widget.moveUser();
                 DirectionIndex = nextTurnIndex;
                 return true; //moved on path
               }
             }
           }
-
+      }
     } catch (e) {}
+
+    // btadapter.emptyBin();
 
     return false;
   }
@@ -430,15 +664,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   List<Cell> findTwoNearestPoints(
       List<double> beaconcoord, List<Cell> turnPoints, String userBid) {
     // Sort the list of turn points by distance to the beacon
+    print("turnPoints[0].x ${turnPoints.length} ${turnPoints[0].x}");
     List<Cell> filteredPoints = turnPoints
         .where((point) => (point.bid == userBid && point.imaginedCell == false))
         .toList();
+    print(
+        "filteredPoints[0].x ${filteredPoints.length} ${filteredPoints[0].x}");
 
     filteredPoints.sort((a, b) => tools
         .calculateAerialDist(beaconcoord[0], beaconcoord[1], a.lat, a.lng)
         .compareTo(tools.calculateAerialDist(
         beaconcoord[0], beaconcoord[1], b.lat, b.lng)));
-
+    print(
+        "filteredPoints[0].x ${filteredPoints.length} ${filteredPoints[0].x}");
     // Return the first two points in the sorted list
     return [filteredPoints[0], filteredPoints[1]];
   }
@@ -471,48 +709,66 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   }
 
   FlutterTts flutterTts = FlutterTts();
-  Future<void> speak(String msg, String lngcode, {bool prevpause = false}) async {
+  Future<void> speak(String msg, String lngcode,
+      {bool prevpause = false}) async {
     if (!UserState.ttsAllStop) {
       if (disposed) return;
+
+      // if (isSpeaking) {
+      //   await flutterTts.stop();
+      // }
+      // setState(() {
+      //   isSpeaking = true;
+      // });
       if (prevpause) {
         await flutterTts.pause();
       }
-
-      if (lngcode == "hi") {
-        if (Platform.isAndroid) {
-          await flutterTts
-              .setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
+      if (Platform.isAndroid) {
+        if (lngcode == "hi") {
+          if (Platform.isAndroid) {
+            await flutterTts
+                .setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
+          } else {
+            await flutterTts.setVoice({"name": "Lekha", "locale": "hi-IN"});
+          }
         } else {
-          await flutterTts.setVoice({"name": "Lekha", "locale": "hi-IN"});
+          await flutterTts
+              .setVoice({"name": "en-US-language", "locale": "en-US"});
         }
-      } else {
-        await flutterTts
-            .setVoice({"name": "en-US-language", "locale": "en-US"});
       }
-      await flutterTts.stop();
+      if (isSpeaking) {
+        await flutterTts.stop();
+      }
       if (Platform.isAndroid) {
         await flutterTts.setSpeechRate(0.7);
       } else {
+        // await flutterTts.setSharedInstance(true);
+        // await flutterTts.setIosAudioCategory(IosTextToSpeechAudioCategory.playback,
+        //     [
+        //       IosTextToSpeechAudioCategoryOptions.allowBluetooth,
+        //       IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+        //       IosTextToSpeechAudioCategoryOptions.mixWithOthers,
+        //       IosTextToSpeechAudioCategoryOptions.defaultToSpeaker
+        //     ],
+        //     IosTextToSpeechAudioMode.defaultMode
+        // );
         await flutterTts.setSpeechRate(0.55);
       }
 
       await flutterTts.setPitch(1.0);
-      if(isSemanticEnabled){
-        PushNotifications.showSimpleNotification(body: "",payload: "",title: msg);
-      }else {
-        await flutterTts.speak(msg);
-      }
+      await flutterTts.speak(msg);
 
+      setState(() {
+        isSpeaking = !isSpeaking;
+      });
     }
   }
-
 
   Cell findNextTurn(List<Cell> turns, List<Cell> path) {
     // Iterate through the sorted list
     for (int i = 0; i < path.length; i++) {
       for (int j = 0; j < turns.length; j++) {
         if (path[i] == turns[j]) {
-          print("returning findNextTurn path[i]");
           return path[i];
         }
       }
@@ -520,10 +776,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
     // If no number is greater than the target, return null
     if (path.length >= widget.user.pathobj.index) {
-      print("returning findNextTurn path[widget.user.pathobj.index]");
       return path[widget.user.pathobj.index];
     } else {
-      print("return findNextTurn else");
       return Cell(
           0,
           0,
@@ -608,8 +862,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     return "";
   }
 
-  Timer? _speakTimer;
-  bool _turnSpoken = false;
   @override
   void didUpdateWidget(DirectionHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -636,10 +888,12 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       //
       //
 
-      nextTurnIndex = widget.user.pathobj.directions.indexWhere((element) => element.node == nextTurn.node);
+      nextTurnIndex = widget.user.pathobj.directions
+          .indexWhere((element) => element.node == nextTurn.node);
       //
 
-      if (turnPoints.contains(widget.user.cellPath[widget.user.pathobj.index])) {
+      if (turnPoints
+          .contains(widget.user.cellPath[widget.user.pathobj.index])) {
         if (DirectionIndex + 1 < widget.user.pathobj.directions.length) {
           DirectionIndex = widget.user.pathobj.directions.indexWhere(
                   (element) =>
@@ -675,18 +929,28 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           print("problem to be solved later $e");
         }
       }
-      double userangle = 0;
-      try{
-        userangle = tools.calculateAngleBWUserandCellPath(
-            widget.user.cellPath[widget.user.pathobj.index],
-            widget.user.cellPath[widget.user.pathobj.index + 1],
-            widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!,
-            widget.user.theta);
-      }catch(_){}
+      double userangle = tools.calculateAngleBWUserandCellPath(
+          widget.user.cellPath[widget.user.pathobj.index],
+          widget.user.cellPath[widget.user.pathobj.index + 1],
+          widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!,
+          widget.user.theta);
 
-
-      widget.direction = (tools.angleToClocks(angle, widget.context) == "None") ? oldWidget.direction : tools.angleToClocks(userangle, widget.context);
-      String userdirection = (tools.angleToClocks(userangle, widget.context) == "None") ? oldWidget.direction : tools.angleToClocks(userangle, widget.context);
+      widget.direction =
+      (tools.angleToClocks(angle, widget.context) == "None" ||
+          tools
+              .angleToClocks(angle, widget.context)
+              .toLowerCase()
+              .contains("slight"))
+          ? oldWidget.direction
+          : tools.angleToClocks(angle, widget.context);
+      String userdirection =
+      (tools.angleToClocks(userangle, widget.context) == "None" ||
+          tools
+              .angleToClocks(angle, widget.context)
+              .toLowerCase()
+              .contains("slight"))
+          ? oldWidget.direction
+          : tools.angleToClocks(userangle, widget.context);
       if (userdirection == "Straight") {
         widget.direction = "Straight";
       }
@@ -699,30 +963,30 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         widget.direction = userdirection;
       }
 
-      int turnIndex = widget.user.cellPath.indexOf(nextTurn);
+      int index = widget.user.cellPath.indexOf(nextTurn);
       //
       double a = 0;
-
-      if (turnIndex + 1 == widget.user.path.length) {
-        // print("index+1");
-        if (widget.user.cellPath[turnIndex - 2].bid == widget.user.cellPath[turnIndex - 1].bid && widget.user.cellPath[turnIndex - 1].bid == widget.user.cellPath[turnIndex].bid) {
+      if (index + 1 == widget.user.path.length) {
+        if (widget.user.cellPath[index - 2].bid ==
+            widget.user.cellPath[index - 1].bid &&
+            widget.user.cellPath[index - 1].bid ==
+                widget.user.cellPath[index].bid) {
           a = tools.calculateAnglefifth(
-              widget.user.path[turnIndex - 2],
-              widget.user.path[turnIndex - 1],
-              widget.user.path[turnIndex],
+              widget.user.path[index - 2],
+              widget.user.path[index - 1],
+              widget.user.path[index],
               widget
                   .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
         }
       } else {
-        // print("index");
-        if (widget.user.cellPath[turnIndex - 1].bid ==
-                widget.user.cellPath[turnIndex].bid &&
-            widget.user.cellPath[turnIndex].bid ==
-                widget.user.cellPath[turnIndex + 1].bid) {
+        if (widget.user.cellPath[index - 1].bid ==
+            widget.user.cellPath[index].bid &&
+            widget.user.cellPath[index].bid ==
+                widget.user.cellPath[index + 1].bid) {
           a = tools.calculateAnglefifth(
-              widget.user.path[turnIndex - 1],
-              widget.user.path[turnIndex],
-              widget.user.path[turnIndex + 1],
+              widget.user.path[index - 1],
+              widget.user.path[index],
+              widget.user.path[index + 1],
               widget
                   .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
         }
@@ -733,41 +997,35 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
       if (oldWidget.direction != widget.direction) {
         if (oldWidget.direction == "Straight") {
-          _speakTimer?.cancel(); // Cancel any previous timer
-          _turnSpoken = false; // Reset flag
+          Vibration.vibrate();
 
-          _speakTimer = Timer(Duration(seconds: 3), () {
-            if (mounted && oldWidget.direction == widget.direction) {
-              return; // Direction changed back, do not proceed
-            }
-            _turnSpoken = true; // Mark that turn instruction was spoken
+          // if(nextTurn == turnPoints.last){
+          //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
+          // }else{
+          //   speak("${widget.direction} ${widget.distance} meter");
+          // }
 
-            Vibration.vibrate();
-            speak(
-                convertTolng(
-                    "Turn ${LocaleData.getProperty5(widget.direction, context)}",
-                    _currentLocale,
-                    widget.direction,
-                    "",
-                    0,
-                    ""),
-                _currentLocale,
-                prevpause: true);
-          });
-        }
-        else if (widget.direction == "Straight") {
-          if (!_turnSpoken) return; // Skip "Straight" if "Turn" was never spoken
-
+          speak(
+              convertTolng(
+                  "Turn ${LocaleData.getProperty5(widget.direction, context)}",
+                  _currentLocale,
+                  widget.direction,
+                  "",
+                  0,
+                  ""),
+              _currentLocale,
+              prevpause: true);
+          //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
+        } else if (widget.direction == "Straight") {
           Vibration.vibrate();
           UserState.isTurn = false;
           if (!UserState.ttsOnlyTurns) {
             speak(
-                "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context)}",
+                "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context)}}",
                 _currentLocale,
                 prevpause: true);
           }
         }
-
       }
 
       if (nextTurn == turnPoints.last && widget.distance == 7) {
@@ -997,8 +1255,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
   @override
   Widget build(BuildContext context) {
-    isSemanticEnabled = MediaQuery.of(context).accessibleNavigation;
-
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     double statusBarHeight = MediaQuery.of(context).padding.top;
@@ -1168,6 +1424,45 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               ),
             )
                 : Container(),
+
+            // Container(
+            //   width: screenWidth,
+            //   height: 300,
+            //   child: SingleChildScrollView(
+            //     scrollDirection: Axis.horizontal,
+            //     child: Column(
+            //       crossAxisAlignment: CrossAxisAlignment.start,
+            //       children: [
+            //         //Text("Beacon ${highestKey} - ${highestAverage}"),
+            //         Text(debuglNearestbeacon),
+            //         // Text(sumMap.entries.map((entry) => '${entry.key}: ${entry.value.join(", ")}').join("\n")),
+            //         // //Text(displayString),
+            //         // Text("-------"),
+            //         // Text(sumMapAvg.toString()),
+            //         // Text("${highestAverage} ${threshold.toString()}")
+            //         //
+            //
+            //         // Text(Building.apibeaconmap.containsKey(debuglNearestbeacon).toString()),
+            //       ],
+            //     ),
+            //   ),
+            // ),
+
+            // Container(
+            //   width: 300,
+            //   height: 100,
+            //   child: SingleChildScrollView(
+            //     scrollDirection: Axis.horizontal,
+            //     child: Column(
+            //       crossAxisAlignment: CrossAxisAlignment.start,
+            //       children: [
+            //
+            //         Text(sumMap.toString()),
+            //
+            //       ],
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),
@@ -1211,7 +1506,7 @@ class scrollableDirection extends StatelessWidget {
           return angle != null
               ? "${listOfDirections[DirectionIndex].turnDirection} ${LocaleData.willbe.getString(context)} ${LocaleData.getProperty(tools.angleToClocks3(angle, context), context)}"
               : "${listOfDirections[DirectionIndex].turnDirection} ${LocaleData.willbeonyourfront.getString(context)}";
-        } else if (nextTurnIndex == -1 || DirectionIndex == nextTurnIndex) {
+        } else if (DirectionIndex == nextTurnIndex) {
           return "${Direction == "Straight" ? "${LocaleData.gostraight.getString(context)}" : LocaleData.getProperty(Direction, context)}";
         } else {
           if (DirectionIndex < listOfDirections.length) {
@@ -1230,11 +1525,11 @@ class scrollableDirection extends StatelessWidget {
 
   String chooseSteps() {
     try {
-      // print("DirectionIndex $DirectionIndex and $nextTurnIndex");
-      if (listOfDirections.isNotEmpty && DirectionIndex < listOfDirections.length) {
+      if (listOfDirections.isNotEmpty &&
+          DirectionIndex < listOfDirections.length) {
         if (listOfDirections[DirectionIndex].isDestination) {
           return "";
-        } else if (nextTurnIndex == -1 || DirectionIndex == nextTurnIndex) {
+        } else if (DirectionIndex == nextTurnIndex) {
           return '$steps';
         } else {
           return '${tools.convertFeet((listOfDirections[DirectionIndex].distanceToNextTurnInFeet ?? 1).toInt(), context)}';
@@ -1257,7 +1552,7 @@ class scrollableDirection extends StatelessWidget {
             color: Colors.blueAccent,
             size: 40,
           );
-        } else if (nextTurnIndex == -1 || DirectionIndex == nextTurnIndex) {
+        } else if (DirectionIndex == nextTurnIndex) {
           return i;
         } else {
           return _DirectionHeaderState.getCustomIcon(

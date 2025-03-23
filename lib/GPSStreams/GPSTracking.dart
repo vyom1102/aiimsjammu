@@ -2,7 +2,7 @@ import 'dart:async';
 import '../GPSService.dart';
 import '../websocket/UserLog.dart';
 
-class GpsService {
+class GpsTracking {
   StreamSubscription<Location>? _gpsSubscription;
   double uniqueLat = 0.0;
   double uniqueLng = 0.0;

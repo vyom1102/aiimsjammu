@@ -961,6 +961,7 @@ class UserState {
       i = await moveToNearestPoint();
       i = await moveToNearestTurn(i);
     }
+    print("moveToStartofPath floor ${pathobj.sourceFloor}");
     floor = pathobj.sourceFloor;
     bid = cellPath[pathobj.index].bid??bid;
     showcoordX = cellPath[pathobj.index].x;

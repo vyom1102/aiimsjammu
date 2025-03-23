@@ -440,7 +440,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   late DateTime timerStartTime;
 
-  final GpsService gpsTrackingService = GpsService();
+  final GpsTracking gpsTrackingService = GpsTracking();
   Set<Marker> gpsTrackingMarker = {};
   final ws = WebSocketService();
   var userInfoBox=Hive.box('UserInformation');
@@ -923,8 +923,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           await flutterTts.setVoice({"name": "Lekha", "locale": "hi-IN"});
         }
       } else {
-        await flutterTts
-            .setVoice({"name": "en-US-language", "locale": "en-US"});
+        await flutterTts.setVoice({"name": "en-US-language", "locale": "en-IN"});
       }
       await flutterTts.stop();
       if (Platform.isAndroid) {
@@ -6749,6 +6748,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                           PathState.sourceX = user.coordX;
                           PathState.sourceY = user.coordY;
                           PathState.sourceFloor = user.floor;
+
                           PathState.sourcePolyID = user.key;
 
                           PathState.sourceName = "Your current location";
@@ -6771,7 +6771,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                               .landmarksMap![SingletonFunctionController
                               .building.selectedLandmarkID]!
                               .floor!;
-                          print("userbid in landmarkdetailpannel is ${user.bid}");
+                          print("userbid in landmarkdetailpannel is ${user.bid} ${PathState.sourceFloor}");
                           PathState.sourceBid = user.bid;
 
                           PathState.destinationBid = snapshot
@@ -9284,12 +9284,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               .sourceBid]!
               .patchData!
               .buildingAngle!);
-      if (PathState.sourceX ==
-          PathState
-              .destinationX &&
-          PathState.sourceY ==
-              PathState
-                  .destinationY) {
+      if (PathState.sourceX == PathState.destinationX &&
+          PathState.sourceY == PathState.destinationY) {
         //HelperClass.showToast("Source and Destination can not be same");
         setState(() {
           _isRoutePanelOpen = false;
@@ -9402,6 +9398,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           .singleCellListPath
           .forEach(
               (element) {});
+      print("printuser1 ${user.pathobj.sourceFloor}  ${PathState.sourceFloor}");
+      user.pathobj = PathState;
       user
           .moveToStartofPath(context)
           .then((value) async {
@@ -9462,6 +9460,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           PathState.destinationLng = destination[1];
 
           user.pathobj = PathState;
+
+          print("printuser2 ${user.pathobj.sourceFloor}  ${PathState.sourceFloor}");
 
           if (kDebugMode) {
             markers[user.bid]
@@ -12988,16 +12988,17 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   // Text(SingletonFunctionController.SC_IL_RSSI_AVERAGE.toString()),
 
 
-                  // Text("coord [${user.coordX},${user.coordY}] \n"
-                  //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                  //     "angle ${tools.AngleBetweenBuildingandGlobalNorth} \n"
-                  // "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
-                  // // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
-                  //     "floor ${user.floor}\n"
-                  //      "userBid ${user.bid} \n"
-                  // "stepSize ${UserState.stepSize}\n"
-                  //     "index ${user.pathobj.index} \n"
-                  //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+                  Text("coord [${user.coordX},${user.coordY}] \n"
+                      "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                      "angle ${tools.AngleBetweenBuildingandGlobalNorth} \n"
+                  "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
+                  // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
+                      "floor ${user.floor}\n"
+                      "sourceFloor ${PathState.sourceFloor}\n"
+                       "userBid ${user.bid} \n"
+                  "stepSize ${UserState.stepSize}\n"
+                      "index ${user.pathobj.index} \n"
+                      "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
 
                   DebugToggle.Slider
                       ? Slider(

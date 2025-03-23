@@ -47,7 +47,10 @@ class pathState {
   pathState();
   // Additional constructor with named parameters for creating instances with specific values
   pathState.withValues(
-      this.sourceX, this.sourceY, this.sourceFloor, this.destinationX, this.destinationY, this.destinationFloor, this.numCols, this.index);
+      this.sourceX, this.sourceY, this.sourceFloor, this.destinationX, this.destinationY, this.destinationFloor, this.numCols, this.index){
+    final stackTrace = StackTrace.current;
+    print("pathState Stack: \n$stackTrace");
+  }
 
   void clear(){
     path.clear();

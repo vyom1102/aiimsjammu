@@ -67,7 +67,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   List<dynamic> recent = [];
 
   TextEditingController _controller = TextEditingController();
-  Timer? _searchDebounce;
+  TextEditingController _test = TextEditingController();
+  // Timer? _searchDebounce;
 
   final SpeechToText speetchText = SpeechToText();
   bool speechEnabled = false;
@@ -186,79 +187,79 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       }
     });
     if(containsPrompt){
-      if (_searchDebounce?.isActive ?? false) _searchDebounce!.cancel();
-
-      _searchDebounce = Timer(Duration(seconds: 3), () {
-        setState(() {
-          promptLoader = true;
-        });
-
-        // Perform search
-        //_performSearch(_controller.text);
-
-        String modifiedString = _controller.text.replaceAll(stringToRemove, "");
-        if(modifiedString.trim().length>0){
-          final fuse = Fuzzy(
-            landmarkData.landmarkNames,
-            options: FuzzyOptions(
-              findAllMatches: true,
-              tokenize: true,
-              threshold: 0.7,
-            ),
-          );
-          final outputresult = fuse.search(modifiedString.toLowerCase());
-          // Assuming `result` is a List<FuseResult<dynamic>>
-          outputresult.forEach((fuseResult) {
-            // Access the item property of the result to get the matched value
-            String matchedName = fuseResult.item;
-            fuseResult.matches.length;
-
-            // Access the score of the match
-            double score = fuseResult.score;
-
-            // Do something with the matchedName or score
-            // score == 0.0
-            //     ? print('Matched Name: $matchedName, Score: $score')
-            //     : print("");
-            if (score <= 0.3) { //0.5 for normal
-              finalName = fuseResult.item;
-            }
-          });
-
-          landmarkData.landmarksMap!.forEach((key, value) {
-            if (value.name != null && value.element!.subType != "beacons") {
-              if (value.name!.toLowerCase().contains(finalName.toLowerCase())) {
-                name = value.name!;
-                floor = value.name!;
-                polyID = value.properties!.polyId!;
-                buildingID = value.buildingID!;
-              }else{
-                print("nooo${value.name!.toLowerCase()} ----- ${finalName.toLowerCase()}");
-              }
-            }
-          });
-
-          if(landmarkData.landmarkNames!.contains(finalName)){
-            //onVenueClicked(name, floor, polyID, buildingID);
-            if(polyID.isNotEmpty){
-              HelperClass.showToast("Navigating to ${finalName}");
-              setState(() {
-                promptLoader = false;
-              });
-              //Future.delayed(Duration(seconds: 2));
-              Navigator.pop(context, polyID);
-            }else{
-            }
-          }
-          
-        }else{
-          HelperClass.showToast("Provide a Landmark name !!");
-        }
-
-
-
-
-      });
+      // if (_searchDebounce?.isActive ?? false) _searchDebounce!.cancel();
+      //
+      // _searchDebounce = Timer(Duration(seconds: 3), () {
+      //   setState(() {
+      //     promptLoader = true;
+      //   });
+      //
+      //   // Perform search
+      //   //_performSearch(_controller.text);
+      //
+      //   String modifiedString = _controller.text.replaceAll(stringToRemove, "");
+      //   if(modifiedString.trim().length>0){
+      //     final fuse = Fuzzy(
+      //       landmarkData.landmarkNames,
+      //       options: FuzzyOptions(
+      //         findAllMatches: true,
+      //         tokenize: true,
+      //         threshold: 0.7,
+      //       ),
+      //     );
+      //     final outputresult = fuse.search(modifiedString.toLowerCase());
+      //     // Assuming `result` is a List<FuseResult<dynamic>>
+      //     outputresult.forEach((fuseResult) {
+      //       // Access the item property of the result to get the matched value
+      //       String matchedName = fuseResult.item;
+      //       fuseResult.matches.length;
+      //
+      //       // Access the score of the match
+      //       double score = fuseResult.score;
+      //
+      //       // Do something with the matchedName or score
+      //       // score == 0.0
+      //       //     ? print('Matched Name: $matchedName, Score: $score')
+      //       //     : print("");
+      //       if (score <= 0.3) { //0.5 for normal
+      //         finalName = fuseResult.item;
+      //       }
+      //     });
+      //
+      //     landmarkData.landmarksMap!.forEach((key, value) {
+      //       if (value.name != null && value.element!.subType != "beacons") {
+      //         if (value.name!.toLowerCase().contains(finalName.toLowerCase())) {
+      //           name = value.name!;
+      //           floor = value.name!;
+      //           polyID = value.properties!.polyId!;
+      //           buildingID = value.buildingID!;
+      //         }else{
+      //           print("nooo${value.name!.toLowerCase()} ----- ${finalName.toLowerCase()}");
+      //         }
+      //       }
+      //     });
+      //
+      //     if(landmarkData.landmarkNames!.contains(finalName)){
+      //       //onVenueClicked(name, floor, polyID, buildingID);
+      //       if(polyID.isNotEmpty){
+      //         HelperClass.showToast("Navigating to ${finalName}");
+      //         setState(() {
+      //           promptLoader = false;
+      //         });
+      //         //Future.delayed(Duration(seconds: 2));
+      //         Navigator.pop(context, polyID);
+      //       }else{
+      //       }
+      //     }
+      //
+      //   }else{
+      //     HelperClass.showToast("Provide a Landmark name !!");
+      //   }
+      //
+      //
+      //
+      //
+      // });
     }else{
       print("Prompt not used");
     }
@@ -780,8 +781,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                         height: 48,
                         child: IconButton(
                           onPressed: () {
-                            SystemChannels.textInput.invokeMethod('TextInput.hide');
-                            Navigator.pop(context);
+                            // SystemChannels.textInput.invokeMethod('TextInput.hide');
+                            // Navigator.pop(context);
                           },
                           icon: Semantics(
                             label: "Back",
@@ -806,8 +807,8 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                 height: 25 / 16,
                               ),
                               onTap: () {
-                                FocusScope.of(context).requestFocus(FocusNode());
-                                SystemChannels.textInput.invokeMethod('TextInput.show');
+                                // FocusScope.of(context).requestFocus(FocusNode());
+                                // SystemChannels.textInput.invokeMethod('TextInput.show');
                                 if (containerBoxColor == Color(0xffA1A1AA)) {
                                   containerBoxColor = Color(0xff24B9B0);
                                 } else {
@@ -904,41 +905,48 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
             //     ),
             //   ),
             // ):Container(),
-            searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
-
-            InkWell(
-              onTap: (){
-              Navigator.push(context,  MaterialPageRoute(
-                builder: (BuildContext context) => SelectOnMapScreen(poly: SingletonFunctionController.building.polyLineData!, patchData: SingletonFunctionController
-                    .building.patchData[buildingAllApi
-                    .getStoredString()]!, destiPoint: (widget.hintText=="Source location")?false:true,buildingData: SingletonFunctionController.building,)
-              ),).then((value){
-                print("poly id:::${value}");
-                Navigator.pop(context,value);
-              });
-              },
-              child: Container(
-                margin: EdgeInsets.only(top:24,left: 17,right: 17,bottom: 8),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        SizedBox(width: 16,),
-                        Icon(Icons.map_rounded,size: 25,),
-                        SizedBox(width: 24,),
-                        Text(style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xff000000),
-                        ),(widget.hintText=="Source location" || widget.hintText.isEmpty)?"Select Source On Map":"Select Destination On Map")
-                      ],
-                    ),
-                  ],
-                ),
+            TextField(
+              controller: _test,
+              decoration: InputDecoration(
+                labelText: "Enter your text",
+                border: OutlineInputBorder(),
               ),
             ),
+            searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
+
+            // InkWell(
+            //   onTap: (){
+            //   Navigator.push(context,  MaterialPageRoute(
+            //     builder: (BuildContext context) => SelectOnMapScreen(poly: SingletonFunctionController.building.polyLineData!, patchData: SingletonFunctionController
+            //         .building.patchData[buildingAllApi
+            //         .getStoredString()]!, destiPoint: (widget.hintText=="Source location")?false:true,buildingData: SingletonFunctionController.building,)
+            //   ),).then((value){
+            //     print("poly id:::${value}");
+            //     Navigator.pop(context,value);
+            //   });
+            //   },
+            //   child: Container(
+            //     margin: EdgeInsets.only(top:24,left: 17,right: 17,bottom: 8),
+            //     child: Column(
+            //       children: [
+            //         Row(
+            //           mainAxisAlignment: MainAxisAlignment.start,
+            //           children: [
+            //             SizedBox(width: 16,),
+            //             Icon(Icons.map_rounded,size: 25,),
+            //             SizedBox(width: 24,),
+            //             Text(style: const TextStyle(
+            //               fontFamily: "Roboto",
+            //               fontSize: 16,
+            //               fontWeight: FontWeight.w400,
+            //               color: Color(0xff000000),
+            //             ),(widget.hintText=="Source location" || widget.hintText.isEmpty)?"Select Source On Map":"Select Destination On Map")
+            //           ],
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
             Semantics(
               label: "Filter Section",
               header: true,
@@ -1107,7 +1115,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   void dispose() {
     // _controller.removeListener(_onSearchChanged);
     _controller.dispose();
-    _searchDebounce?.cancel();
+    // _searchDebounce?.cancel();
     super.dispose();
   }
 }
