@@ -3075,7 +3075,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     var time = DateTime.now();
     if (SingletonFunctionController.timer != null) {
       print("Waiting for timer and allBuildingCalls...");
-      await Future.wait([Future.delayed(Duration(seconds: 1)), SingletonFunctionController.timer!, allBuildingCalls]);
+      await Future.wait([Future.delayed(Duration(seconds: 10)), SingletonFunctionController.timer!, allBuildingCalls]);
     }else{
       print("SingletonFunctionController.timer == null");
     }
@@ -3251,6 +3251,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
     if (await FlutterBluePlus.isOn) {
       nearestBeacon = findMaxWeightKey(SingletonFunctionController.btadapter.latesILMap);
+      print("ILnearestBeacon $nearestBeacon");
 
 
       // for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {

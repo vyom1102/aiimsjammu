@@ -612,10 +612,10 @@ class _HomePageState extends State<HomePage> {
     // Fetch data for all building IDs in parallel
     await Future.wait(buildingAllApi.allBuildingID.keys.map(fetchDataForBuilding));
 
-    try {
-      var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(buildingAllApi.outdoorID);
-      Building.GlobalAnnotation = globalData;
-    }catch(_){}
+    // try {
+    //   var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(buildingAllApi.outdoorID);
+    //   Building.GlobalAnnotation = globalData;
+    // }catch(_){}
 
     // Fetch outdoor data
     await fetchDataForBuilding(buildingAllApi.outdoorID);
