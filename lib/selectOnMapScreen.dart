@@ -25,6 +25,7 @@ import 'APIMODELS/polylinedata.dart';
 import 'CLUSTERING/InitMarkerModel.dart';
 import 'CLUSTERING/MapHelper.dart';
 import 'CLUSTERING/MapMarkers.dart';
+import 'GlobalAnnotation/global_rendering.dart';
 import 'MapState.dart';
 import 'UserState.dart';
 import 'buildingState.dart';
@@ -37,11 +38,18 @@ class SelectOnMapScreen extends StatefulWidget {
   patchDataModel patchData;
   bool destiPoint;
   Building buildingData;
-  SelectOnMapScreen({super.key,required this.poly,required this.patchData,required this.destiPoint,required this.buildingData});
+  SelectOnMapScreen(
+      {super.key,
+      required this.poly,
+      required this.patchData,
+      required this.destiPoint,
+      required this.buildingData});
   @override
   State<SelectOnMapScreen> createState() => _SelectOnMapScreenState();
 }
-class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProviderStateMixin{
+
+class _SelectOnMapScreenState extends State<SelectOnMapScreen>
+    with TickerProviderStateMixin {
   MapState mapState = new MapState();
   Timer? PDRTimer;
   Timer? _exploreModeTimer;
@@ -59,6 +67,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
   Set<gmap.Polyline> focusturn = Set();
   Set<Marker> focusturnArrow = Set();
   Map<String, Set<Polygon>> closedpolygons = Map();
+  Set<Polygon> globalCampus = Set();
   Set<Polygon> otherclosedpolygons = Set();
   Set<Marker> Markers = Set();
   Set<Marker> builidngNameMarker = Set();
@@ -146,16 +155,18 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
   /// Color of the cluster text
   final Color _clusterTextColor = Colors.white;
+
   /// Example marker coordinates
   final List<InitMarkerModel> mapMarkerLocationMapAndName = [];
   final Map<LatLng, String> _markerLocationsMap = {};
   final Map<LatLng, String> _markerLocationsMapLanName = {};
   final Map<LatLng, String> _markerLocationsMapLanNameBID = {};
+
   /// Inits [Fluster] and all the markers with network images and updates the loading state.
   ///
   Set<Polygon> _polygon = Set();
   Set<Polygon> getCombinedPolygons() {
-    if(cachedPolygon.isEmpty){
+    if (cachedPolygon.isEmpty) {
       Set<Polygon> polygons = Set();
 
       closedpolygons.forEach((key, value) {
@@ -170,40 +181,48 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
     }
     return cachedPolygon.union(patch).union(otherpatch).union(blurPatch);
   }
+
   land combinedMarker = land();
 
- @override
+  @override
   void initState() {
-
-
-
-
-
-   //createRooms(widget.poly, SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]!.floor()??0);
+    //createRooms(widget.poly, SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]!.floor()??0);
     super.initState();
     renderData();
   }
 
   renderData() async {
-   await renderpatchData();
-   await renderpolylineData();
-   callMarkers();
+    await renderpatchData();
+    await renderpolylineData();
+    await renderGlobalAnnotation();
+    callMarkers();
   }
 
-  renderpatchData()async{
-    widget.buildingData.patchData.forEach((key,value){
+  renderpatchData() async {
+    widget.buildingData.patchData.forEach((key, value) {
       createPatch(value);
     });
   }
+
   renderpolylineData() async {
-    widget.buildingData.polylinedatamap.forEach((key,value){
-      createRooms(value,SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]!.floor()??0);
+    widget.buildingData.polylinedatamap.forEach((key, value) {
+      createRooms(
+          value,
+          SingletonFunctionController
+                  .building.floor[buildingAllApi.getStoredString()]!
+                  .floor() ??
+              0);
     });
   }
 
+  renderGlobalAnnotation() async {
+    closedpolygons[Building.GlobalAnnotation!.mappingElements!.first.buildingID!] = await globalRendering(Building.GlobalAnnotation!,null)??Set();
+  }
+
+
   callMarkers() async {
     SingletonFunctionController.building.landmarkdata!.then((value) {
-      createMarkers(value,0);
+      createMarkers(value, 0);
     });
   }
 
@@ -215,6 +234,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
     _googleMapController.dispose();
     super.dispose();
   }
+
   String closestBuildingId = "";
   void createPatch(patchDataModel value) async {
     print("patchformation $value");
@@ -240,23 +260,23 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
             latcenterofmap +
                 1.1 *
                     (double.parse(
-                        value.patchData!.coordinates![i].globalRef!.lat!) -
+                            value.patchData!.coordinates![i].globalRef!.lat!) -
                         latcenterofmap),
             lngcenterofmap +
                 1.1 *
                     (double.parse(
-                        value.patchData!.coordinates![i].globalRef!.lng!) -
+                            value.patchData!.coordinates![i].globalRef!.lng!) -
                         lngcenterofmap));
         polygonPoints.add(LatLng(
             latcenterofmap +
                 1.1 *
                     (double.parse(
-                        value.patchData!.coordinates![i].globalRef!.lat!) -
+                            value.patchData!.coordinates![i].globalRef!.lat!) -
                         latcenterofmap),
             lngcenterofmap +
                 1.1 *
                     (double.parse(
-                        value.patchData!.coordinates![i].globalRef!.lng!) -
+                            value.patchData!.coordinates![i].globalRef!.lng!) -
                         lngcenterofmap)));
       }
       SingletonFunctionController.building
@@ -271,7 +291,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
               fillColor: Color(0xffffffff),
               geodesic: false,
               consumeTapEvents: true,
-              zIndex:-1),
+              zIndex: -1),
         );
         cachedPolygon.clear();
       });
@@ -280,17 +300,18 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
       } catch (e) {}
     }
   }
+
   Set<Marker> getCombinedMarkers() {
     Set<Marker> combinedMarkers = Set();
-    if(user.floor ==
+    if (user.floor ==
         SingletonFunctionController
-            .building.floor[buildingAllApi.getStoredString()]){
+            .building.floor[buildingAllApi.getStoredString()]) {
       if (_isLandmarkPanelOpen) {
         selectedroomMarker.forEach((key, value) {
           combinedMarkers = combinedMarkers.union(value);
         });
       }
-    }else{
+    } else {
       if (_isLandmarkPanelOpen) {
         selectedroomMarker.forEach((key, value) {
           combinedMarkers = combinedMarkers.union(value);
@@ -302,7 +323,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
           pathMarkers[key]![SingletonFunctionController.building.floor[key]] !=
               null) {
         combinedMarkers = combinedMarkers.union(pathMarkers[key]![
-        SingletonFunctionController.building.floor[key]]!);
+            SingletonFunctionController.building.floor[key]]!);
       }
       if ((!_isRoutePanelOpen || !_isnavigationPannelOpen) &&
           markers[key] != null &&
@@ -319,9 +340,11 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
     }
     return combinedMarkers;
   }
+
   Set<Polygon> cachedPolygon = {};
   Set<Marker> restBuildingMarker = Set();
-  Future<void> zoomWhileWait(Map<String, LatLng> allBuildingID, GoogleMapController controller) async {
+  Future<void> zoomWhileWait(
+      Map<String, LatLng> allBuildingID, GoogleMapController controller) async {
     print("allbuilding id ${allBuildingID}");
     print("else");
     print(patch.length);
@@ -385,7 +408,9 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
     //   }
     // }
   }
-  Future<typed_data.Uint8List> getImagesFromMarker(String path, int width) async {
+
+  Future<typed_data.Uint8List> getImagesFromMarker(
+      String path, int width) async {
     typed_data.ByteData data = await rootBundle.load(path);
     ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
         targetHeight: width);
@@ -394,20 +419,22 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
         .buffer
         .asUint8List();
   }
+
   Future<void> moveCameraSmoothly({
     required GoogleMapController controller,
     required CameraPosition targetPosition,
     required LatLng currTarget,
-    Duration duration = const Duration(milliseconds:100),
+    Duration duration = const Duration(milliseconds: 100),
     int steps = 50,
   }) async {
     print("runnningggg");
     // Get the current camera position
     final LatLng currentTarget;
-    if(tappedPolygonCoordinates.isNotEmpty){
-      currentTarget=tools.calculateRoomCenterinLatLng(tappedPolygonCoordinates);
-    }else{
-      currentTarget=currTarget;
+    if (tappedPolygonCoordinates.isNotEmpty) {
+      currentTarget =
+          tools.calculateRoomCenterinLatLng(tappedPolygonCoordinates);
+    } else {
+      currentTarget = currTarget;
     }
     // Assume the current zoom level
     double currentZoom = await controller.getZoomLevel();
@@ -437,6 +464,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
       await Future.delayed(duration ~/ steps);
     }
   }
+
   LatLng calculateRoomCenter(List<LatLng> polygonPoints) {
     double lat = 0.0;
     double long = 0.0;
@@ -454,6 +482,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
       return LatLng(lat / 4, long / 4);
     }
   }
+
   List<LatLng> getPolygonPoints(Polygon polygon) {
     List<LatLng> polygonPoints = [];
 
@@ -463,6 +492,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
     return polygonPoints;
   }
+
   PolygonId matchPolygonId = PolygonId("");
   List<LatLng> matchPolygonPoints = [];
   AnimationController? _controller12;
@@ -483,14 +513,14 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
       strokeColor: color ?? Colors.blue,
       strokeWidth: 2,
     ));
-    cachedPolygon.clear();// Clear existing markers
+    cachedPolygon.clear(); // Clear existing markers
 
     List<geo.LatLng> points = [];
     for (var e in polygonPoints) {
       points.add(geo.LatLng(e.latitude, e.longitude));
     }
     Uint8List iconMarker =
-    await getImagesFromMarker('assets/IwaymapsDefaultMarker.png', 140);
+        await getImagesFromMarker('assets/IwaymapsDefaultMarker.png', 140);
     setState(() {
       if (selectedroomMarker.containsKey(buildingAllApi.getStoredString())) {
         selectedroomMarker[buildingAllApi.getStoredString()]?.add(
@@ -556,11 +586,12 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
           });
           Markers = updatedMarkers;
         });
-      }else{
-        setState((){
-          Markers.forEach((marker){
+      } else {
+        setState(() {
+          Markers.forEach((marker) {
             List<String> words = marker.markerId.value.split(' ');
-            if (SingletonFunctionController.building.ignoredMarker.contains(words[1])) {
+            if (SingletonFunctionController.building.ignoredMarker
+                .contains(words[1])) {
               if (marker.markerId.value.contains("Door")) {
                 Marker _marker = customMarker.visibility(true, marker);
 
@@ -570,23 +601,23 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                 Marker _marker = customMarker.visibility(false, marker);
                 updatedMarkers.add(_marker);
               }
-            }else if (marker.markerId.value.contains("toppriority")) {
+            } else if (marker.markerId.value.contains("toppriority")) {
               Marker _marker = customMarker.visibility(zoom > 19, marker);
               updatedMarkers.add(_marker);
-            }else if (marker.markerId.value.contains("Room")) {
+            } else if (marker.markerId.value.contains("Room")) {
               Marker _marker = customMarker.visibility(zoom > 20.5, marker);
               updatedMarkers.add(_marker);
-            }else if (marker.markerId.value.contains("Rest")) {
+            } else if (marker.markerId.value.contains("Rest")) {
               Marker _marker = customMarker.visibility(zoom > 19, marker);
               updatedMarkers.add(_marker);
-            }else if (marker.markerId.value.contains("Entry")) {
+            } else if (marker.markerId.value.contains("Entry")) {
               Marker _marker = customMarker.visibility(
                   (zoom > 18.5 && zoom < 19) || zoom > 20.3, marker);
               updatedMarkers.add(_marker);
-            }else if (marker.markerId.value.contains("Building")) {
+            } else if (marker.markerId.value.contains("Building")) {
               Marker _marker = customMarker.visibility(zoom < 16.0, marker);
               updatedMarkers.add(_marker);
-            }else if (marker.markerId.value.contains("Lift")) {
+            } else if (marker.markerId.value.contains("Lift")) {
               Marker _marker = customMarker.visibility(zoom > 19, marker);
               updatedMarkers.add(_marker);
             }
@@ -596,6 +627,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
       }
     }
   }
+
   void fitPolygonInScreen(Polygon polygon) {
     List<LatLng> polygonPoints = getPolygonPoints(polygon);
     double minLat = polygonPoints[0].latitude;
@@ -606,13 +638,13 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
       if (point.latitude < minLat) {
         minLat = point.latitude;
       }
-      if (point.latitude > maxLat){
+      if (point.latitude > maxLat) {
         maxLat = point.latitude;
       }
-      if (point.longitude < minLng){
+      if (point.longitude < minLng) {
         minLng = point.longitude;
       }
-      if (point.longitude > maxLng){
+      if (point.longitude > maxLng) {
         maxLng = point.longitude;
       }
     }
@@ -626,6 +658,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
       return;
     });
   }
+
   Future<void> _updateMarkers11([double? updatedZoom]) async {
     if (updatedZoom != null && updatedZoom! > 15.5) {
       if (_clusterManager == null || updatedZoom == _currentZoom) return;
@@ -643,7 +676,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
           _clusterTextColor,
           70,
           _googleMapController);
-      updatedMarkers.forEach((currentMarker){
+      updatedMarkers.forEach((currentMarker) {
         if (currentMarker.markerId.toString().contains(closestBuildingId)) {
           currentMarker.visible = true;
         } else {
@@ -659,6 +692,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
       });
     }
   }
+
   List<PolyArray> findLift(String floor, List<Floors> floorData) {
     List<PolyArray> lifts = [];
     floorData.forEach((Element) {
@@ -672,6 +706,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
     });
     return lifts;
   }
+
   List<int> findCommonLift(List<PolyArray> list1, List<PolyArray> list2) {
     List<int> diff = [0, 0];
 
@@ -709,6 +744,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
     }
     return diff;
   }
+
   Future<void> createRooms(polylinedata value, int floor) async {
     if (closedpolygons[buildingAllApi.getStoredString()] == null) {
       closedpolygons[buildingAllApi.getStoredString()] = Set();
@@ -725,7 +761,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
     if (floor != 0) {
       List<PolyArray> prevFloorLifts =
-      findLift(tools.numericalToAlphabetical(0), value.polyline!.floors!);
+          findLift(tools.numericalToAlphabetical(0), value.polyline!.floors!);
       List<PolyArray> currFloorLifts = findLift(
           tools.numericalToAlphabetical(floor), value.polyline!.floors!);
       List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
@@ -743,13 +779,13 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
         FloorPolyArray = value.polyline!.floors![j].polyArray;
       }
     }
-    setState((){
+    setState(() {
       if (FloorPolyArray != null) {
-        for (PolyArray polyArray in FloorPolyArray){
+        for (PolyArray polyArray in FloorPolyArray) {
           if (polyArray.visibilityType == "visible" &&
-              polyArray.polygonType != "Waypoints"){
+              polyArray.polygonType != "Waypoints") {
             List<LatLng> coordinates = [];
-            for (Nodes node in polyArray.nodes!){
+            for (Nodes node in polyArray.nodes!) {
               //coordinates.add(LatLng(node.lat!,node.lon!));
               coordinates.add(LatLng(
                   tools.localtoglobal(
@@ -779,50 +815,52 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                         "${value.polyline!.buildingID!} Line ${polyArray.id!}"),
                     points: coordinates,
                     color: polyArray.cubicleColor != null &&
-                        polyArray.cubicleColor != "undefined"
+                            polyArray.cubicleColor != "undefined"
                         ? Color(int.parse(
-                        '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                         : Color(0xffC0C0C0),
                     width: 1,
                     onTap: () {}));
               }
-            }else if(polyArray.polygonType == 'Room' ){
+            } else if (polyArray.polygonType == 'Room') {
               print("polyArray.name");
               print(polyArray.name);
-              if(polyArray.name!.toLowerCase().contains('lr') || polyArray.name!.toLowerCase().contains('lab') || polyArray.name!.toLowerCase().contains('office') || polyArray.name!.toLowerCase().contains('pantry') || polyArray.name!.toLowerCase().contains('reception')) {
+              if (polyArray.name!.toLowerCase().contains('lr') ||
+                  polyArray.name!.toLowerCase().contains('lab') ||
+                  polyArray.name!.toLowerCase().contains('office') ||
+                  polyArray.name!.toLowerCase().contains('pantry') ||
+                  polyArray.name!.toLowerCase().contains('reception')) {
                 print("COntaining LA");
-                if (coordinates.length > 2){
+                if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                      polygonId:PolygonId(
-                          "${value.polyline!.buildingID!} Room ${polyArray
-                              .id!}"),
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Room ${polyArray.id!}"),
                       points: coordinates,
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
                       strokeColor: Color(0xffA38F9F),
                       fillColor: Color(0xffE8E3E7),
                       consumeTapEvents: true,
-                      onTap:(){
+                      onTap: () {
                         print("polyid::${polyArray.id}");
-                        setState((){
-                          tappedPolygonCoordinates=coordinates;
+                        setState(() {
+                          tappedPolygonCoordinates = coordinates;
                         });
-                        moveCameraSmoothly(controller: _googleMapController, targetPosition:  CameraPosition(
-                            target: tools.calculateRoomCenterinLatLng(coordinates),zoom:22), currTarget: LatLng(user.lat,user.lng));
-                        setState((){
-                          if (SingletonFunctionController.building
-                              .selectedLandmarkID != polyArray.id) {
+                        moveCameraSmoothly(
+                            controller: _googleMapController,
+                            targetPosition: CameraPosition(
+                                target: tools
+                                    .calculateRoomCenterinLatLng(coordinates),
+                                zoom: 22),
+                            currTarget: LatLng(user.lat, user.lng));
+                        setState(() {
+                          if (SingletonFunctionController
+                                  .building.selectedLandmarkID !=
+                              polyArray.id) {
                             user.reset();
                             PathState = pathState.withValues(
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                null,
-                                0);
+                                -1, -1, -1, -1, -1, -1, null, 0);
                             pathMarkers.clear();
                             PathState.path.clear();
                             PathState.sourcePolyID = "";
@@ -830,8 +868,8 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                             singleroute.clear();
                             user.isnavigating = false;
                             _isnavigationPannelOpen = false;
-                            SingletonFunctionController.building
-                                .selectedLandmarkID = polyArray.id;
+                            SingletonFunctionController
+                                .building.selectedLandmarkID = polyArray.id;
                             SingletonFunctionController.building.ignoredMarker
                                 .clear();
                             SingletonFunctionController.building.ignoredMarker
@@ -842,22 +880,25 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             addselectedRoomMarker(coordinates);
-                            Future.delayed(Duration(milliseconds: 500)).then((onValue){
-                              Navigator.pop(context, SingletonFunctionController.building.selectedLandmarkID);
+                            Future.delayed(Duration(milliseconds: 500))
+                                .then((onValue) {
+                              Navigator.pop(
+                                  context,
+                                  SingletonFunctionController
+                                      .building.selectedLandmarkID);
                             });
-
                           }
                         });
                       }));
                 }
-              }else if(polyArray.name!.toLowerCase().contains('atm') || polyArray.name!.toLowerCase().contains('health')) {
+              } else if (polyArray.name!.toLowerCase().contains('atm') ||
+                  polyArray.name!.toLowerCase().contains('health')) {
                 print("COntaining LA");
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
                       polygonId: PolygonId(
-                          "${value.polyline!.buildingID!} Room ${polyArray
-                              .id!}"),
+                          "${value.polyline!.buildingID!} Room ${polyArray.id!}"),
                       points: coordinates,
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
@@ -867,25 +908,24 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                       consumeTapEvents: true,
                       onTap: () {
                         print("polyid::${polyArray.id}");
-                        setState((){
-                          tappedPolygonCoordinates=coordinates;
+                        setState(() {
+                          tappedPolygonCoordinates = coordinates;
                         });
 
-                        moveCameraSmoothly(controller: _googleMapController, targetPosition:  CameraPosition(
-                            target: tools.calculateRoomCenterinLatLng(coordinates),zoom:22), currTarget: LatLng(user.lat,user.lng));
+                        moveCameraSmoothly(
+                            controller: _googleMapController,
+                            targetPosition: CameraPosition(
+                                target: tools
+                                    .calculateRoomCenterinLatLng(coordinates),
+                                zoom: 22),
+                            currTarget: LatLng(user.lat, user.lng));
                         setState(() {
-                          if (SingletonFunctionController.building
-                              .selectedLandmarkID != polyArray.id) {
+                          if (SingletonFunctionController
+                                  .building.selectedLandmarkID !=
+                              polyArray.id) {
                             user.reset();
                             PathState = pathState.withValues(
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                null,
-                                0);
+                                -1, -1, -1, -1, -1, -1, null, 0);
                             pathMarkers.clear();
                             PathState.path.clear();
                             PathState.sourcePolyID = "";
@@ -894,8 +934,8 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
                             user.isnavigating = false;
                             _isnavigationPannelOpen = false;
-                            SingletonFunctionController.building
-                                .selectedLandmarkID = polyArray.id;
+                            SingletonFunctionController
+                                .building.selectedLandmarkID = polyArray.id;
                             SingletonFunctionController.building.ignoredMarker
                                 .clear();
                             SingletonFunctionController.building.ignoredMarker
@@ -907,20 +947,23 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                             PathState.directions = [];
 
                             addselectedRoomMarker(coordinates);
-                            Future.delayed(Duration(milliseconds: 500)).then((onValue){
-                              Navigator.pop(context, SingletonFunctionController.building.selectedLandmarkID);
+                            Future.delayed(Duration(milliseconds: 500))
+                                .then((onValue) {
+                              Navigator.pop(
+                                  context,
+                                  SingletonFunctionController
+                                      .building.selectedLandmarkID);
                             });
                           }
                         });
                       }));
                 }
-              } else{
+              } else {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
                       polygonId: PolygonId(
-                          "${value.polyline!.buildingID!} Room ${polyArray
-                              .id!}"),
+                          "${value.polyline!.buildingID!} Room ${polyArray.id!}"),
                       points: coordinates,
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
@@ -930,26 +973,25 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                       consumeTapEvents: true,
                       onTap: () {
                         print("polyid::${polyArray.id}");
-                        setState((){
-                          tappedPolygonCoordinates=coordinates;
+                        setState(() {
+                          tappedPolygonCoordinates = coordinates;
                         });
 
-                        moveCameraSmoothly(controller: _googleMapController, targetPosition:  CameraPosition(
-                            target: tools.calculateRoomCenterinLatLng(coordinates),zoom:22), currTarget: LatLng(user.lat,user.lng));
+                        moveCameraSmoothly(
+                            controller: _googleMapController,
+                            targetPosition: CameraPosition(
+                                target: tools
+                                    .calculateRoomCenterinLatLng(coordinates),
+                                zoom: 22),
+                            currTarget: LatLng(user.lat, user.lng));
 
                         setState(() {
-                          if (SingletonFunctionController.building
-                              .selectedLandmarkID != polyArray.id) {
+                          if (SingletonFunctionController
+                                  .building.selectedLandmarkID !=
+                              polyArray.id) {
                             user.reset();
                             PathState = pathState.withValues(
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                null,
-                                0);
+                                -1, -1, -1, -1, -1, -1, null, 0);
                             pathMarkers.clear();
                             PathState.path.clear();
                             PathState.sourcePolyID = "";
@@ -958,8 +1000,8 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
                             user.isnavigating = false;
                             _isnavigationPannelOpen = false;
-                            SingletonFunctionController.building
-                                .selectedLandmarkID = polyArray.id;
+                            SingletonFunctionController
+                                .building.selectedLandmarkID = polyArray.id;
                             SingletonFunctionController.building.ignoredMarker
                                 .clear();
                             SingletonFunctionController.building.ignoredMarker
@@ -970,8 +1012,12 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                             _isLandmarkPanelOpen = true;
                             PathState.directions = [];
                             addselectedRoomMarker(coordinates);
-                            Future.delayed(Duration(milliseconds: 500)).then((onValue){
-                              Navigator.pop(context, SingletonFunctionController.building.selectedLandmarkID);
+                            Future.delayed(Duration(milliseconds: 500))
+                                .then((onValue) {
+                              Navigator.pop(
+                                  context,
+                                  SingletonFunctionController
+                                      .building.selectedLandmarkID);
                             });
                           }
                         });
@@ -980,7 +1026,14 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
               }
             } else if (polyArray.polygonType == 'Cubicle') {
               if (polyArray.cubicleName == "Green Area" ||
-                  polyArray.cubicleName == "Green Area | Pots" || polyArray.name!.toLowerCase().contains('auditorium') || polyArray.name!.toLowerCase().contains('basketball') || polyArray.name!.toLowerCase().contains('cricket') || polyArray.name!.toLowerCase().contains('football') || polyArray.name!.toLowerCase().contains('gym') || polyArray.name!.toLowerCase().contains('swimming') || polyArray.name!.toLowerCase().contains('tennis')) {
+                  polyArray.cubicleName == "Green Area | Pots" ||
+                  polyArray.name!.toLowerCase().contains('auditorium') ||
+                  polyArray.name!.toLowerCase().contains('basketball') ||
+                  polyArray.name!.toLowerCase().contains('cricket') ||
+                  polyArray.name!.toLowerCase().contains('football') ||
+                  polyArray.name!.toLowerCase().contains('gym') ||
+                  polyArray.name!.toLowerCase().contains('swimming') ||
+                  polyArray.name!.toLowerCase().contains('tennis')) {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
@@ -992,9 +1045,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
                       strokeColor: Color(0xffADFA9E),
                       fillColor: Color(0xffE7FEE9),
-                      onTap: () {
-
-                      }));
+                      onTap: () {}));
                 }
               } else if (polyArray.cubicleName!
                   .toLowerCase()
@@ -1012,14 +1063,19 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                       fillColor: Color(0xffDAE6F1),
                       onTap: () {
                         print("polyid::${polyArray.id}");
-                        setState((){
-                          tappedPolygonCoordinates=coordinates;
+                        setState(() {
+                          tappedPolygonCoordinates = coordinates;
                         });
-                        moveCameraSmoothly(controller: _googleMapController, targetPosition:  CameraPosition(
-                            target: tools.calculateRoomCenterinLatLng(coordinates),zoom:22), currTarget: LatLng(user.lat,user.lng));
+                        moveCameraSmoothly(
+                            controller: _googleMapController,
+                            targetPosition: CameraPosition(
+                                target: tools
+                                    .calculateRoomCenterinLatLng(coordinates),
+                                zoom: 22),
+                            currTarget: LatLng(user.lat, user.lng));
                         setState(() {
                           if (SingletonFunctionController
-                              .building.selectedLandmarkID !=
+                                  .building.selectedLandmarkID !=
                               polyArray.id) {
                             user.reset();
                             PathState = pathState.withValues(
@@ -1045,15 +1101,18 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                             PathState.directions = [];
                             addselectedRoomMarker(coordinates,
                                 color: Colors.greenAccent);
-                            Future.delayed(Duration(milliseconds: 500)).then((onValue){
-                              Navigator.pop(context, SingletonFunctionController.building.selectedLandmarkID);
+                            Future.delayed(Duration(milliseconds: 500))
+                                .then((onValue) {
+                              Navigator.pop(
+                                  context,
+                                  SingletonFunctionController
+                                      .building.selectedLandmarkID);
                             });
-
                           }
                         });
                       }));
                 }
-              } else if (polyArray.cubicleName == "Male Washroom"){
+              } else if (polyArray.cubicleName == "Male Washroom") {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
@@ -1067,14 +1126,19 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                       fillColor: Color(0xFFE7F4FE),
                       onTap: () {
                         print("polyid::${polyArray.id}");
-                        setState((){
-                          tappedPolygonCoordinates=coordinates;
+                        setState(() {
+                          tappedPolygonCoordinates = coordinates;
                         });
-                        moveCameraSmoothly(controller: _googleMapController, targetPosition:  CameraPosition(
-                            target: tools.calculateRoomCenterinLatLng(coordinates),zoom:22), currTarget: LatLng(user.lat,user.lng));
+                        moveCameraSmoothly(
+                            controller: _googleMapController,
+                            targetPosition: CameraPosition(
+                                target: tools
+                                    .calculateRoomCenterinLatLng(coordinates),
+                                zoom: 22),
+                            currTarget: LatLng(user.lat, user.lng));
                         setState(() {
                           if (SingletonFunctionController
-                              .building.selectedLandmarkID !=
+                                  .building.selectedLandmarkID !=
                               polyArray.id) {
                             user.reset();
                             PathState = pathState.withValues(
@@ -1101,8 +1165,12 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
                             addselectedRoomMarker(coordinates,
                                 color: Colors.white);
-                            Future.delayed(Duration(milliseconds: 500)).then((onValue){
-                              Navigator.pop(context, SingletonFunctionController.building.selectedLandmarkID);
+                            Future.delayed(Duration(milliseconds: 500))
+                                .then((onValue) {
+                              Navigator.pop(
+                                  context,
+                                  SingletonFunctionController
+                                      .building.selectedLandmarkID);
                             });
                           }
                         });
@@ -1122,14 +1190,19 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                       fillColor: Color(0xFFE7F4FE),
                       onTap: () {
                         print("polyid::${polyArray.id}");
-                        setState((){
-                          tappedPolygonCoordinates=coordinates;
+                        setState(() {
+                          tappedPolygonCoordinates = coordinates;
                         });
-                        moveCameraSmoothly(controller: _googleMapController, targetPosition:  CameraPosition(
-                            target: tools.calculateRoomCenterinLatLng(coordinates),zoom:22), currTarget: LatLng(user.lat,user.lng));
+                        moveCameraSmoothly(
+                            controller: _googleMapController,
+                            targetPosition: CameraPosition(
+                                target: tools
+                                    .calculateRoomCenterinLatLng(coordinates),
+                                zoom: 22),
+                            currTarget: LatLng(user.lat, user.lng));
                         setState(() {
                           if (SingletonFunctionController
-                              .building.selectedLandmarkID !=
+                                  .building.selectedLandmarkID !=
                               polyArray.id) {
                             user.reset();
                             PathState = pathState.withValues(
@@ -1155,8 +1228,12 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                             PathState.directions = [];
                             addselectedRoomMarker(coordinates,
                                 color: Colors.white);
-                            Future.delayed(Duration(milliseconds: 500)).then((onValue){
-                              Navigator.pop(context, SingletonFunctionController.building.selectedLandmarkID);
+                            Future.delayed(Duration(milliseconds: 500))
+                                .then((onValue) {
+                              Navigator.pop(
+                                  context,
+                                  SingletonFunctionController
+                                      .building.selectedLandmarkID);
                             });
                           }
                         });
@@ -1176,9 +1253,9 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
                       strokeColor: Colors.black,
                       fillColor: polyArray.cubicleColor != null &&
-                          polyArray.cubicleColor != "undefined"
+                              polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xffF21D0D),
                       onTap: () {}));
                 }
@@ -1196,9 +1273,9 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
                       strokeColor: Color(0xff6EBCF7),
                       fillColor: polyArray.cubicleColor != null &&
-                          polyArray.cubicleColor != "undefined"
+                              polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xffE7F4FE),
                       onTap: () {}));
                 }
@@ -1215,9 +1292,9 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                       // Modify the color and opacity based on the selectedRoomId
                       strokeColor: Color(0xffC0C0C0),
                       fillColor: polyArray.cubicleColor != null &&
-                          polyArray.cubicleColor != "undefined"
+                              polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xffffffff),
                       onTap: () {}));
                 }
@@ -1233,13 +1310,13 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
                       strokeColor: Color(0xffCCCCCC),
                       fillColor: polyArray.cubicleColor != null &&
-                          polyArray.cubicleColor != "undefined"
+                              polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xffE6E6E6),
                       onTap: () {}));
                 }
-              }else if (polyArray.cubicleName == "Non Walkable Area") {
+              } else if (polyArray.cubicleName == "Non Walkable Area") {
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
@@ -1251,9 +1328,9 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
                       strokeColor: Color(0xffcccccc),
                       fillColor: polyArray.cubicleColor != null &&
-                          polyArray.cubicleColor != "undefined"
+                              polyArray.cubicleColor != "undefined"
                           ? Color(int.parse(
-                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                              '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                           : Color(0xffE6E6E6),
                       onTap: () {}));
                 }
@@ -1266,11 +1343,11 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                     points: coordinates,
                     strokeWidth: 1,
                     strokeColor: Color(0xffD3D3D3),
-                    onTap: (){},
+                    onTap: () {},
                     fillColor: polyArray.cubicleColor != null &&
-                        polyArray.cubicleColor != "undefined"
+                            polyArray.cubicleColor != "undefined"
                         ? Color(int.parse(
-                        '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                         : Colors.white,
                   ));
                 }
@@ -1286,9 +1363,9 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                     // Modify the color and opacity based on the selectedRoomId
                     strokeColor: Color(0xffD3D3D3),
                     fillColor: polyArray.cubicleColor != null &&
-                        polyArray.cubicleColor != "undefined"
+                            polyArray.cubicleColor != "undefined"
                         ? Color(int.parse(
-                        '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                            '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                         : Colors.white,
                     consumeTapEvents: true,
                     onTap: () {}));
@@ -1298,9 +1375,9 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                   polylineId: PolylineId(polyArray.id!),
                   points: coordinates,
                   color: polyArray.cubicleColor != null &&
-                      polyArray.cubicleColor != "undefined"
+                          polyArray.cubicleColor != "undefined"
                       ? Color(int.parse(
-                      '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
                       : Color(0xffE6E6E6),
                   width: 1,
                   onTap: () {}));
@@ -1325,7 +1402,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
       style: TextStyle(
         fontWeight: FontWeight.w600,
         fontSize: 30.0, // Increased font size
-        color: color??Color(0xff000000),
+        color: color ?? Color(0xff000000),
       ),
     );
     textPainter.layout(
@@ -1338,8 +1415,12 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
     final double textHeight = textPainter.height;
 
     // Variables for canvas size, depending on whether the image is used
-    double canvasWidth = textWidth > imageSize.width ? textWidth : imageSize.width;
-    double canvasHeight = textHeight + (imagePath != null ? imageSize.height + 20.0 : 0.0); // Increased padding if image is present
+    double canvasWidth =
+        textWidth > imageSize.width ? textWidth : imageSize.width;
+    double canvasHeight = textHeight +
+        (imagePath != null
+            ? imageSize.height + 20.0
+            : 0.0); // Increased padding if image is present
 
     final PictureRecorder pictureRecorder = PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
@@ -1357,7 +1438,8 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
           baseImageBytes.buffer.asUint8List(),
           targetWidth: imageSize.width.toInt(),
           targetHeight: imageSize.height.toInt());
-      final ui.FrameInfo markerImageFrame = await markerImageCodec.getNextFrame();
+      final ui.FrameInfo markerImageFrame =
+          await markerImageCodec.getNextFrame();
       final ui.Image markerImage = markerImageFrame.image;
 
       // Draw the base marker image below the text
@@ -1368,12 +1450,12 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
     // Generate the final image
     final ui.Image finalImage = await pictureRecorder.endRecording().toImage(
-      canvasWidth.toInt(),
-      canvasHeight.toInt(),
-    );
+          canvasWidth.toInt(),
+          canvasHeight.toInt(),
+        );
 
     final ByteData? byteData =
-    await finalImage.toByteData(format: ui.ImageByteFormat.png);
+        await finalImage.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List? pngBytes = byteData?.buffer.asUint8List();
 
     return BitmapDescriptor.fromBytes(pngBytes!);
@@ -1403,6 +1485,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
       }
     });
   }
+
   void createMarkers(land _landData, int floor, {String? bid}) async {
     // _markers.clear();
     // _markerLocationsMap.clear();
@@ -1421,12 +1504,12 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
               !landmarks[i].wasPolyIdNull!) {
             BitmapDescriptor textMarker;
 
-              String markerText;
-              List<String> parts = landmarks[i].name!.split('-');
-              markerText = parts.isNotEmpty ? parts[0].trim() : '';
-              textMarker = await bitmapDescriptorFromTextAndImage(
-                  markerText, 'assets/Classroom.png',imageSize: const Size(95, 95),color: Color(0xff544551));
-
+            String markerText;
+            List<String> parts = landmarks[i].name!.split('-');
+            markerText = parts.isNotEmpty ? parts[0].trim() : '';
+            textMarker = await bitmapDescriptorFromTextAndImage(
+                markerText, 'assets/Classroom.png',
+                imageSize: const Size(95, 95), color: Color(0xff544551));
 
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!,
@@ -1436,7 +1519,8 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
             Markers.add(Marker(
                 markerId: MarkerId(
-                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
+                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " +
+                        (landmarks[i].priority! > 1 ? "toppriority" : "")),
                 position: LatLng(value[0], value[1]),
                 icon: textMarker,
                 anchor: Offset(0.5, 1.0),
@@ -1447,16 +1531,17 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                     // snippet: '${landmarks[i].properties!.polyId}',
                     // Replace with additional information
                     onTap: () {})));
-          }else if (landmarks[i].element!.type == "Rooms" &&
+          } else if (landmarks[i].element!.type == "Rooms" &&
               landmarks[i].element!.subType == "Cafeteria" &&
               landmarks[i].coordinateX != null &&
               !landmarks[i].wasPolyIdNull!) {
             BitmapDescriptor textMarker;
-              String markerText;
-              List<String> parts = landmarks[i].name!.split('-');
-              markerText = parts.isNotEmpty ? parts[0].trim() : '';
-              textMarker = await bitmapDescriptorFromTextAndImage(
-                  markerText, 'assets/cutlery.png',imageSize: const Size(95, 95),color: Color(0xfffb8c00));
+            String markerText;
+            List<String> parts = landmarks[i].name!.split('-');
+            markerText = parts.isNotEmpty ? parts[0].trim() : '';
+            textMarker = await bitmapDescriptorFromTextAndImage(
+                markerText, 'assets/cutlery.png',
+                imageSize: const Size(95, 95), color: Color(0xfffb8c00));
 
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!,
@@ -1466,7 +1551,8 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
             Markers.add(Marker(
                 markerId: MarkerId(
-                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
+                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " +
+                        (landmarks[i].priority! > 1 ? "toppriority" : "")),
                 position: LatLng(value[0], value[1]),
                 icon: textMarker,
                 anchor: Offset(0.5, 1.0),
@@ -1477,7 +1563,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                     // snippet: '${landmarks[i].properties!.polyId}',
                     // Replace with additional information
                     onTap: () {})));
-          }else if (landmarks[i].element!.type == "Rooms" &&
+          } else if (landmarks[i].element!.type == "Rooms" &&
               landmarks[i].element!.subType == "Point of Interest" &&
               landmarks[i].coordinateX != null &&
               !landmarks[i].wasPolyIdNull!) {
@@ -1488,17 +1574,16 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
             BitmapDescriptor textMarker;
             String markerText;
-            markerText = landmarks[i].name??"";
+            markerText = landmarks[i].name ?? "";
             textMarker = await bitmapDescriptorFromTextAndImage(
-                markerText,null,imageSize: const Size(85, 85));
-
+                markerText, null,
+                imageSize: const Size(85, 85));
 
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!,
                 landmarks[i].coordinateY!,
                 SingletonFunctionController.building
                     .patchData[bid ?? buildingAllApi.getStoredString()]);
-
 
             Markers.add(Marker(
                 markerId: MarkerId(
@@ -1513,7 +1598,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                     // snippet: '${landmarks[i].properties!.polyId}',
                     // Replace with additional information
                     onTap: () {})));
-          }else if (landmarks[i].element!.type == "Rooms" &&
+          } else if (landmarks[i].element!.type == "Rooms" &&
               landmarks[i].element!.subType == "Counter" &&
               landmarks[i].coordinateX != null &&
               !landmarks[i].wasPolyIdNull!) {
@@ -1524,17 +1609,16 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
             BitmapDescriptor textMarker;
             String markerText;
-            markerText = landmarks[i].name??"";
+            markerText = landmarks[i].name ?? "";
             textMarker = await bitmapDescriptorFromTextAndImage(
-                markerText,null,imageSize: const Size(85, 85));
-
+                markerText, null,
+                imageSize: const Size(85, 85));
 
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!,
                 landmarks[i].coordinateY!,
                 SingletonFunctionController.building
                     .patchData[bid ?? buildingAllApi.getStoredString()]);
-
 
             Markers.add(Marker(
                 markerId: MarkerId(
@@ -1549,7 +1633,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                     // snippet: '${landmarks[i].properties!.polyId}',
                     // Replace with additional information
                     onTap: () {})));
-          }else if (landmarks[i].element!.type == "Rooms" &&
+          } else if (landmarks[i].element!.type == "Rooms" &&
               landmarks[i].element!.subType == "Point of Interest" &&
               landmarks[i].coordinateX != null &&
               !landmarks[i].wasPolyIdNull!) {
@@ -1560,17 +1644,16 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
             BitmapDescriptor textMarker;
             String markerText;
-            markerText = landmarks[i].name??"";
+            markerText = landmarks[i].name ?? "";
             textMarker = await bitmapDescriptorFromTextAndImage(
-                markerText,null,imageSize: const Size(85, 85));
-
+                markerText, null,
+                imageSize: const Size(85, 85));
 
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!,
                 landmarks[i].coordinateY!,
                 SingletonFunctionController.building
                     .patchData[bid ?? buildingAllApi.getStoredString()]);
-
 
             Markers.add(Marker(
                 markerId: MarkerId(
@@ -1585,7 +1668,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                     // snippet: '${landmarks[i].properties!.polyId}',
                     // Replace with additional information
                     onTap: () {})));
-          }else if (landmarks[i].element!.type == "Rooms" &&
+          } else if (landmarks[i].element!.type == "Rooms" &&
               landmarks[i].element!.subType == "ATM" &&
               landmarks[i].coordinateX != null &&
               !landmarks[i].wasPolyIdNull!) {
@@ -1596,12 +1679,12 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
             BitmapDescriptor textMarker;
 
-              String markerText;
-              List<String> parts = landmarks[i].name!.split('-');
-              markerText = parts.isNotEmpty ? parts[0].trim() : '';
-              textMarker = await bitmapDescriptorFromTextAndImage(
-                  markerText, 'assets/ATM.png',imageSize: const Size(100, 100),color: Color(0xffd32f2f));
-
+            String markerText;
+            List<String> parts = landmarks[i].name!.split('-');
+            markerText = parts.isNotEmpty ? parts[0].trim() : '';
+            textMarker = await bitmapDescriptorFromTextAndImage(
+                markerText, 'assets/ATM.png',
+                imageSize: const Size(100, 100), color: Color(0xffd32f2f));
 
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!,
@@ -1609,10 +1692,10 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                 SingletonFunctionController.building
                     .patchData[bid ?? buildingAllApi.getStoredString()]);
 
-
             Markers.add(Marker(
                 markerId: MarkerId(
-                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
+                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " +
+                        (landmarks[i].priority! > 1 ? "toppriority" : "")),
                 position: LatLng(value[0], value[1]),
                 icon: textMarker,
                 anchor: Offset(0.5, 1.0),
@@ -1623,7 +1706,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                     // snippet: '${landmarks[i].properties!.polyId}',
                     // Replace with additional information
                     onTap: () {})));
-          }else if (landmarks[i].element!.type == "Rooms" &&
+          } else if (landmarks[i].element!.type == "Rooms" &&
               landmarks[i].element!.subType == "Consultation Room" &&
               landmarks[i].coordinateX != null &&
               !landmarks[i].wasPolyIdNull!) {
@@ -1634,12 +1717,12 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
             BitmapDescriptor textMarker;
 
-              String markerText;
-              List<String> parts = landmarks[i].name!.split('-');
-              markerText = parts.isNotEmpty ? parts[0].trim() : '';
-              textMarker = await bitmapDescriptorFromTextAndImage(
-                  markerText, 'assets/Consultation Room.png',imageSize: const Size(85, 85),color: Color(0xff544551));
-
+            String markerText;
+            List<String> parts = landmarks[i].name!.split('-');
+            markerText = parts.isNotEmpty ? parts[0].trim() : '';
+            textMarker = await bitmapDescriptorFromTextAndImage(
+                markerText, 'assets/Consultation Room.png',
+                imageSize: const Size(85, 85), color: Color(0xff544551));
 
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!,
@@ -1647,10 +1730,10 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                 SingletonFunctionController.building
                     .patchData[bid ?? buildingAllApi.getStoredString()]);
 
-
             Markers.add(Marker(
                 markerId: MarkerId(
-                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
+                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " +
+                        (landmarks[i].priority! > 1 ? "toppriority" : "")),
                 position: LatLng(value[0], value[1]),
                 icon: textMarker,
                 anchor: Offset(0.5, 1.0),
@@ -1661,7 +1744,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                     // snippet: '${landmarks[i].properties!.polyId}',
                     // Replace with additional information
                     onTap: () {})));
-          }else if (landmarks[i].element!.type == "Rooms" &&
+          } else if (landmarks[i].element!.type == "Rooms" &&
               landmarks[i].element!.subType == "Office" &&
               landmarks[i].coordinateX != null &&
               !landmarks[i].wasPolyIdNull!) {
@@ -1672,12 +1755,12 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
             BitmapDescriptor textMarker;
 
-              String markerText;
-              List<String> parts = landmarks[i].name!.split('-');
-              markerText = parts.isNotEmpty ? parts[0].trim() : '';
-              textMarker = await bitmapDescriptorFromTextAndImage(
-                  markerText, 'assets/Office.png',imageSize: const Size(85, 85),color: Color(0xff544551));
-
+            String markerText;
+            List<String> parts = landmarks[i].name!.split('-');
+            markerText = parts.isNotEmpty ? parts[0].trim() : '';
+            textMarker = await bitmapDescriptorFromTextAndImage(
+                markerText, 'assets/Office.png',
+                imageSize: const Size(85, 85), color: Color(0xff544551));
 
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!,
@@ -1687,7 +1770,8 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
             Markers.add(Marker(
                 markerId: MarkerId(
-                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
+                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " +
+                        (landmarks[i].priority! > 1 ? "toppriority" : "")),
                 position: LatLng(value[0], value[1]),
                 icon: textMarker,
                 anchor: Offset(0.5, 1.0),
@@ -1707,11 +1791,12 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
             //   getImagesFromMarker('assets/location_on.png',50),
             // );
             BitmapDescriptor textMarker;
-              String markerText;
-              List<String> parts = landmarks[i].name!.split('-');
-              markerText = parts.isNotEmpty ? parts[0].trim() : '';
-              textMarker = await bitmapDescriptorFromTextAndImage(
-                  markerText, 'assets/Generic Marker.png',imageSize: const Size(85, 85));
+            String markerText;
+            List<String> parts = landmarks[i].name!.split('-');
+            markerText = parts.isNotEmpty ? parts[0].trim() : '';
+            textMarker = await bitmapDescriptorFromTextAndImage(
+                markerText, 'assets/Generic Marker.png',
+                imageSize: const Size(85, 85));
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!,
                 landmarks[i].coordinateY!,
@@ -1719,7 +1804,8 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                     .patchData[bid ?? buildingAllApi.getStoredString()]);
             Markers.add(Marker(
                 markerId: MarkerId(
-                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
+                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " +
+                        (landmarks[i].priority! > 1 ? "toppriority" : "")),
                 position: LatLng(value[0], value[1]),
                 icon: textMarker,
                 anchor: Offset(0.5, 1.0),
@@ -1734,7 +1820,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
               landmarks[i].element!.subType == "room door" &&
               landmarks[i].doorX != null) {
             final Uint8List iconMarker =
-            await getImagesFromMarker('assets/dooricon.png', 45);
+                await getImagesFromMarker('assets/dooricon.png', 45);
             setState(() {
               List<double> value = tools.localtoglobal(
                   landmarks[i].coordinateX!,
@@ -1753,10 +1839,10 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                     // Replace with additional information
                     onTap: () {
                       if (SingletonFunctionController
-                          .building.selectedLandmarkID !=
+                              .building.selectedLandmarkID !=
                           landmarks[i].properties!.polyId) {
                         SingletonFunctionController
-                            .building.selectedLandmarkID =
+                                .building.selectedLandmarkID =
                             landmarks[i].properties!.polyId;
                         _isRoutePanelOpen = false;
                         singleroute.clear();
@@ -1771,7 +1857,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
               landmarks[i].element!.type == ("FloorConnection") &&
               landmarks[i].element!.subType == "lift") {
             final Uint8List iconMarker =
-            await getImagesFromMarker('assets/entry.png', 75);
+                await getImagesFromMarker('assets/entry.png', 75);
 
             setState(() {
               List<double> value = tools.localtoglobal(
@@ -1788,9 +1874,9 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                   landmarks[i].buildingID!));
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Lift';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-              landmarks[i].name!;
+                  landmarks[i].name!;
               _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] =
-              landmarks[i].buildingID!;
+                  landmarks[i].buildingID!;
             });
           } else if (landmarks[i].name != null &&
               landmarks[i].name!.toLowerCase().contains("pharmacy")) {
@@ -1808,9 +1894,9 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Pharmacy';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-              landmarks[i].name!;
+                  landmarks[i].name!;
               _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] =
-              landmarks[i].buildingID!;
+                  landmarks[i].buildingID!;
             });
           }
           // else if (landmarks[i].name != null &&
@@ -1828,7 +1914,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
           else if (landmarks[i].properties!.washroomType != null &&
               landmarks[i].properties!.washroomType == "Male") {
             final Uint8List iconMarker =
-            await getImagesFromMarker('assets/6.png', 65);
+                await getImagesFromMarker('assets/6.png', 65);
             setState(() {
               List<double> value = tools.localtoglobal(
                   landmarks[i].coordinateX!,
@@ -1843,9 +1929,9 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Male';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-              landmarks[i].name!;
+                  landmarks[i].name!;
               _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] =
-              landmarks[i].buildingID!;
+                  landmarks[i].buildingID!;
 
               // Markers.add(Marker(
               //     markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
@@ -1872,7 +1958,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
           } else if (landmarks[i].properties!.washroomType != null &&
               landmarks[i].properties!.washroomType == "Female") {
             final Uint8List iconMarker =
-            await getImagesFromMarker('assets/4.png', 65);
+                await getImagesFromMarker('assets/4.png', 65);
 
             setState(() {
               List<double> value = tools.localtoglobal(
@@ -1888,9 +1974,9 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
 
               _markerLocationsMap[LatLng(value[0], value[1])] = 'Female';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-              landmarks[i].name!;
+                  landmarks[i].name!;
               _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] =
-              landmarks[i].buildingID!;
+                  landmarks[i].buildingID!;
 
               // Markers.add(Marker(
               //     markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
@@ -1917,7 +2003,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
           } else if (landmarks[i].element!.subType != null &&
               landmarks[i].element!.subType == "main entry") {
             final Uint8List iconMarker =
-            await getImagesFromMarker('assets/1.png', 90);
+                await getImagesFromMarker('assets/1.png', 90);
 
             setState(() {
               List<double> value = tools.localtoglobal(
@@ -1935,13 +2021,13 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                   landmarks[i].buildingID!));
 
               _markerLocationsMap[LatLng(value[0], value[1])] =
-              landmarks[i].buildingID == buildingAllApi.outdoorID
-                  ? "Campus Entry"
-                  : 'Entry';
+                  landmarks[i].buildingID == buildingAllApi.outdoorID
+                      ? "Campus Entry"
+                      : 'Entry';
               _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-              landmarks[i].name!;
+                  landmarks[i].name!;
               _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] =
-              landmarks[i].buildingID!;
+                  landmarks[i].buildingID!;
 
               // _markers!.add(Marker(
               //   markerId: MarkerId("Entry ${landmarks[i].properties!.polyId}"),
@@ -1990,7 +2076,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
             //   getImagesFromMarker('assets/location_on.png',50),
             // );
             final Uint8List iconMarker =
-            await getImagesFromMarker('assets/pin.png', 50);
+                await getImagesFromMarker('assets/pin.png', 50);
             List<double> value = tools.localtoglobal(
                 landmarks[i].coordinateX!,
                 landmarks[i].coordinateY!,
@@ -2038,8 +2124,34 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
       //   visible: false,
       // ));
     });
-
   }
+
+  void focusBuildingChecker(CameraPosition position) {
+    blurPatch.clear();
+    restBuildingMarker.clear();
+    LatLng currentLatLng = position.target;
+    // String closestBuildingId = "";
+    double? minDistance;
+    Building.allBuildingID.forEach((key, value) {
+      if (key != buildingAllApi.outdoorID) {
+        num distance = geo.Geodesy().distanceBetweenTwoGeoPoints(
+          geo.LatLng(value.latitude, value.longitude),
+          geo.LatLng(currentLatLng.latitude, currentLatLng.longitude),
+        );
+        // Update closestBuildingId if this SingletonFunctionController.building is closer
+        if (minDistance == null || distance < minDistance!) {
+          minDistance = distance.toDouble();
+          closestBuildingId = key;
+        }
+      }
+    });
+
+    // Store the nearest SingletonFunctionController.building ID
+    if (closestBuildingId.isNotEmpty) {
+      buildingAllApi.setStoredString(closestBuildingId);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -2049,7 +2161,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
         shadowColor: Colors.black.withOpacity(0.5), // Shadow color with opacity
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed:(){
+          onPressed: () {
             Navigator.of(context).pop();
           },
         ),
@@ -2058,7 +2170,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              "Choose ${(widget.destiPoint)?"Destination":"Starting"} Point",
+              "Choose ${(widget.destiPoint) ? "Destination" : "Starting"} Point",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -2076,13 +2188,11 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
           ],
         ),
       ),
-
       body: Stack(
         children: [
           Container(
             child: GoogleMap(
-              padding:
-              EdgeInsets.only(left: 20), // <--- padding added here
+              padding: EdgeInsets.only(left: 20), // <--- padding added here
               initialCameraPosition: _initialCameraPosition,
               myLocationButtonEnabled: false,
               myLocationEnabled: false,
@@ -2111,15 +2221,18 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
               compassEnabled: false,
               rotateGesturesEnabled: true,
               minMaxZoomPreference: MinMaxZoomPreference(2, 30),
-              onMapCreated: (controller){
+              onMapCreated: (controller) {
                 controller.setMapStyle(maptheme);
                 _googleMapController = controller;
                 zoomWhileWait(buildingAllApi.allBuildingID, controller);
               },
               onCameraMove: (CameraPosition cameraPosition) {
                 mapState.cameraposition = cameraPosition;
-                if (cameraPosition.target.latitude.toStringAsFixed(5) !=
-                    mapState.target.latitude.toStringAsFixed(5)) {
+                if (cameraPosition.zoom > 16.8) {
+                  focusBuildingChecker(cameraPosition);
+                }
+
+                if (cameraPosition.target.latitude.toStringAsFixed(5) != mapState.target.latitude.toStringAsFixed(5)) {
                   mapState.aligned = false;
                 } else {
                   mapState.aligned = true;
@@ -2147,16 +2260,13 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
                 }
                 if (markerSldShown) {
                   _updateMarkers11(cameraPosition.zoom);
-                } else {
-
-                }
+                } else {}
 
                 // _updateEntryMarkers11(cameraPosition.zoom);
                 //_markerLocations.clear();
                 //
               },
-              onCameraIdle:(){
-              },
+              onCameraIdle: () {},
               onCameraMoveStarted: () {
                 user.building = SingletonFunctionController.building;
                 mapState.interaction2 = false;
@@ -2168,94 +2278,80 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen> with TickerProvid
             bottom: 300.0, // Adjust the position as needed
             right: 16.0,
             child: Semantics(
-            label: "Change floor",
-            child: SpeedDial(
-            child: Text(
-            SingletonFunctionController.building.floor == 0
-            ? 'G'
-                : '${SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]}',
-            style: const TextStyle(
-            fontFamily: "Roboto",
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
-            color: Color(0xff24b9b0),
-            height: 19 / 16,
-
-            ),
-            ),
-            activeIcon: Icons.close,
-            backgroundColor: Colors.white,
-            children: List.generate(
-                (Building.numberOfFloorsDelhi[
-                buildingAllApi.getStoredString()] ??
-                [0])
-                    .length,
-                (int i){
-                List<int> floorList=Building
-                    .numberOfFloorsDelhi[
-                buildingAllApi.getStoredString()] ??
-                [0];
-                List<int> revfloorList = floorList;
-                revfloorList.sort();
-                return SpeedDialChild(
-                child: Semantics(
-                label: "${revfloorList[i]}",
+              label: "Change floor",
+              child: SpeedDial(
                 child: Text(
-                revfloorList[i] == 0
-                ? 'G'
-                    : '${revfloorList[i]}',
-                style: const TextStyle(
-                fontFamily: "Roboto",
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                height: 19 / 16,
+                  SingletonFunctionController.building.floor == 0
+                      ? 'G'
+                      : '${SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]}',
+                  style: const TextStyle(
+                    fontFamily: "Roboto",
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xff24b9b0),
+                    height: 19 / 16,
+                  ),
                 ),
+                activeIcon: Icons.close,
+                backgroundColor: Colors.white,
+                children: List.generate(
+                  (Building.numberOfFloorsDelhi[
+                              buildingAllApi.getStoredString()] ??
+                          [0])
+                      .length,
+                  (int i) {
+                    List<int> floorList = Building.numberOfFloorsDelhi[
+                            buildingAllApi.getStoredString()] ??
+                        [0];
+                    List<int> revfloorList = floorList;
+                    revfloorList.sort();
+                    return SpeedDialChild(
+                      child: Semantics(
+                        label: "${revfloorList[i]}",
+                        child: Text(
+                          revfloorList[i] == 0 ? 'G' : '${revfloorList[i]}',
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            height: 19 / 16,
+                          ),
+                        ),
+                      ),
+                      backgroundColor: pathMarkers[i] == null
+                          ? Colors.white
+                          : Color(0xff24b9b0),
+                      onTap: () {
+                        _polygon.clear();
+                        cachedPolygon.clear();
+                        _markers.clear();
+                        _markerLocationsMap.clear();
+                        _markerLocationsMapLanName.clear();
+                        SingletonFunctionController.building.floor[buildingAllApi.getStoredString()] = revfloorList[i];
+                        createRooms(
+                          SingletonFunctionController.building.polylinedatamap[
+                              buildingAllApi.getStoredString()]!,
+                          SingletonFunctionController.building
+                              .floor[buildingAllApi.getStoredString()]!,
+                        );
+                        if (pathMarkers[i] != null) {
+                          //setCameraPosition(pathMarkers[i]!);
+                        }
+                        // Markers.clear();
+                        SingletonFunctionController.building.landmarkdata!
+                            .then((value) {
+                          createMarkers(
+                              value,
+                              SingletonFunctionController.building
+                                  .floor[buildingAllApi.getStoredString()]!,
+                              bid: buildingAllApi.getStoredString());
+                        });
+                      },
+                    );
+                  },
                 ),
-                ),
-                backgroundColor: pathMarkers[i] == null
-                ? Colors.white
-                    : Color(0xff24b9b0),
-                onTap: () {
-                _polygon.clear();
-                cachedPolygon.clear();
-                _markers.clear();
-                _markerLocationsMap.clear();
-                _markerLocationsMapLanName.clear();
-                SingletonFunctionController
-                    .building.floor[
-                buildingAllApi
-                    .getStoredString()] =
-                revfloorList[i];
-                createRooms(
-                SingletonFunctionController
-                    .building.polylinedatamap[
-                buildingAllApi.getStoredString()]!,
-                SingletonFunctionController
-                    .building.floor[
-                buildingAllApi.getStoredString()]!,
-                );
-                if (pathMarkers[i] != null) {
-                //setCameraPosition(pathMarkers[i]!);
-                }
-                // Markers.clear();
-                SingletonFunctionController
-                    .building.landmarkdata!
-                    .then((value) {
-                createMarkers(
-                value,
-                SingletonFunctionController
-                    .building.floor[
-                buildingAllApi
-                    .getStoredString()]!,
-                bid: buildingAllApi
-                    .getStoredString());
-                });
-                },
-                );
-                },
-                ),
-                ),
-                ),
+              ),
+            ),
           )
         ],
       ),

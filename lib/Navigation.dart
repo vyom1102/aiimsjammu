@@ -12554,7 +12554,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Timer? exploremodeLandmarkTimer;
 
   String closestBuildingId = "";
-  String newBuildingID = "";
   void focusBuildingChecker(CameraPosition position) {
     blurPatch.clear();
     restBuildingMarker.clear();
@@ -12574,16 +12573,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         }
       }
     });
-    if (newBuildingID != closestBuildingId) {
-      //patchTransition(closestBuildingId);
-    }
-    newBuildingID = closestBuildingId;
 
     // Store the nearest SingletonFunctionController.building ID
     if (closestBuildingId.isNotEmpty) {
       buildingAllApi.setStoredString(closestBuildingId);
     }
   }
+
   Set<Circle> circles = Set();
   @override
   void dispose(){
@@ -13259,22 +13255,22 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       Colors.white, // Set the background color of the FAB
                     ),
                   ) : Container(),
-                  FloatingActionButton(
-                    onPressed: () async {
-                      bluetoothScanAndroidClass.startbin();
-                      bluetoothScanAndroidClass.emptyBin();
-                      setState(() {
-                        bluetoothScanAndroidClass.bluetoothDebug(SingletonFunctionController.apibeaconmap);
-                      });
-                    },
-                    child: Icon(Icons.pin_drop_rounded),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                      BorderRadius.circular(26.0), // Change radius here
-                    ),
-                    backgroundColor:
-                    Colors.white, // Set the background color of the FAB
-                  ),
+                  // FloatingActionButton(
+                  //   onPressed: () async {
+                  //     bluetoothScanAndroidClass.startbin();
+                  //     bluetoothScanAndroidClass.emptyBin();
+                  //     setState(() {
+                  //       bluetoothScanAndroidClass.bluetoothDebug(SingletonFunctionController.apibeaconmap);
+                  //     });
+                  //   },
+                  //   child: Icon(Icons.pin_drop_rounded),
+                  //   shape: RoundedRectangleBorder(
+                  //     borderRadius:
+                  //     BorderRadius.circular(26.0), // Change radius here
+                  //   ),
+                  //   backgroundColor:
+                  //   Colors.white, // Set the background color of the FAB
+                  // ),
                   SizedBox(height: 28.0),
                   (!kIsWeb &&  Platform.isAndroid) && !user.isnavigating &&
                       (!_isLandmarkPanelOpen &&
