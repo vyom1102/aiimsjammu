@@ -26,6 +26,7 @@ import 'DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
 import 'DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
+import 'DATABASE/DATABASEMODEL/GlobalAnnotationAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import 'DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
 import 'DATABASE/DATABASEMODEL/OutDoorModel.dart';
@@ -68,6 +69,8 @@ Future<void> main() async {
   await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
   Hive.registerAdapter(LocalNotificationAPIDatabaseModelAdapter());
   await Hive.openBox<LocalNotificationAPIDatabaseModel>('LocalNotificationAPIDatabaseModel');
+  Hive.registerAdapter(GlobalAnnotationAPIModelAdapter());
+  await Hive.openBox<GlobalAnnotationAPIModel>('GlobalAnnotationAPIModelFile');
 
   await interactionManager.initialize();
   await sessionManager.initialize();
