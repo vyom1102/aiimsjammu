@@ -1371,7 +1371,7 @@ List<Cell> findCorridorSegments(
     String bid = tools.extractBid(stringPoint);
     int? coorridorWidth=(patchData[bid]!.patchData!.corridorWidth!=null)?int.parse(patchData[bid]!.patchData!.corridorWidth!):10;
     int floor = point[2];
-    var nonWalkable = SingletonFunctionController.building.nonWalkable[bid]![floor]!;
+    var nonWalkable = SingletonFunctionController.building.nonWalkable[bid]![floor]??[];
     print("cellpathdebug $stringPoint bid $bid $floor ${SingletonFunctionController.building.floorDimenssion[bid]}");
     int numCols = 0;
     try{

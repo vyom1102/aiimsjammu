@@ -14,7 +14,7 @@ class SignInAPI{
     final Map<String, dynamic> data = {
       "username": username,
       "password": password,
-      "appId":"com.iwayplus.aiimsj"
+      "appId":"com.iwayplus.aiimsjammu"
     };
     final response = await http.post(
       Uri.parse(baseUrl),
@@ -59,7 +59,7 @@ class SignInAPI{
   }
   static Future<int> sendOtpForgetPassword(String user) async {
     final String xaccesstoken = AppConfig.Authorization;
-    final Map<String, dynamic> data = {"username": "${user}", "digits":4,"appId":"com.iwayplus.aiimsj"};
+    final Map<String, dynamic> data = {"username": "${user}", "digits":4,"appId":"com.iwayplus.aiimsjammu"};
     final response = await http.post(
       Uri.parse('${AppConfig.baseUrl}/auth/otp/username'),
       body: EncryptedbodyForApi(data),
@@ -88,7 +88,7 @@ class SignInAPI{
       "username": "$user",
       "password": "$pass",
       "otp": "$otp",
-      "appId":"com.iwayplus.aiimsj"
+      "appId":"com.iwayplus.aiimsjammu"
 
     };
     final response = await http.post(

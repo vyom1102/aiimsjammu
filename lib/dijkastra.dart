@@ -137,11 +137,12 @@ Future<List<String>> masterDijkstra(
     if (currentNode == goal) {
       var path = <String>[];
       while (previous.containsKey(currentNode)) {
+        print("masterpath $currentNode");
         path.add(currentNode);
         currentNode = previous[currentNode]!;
       }
       path.add(currentNode); // Add the start node
-      print("masterpath $path");
+
       return path.reversed.toList();
     }
 
@@ -259,6 +260,8 @@ List<String> findNearestAndSecondNearestVertices(
     Map<String, dynamic> pathNetwork,
     List<int> coord1,
     List<int> coord2) {
+  final stackTrace = StackTrace.current;
+  print("stateDebug Stack: \n$stackTrace");
   String nearestToCoord1 = '';
   String secondNearestToCoord1 = '';
   String nearestToCoord2 = '';
@@ -316,7 +319,8 @@ List<String> findNearestAndSecondNearestVertices(
 }
 
 List<String> masterFindNearestAndSecondNearestVertices(Map<String, dynamic> pathNetwork, String coord1, String coord2) {
-
+  final stackTrace = StackTrace.current;
+  print("stateDebug Stack: \n$stackTrace");
   String nearestToCoord1 = '';
   String secondNearestToCoord1 = '';
   String nearestToCoord2 = '';
