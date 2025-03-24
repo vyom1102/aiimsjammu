@@ -8677,6 +8677,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                                   hintText: 'Source location',
                                                   voiceInputEnabled: false,
                                                   userLocalized: user.key,
+                                                  fromNavigation: true,
                                                 )))
                                         .then((value) async {
                                       // onLandmarkVenueClicked(value,DirectlyStartNavigation: true);
@@ -8721,6 +8722,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                         MaterialPageRoute(
                                             builder: (context) =>
                                                 GlobalSearchPage(
+                                                  fromNavigation:true,
                                                   hintText: 'Destination location',
                                                   voiceInputEnabled: false,
                                                 )))
