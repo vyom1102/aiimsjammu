@@ -46,12 +46,14 @@ class GlobalSearchPage extends StatefulWidget {
   bool voiceInputEnabled;
   String userLocalized;
   bool frombottombar;
+  bool fromNavigation;
   GlobalSearchPage(
       {this.hintText = "",
       this.previousFilter = "",
       required this.voiceInputEnabled,
       this.userLocalized = "",
       this.frombottombar = false,
+        this.fromNavigation = false,
       });
 
   @override
@@ -590,6 +592,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
           }
 
           print("Searching doctors...");
+          if(!widget.fromNavigation)
           for (var doctor in _doctors) {
             if (courseCount < 3 && searchResults.length < 10) {
               String courseName = doctor['name'] ?? '';
@@ -616,7 +619,9 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
 
           print("Searching services...");
           print("Total services: ${_services.length}");
-          for (var service in _services) {
+
+          if(!widget.fromNavigation)
+            for (var service in _services) {
             if (serviceCount < 2 && searchResults.length < 10) {
               String serviceName = service['name'] ?? '';
               String serviceLocation = service['locationName'] ?? '';
@@ -656,7 +661,6 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
               break;
             }
           }
-
           if (searchResults.isEmpty) {
             print("No exact matches found, performing similarity search...");
 
