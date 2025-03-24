@@ -2,16 +2,15 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import '../APIMODELS/polylinedata.dart';
 import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
+import '../ELEMENTS/HelperClass.dart';
+import '../APIMODELS/polylinedata.dart';
 import '../DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import '../DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
-import '../ELEMENTS/HelperClass.dart';
-import '../api/RefreshTokenAPI.dart';
 import '../api/buildingAllApi.dart';
 import '../config.dart';
-
 import '../VersioInfo.dart';
+import 'RefreshTokenAPI.dart';
 
 class PolyLineApi {
   final String baseUrl ="${AppConfig.baseUrl}/secured/polyline";
@@ -21,19 +20,12 @@ class PolyLineApi {
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
 
-  String encryptDecrypt(String input, String key){
-    StringBuffer result = StringBuffer();
-    for (int i = 0; i < input.length; i++) {
-      // XOR each character of the input with the corresponding character of the key
-      result.writeCharCode(input.codeUnitAt(i) ^ key.codeUnitAt(i % key.length));
-    }
-    return result.toString();
-  }
+
   String getDecryptedData(String encryptedData){
     Map<String, dynamic> encryptedResponseBody = json.decode(encryptedData);
     print("encryptedResponseBody $encryptedResponseBody");
-    String newResponse=encryptDecrypt(encryptedResponseBody['encryptedData'], "xX7/kWYt6cjSDMwB4wJPOBI+/AwC+Lfbd610sWfwywU=");
-    //print("new response ${newResponse}");
+    String newResponse=encryptDecrypt(encryptedResponseBody['encryptedData']);
+    print("new response ${newResponse}");
     Map<String,dynamic> originalList = jsonDecode(newResponse);
     // Wrap in landmarks header
     Map<String, dynamic> wrappedResponse = {
@@ -67,7 +59,7 @@ class PolyLineApi {
       headers: {
         'Content-Type': 'application/json',
         'x-access-token': accessToken,
-        'Authorization': 'e28cdb80-c69a-11ef-aa4e-e7aa7912987a'
+        'Authorization': AppConfig.Authorization
       },
     );
     if (response.statusCode == 200) {

@@ -1834,7 +1834,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       print("got into beacon localization");
       ws.updateMessage({
         "AppInitialization.localizedOn": nearestBeacon,
-      });      final beaconData = SingletonFunctionController.apibeaconmap[nearestBeacon];
+      });
+      final beaconData = SingletonFunctionController.apibeaconmap[nearestBeacon];
       if (beaconData == null){
         print("_handleBeaconLocalization: Beacon data not found");
         if (speakTTS) unableToFindLocation();
@@ -1866,7 +1867,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           print("got inside this");
 
           if(SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!.where((test)=>test.properties!.isWaypoint == false).length>1){
-            showListOfNearbyLandmarks(SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!);
+            showListOfNearbyLandmarks(SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!,beaconData.floor!);
           }else{
             final userSetLocation = tools.localizefindNearbyLandmark(beaconData, landmarkData!.landmarksMap!);
             print("usersetlocation::${userSetLocation}");
@@ -1975,9 +1976,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     SingletonFunctionController.building.qrOpened = true;
   }
 
-  Future<void> showListOfNearbyLandmarks(List<Landmarks> landmarks) async {
-    SingletonFunctionController.building.floor[landmarks.first.buildingID!] = landmarks.first.floor??0;
-    await createRooms(SingletonFunctionController.building.polylinedatamap[landmarks.first.buildingID]!, landmarks.first.floor??0);
+  Future<void> showListOfNearbyLandmarks(List<Landmarks> landmarks,int beaconFloor) async {
+    SingletonFunctionController.building.floor[landmarks.first.buildingID!] = beaconFloor;
+    await createRooms(SingletonFunctionController.building.polylinedatamap[landmarks.first.buildingID]!, beaconFloor);
+
     await Future.delayed(Duration(milliseconds: 1000));
     speak(convertTolng("Confirm Your Location Amongst Below Given List", _currentLocale, ''), _currentLocale);
     focusOnPinLandmark(LatLng(double.parse(landmarks.first.properties!.latitude!), double.parse(landmarks.first.properties!.longitude!)));
@@ -2186,8 +2188,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
       if (widget.directLandID.length < 2 && speakTTS) {
         SingletonFunctionController.building.floor[userSetLocation.buildingID!] = userSetLocation.floor!;
-        createRooms(SingletonFunctionController.building.polyLineData!,
-            userSetLocation.floor!);
+        createRooms(SingletonFunctionController.building.polyLineData!, userSetLocation.floor!);
       }
 
       SingletonFunctionController.building.landmarkdata!.then((value) {
@@ -3353,7 +3354,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     print("callback");
     SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID).then((_){
       SingletonFunctionController.timer?.whenComplete((){
-        print("localizeUser 1 ${DateTime.now().difference(timerStartTime)}");
         localizeUserInCallback();
         SingletonFunctionController.timer = null;
       });
@@ -4666,6 +4666,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
   List<LatLng> tappedPolygonCoordinates = [];
   Future<void> createRooms(polylinedata value, int floor) async {
+    final stackTrace = StackTrace.current;
+    print("reroute Stack: \n$stackTrace");
     print("createRooms-- ${value.polyline!.buildingID!} ${floor}");
 
     if (closedpolygons[buildingAllApi.getStoredString()] == null) {
@@ -8778,7 +8780,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                           children: [
                             AccessiblePathButton(label: "Stairs", icon: Icons.escalator, accessibleBy: "Stairs", PathState: PathState, calculateroute: calculateroute),
                             AccessiblePathButton(label: "Lift", icon: Icons.elevator, accessibleBy: "Lifts", PathState: PathState, calculateroute: calculateroute),
-                            AccessiblePathButton(label: "Escalator", icon: Icons.escalator_warning, accessibleBy: "Escalators", PathState: PathState, calculateroute: calculateroute),
+                            // AccessiblePathButton(label: "Escalator", icon: Icons.escalator_warning, accessibleBy: "Escalators", PathState: PathState, calculateroute: calculateroute),
                             AccessiblePathButton(label: "Ramp", icon: Icons.accessible, accessibleBy: "Ramps", PathState: PathState, calculateroute: calculateroute),
 
                           ],
@@ -11758,7 +11760,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     return Visibility(
         visible: _isExploreModePannelOpen,
         child: SlidingUpPanel(
-          maxHeight: 90+ (getallnearestInfo.length * 100),
+          maxHeight: 90+ (getallnearestInfo.length * 65),
           minHeight: 90 + 8,
           controller: ExploreModePannelController,
           panel: Container(
