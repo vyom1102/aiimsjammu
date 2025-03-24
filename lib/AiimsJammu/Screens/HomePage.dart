@@ -380,7 +380,7 @@ class _HomePageState extends State<HomePage> {
         case 'atm':
           return floorMatch && landmarkType == "atm";
         case 'transport':
-          return floorMatch && landmarkType == "transportation service till building";
+          return floorMatch && (landmarkType == "transportation service till building" || landmarkType == "Pick-up / Drop-off Point");
         default:
           return floorMatch;
       }
@@ -397,16 +397,10 @@ class _HomePageState extends State<HomePage> {
       print(buildingstartY);
       print(nearestLandmark);
       for (var landmark in filteredLandmarks) {
-        // double landmarkX = landmark['doorX']?.toDouble() ??
-        //     landmark['coordinateX']?.toDouble() ??
-        //     0.0;
+
         double landmarkX = double.parse(landmark['properties']['latitude']);
         double landmarkY = double.parse(landmark['properties']['longitude']);
-        // double landmarkY = landmark['doorY']?.toDouble() ??
-        //     landmark['coordinateY']?.toDouble() ??
-        //     0.0;
 
-        // Calculate Euclidean distance from current position
         double distance = sqrt(
             pow(buildingstartX! - landmarkX, 2) +
                 pow(buildingstartY! - landmarkY, 2)
