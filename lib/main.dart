@@ -2,8 +2,10 @@
 import 'dart:io' show Platform;
 
 import 'package:app_links/app_links.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
@@ -21,6 +23,7 @@ import 'API/buildingAllApi.dart';
 import 'AiimsJammu/Screens/DoctorProfile1.dart';
 import 'AiimsJammu/Screens/ServiceInfo1.dart';
 import 'AiimsJammu/Screens/SplashScreen.dart';
+import 'AiimsJammu/Widgets/WebSocketDriver.dart';
 import 'DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
@@ -37,6 +40,9 @@ import 'DATABASE/DATABASEMODEL/WayPointModel.dart';
 import 'Elements/deeplinks.dart';
 import 'LOGIN SIGNUP/SignIn.dart';
 import 'MainScreen.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
+
+import 'config.dart';
 
 final interactionManager = InteractionManager();
 final sessionManager = SessionManager();
@@ -123,12 +129,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
   String? initialDocId;
   String? initialServiceId;
   bool isLocating=false;
+  late io.Socket _socket;
 
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     SessionManager().startSession();
     configureLocalization();
+    // _initializeSocket();
+     LocationTrackingService().initialize();
+    LocationTrackingService().startTracking();
+
     // _initDeepLinkListener();
 
     super.initState();
@@ -151,6 +162,30 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
     localization.init(mapLocales: LOCALES, initLanguageCode: 'en');
     localization.onTranslatedLanguage = ontranslatedLanguage;
   }
+
+
+  void _initializeSocket() {
+    _socket = io.io(AppConfig.baseUrl, <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': true, // Automatically connects on app start
+      'reconnection': true, // Enables auto-reconnect
+      'reconnectionAttempts': 5, // Tries reconnecting 5 times
+      'reconnectionDelay': 2000, // 2s delay between retries
+    });
+
+    _socket.onConnect((_) async {
+      print('✅ Connected to WebSocket Server in main.dart');
+      // sendMessage();
+      await LocationTrackingService().initialize();
+
+      LocationTrackingService().startTracking();
+    });
+
+    _socket.onDisconnect((_) => print('⚠️ Disconnected from WebSocket Server main.dart'));
+    _socket.onError((data) => print('❌ WebSocket Error main.dart : $data'));
+    _socket.onReconnect((_) => print('🔄 Reconnecting...'));
+
+     }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
