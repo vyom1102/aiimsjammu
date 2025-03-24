@@ -137,8 +137,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
     SessionManager().startSession();
     configureLocalization();
     // _initializeSocket();
-     LocationTrackingService().initialize();
-    LocationTrackingService().startTracking();
+    //  LocationTrackingService().initialize();
+    // LocationTrackingService().startTracking();
 
     // _initDeepLinkListener();
 

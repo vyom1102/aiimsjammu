@@ -57,6 +57,7 @@ import '../../websocket/UserLog.dart';
 import '../../websocket/interactionManager.dart';
 import '../Widgets/MapPreview.dart';
 import '../Widgets/Translator.dart';
+import '../Widgets/WebSocketDriver.dart';
 import '../Widgets/defaultMap.dart';
 import '/DestinationSearchPage.dart';
 import '/AiimsJammu/Screens/ATMScreen.dart';
@@ -129,6 +130,7 @@ class _HomePageState extends State<HomePage> {
   String? accessToken;
   String? refreshToken;
   String? userName = "User";
+  bool isDriver = false;
   String? emailAddress;
   bool nameLoading= false;
   bool isOnline = true;
@@ -143,6 +145,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     getUserDataFromHive();
+    getDriverDetail();
     NotificationSocket.receiveMessage();
     checkForUpdate();
     _pageController = PageController(initialPage: _currentPage);
@@ -902,14 +905,24 @@ class _HomePageState extends State<HomePage> {
   var DashboardListBox = Hive.box('DashboardList');
   var userListBox = Hive.box('user');
 
-  void checkForReload(){
+  Future<void> checkForReload() async {
     if(userListBox.containsKey('name')){
       userName = userListBox.get('name');
       print('name from database');
     }else{
-      // getUserDetails();
       getUserDataFromHive();
       print("name from api");
+    }
+    print("driver check");
+    print(userListBox.containsKey('isDriver'));
+    print(userListBox.get('isDriver'));
+    if(userListBox.containsKey('isDriver')) {
+
+      if (userListBox.get('isDriver')) {
+        print("Driver");
+        await LocationTrackingService().initialize();
+        LocationTrackingService().startTracking();
+      }
     }
     if(userListBox.containsKey('username')){
       emailAddress = userListBox.get('username');
@@ -1014,6 +1027,49 @@ class _HomePageState extends State<HomePage> {
     }
 
   }
+  Future<void> getDriverDetail() async {
+    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
+
+    try {
+      final response = await http.post(
+        Uri.parse(baseUrl),
+        body: json.encode({"userId": userId}),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': '$accessToken',
+        },
+      );
+      print("driver get");
+      print(response.statusCode);
+      print(response.body);
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseBody = json.decode(response.body);
+        setState(() async {
+
+          isDriver = responseBody["userTracking"]??false;
+          if(isDriver) {
+            await LocationTrackingService().initialize();
+            LocationTrackingService().startTracking();
+          }
+          userListBox.put('isDriver', isDriver);
+          print("userTracking11");
+          print(isDriver);
+          print(responseBody['userTracking']);
+          print(userListBox.get('isDriver'));
+        });
+      } else if (response.statusCode == 403) {
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        await getDriverDetail();
+
+      } else {
+      }
+    } catch (e) {
+      // Handle errors
+    }
+  }
+
   @override
   void dispose() {
     _pageController.dispose();
@@ -1326,47 +1382,48 @@ class _HomePageState extends State<HomePage> {
       curve: Curves.easeInOut,
     );
   }
-  Future<void> getUserDetails() async {
 
-    setState(() {
-      nameLoading = true;
-    });
-    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
-
-    try {
-      final response = await http.post(
-        Uri.parse(baseUrl),
-        body: json.encode({"userId": userId}),
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': '$accessToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        Map<String, dynamic> responseBody = json.decode(response.body);
-        setState(() {
-          userName = responseBody["name"];
-          emailAddress = responseBody["email"];
-          userListBox.put('name', userName);
-          userListBox.put('username',responseBody['username']);
-        });
-      } else if (response.statusCode == 403) {
-        String newAccessToken = await RefreshTokenAPI.refresh();
-        accessToken = newAccessToken;
-        getUserDetails();
-      }else {
-        // Handle other status codes
-      }
-    } catch (e) {
-      // Handle errors
-    }finally {
-      setState(() {
-        nameLoading = false;
-      });
-    }
-
-  }
+  // Future<void> getUserDetails() async {
+  //
+  //   setState(() {
+  //     nameLoading = true;
+  //   });
+  //   final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
+  //
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse(baseUrl),
+  //       body: json.encode({"userId": userId}),
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'x-access-token': '$accessToken',
+  //       },
+  //     );
+  //
+  //     if (response.statusCode == 200) {
+  //       Map<String, dynamic> responseBody = json.decode(response.body);
+  //       setState(() {
+  //         userName = responseBody["name"];
+  //         emailAddress = responseBody["email"];
+  //         userListBox.put('name', userName);
+  //         userListBox.put('username',responseBody['username']);
+  //       });
+  //     } else if (response.statusCode == 403) {
+  //       String newAccessToken = await RefreshTokenAPI.refresh();
+  //       accessToken = newAccessToken;
+  //       getUserDetails();
+  //     }else {
+  //       // Handle other status codes
+  //     }
+  //   } catch (e) {
+  //     // Handle errors
+  //   }finally {
+  //     setState(() {
+  //       nameLoading = false;
+  //     });
+  //   }
+  //
+  // }
 
   @override
   Widget build(BuildContext context) {

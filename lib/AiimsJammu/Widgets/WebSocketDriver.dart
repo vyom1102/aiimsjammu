@@ -1,23 +1,21 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:iwaymaps/config.dart';
 
 class LocationTrackingService {
-  // Singleton pattern
   static final LocationTrackingService _instance = LocationTrackingService._internal();
   factory LocationTrackingService() => _instance;
   LocationTrackingService._internal();
 
-  // Properties
   late io.Socket _socket;
   Timer? _locationTimer;
   Position? _currentPosition;
   bool _isTracking = false;
   bool _isConnected = false;
 
-  // Getters
   bool get isTracking => _isTracking;
   bool get isConnected => _isConnected;
   Position? get currentPosition => _currentPosition;
@@ -126,13 +124,18 @@ class LocationTrackingService {
 
   // Get current position
   Future<void> _getCurrentPosition() async {
-    try {
-      _currentPosition = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error getting location: $e');
+    bool serviceEnabled;
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+    if(serviceEnabled) {
+      try {
+        _currentPosition = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error getting location: $e');
+        }
       }
     }
   }
@@ -152,8 +155,8 @@ class LocationTrackingService {
 
       _socket.emit('user-log-socket', locationData);
       print(" LocationTrackingService Sent message: $locationData");
-
-        print('LocationTrackingService: Location sent - Lat: ${_currentPosition!.latitude}, Lng: ${_currentPosition!.longitude}');
+      // Fluttertoast.showToast(msg: "$locationData");
+      print('LocationTrackingService: Location sent - Lat: ${_currentPosition!.latitude}, Lng: ${_currentPosition!.longitude}');
 
     }
   }
