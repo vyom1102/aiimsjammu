@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../API/RefreshTokenAPI.dart';
 import '../../config.dart';
 import '../../websocket/interactionManager.dart';
 import '../Widgets/Translator.dart';
@@ -33,8 +34,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? emailAddress;
   String? username;
   String? uploadedimage;
-
-
+  bool isDriver= false;
   @override
   void initState() {
     super.initState();
@@ -42,6 +42,7 @@ class _ProfilePageState extends State<ProfilePage> {
     getUserDataFromHive();
   }
   var userListBox = Hive.box('user');
+  var signInBox =  Hive.box('SignInDatabase');
 
   void checkForReload(){
     if(userListBox.containsKey('name')){
@@ -84,9 +85,8 @@ class _ProfilePageState extends State<ProfilePage> {
       );
       print(refreshToken);
       if (response.statusCode == 200) {
-        final signInBox = await Hive.openBox('SignInDatabase');
         await signInBox.clear();
-        userListBox.clear();
+        await userListBox.clear();
         var userInfoBox=Hive.box('UserInformation');
         userInfoBox.clear();
 
@@ -137,6 +137,9 @@ class _ProfilePageState extends State<ProfilePage> {
           'x-access-token': '$accessToken',
         },
       );
+      print("user get");
+    print(response.statusCode);
+    print(response.body);
 
       if (response.statusCode == 200) {
         Map<String, dynamic> responseBody = json.decode(response.body);
@@ -144,12 +147,19 @@ class _ProfilePageState extends State<ProfilePage> {
           name = responseBody["name"];
           emailAddress = responseBody["email"];
           username = responseBody["username"];
+          isDriver = responseBody["userTracking"]??false;
           userListBox.put('name', name);
           userListBox.put('username',username);
           userListBox.put('photo', uploadedimage);
+          userListBox.put('isDriver', isDriver);
+          print("userTracking11");
+          print(responseBody['userTracking']);
+          print(userListBox.get('isDriver'));
         });
       } else if (response.statusCode == 403) {
-        await refreshTokenAndRetryForGetUserDetails(baseUrl);
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        await getUserDetails();
 
       } else {
       }

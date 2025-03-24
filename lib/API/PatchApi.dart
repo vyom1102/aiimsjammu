@@ -4,7 +4,6 @@ import 'package:device_information/device_information.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-
 import '../APIMODELS/patchDataModel.dart';
 import '../DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import '../api/buildingAllApi.dart';
@@ -24,17 +23,9 @@ class patchAPI {
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
 
-  String encryptDecrypt(String input, String key){
-    StringBuffer result = StringBuffer();
-    for (int i = 0; i < input.length; i++) {
-      // XOR each character of the input with the corresponding character of the key
-      result.writeCharCode(input.codeUnitAt(i) ^ key.codeUnitAt(i % key.length));
-    }
-    return result.toString();
-  }
   String getDecryptedData(String encryptedData){
     Map<String, dynamic> encryptedResponseBody = json.decode(encryptedData);
-    String newResponse=encryptDecrypt(encryptedResponseBody['encryptedData'], "xX7/kWYt6cjSDMwB4wJPOBI+/AwC+Lfbd610sWfwywU=");
+    String newResponse=encryptDecrypt(encryptedResponseBody['encryptedData']);
     // //print("new response ${newResponse}");
     Map<String,dynamic> originalList = jsonDecode(newResponse);
     // Wrap in landmarks header
@@ -76,9 +67,10 @@ class patchAPI {
       headers: {
         'Content-Type': 'application/json',
         'x-access-token': accessToken,
-        'Authorization': 'e28cdb80-c69a-11ef-aa4e-e7aa7912987a'
+        'Authorization': AppConfig.Authorization
       },
     );
+    print("data from patch ${response.statusCode} ${response.body}");
     if (response.statusCode == 200) {
       print("data from patch ${response.body}");
       try{
