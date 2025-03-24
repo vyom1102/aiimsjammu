@@ -338,7 +338,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       // print("---nearestBeacon");
       // print(nearestBeacon);
       debugNearestbeacon = "$nearestBeacon $threshold";
-      setState(() {});
       sumMap = bluetoothScanAndroidClass.giveSumMapCallBack();
       // print("listenToBin${sumMap} ");
 
