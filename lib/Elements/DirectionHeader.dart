@@ -285,7 +285,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
 
 
-  double highestweight = Platform.isIOS?2.8 : 3.25;
+  double highestweight = Platform.isIOS?3.25 : 3.25;
 
   String? parseString(String input) {
     final regex = RegExp(r'Optional\("(.+?)"\)\s+(\d+\.\d+)');
