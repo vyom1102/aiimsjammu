@@ -157,10 +157,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       _timer = Timer.periodic(Duration(milliseconds: 1000), (timer) {
         // print("widget.user.pathobj.index");
         // print(widget.user.pathobj.index);
-
-        if (widget.user.pathobj.index > 3) {
-          listenToBin();
-        }
+        listenToBin();
+        // if (widget.user.pathobj.index > 3) {
+        //  listenToBin();
+        // }
       });
     }else if(Platform.isIOS){
       Device_timer = Timer.periodic(Duration(milliseconds: 1000), (timer)  {
@@ -273,7 +273,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   }
 
   String debuglastNearestbeacon = "";
-  String debuglNearestbeacon = "";
+  String debugNearestbeacon = "";
   Map<String, double> sortedsumMap = {};
   Map<String, List<double>> sumMap = {};
   Map<String, double> sumMapAvg = {};
@@ -321,6 +321,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     }
   }
 
+  List<String> localizedOn = [];
 
   Future<bool> listenToBin()  async {
     // print("listentobin");
@@ -331,11 +332,13 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       sumMap.clear();
       // sumMap = btadapter.calculateAverage();
       nearestBeacon = bluetoothScanAndroidClass.closestDeviceDetails;
+
       sumMapAvg = bluetoothScanAndroidClass.rssiAverage;
       threshold = bluetoothScanAndroidClass.closestRSSI;
       // print("---nearestBeacon");
       // print(nearestBeacon);
-      debuglNearestbeacon = nearestBeacon;
+      debugNearestbeacon = "$nearestBeacon $threshold";
+      setState(() {});
       sumMap = bluetoothScanAndroidClass.giveSumMapCallBack();
       // print("listenToBin${sumMap} ");
 
@@ -359,7 +362,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       nearestBeacon = parseString(receivedStringFromIOS)??"";
 
       threshold = parseStringT(receivedStringFromIOS)??"";
-      debuglNearestbeacon = "${nearestBeacon} ${threshold}";
+      debugNearestbeacon = "${nearestBeacon} ${threshold}";
+      setState(() {});
+    }
+    if(localizedOn.contains(nearestBeacon)){
+      nearestBeacon = "";
     }
     print("highestweight");
     print(highestweight);
@@ -480,6 +487,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     widget.user.pathobj.sourceFloor &&
                 widget.user.pathobj.destinationFloor ==
                     Building.apibeaconmap[nearestBeacon]!.floor && double.parse(threshold!) >= 1.2) {
+              localizedOn.add(nearestBeacon);
               List<int> beaconcoord = [
                 Building.apibeaconmap[nearestBeacon]!.coordinateX!,
                 Building.apibeaconmap[nearestBeacon]!.coordinateY!
@@ -529,6 +537,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             // }
 
             else if (widget.user.floor == Building.apibeaconmap[nearestBeacon]!.floor && double.parse(threshold!) >= highestweight) {
+              localizedOn.add(nearestBeacon);
               print("calling expected function 2${highestweight} -- ${threshold}");
               widget.user.onConnection = false;
               //
@@ -1422,28 +1431,26 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             )
                 : Container(),
 
-            // Container(
-            //   width: screenWidth,
-            //   height: 300,
-            //   child: SingleChildScrollView(
-            //     scrollDirection: Axis.horizontal,
-            //     child: Column(
-            //       crossAxisAlignment: CrossAxisAlignment.start,
-            //       children: [
-            //         //Text("Beacon ${highestKey} - ${highestAverage}"),
-            //         Text(debuglNearestbeacon),
-            //         // Text(sumMap.entries.map((entry) => '${entry.key}: ${entry.value.join(", ")}').join("\n")),
-            //         // //Text(displayString),
-            //         // Text("-------"),
-            //         // Text(sumMapAvg.toString()),
-            //         // Text("${highestAverage} ${threshold.toString()}")
-            //         //
-            //
-            //         // Text(Building.apibeaconmap.containsKey(debuglNearestbeacon).toString()),
-            //       ],
-            //     ),
-            //   ),
-            // ),
+            Container(
+              width: screenWidth,
+              height: 300,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Text("Beacon ${highestKey} - ${highestAverage}"),
+                    // Text(debugNearestbeacon),
+                    // Text(sumMap.entries.map((entry) => '${entry.key}: ${entry.value.join(", ")}').join("\n")),
+                    // Text(displayString),
+                    // Text("-------"),
+                    // Text(sumMapAvg.toString()),
+                    // Text("${highestAverage} ${threshold.toString()}")
+                    // Text(Building.apibeaconmap.containsKey(debuglNearestbeacon).toString()),
+                  ],
+                ),
+              ),
+            ),
 
             // Container(
             //   width: 300,

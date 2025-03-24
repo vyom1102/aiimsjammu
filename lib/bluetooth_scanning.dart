@@ -93,7 +93,7 @@ class BLueToothClass {
           ws.updateMessage({"AppInitialization.bleScanResults":{MacId:Rssi}});
           if (apibeaconmap.containsKey(MacId)) {
             if (result.timeStamp.difference(SourceTSP).inSeconds>=0 && result.timeStamp.difference(SourceTSP).inSeconds < 10) {
-              print("result.timeStamp.difference(SourceTSP) ${result.timeStamp.difference(SourceTSP)}  ${result.timeStamp.difference(SourceTSP).inSeconds}");
+              // print("result.timeStamp.difference(SourceTSP) ${result.timeStamp.difference(SourceTSP)}  ${result.timeStamp.difference(SourceTSP).inSeconds}");
 
               latesILMap.putIfAbsent(MacId,() => []);
               latesILMapTimeStamp.putIfAbsent(MacId,() => []);
@@ -102,7 +102,7 @@ class BLueToothClass {
                 latesILMapTimeStamp[MacId]!.add(result.timeStamp);
                 latesILMap[MacId]!.add(Rssi);
               }
-              print("Beacon $MacId $Rssi ${result.timeStamp.difference(SourceTSP)} ${result.timeStamp} ${SourceTSP}");
+              // print("Beacon $MacId $Rssi ${result.timeStamp.difference(SourceTSP)} ${result.timeStamp} ${SourceTSP}");
 
             }
 

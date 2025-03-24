@@ -30,7 +30,8 @@ class WebSocketService {
 
 
   Map<dynamic, dynamic> _initializeMessage(String appId) {
-    message = {
+    print("_initializeMessage called");
+    return {
       "appId": appId, // Now appId is dynamically assigned
       "userId": "",
       "deviceInfo": {
@@ -90,6 +91,20 @@ class WebSocketService {
 
     _socket.onConnect((_) {
       print('✅ Connected to WebSocket Server');
+      String appId = "";
+      if (userInfoBox.containsKey("userTracking")) {
+        if (userInfoBox.get("userTracking")) {
+          appId = "com.iwayplus.aiimsjammu-driver";
+        } else {
+          appId = "com.iwayplus.aiimsjammu";
+        }
+      }
+
+      // Ensure message is initialized only once, not reset on every update
+      message = _initializeMessage(appId);
+      // Timer.periodic(Duration(seconds: 2), (timer){
+      //   sendMessage(message);
+      // });
       //sendMessage(); // Send initial message upon connection
     });
 
@@ -118,6 +133,7 @@ class WebSocketService {
     _receiveSocket.onDisconnect((_) => print('⚠️ Disconnected from WebSocket Server'));
     _receiveSocket.onError((data) => print('❌ WebSocket Error: $data'));
     _receiveSocket.onReconnect((_) => print('🔄 Reconnecting...'));
+
   }
 
   bool send = false;
@@ -137,23 +153,24 @@ class WebSocketService {
     }
 
     updates.forEach((key,value){
-      updateNestedMap(message,key,value);
+     message = updateNestedMap(message,key,value);
     });
 
-    // print("🔄 Updated message: ${message["userPosition"]}");
+    // print("🔄 Updated message: ${message}");
 
     // sendMessage(message);
   }
 
-  void updateNestedMap(Map<dynamic, dynamic> map, String key, dynamic value) {
+  Map<dynamic, dynamic> updateNestedMap(Map<dynamic, dynamic> map, String key, dynamic value) {
     List<String> keys = key.split('.');
     Map<dynamic, dynamic> temp = map;
 
     for (int i = 0; i < keys.length - 1; i++) {
-      temp = temp.putIfAbsent(keys[i], () => {}) as Map<String, dynamic>;
+      temp = temp.putIfAbsent(keys[i], () => {}) as Map<dynamic, dynamic>;
     }
 
     temp[keys.last] = value;
+    return temp;
   }
 
   void sendMessage(Map<dynamic, dynamic> message) {
@@ -171,11 +188,15 @@ class WebSocketService {
       // print("📩 Received in Timer: ${data}");
       // print(data["userPosition"]["latitude"]);
       // print(data["userPosition"]["longitude"]);
-      if(data["userPosition"]["latitude"] != 0.0 || data["userPosition"]["latitude"] != 0){
-        driverLat = data["userPosition"]["latitude"];
-      }
-      if(data["userPosition"]["longitude"] != 0.0 || data["userPosition"]["longitude"] != 0){
-        driverLng = data["userPosition"]["longitude"];
+      if(data["userPosition"] != null && data["userPosition"]["latitude"] != null) {
+        if (data["userPosition"]["latitude"] != 0.0 ||
+            data["userPosition"]["latitude"] != 0) {
+          driverLat = data["userPosition"]["latitude"];
+        }
+        if (data["userPosition"]["longitude"] != 0.0 ||
+            data["userPosition"]["longitude"] != 0) {
+          driverLng = data["userPosition"]["longitude"];
+        }
       }
     });
   }
