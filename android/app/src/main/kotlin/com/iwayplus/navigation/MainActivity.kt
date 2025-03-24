@@ -61,7 +61,9 @@ class MainActivity : FlutterActivity() {
                 return
             }
             if (device.name != null && device.name.contains("IW")) {
-                val deviceDetails = "Device Name: ${device.name}\nAddress: ${device.address}\nRSSI: $rssi"
+                Log.d("BluetoothScan","Device Info $result");
+
+                val deviceDetails = "Device Name: ${device.name}\nAddress: ${device.address}\nRSSI: $rssi "
                 if (!deviceDetailsList.contains(deviceDetails)) {
                     deviceDetailsList.add(deviceDetails)
                     Log.d("BluetoothScan", "New Device Found: $deviceDetails")
