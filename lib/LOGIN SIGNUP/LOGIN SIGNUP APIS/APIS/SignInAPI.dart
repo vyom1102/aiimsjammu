@@ -1,31 +1,21 @@
 import 'dart:convert';
-
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import 'package:iwaymaps/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
-
-
-import '../../../API/RefreshTokenAPI.dart';
-import '../../../DATABASE/BOXES/SignINAPIModelBox.dart';
-import '../../../Elements/UserCredential.dart';
 import '../../../config.dart';
+import '/LOGIN%20SIGNUP/LOGIN%20SIGNUP%20APIS/MODELS/SignInAPIModel.dart';
 
 class SignInAPI{
 
   final String baseUrl = "${AppConfig.baseUrl}/auth/signin2";
   final String xaccesstoken = AppConfig.Authorization;
 
-
   Future<SignInApiModel?> signIN(String username, String password) async {
-    //final signindataBox = FavouriteDataBaseModelBox.getData();
-    // final SigninBox = SignINAPIModelBox.getData();
 
     final Map<String, dynamic> data = {
       "username": username,
       "password": password,
-      "appId":"com.iwayplus.aiimsjammu"
+      "appId":"com.iwayplus.aiimsj"
     };
-
     final response = await http.post(
       Uri.parse(baseUrl),
       body: EncryptedbodyForApi(data),
@@ -67,10 +57,9 @@ class SignInAPI{
       return null;
     }
   }
-
   static Future<int> sendOtpForgetPassword(String user) async {
     final String xaccesstoken = AppConfig.Authorization;
-    final Map<String, dynamic> data = {"username": "${user}", "digits":4,"appId":"com.iwayplus.aiimsjammu"};
+    final Map<String, dynamic> data = {"username": "${user}", "digits":4,"appId":"com.iwayplus.aiimsj"};
     final response = await http.post(
       Uri.parse('${AppConfig.baseUrl}/auth/otp/username'),
       body: EncryptedbodyForApi(data),
@@ -99,7 +88,7 @@ class SignInAPI{
       "username": "$user",
       "password": "$pass",
       "otp": "$otp",
-      "appId":"com.iwayplus.aiimsjammu"
+      "appId":"com.iwayplus.aiimsj"
 
     };
     final response = await http.post(

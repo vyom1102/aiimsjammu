@@ -307,6 +307,7 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
                 itemCount: filteredLandmarks.length,
                 itemBuilder: (context, index) {
                   final landmark = filteredLandmarks[index];
+                  final polyId = landmark['properties']['polyId']??landmark["_id"];
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12.0),
                     decoration: BoxDecoration(
@@ -337,7 +338,7 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => Navigation(directLandID: landmark['properties']['polyId']),
+                                      builder: (context) => Navigation(directLandID: polyId),
                                     ),
                                   );
                                 },

@@ -13,21 +13,20 @@ class SendOTPAPI{
     final Map<String, dynamic> data = {
       "username": username,
       "digits":4,
-      "appName":"AIIMSJammu"
+      "appName":"Aiims Jammu Navigation"
     };
 
     final response = await http.post(
       Uri.parse(baseUrl),
-      body: json.encode(data),
+      body: EncryptedbodyForApi(data),
       headers: {
         'Content-Type': 'application/json',
         'x-access-token':xaccesstoken
       },
     );
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
+    if (response.statusCode == 200) {
       return true;
-      // return HelperClass.showToast("OTP sent successfully");
     } else {
       print("SendOTPAPI--response.statusCode${response.statusCode} ${response.body}");
       return false;

@@ -13208,7 +13208,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                 SingletonFunctionController.apibeaconmap);
                           } else {
                             SingletonFunctionController.btadapter
-                                .startScanningIOS(
+                                .startScanning(
                                 SingletonFunctionController.apibeaconmap);
                           }
                           setState(() {
@@ -13318,7 +13318,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                                             .apibeaconmap);
                                   } else {
                                     SingletonFunctionController.btadapter
-                                        .startScanningIOS(
+                                        .startScanning(
                                         SingletonFunctionController
                                             .apibeaconmap);
                                   }
