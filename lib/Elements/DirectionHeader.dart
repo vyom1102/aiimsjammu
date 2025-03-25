@@ -338,7 +338,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       // print("---nearestBeacon");
       // print(nearestBeacon);
       debugNearestbeacon = "$nearestBeacon $threshold";
-      setState(() {});
       sumMap = bluetoothScanAndroidClass.giveSumMapCallBack();
       // print("listenToBin${sumMap} ");
 
@@ -922,7 +921,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             widget.user.cellPath[widget.user.pathobj.index].node,
             widget.user.cellPath[widget.user.pathobj.index + 1].node,
             widget.user.cellPath[widget.user.pathobj.index + 2].node,
-            widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
+            widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]??widget.user.pathobj.numCols![widget.user.bid]![0]!);
       } catch (e) {
         print("error to be solved later $e");
       }
@@ -932,8 +931,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               widget.user.cellPath[widget.user.pathobj.index - 1].node,
               widget.user.cellPath[widget.user.pathobj.index].node,
               widget.user.cellPath[widget.user.pathobj.index + 1].node,
-              widget
-                  .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
+              widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]??widget
+                  .user.pathobj.numCols![widget.user.bid]![0]!);
         } catch (e) {
           print("problem to be solved later $e");
         }
@@ -943,7 +942,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         userangle = tools.calculateAngleBWUserandCellPath(
             widget.user.cellPath[widget.user.pathobj.index],
             widget.user.cellPath[widget.user.pathobj.index + 1],
-            widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]!,
+            widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]??widget.user.pathobj.numCols![widget.user.bid]![0]!,
             widget.user.theta);
       }catch(_){}
 
@@ -965,34 +964,35 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       int turnIndex = widget.user.cellPath.indexOf(nextTurn);
       //
       double a = 0;
-
-      if (turnIndex + 1 == widget.user.path.length) {
-        // print("index+1");
-        if (widget.user.cellPath[turnIndex - 2].bid == widget.user.cellPath[turnIndex - 1].bid && widget.user.cellPath[turnIndex - 1].bid == widget.user.cellPath[turnIndex].bid) {
-          a = tools.calculateAnglefifth(
-              widget.user.path[turnIndex - 2],
-              widget.user.path[turnIndex - 1],
-              widget.user.path[turnIndex],
-              widget
-                  .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
-        }
-      } else {
-        // print("index");
-        if (widget.user.cellPath[turnIndex - 1].bid ==
-            widget.user.cellPath[turnIndex].bid &&
-            widget.user.cellPath[turnIndex].bid ==
-                widget.user.cellPath[turnIndex + 1].bid) {
-          a = tools.calculateAnglefifth(
-              widget.user.path[turnIndex - 1],
-              widget.user.path[turnIndex],
-              widget.user.path[turnIndex + 1],
-              widget
-                  .user.pathobj.numCols![widget.user.bid]![widget.user.floor]!);
+      if(turnIndex != -1){
+        if (turnIndex + 1 == widget.user.path.length) {
+          // print("index+1");
+          if (widget.user.cellPath[turnIndex - 2].bid == widget.user.cellPath[turnIndex - 1].bid && widget.user.cellPath[turnIndex - 1].bid == widget.user.cellPath[turnIndex].bid) {
+            a = tools.calculateAnglefifth(
+                widget.user.path[turnIndex - 2],
+                widget.user.path[turnIndex - 1],
+                widget.user.path[turnIndex],
+                widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]??widget.user.pathobj.numCols![widget.user.bid]![0]!);
+          }
+        } else {
+          // print("index");
+          if (widget.user.cellPath[turnIndex - 1].bid ==
+              widget.user.cellPath[turnIndex].bid &&
+              widget.user.cellPath[turnIndex].bid ==
+                  widget.user.cellPath[turnIndex + 1].bid) {
+            a = tools.calculateAnglefifth(
+                widget.user.path[turnIndex - 1],
+                widget.user.path[turnIndex],
+                widget.user.path[turnIndex + 1],
+                widget.user.pathobj.numCols![widget.user.bid]![widget.user.floor]??widget.user.pathobj.numCols![widget.user.bid]![0]!);
+          }
         }
       }
 
+
       String direc = tools.angleToClocks(a, widget.context);
       turnDirection = direc;
+
 
       if (oldWidget.direction != widget.direction) {
         if (oldWidget.direction == "Straight") {
@@ -1019,7 +1019,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           });
         }
         else if (widget.direction == "Straight") {
-          if (!_turnSpoken) return; // Skip "Straight" if "Turn" was never spoken
+          // if (!_turnSpoken) return; // Skip "Straight" if "Turn" was never spoken
 
           Vibration.vibrate();
           UserState.isTurn = false;

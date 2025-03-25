@@ -163,7 +163,6 @@ class Navigation extends StatefulWidget {
 
 class _NavigationState extends State<Navigation> with TickerProviderStateMixin, WidgetsBindingObserver {
   MapState mapState = new MapState();
-  Timer? PDRTimer;
   Timer? _exploreModeTimer;
   String maptheme = "";
   var _initialCameraPosition = CameraPosition(
@@ -223,7 +222,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   DateTime? _gyroscopeUpdateTime;
   DateTime? _magnetometerUpdateTime;
   final _streamSubscriptions = <StreamSubscription<dynamic>>[];
-  final pdr = <StreamSubscription<dynamic>>[];
+  StreamSubscription<AccelerometerEvent>? pdr;
   Duration sensorInterval = Duration(milliseconds: 100);
   final pinLandmarkPannel PinLandmarkPannel = pinLandmarkPannel();
 
@@ -959,33 +958,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   void StartPDR() {
     final stackTrace = StackTrace.current;
     print("StartPDR Stack: \n$stackTrace");
-    PDRTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
-      //
-      setState(() {
-        isPdr = true;
-      });
-      if(isAppinForeground){
-        pdrstepCount();
-      }
-
-    });
+    isPdr = true;
+    if(pdr == null || pdr!.isPaused){
+      pdrstepCount();
+    }
   }
 
-// Function to stop the timer
-  bool isPdrStop = false;
-
   void StopPDR() async {
-    if (PDRTimer != null && PDRTimer!.isActive) {
-      setState(() {
-        isPdrStop = true;
-        isPdr = false;
-      });
-      PDRTimer?.cancel();
-      PDRTimer = null;
-      for (final subscription in pdr) {
-        subscription.cancel();
-      }
+    if(pdr == null){
+      return ;
     }
+    setState(() {
+      isPdr = false;
+      pdr!.pause();
+    });
   }
 
   int stepCount = 0;
@@ -1010,24 +996,81 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
 // late StreamSubscription<AccelerometerEvent>? pdr;
   void pdrstepCount() {
-    if(true){
-      pdr.add(accelerometerEventStream().listen(
-            (AccelerometerEvent event) {
-          if (pdr == null) {
-            return; // Exit the event listener if subscription is canceled
-          }
-          ws.updateMessage({
-            "deviceInfo.permissions.activity": true,
-            "deviceInfo.sensors.activity": true,
-          });
+    pdr = accelerometerEventStream().listen((AccelerometerEvent event) {
+      if(user.isnavigating && isPdr){
+        ws.updateMessage({
+          "deviceInfo.permissions.activity": true,
+          "deviceInfo.sensors.activity": true,
+        });
 
-          // Apply low-pass filter
-          if (detectStep(event.x, event.y, event.z)) {
+        // Apply low-pass filter
+        if (detectStep(event.x, event.y, event.z)) {
+          setState(() {
+            lastPeakTime = DateTime
+                .now()
+                .millisecondsSinceEpoch;
+            stepCount++;
+            bool isvalid = MotionModel.isValidStep(
+                user,
+                SingletonFunctionController
+                    .building.floorDimenssion[user.bid]![user.floor]![0],
+                SingletonFunctionController
+                    .building.floorDimenssion[user.bid]![user.floor]![1],
+                SingletonFunctionController
+                    .building.nonWalkable[user.bid]![user.floor]!,
+                reroute, context);
+            if (isvalid) {
+              user.move(context).then((value) {
+                renderHere();
+              });
+            } else {
+              if (user.isnavigating) {
+                // reroute();
+                // showToast("You are out of path");
+              }
+            }
+          });
+        }
+        else {
+          filteredX = alpha * filteredX + (1 - alpha) * event.x;
+          filteredY = alpha * filteredY + (1 - alpha) * event.y;
+          filteredZ = alpha * filteredZ + (1 - alpha) * event.z;
+          // Compute orientation angle from accelerometer data (e.g., pitch or roll)
+          double orientation = atan2(filteredY,
+              sqrt(filteredX * filteredX + filteredZ * filteredZ))
+          ;
+          // Add orientation to history and check variability
+          orientationHistory.add(orientation);
+          if (orientationHistory.length > orientationWindowSize) {
+            orientationHistory.removeAt(0); // Maintain a fixed window size
+
+            // Calculate standard deviation of orientation
+            double avgOrientation = orientationHistory.reduce((a, b) =>
+            a + b) / orientationWindowSize;
+            double orientationVariance = orientationHistory.fold(
+                0, (sum, value) => sum +
+                pow(value - avgOrientation, 2).toInt()) /
+                orientationWindowSize;
+            double orientationStability = sqrt(orientationVariance);
+
+            // Suppress step detection if orientation is too variable
+            if (orientationStability > orientationThreshold) {
+              // Too random, assume the user is stationary or talking, ignore steps
+              return;
+            }
+          }
+          // Compute magnitude of acceleration vector
+          double magnitude = sqrt((filteredX * filteredX +
+              filteredY * filteredY +
+              filteredZ * filteredZ));
+          // Detect peak and valley
+          if (magnitude > peakThreshold && DateTime.now().millisecondsSinceEpoch - lastPeakTime > peakInterval) {
             setState(() {
               lastPeakTime = DateTime
                   .now()
                   .millisecondsSinceEpoch;
               stepCount++;
+              print("${SingletonFunctionController.building.floorDimenssion}");
               bool isvalid = MotionModel.isValidStep(
                   user,
                   SingletonFunctionController
@@ -1048,90 +1091,27 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 }
               }
             });
+          } else if (magnitude < valleyThreshold &&
+              DateTime
+                  .now()
+                  .millisecondsSinceEpoch - lastValleyTime >
+                  valleyInterval) {
+            setState(() {
+              lastValleyTime = DateTime
+                  .now()
+                  .millisecondsSinceEpoch;
+            });
           }
-          else {
-            filteredX = alpha * filteredX + (1 - alpha) * event.x;
-            filteredY = alpha * filteredY + (1 - alpha) * event.y;
-            filteredZ = alpha * filteredZ + (1 - alpha) * event.z;
-            // Compute orientation angle from accelerometer data (e.g., pitch or roll)
-            double orientation = atan2(filteredY,
-                sqrt(filteredX * filteredX + filteredZ * filteredZ))
-            ;
-            // Add orientation to history and check variability
-            orientationHistory.add(orientation);
-            if (orientationHistory.length > orientationWindowSize) {
-              orientationHistory.removeAt(0); // Maintain a fixed window size
-
-              // Calculate standard deviation of orientation
-              double avgOrientation = orientationHistory.reduce((a, b) =>
-              a + b) / orientationWindowSize;
-              double orientationVariance = orientationHistory.fold(
-                  0, (sum, value) => sum +
-                  pow(value - avgOrientation, 2).toInt()) /
-                  orientationWindowSize;
-              double orientationStability = sqrt(orientationVariance);
-
-              // Suppress step detection if orientation is too variable
-              if (orientationStability > orientationThreshold) {
-                // Too random, assume the user is stationary or talking, ignore steps
-                return;
-              }
-            }
-            // Compute magnitude of acceleration vector
-            double magnitude = sqrt((filteredX * filteredX +
-                filteredY * filteredY +
-                filteredZ * filteredZ));
-            // Detect peak and valley
-            if (magnitude > peakThreshold && DateTime.now().millisecondsSinceEpoch - lastPeakTime > peakInterval) {
-              setState(() {
-                lastPeakTime = DateTime
-                    .now()
-                    .millisecondsSinceEpoch;
-                stepCount++;
-                print("${SingletonFunctionController.building.floorDimenssion}");
-                bool isvalid = MotionModel.isValidStep(
-                    user,
-                    SingletonFunctionController
-                        .building.floorDimenssion[user.bid]![user.floor]![0],
-                    SingletonFunctionController
-                        .building.floorDimenssion[user.bid]![user.floor]![1],
-                    SingletonFunctionController
-                        .building.nonWalkable[user.bid]![user.floor]!,
-                    reroute, context);
-                if (isvalid) {
-                  user.move(context).then((value) {
-                    renderHere();
-                  });
-                } else {
-                  if (user.isnavigating) {
-                    // reroute();
-                    // showToast("You are out of path");
-                  }
-                }
-              });
-            } else if (magnitude < valleyThreshold &&
-                DateTime
-                    .now()
-                    .millisecondsSinceEpoch - lastValleyTime >
-                    valleyInterval) {
-              setState(() {
-                lastValleyTime = DateTime
-                    .now()
-                    .millisecondsSinceEpoch;
-              });
-            }
-          }
-
-        },
-        onError: (error) {
+        }
+      }
+    }, onError: (error) {
           ws.updateMessage({
             "deviceInfo.permissions.activity": false,
             "deviceInfo.sensors.activity": false,
           });
-        },
-      ));
-    }
+        });
   }
+
   DateTime? lastStepTime; // To track the last step detection time
   final Duration stepCooldown = Duration(milliseconds: 800);
   bool isPdrActive = false;
@@ -2762,8 +2742,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         //  if(user.isnavigating==false){
         clearPathVariables();
         // }
-        PDRTimer?.cancel();
-        PDRTimer = null;
         PathState.clear();
         PathState.sourceX = user.coordX;
         PathState.sourceY = user.coordY;
@@ -3071,6 +3049,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         await apiController.landmarkAPIController(key, false);
       }
     }));
+
+
 
     print("widget.directLandID.length ${widget.directLandID}");
     print("Checking timer: ${SingletonFunctionController.timer}");
@@ -4683,7 +4663,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
     polylines[value.polyline!.buildingID!]?.clear();
 
-    if (floor != 0) {
+    if (floor != 0 && value.polyline?.buildingID != buildingAllApi.outdoorID) {
       List<PolyArray> prevFloorLifts =
       findLift(tools.numericalToAlphabetical(0), value.polyline!.floors!);
       List<PolyArray> currFloorLifts = findLift(
@@ -10121,14 +10101,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             }
           }catch(_){}
           for (int i = 0; i < getPoints.length; i++) {
-            if (isPdrStop && (val == 0 || (val<60 && val>-60))) {
-              Future.delayed(Duration(milliseconds: 1500)).then((value) => {
-                print("pdr started"),
-                StartPDR(),
-              });
-              setState(() {
-                isPdrStop = false;
-              });
+            if (val == 0 || (val<60 && val>-60)) {
+              if(pdr == null || pdr!.isPaused){
+                Future.delayed(Duration(milliseconds: 1500)).then((value) => {
+                  print("pdr started"),
+                  StartPDR(),
+                });
+              }
               break;
             }
             if (getPoints[i][0] == user.showcoordX &&
@@ -12215,8 +12194,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     //   //showDestinationDialog(context,user.convertTolng("You have reached ${destname}. It is ${direction}","", 0.0, context, angle, "", "",destname: destname));
     // }
 
-    PDRTimer?.cancel();
-    PDRTimer = null;
     clearPathVariables();
     StopPDR();
     PathState.didPathStart = true;
@@ -12257,12 +12234,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     land snapshot = land();
     // Collect all API call futures
     List<Future<void>> apiCalls = [];
+    SingletonFunctionController.building.landmarkdata;
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
       apiCalls.add(landmarkApi().fetchLandmarkData(id: key).then((value) {
-        snapshot.mergeLandmarks(value.landmarks);
-        print("merged $key");
+        if(key != buildingAllApi.outdoorID){
+          snapshot.mergeLandmarks(value.landmarks);
+          print("merged $key");
+        }
       }));
     });
+    apiCalls.add(GlobalAnnotation().fetchGlobalAnnotationData(buildingAllApi.outdoorID).then((globalData) async {
+      var landmarks = await GlobalAnnotationController.OptionalWrapLandmarks(globalData);
+      snapshot.mergeLandmarks(landmarks);
+    }));
+
     // Wait for all API calls to complete
     await Future.wait(apiCalls);
     _isBuildingPannelOpen = false;
@@ -12596,7 +12581,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     UserState.geoLat=0.0;
     UserState.geoLng=0.0;
     flutterTts.stop();
-    PDRTimer?.cancel();
     _controller12?.dispose();
     SingletonFunctionController.building.qrOpened = false;
     SingletonFunctionController.building.dispose();
@@ -12616,6 +12600,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     PB_controller.dispose(); // Dispose of the controller to free up resources
     for (var controller in _controllers) {
       controller.dispose();
+    }
+    if(pdr != null){
+      pdr!.cancel();
     }
     magnetometerSubscription.cancel();
     super.dispose();

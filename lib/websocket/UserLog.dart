@@ -153,7 +153,7 @@ class WebSocketService {
     }
 
     updates.forEach((key,value){
-     message = updateNestedMap(message,key,value);
+     //message = updateNestedMap(message,key,value);
     });
 
     // print("🔄 Updated message: ${message}");

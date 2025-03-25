@@ -104,13 +104,11 @@ class NavigationAPIController {
         var allIntegers =
         matches.map((match) => int.parse(match.group(0)!)).toList();
 
-        var currentNonWalkable = SingletonFunctionController
-            .building.nonWalkable[landmark.buildingID!] ??
+        var currentNonWalkable = SingletonFunctionController.building.nonWalkable[landmark.buildingID!] ??
             {};
         currentNonWalkable[landmark.floor!] = allIntegers;
 
-        SingletonFunctionController.building.nonWalkable[landmark.buildingID!] =
-            currentNonWalkable;
+        SingletonFunctionController.building.nonWalkable[landmark.buildingID!] = currentNonWalkable;
 
         if(selected){
           UserState.nonWalkable = SingletonFunctionController.building.nonWalkable;
@@ -143,6 +141,35 @@ class NavigationAPIController {
     createMarkers(landmarkData, 0, bid: id);
     ARPatch(id, selected, coordinates: coordinates);
   }
+
+  void modifyCampusVariables() {
+    if (buildingAllApi.outdoorID != "") {
+      var currentNonWalkable = SingletonFunctionController.building.nonWalkable[buildingAllApi.outdoorID] ?? {};
+
+      if (currentNonWalkable.isNotEmpty && currentNonWalkable.keys.length == 1) {
+        List<int>? nonWalk = currentNonWalkable.values.firstOrNull;
+        if (nonWalk != null) {
+          for (int i = 1; i < 10; i++) {
+            currentNonWalkable[i] = nonWalk;
+          }
+          SingletonFunctionController.building.nonWalkable[buildingAllApi.outdoorID] = currentNonWalkable;
+        }
+      }
+
+      var currentFloorDimensions = SingletonFunctionController.building.floorDimenssion[buildingAllApi.outdoorID] ?? {};
+
+      if (currentFloorDimensions.isNotEmpty && currentFloorDimensions.keys.length == 1) {
+        List<int>? floorDim = currentFloorDimensions.values.firstOrNull;
+        if (floorDim != null) {
+          for (int i = 1; i < 10; i++) {
+            currentFloorDimensions[i] = floorDim;
+          }
+          SingletonFunctionController.building.floorDimenssion[buildingAllApi.outdoorID] = currentFloorDimensions;
+        }
+      }
+    }
+  }
+
 
   Future<void> ARPatch(String id, bool selected, {Map<int, geo.LatLng>? coordinates}) async {
     if(coordinates == null){
