@@ -130,8 +130,7 @@ class UserState {
     return true;
   }
 
-  bool isTurnCheck(
-      int prevX, int prevY, int nextX, int nextY, List<Cell> turnPoints) {
+  bool isTurnCheck(int prevX, int prevY, int nextX, int nextY, List<Cell> turnPoints) {
     if (bid == buildingAllApi.outdoorID) {
       for (var c in turnPoints) {
         if (c.bid == bid && c.x == showcoordX && c.y == showcoordY) {

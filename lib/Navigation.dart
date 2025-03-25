@@ -3050,6 +3050,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       }
     }));
 
+
+
     print("widget.directLandID.length ${widget.directLandID}");
     print("Checking timer: ${SingletonFunctionController.timer}");
     var time = DateTime.now();
@@ -4661,7 +4663,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
     polylines[value.polyline!.buildingID!]?.clear();
 
-    if (floor != 0) {
+    if (floor != 0 && value.polyline?.buildingID != buildingAllApi.outdoorID) {
       List<PolyArray> prevFloorLifts =
       findLift(tools.numericalToAlphabetical(0), value.polyline!.floors!);
       List<PolyArray> currFloorLifts = findLift(

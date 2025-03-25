@@ -45,6 +45,7 @@ class GlobalAnnotationController {
   Future<void> wrapPatch() async {
     await apiController.patchAPIController(data.mappingElements!.first.buildingID!, false);
     await apiController.landmarkAPIController(data.mappingElements!.first.buildingID!, false);
+    apiController.modifyCampusVariables();
   }
 
   Future<List<Landmarks>?> wrapLandmarks() async {
