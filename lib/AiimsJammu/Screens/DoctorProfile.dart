@@ -14,6 +14,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../API/RefreshTokenAPI.dart';
 import '../../config.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/Translator.dart';
@@ -140,8 +141,10 @@ class _DoctorProfileState extends State<DoctorProfile> {
           }
         }
       } else if (response.statusCode == 403) {
-        // Access token expired, refresh token and retry the call
-        await refreshTokenAndRetryForGetUserDetails(baseUrl);
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        getUserDetails();
+        // await refreshTokenAndRetryForGetUserDetails(baseUrl);
       } else {
         print(response.statusCode);
       }
@@ -317,8 +320,11 @@ class _DoctorProfileState extends State<DoctorProfile> {
         isFavorite = !isFavorite;
       });
     } else if (response.statusCode == 403) {
+      String newAccessToken = await RefreshTokenAPI.refresh();
+      accessToken = newAccessToken;
+      updateUserFavorites();
       // Access token expired, refresh token and retry the call
-      await refreshTokenAndRetryForGetUserDetails(baseUrl);
+      // await refreshTokenAndRetryForGetUserDetails(baseUrl);
     } else {
       print('Failed to add doctor to favorites: ${response.statusCode}');
     }

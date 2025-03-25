@@ -13,6 +13,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../API/RefreshTokenAPI.dart';
 import '../../config.dart';
 import '../Widgets/CalculateDistance.dart';
 import '../Widgets/LocationIdFunction.dart';
@@ -101,7 +102,10 @@ class _ServiceInfoState extends State<ServiceInfo> {
         }
 
       } else if (response.statusCode == 403) {
-        await refreshTokenAndRetryForGetUserDetails(baseUrl);
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        getUserDetails();
+        // await refreshTokenAndRetryForGetUserDetails(baseUrl);
       } else {
         // Handle other status codes
       }
@@ -169,7 +173,10 @@ class _ServiceInfoState extends State<ServiceInfo> {
       }
     } else if (response.statusCode == 403) {
       // Access token expired, refresh token and retry the call
-      await refreshTokenAndRetryForGetUserDetails(baseUrl);
+      // await refreshTokenAndRetryForGetUserDetails(baseUrl);
+      String newAccessToken = await RefreshTokenAPI.refresh();
+      accessToken = newAccessToken;
+      updateUserFavorites();
     } else {
       print('Failed to add doctor to favorites: ${response.statusCode}');
     }

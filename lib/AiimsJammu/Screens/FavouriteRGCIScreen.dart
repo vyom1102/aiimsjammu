@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:iwaymaps/AiimsJammu/Screens/FavouriteDoctor.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/FavouriteService.dart';
 
+import '../../API/RefreshTokenAPI.dart';
 import '../../config.dart';
 import '../Widgets/Translator.dart';
 
@@ -157,7 +158,10 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
         // _nameController.text = originalName!;
       } else if (response.statusCode == 403) {
         // Access token expired, refresh token and retry the call
-        await refreshTokenAndRetryForGetUserDetails(baseUrl);
+        // await refreshTokenAndRetryForGetUserDetails(baseUrl);
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        getUserDetails();
       } else {
         print(response.statusCode);
       }

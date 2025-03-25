@@ -14,6 +14,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../API/RefreshTokenAPI.dart';
 import '../../config.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/Translator.dart';
@@ -73,7 +74,11 @@ class _FavouriteServiceState extends State<FavouriteService> {
       );
       print('Service added to favorites!');
     } else if (response.statusCode == 403) {
-      await refreshTokenAndRetryForGetUserDetails(baseUrl);
+      String newAccessToken = await RefreshTokenAPI.refresh();
+      accessToken = newAccessToken;
+      // updateUserFavorites(id);
+      updateUserFavorites(id);
+      // await refreshTokenAndRetryForGetUserDetails(baseUrl);
     } else {
       print('Failed to add service to favorites: ${response.statusCode}');
     }
@@ -195,7 +200,11 @@ class _FavouriteServiceState extends State<FavouriteService> {
           }
         }
       } else if (response.statusCode == 403) {
-        await refreshTokenAndRetryForGetUserDetails(baseUrl);
+        // await refreshTokenAndRetryForGetUserDetails(baseUrl);
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        getUserDetails();
+
       } else {
         // Handle other status codes
       }

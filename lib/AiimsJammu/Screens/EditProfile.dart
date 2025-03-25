@@ -14,6 +14,7 @@ import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../API/DeleteApi.dart';
+import '../../API/RefreshTokenAPI.dart';
 import '../../LOGIN SIGNUP/SignIn.dart';
 import '../../config.dart';
 import '../Widgets/Translator.dart';
@@ -77,7 +78,10 @@ class _EditProfileState extends State<EditProfile> {
           print("Failed to upload image: ${responseData['message']}");
         }
       } else if (response.statusCode == 403) {
-        await refreshTokenAndRetryUpload();
+        // await refreshTokenAndRetryUpload();
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        uploadImage();
       } else {
         print("Failed to upload image. Status code: ${response.statusCode}");
       }
@@ -185,7 +189,10 @@ class _EditProfileState extends State<EditProfile> {
         _nameController.text = originalName!;
       } else if (response.statusCode == 403) {
         // Access token expired, refresh token and retry the call
-        await refreshTokenAndRetryForGetUserDetails(baseUrl);
+        // await refreshTokenAndRetryForGetUserDetails(baseUrl);
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        getUserDetails();
       } else {
         print(response.statusCode);
       }
@@ -333,7 +340,10 @@ class _EditProfileState extends State<EditProfile> {
         );
       } else if (response.statusCode == 403) {
         // Access token expired, refresh token and retry the call
-        await refreshTokenAndRetry(updateUrl);
+        // await refreshTokenAndRetry(updateUrl);
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        updateUser(context);
       } else {
         // Handle other status codes
         QuickAlert.show(
