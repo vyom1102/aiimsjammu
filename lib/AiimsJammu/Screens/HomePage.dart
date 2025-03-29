@@ -16,6 +16,7 @@ import 'package:new_version_plus/new_version_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -2250,6 +2251,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ):TranslatorWidget("Offline"),
         floatingActionButton: FloatingActionButton(
+          heroTag: 'homepage',
           onPressed: (){
             Navigator.push(
               context,
@@ -2334,7 +2336,236 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+  // Widget _buildMainServices() {
+  //   final List<Map<String, dynamic>> services = [
+  //     {
+  //       'image': 'assets/images/opd.svg',
+  //       'color': Color(0xFFEAF2FF),
+  //       'iconColor': Color(0xFF003366),
+  //       'title': 'OPD & Ayush',
+  //       'buildingId':['66794105b80a6778c53c4856','679ca3fde7e7001d98497002'],
+  //     },
+  //     {
+  //       'image':  'assets/images/emergency.svg',
+  //       'color': Color(0xFFFAE9E9),
+  //       'iconColor': Colors.red,
+  //       'title': 'Emergency',
+  //       'buildingId':['6798c6df96af63c3e82659ec'],
+  //     },
+  //     {
+  //       'image':  'assets/images/ward.svg',
+  //       'color': Color(0xFFFAF8E9),
+  //       'iconColor': Color(0xFF6B8E23),
+  //       'title': 'Ward',
+  //       'buildingId':['6798c99e96af63c3e828203d','6798c81c96af63c3e826add3'],
+  //     },
+  //     {
+  //       'image':  'assets/images/diagnostic.svg',
+  //       'color': Color(0xFFE4F8EB),
+  //       'iconColor': Color(0xFF00796B),
+  //       'title': 'Diagnostic',
+  //       'buildingId':['6798c8fa96af63c3e8277db2'],
+  //     },
+  //   ];
+  //
+  //   return GridView.count(
+  //     shrinkWrap: true,
+  //     physics: NeverScrollableScrollPhysics(),
+  //     crossAxisCount: 2,
+  //     crossAxisSpacing: 16,
+  //     mainAxisSpacing: 16,
+  //     childAspectRatio: 1.2,
+  //     children: services.map((service) {
+  //       return InkWell(
+  //         onTap: (){
+  //
+  //           bool anyLandmarkExists = false;
+  //           List<dynamic> allLandmarks = [];
+  //           List<String> buildingIds = List<String>.from(service['buildingId']);
+  //
+  //           print("Selected service: ${service['title']}");
+  //           print("Building IDs: $buildingIds");
+  //
+  //           // First, collect all landmarks from all buildings
+  //           for (String id in buildingIds) {
+  //             print("Processing building ID: $id");
+  //             if (allLandmarkData.containsKey(id)) {
+  //               print("Found landmarks for building: $id");
+  //
+  //               // Check if landmarks exist
+  //               if (allLandmarkData[id]['landmarkExist'] == true) {
+  //                 anyLandmarkExists = true;
+  //               }
+  //
+  //               // Get landmarks list from this building and add to our collection
+  //               if (allLandmarkData[id]['landmarks'] != null &&
+  //                   allLandmarkData[id]['landmarks'] is List) {
+  //                 List<dynamic> buildingLandmarks = List<dynamic>.from(allLandmarkData[id]['landmarks']);
+  //                 print("Adding ${buildingLandmarks.length} landmarks from building $id");
+  //                 allLandmarks.addAll(buildingLandmarks);
+  //               }
+  //             } else {
+  //               print("No landmarks found for building: $id");
+  //             }
+  //           }
+  //
+  //           // Create the combined data with merged content
+  //           Map<String, dynamic> combinedData = {
+  //             'landmarkExist': anyLandmarkExists,
+  //             'landmarks': allLandmarks
+  //           };
+  //
+  //           print("Final combined landmarks count: ${allLandmarks.length}");
+  //
+  //           // Navigate to Buildinglandmarks with the combined data
+  //           Navigator.push(
+  //             context,
+  //             MaterialPageRoute(
+  //               builder: (context) => Buildinglandmarks(
+  //                 buildingName: service['title'],
+  //                 buildingId: buildingIds.join(','),
+  //                 landmarkData: combinedData,
+  //               ),
+  //             ),
+  //           );
+  //         },
+  //         child: Container(
+  //           decoration: BoxDecoration(
+  //             color: service['color'],
+  //             borderRadius: BorderRadius.circular(16),
+  //           ),
+  //           child: Column(
+  //             mainAxisAlignment: MainAxisAlignment.center,
+  //             children: [
+  //               SvgPicture.asset(service['image']),
+  //               TranslatorWidget(
+  //                 service['title'],
+  //                 style: TextStyle(
+  //                   fontWeight: FontWeight.w500,
+  //                   fontSize: 16,
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       );
+  //     }).toList(),
+  //   );
+  // }
   Widget _buildMainServices() {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _fetchServiceData(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return _buildShimmerGrid();
+        }
+
+        List<Map<String, dynamic>> services = snapshot.data!;
+
+        return GridView.count(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 1.2,
+          children: services.map((service) {
+            return InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Buildinglandmarks(
+                      buildingName: service['title'],
+                      buildingId: service['buildingId'].join(','),
+                      landmarkData: service['landmarkData'],
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: service['color'],
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(service['image']),
+                    TranslatorWidget(
+                      service['title'],
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  // Future<List<Map<String, dynamic>>> _fetchServiceData() async {
+  //   final List<Map<String, dynamic>> services = [
+  //     {
+  //       'image': 'assets/images/opd.svg',
+  //       'color': Color(0xFFEAF2FF),
+  //       'iconColor': Color(0xFF003366),
+  //       'title': 'OPD & Ayush',
+  //       'buildingId':['66794105b80a6778c53c4856','679ca3fde7e7001d98497002'],
+  //     },
+  //     {
+  //       'image': 'assets/images/emergency.svg',
+  //       'color': Color(0xFFFAE9E9),
+  //       'iconColor': Colors.red,
+  //       'title': 'Emergency',
+  //       'buildingId':['6798c6df96af63c3e82659ec'],
+  //     },
+  //     {
+  //       'image': 'assets/images/ward.svg',
+  //       'color': Color(0xFFFAF8E9),
+  //       'iconColor': Color(0xFF6B8E23),
+  //       'title': 'Ward',
+  //       'buildingId':['6798c99e96af63c3e828203d','6798c81c96af63c3e826add3'],
+  //     },
+  //     {
+  //       'image': 'assets/images/diagnostic.svg',
+  //       'color': Color(0xFFE4F8EB),
+  //       'iconColor': Color(0xFF00796B),
+  //       'title': 'Diagnostic',
+  //       'buildingId':['6798c8fa96af63c3e8277db2'],
+  //     },
+  //   ];
+  //
+  //   for (var service in services) {
+  //     List<String> buildingIds = List<String>.from(service['buildingId']);
+  //     bool anyLandmarkExists = false;
+  //     List<dynamic> allLandmarks = [];
+  //
+  //     for (String id in buildingIds) {
+  //       if (allLandmarkData.containsKey(id)) {
+  //         if (allLandmarkData[id]['landmarkExist'] == true) {
+  //           anyLandmarkExists = true;
+  //         }
+  //         if (allLandmarkData[id]['landmarks'] is List) {
+  //           allLandmarks.addAll(List<dynamic>.from(allLandmarkData[id]['landmarks']));
+  //         }
+  //       }
+  //     }
+  //
+  //     service['landmarkData'] = {
+  //       'landmarkExist': anyLandmarkExists,
+  //       'landmarks': allLandmarks,
+  //     };
+  //   }
+  //
+  //   return Future.delayed(Duration(seconds: 2), () => services); // Simulated API delay
+  // }
+  Future<List<Map<String, dynamic>>> _fetchServiceData() async {
     final List<Map<String, dynamic>> services = [
       {
         'image': 'assets/images/opd.svg',
@@ -2344,21 +2575,21 @@ class _HomePageState extends State<HomePage> {
         'buildingId':['66794105b80a6778c53c4856','679ca3fde7e7001d98497002'],
       },
       {
-        'image':  'assets/images/emergency.svg',
+        'image': 'assets/images/emergency.svg',
         'color': Color(0xFFFAE9E9),
         'iconColor': Colors.red,
         'title': 'Emergency',
         'buildingId':['6798c6df96af63c3e82659ec'],
       },
       {
-        'image':  'assets/images/ward.svg',
+        'image': 'assets/images/ward.svg',
         'color': Color(0xFFFAF8E9),
         'iconColor': Color(0xFF6B8E23),
         'title': 'Ward',
         'buildingId':['6798c99e96af63c3e828203d','6798c81c96af63c3e826add3'],
       },
       {
-        'image':  'assets/images/diagnostic.svg',
+        'image': 'assets/images/diagnostic.svg',
         'color': Color(0xFFE4F8EB),
         'iconColor': Color(0xFF00796B),
         'title': 'Diagnostic',
@@ -2366,6 +2597,65 @@ class _HomePageState extends State<HomePage> {
       },
     ];
 
+    // Create a completer to resolve the Future when data is ready
+    final completer = Completer<List<Map<String, dynamic>>>();
+
+    // Use a max timeout for safety (in case landmarks never become true)
+    const maxWaitTime = Duration(seconds: 10);
+    Timer? timeoutTimer;
+
+    // Function to check if data is ready
+    bool isDataReady(List<Map<String, dynamic>> services) {
+      // Check if any service has landmark data available
+      return services.any((service) =>
+      service.containsKey('landmarkData') &&
+          service['landmarkData']['landmarkExist'] == true
+      );
+    }
+
+    // Setup polling to check for data readiness
+    Timer.periodic(Duration(milliseconds: 200), (timer) {
+      // Process landmark data for each service
+      for (var service in services) {
+        List<String> buildingIds = List<String>.from(service['buildingId']);
+        bool anyLandmarkExists = false;
+        List<dynamic> allLandmarks = [];
+
+        for (String id in buildingIds) {
+          if (allLandmarkData.containsKey(id)) {
+            if (allLandmarkData[id]['landmarkExist'] == true) {
+              anyLandmarkExists = true;
+            }
+            if (allLandmarkData[id]['landmarks'] is List) {
+              allLandmarks.addAll(List<dynamic>.from(allLandmarkData[id]['landmarks']));
+            }
+          }
+        }
+
+        service['landmarkData'] = {
+          'landmarkExist': anyLandmarkExists,
+          'landmarks': allLandmarks,
+        };
+      }
+
+      // Check if data is ready to be returned
+      if (isDataReady(services)) {
+        timer.cancel();
+        if (timeoutTimer != null) timeoutTimer!.cancel();
+        completer.complete(services);
+      }
+    });
+
+    // Set a timeout just in case
+    timeoutTimer = Timer(maxWaitTime, () {
+      if (!completer.isCompleted) {
+        completer.complete(services);
+      }
+    });
+
+    return completer.future;
+  }
+  Widget _buildShimmerGrid() {
     return GridView.count(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
@@ -2373,84 +2663,23 @@ class _HomePageState extends State<HomePage> {
       crossAxisSpacing: 16,
       mainAxisSpacing: 16,
       childAspectRatio: 1.2,
-      children: services.map((service) {
-        return InkWell(
-          onTap: (){
-            // Each building has "landmarkExist" and "landmarks" keys
-            // We need to merge the contents instead of just using the keys
-            bool anyLandmarkExists = false;
-            List<dynamic> allLandmarks = [];
-            List<String> buildingIds = List<String>.from(service['buildingId']);
-
-            print("Selected service: ${service['title']}");
-            print("Building IDs: $buildingIds");
-
-            // First, collect all landmarks from all buildings
-            for (String id in buildingIds) {
-              print("Processing building ID: $id");
-              if (allLandmarkData.containsKey(id)) {
-                print("Found landmarks for building: $id");
-
-                // Check if landmarks exist
-                if (allLandmarkData[id]['landmarkExist'] == true) {
-                  anyLandmarkExists = true;
-                }
-
-                // Get landmarks list from this building and add to our collection
-                if (allLandmarkData[id]['landmarks'] != null &&
-                    allLandmarkData[id]['landmarks'] is List) {
-                  List<dynamic> buildingLandmarks = List<dynamic>.from(allLandmarkData[id]['landmarks']);
-                  print("Adding ${buildingLandmarks.length} landmarks from building $id");
-                  allLandmarks.addAll(buildingLandmarks);
-                }
-              } else {
-                print("No landmarks found for building: $id");
-              }
-            }
-
-            // Create the combined data with merged content
-            Map<String, dynamic> combinedData = {
-              'landmarkExist': anyLandmarkExists,
-              'landmarks': allLandmarks
-            };
-
-            print("Final combined landmarks count: ${allLandmarks.length}");
-
-            // Navigate to Buildinglandmarks with the combined data
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => Buildinglandmarks(
-                  buildingName: service['title'],
-                  buildingId: buildingIds.join(','), // Passing all IDs as a comma-separated string
-                  landmarkData: combinedData, // Use the newly created combined data
-                ),
-              ),
-            );
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              color: service['color'],
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SvgPicture.asset(service['image']),
-                TranslatorWidget(
-                  service['title'],
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
+      children: List.generate(4, (index) => _buildShimmerCard()),
     );
   }
+
+  Widget _buildShimmerCard() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+    );
+  }
+
 }
 Widget _buildCard(String imagePath, String text) {
   return Card(

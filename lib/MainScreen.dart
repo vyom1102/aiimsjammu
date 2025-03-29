@@ -218,6 +218,8 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ),
           floatingActionButton: FloatingActionButton(
+            heroTag: 'mainscreen',
+
             onPressed: (){
               Navigator.push(
                 context,

@@ -2,6 +2,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:iwaymaps/AiimsJammu/Widgets/LocationIdFunction.dart';
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
@@ -948,7 +949,11 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
 
 
   void onVenueClicked(String name, String location, String ID, String bid) {
-    Navigator.pop(context, ID);
+    if(widget.frombottombar){
+      PassLocationId(context, ID);
+    }else if(!widget.frombottombar) {
+      Navigator.pop(context, ID);
+    }
   }
 
   IconData getIcon(String option) {

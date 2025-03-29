@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/Translator.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../Navigation.dart';
 
@@ -30,6 +31,7 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
   String searchQuery = '';
   TextEditingController searchController = TextEditingController();
   List<String> uniqueBuildingIds = [];
+  bool isLoading = true;
 
   final Map<String, String> buildingNames = {
     "66794105b80a6778c53c4856": "OPD BLOCK",
@@ -46,6 +48,14 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
     print("idsss ${widget.buildingId}");
     List<String> buildingIds = widget.buildingId.split(',');
     print("Landmark Data: ${widget.landmarkData}");
+
+    // Load data with a slight delay to show shimmer effect
+    loadData();
+  }
+
+  Future<void> loadData() async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 800));
 
     // Filter landmarks to only show those with element-type = Rooms
     if (widget.landmarkData['landmarks'] != null) {
@@ -103,6 +113,12 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
       // Initialize filtered landmarks
       filteredLandmarks = List.from(roomLandmarks);
     }
+
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   void filterLandmarks() {
@@ -144,7 +160,10 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
         filteredLandmarks = filteredLandmarks
             .where((landmark) =>
         landmark['name'] != null &&
-            landmark['name'].toString().toLowerCase().contains(searchQuery.toLowerCase()))
+            landmark['name']
+                .toString()
+                .toLowerCase()
+                .contains(searchQuery.toLowerCase()))
             .toList();
       }
     });
@@ -214,6 +233,236 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
     }
   }
 
+  Widget _buildShimmerFilter() {
+    return Container(
+      margin: const EdgeInsets.only(top: 8.0, bottom: 16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      height: 48,
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerCard() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 200,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: 220,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                width: 180,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                width: 80,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLandmarkList() {
+    if (isLoading) {
+      return ListView.builder(
+        itemCount: 5,
+        itemBuilder: (context, index) => _buildShimmerCard(),
+      );
+    } else if (filteredLandmarks.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            TranslatorWidget(
+              'No landmarks found',
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return ListView.builder(
+        itemCount: filteredLandmarks.length,
+        itemBuilder: (context, index) {
+          final landmark = filteredLandmarks[index];
+          final polyId = landmark['properties']['polyId'] ?? landmark["_id"];
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 2,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: TranslatorWidget(
+                          (landmark['name'] ?? 'Unknown Landmark').length > 25
+                              ? (landmark['name'] as String).substring(0, 25) +
+                              '...'
+                              : landmark['name'] ?? 'Unknown Landmark',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  Navigation(directLandID: polyId),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(50),
+                            border: Border.all(
+                                color: const Color(0xFFE6E6E6), width: 1),
+                          ),
+                          padding: const EdgeInsets.all(8),
+                          child: SvgPicture.asset(
+                              'assets/images/assistant_direction.svg'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_today,
+                          size: 16, color: Colors.blue[900]),
+                      const SizedBox(width: 8),
+                      TranslatorWidget(
+                        landmark['properties']['timings'] ??
+                            'Monday - Saturday | 9 AM - 5 PM',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on, size: 16, color: Colors.blue[900]),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: TranslatorWidget(
+                          buildingNames[landmark['building_ID']] ??
+                              'No Location Info',
+                          style:
+                          const TextStyle(fontSize: 14, color: Colors.black54),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  TranslatorWidget(
+                    'Open Now',
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -239,166 +488,86 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
         title: _buildAppBarTitle(),
         actions: _buildAppBarActions(),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: Column(
-          children: [
-            // Combined filter dropdown
-            Container(
-              margin: const EdgeInsets.only(top: 8.0, bottom: 16.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.grey[300]!),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          setState(() {
+            isLoading = true;
+          });
+          await loadData();
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Column(
+            children: [
+              // Combined filter dropdown or shimmer placeholder
+              isLoading
+                  ? _buildShimmerFilter()
+                  : Container(
+                margin: const EdgeInsets.only(top: 8.0, bottom: 16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(24),
-                  icon: const Icon(Icons.arrow_drop_down),
-                  isExpanded: true,
-                  value: selectedFilter,
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      setState(() {
-                        selectedFilter = newValue;
-                        filterLandmarks();
-                      });
-                    }
-                  },
-                  items: filterOptions
-                      .map<DropdownMenuItem<String>>((String value) {
-                    // Add appropriate icons based on filter type
-                    Widget leading;
-                    if (value.startsWith('Building:')) {
-                      leading = Icon(Icons.apartment, size: 16, color: Colors.blue[900]);
-                    } else if (value.startsWith('Dept:')) {
-                      leading = Icon(Icons.medical_services, size: 16, color: Colors.blue[900]);
-                    } else {
-                      leading = Icon(Icons.filter_list, size: 16, color: Colors.blue[900]);
-                    }
-
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Row(
-                        children: [
-                          leading,
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: TranslatorWidget(value),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-
-            Expanded(
-              child: filteredLandmarks.isEmpty
-                  ? Center(
-                child: TranslatorWidget(
-                  'No landmarks found',
-                  style: TextStyle(fontSize: 16),
-                ),
-              )
-                  : ListView.builder(
-                itemCount: filteredLandmarks.length,
-                itemBuilder: (context, index) {
-                  final landmark = filteredLandmarks[index];
-                  final polyId = landmark['properties']['polyId']??landmark["_id"];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey[300]!),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      spreadRadius: 1,
+                      blurRadius: 2,
+                      offset: const Offset(0, 1),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: TranslatorWidget(
-                                  (landmark['name'] ?? 'Unknown Landmark').length > 25
-                                      ? (landmark['name'] as String).substring(0, 25) + '...'
-                                      : landmark['name'] ?? 'Unknown Landmark',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => Navigation(directLandID: polyId),
-                                    ),
-                                  );
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(50),
-                                    border: Border.all(color: const Color(0xFFE6E6E6), width: 1),
-                                  ),
-                                  padding: const EdgeInsets.all(8),
-                                  child: SvgPicture.asset('assets/images/assistant_direction.svg'),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Icon(Icons.calendar_today, size: 16, color: Colors.blue[900]),
-                              const SizedBox(width: 8),
-                              TranslatorWidget(
-                                landmark['properties']['timings'] ??
-                                    'Monday - Saturday | 9 AM - 5 PM',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[800],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Icon(Icons.location_on, size: 16, color: Colors.blue[900]),
-                              const SizedBox(width: 5),
-                              Expanded(
-                                child: TranslatorWidget(
-                                  buildingNames[landmark['building_ID']] ?? 'No Location Info',
-                                  style: const TextStyle(fontSize: 14, color: Colors.black54),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          TranslatorWidget(
-                            'Open Now',
-                            style: TextStyle(
-                              color: Colors.green,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14,
+                  ],
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0),
+                    borderRadius: BorderRadius.circular(24),
+                    icon: const Icon(Icons.arrow_drop_down),
+                    isExpanded: true,
+                    value: selectedFilter,
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          selectedFilter = newValue;
+                          filterLandmarks();
+                        });
+                      }
+                    },
+                    items: filterOptions
+                        .map<DropdownMenuItem<String>>((String value) {
+                      // Add appropriate icons based on filter type
+                      Widget leading;
+                      if (value.startsWith('Building:')) {
+                        leading = Icon(Icons.apartment,
+                            size: 16, color: Colors.blue[900]);
+                      } else if (value.startsWith('Dept:')) {
+                        leading = Icon(Icons.medical_services,
+                            size: 16, color: Colors.blue[900]);
+                      } else {
+                        leading = Icon(Icons.filter_list,
+                            size: 16, color: Colors.blue[900]);
+                      }
+
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Row(
+                          children: [
+                            leading,
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: TranslatorWidget(value),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
               ),
-            ),
-          ],
+
+              Expanded(child: _buildLandmarkList()),
+            ],
+          ),
         ),
       ),
     );
