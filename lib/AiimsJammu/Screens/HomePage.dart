@@ -198,11 +198,22 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _isLoading = true;
     });
+    await setInitialLandmarkData();
     await DataVersionCheckForLandmarks();
     setState(() {
       _isLoading = false;
     });
     print("Global Building IDs: $globalBuildingIds");
+  }
+  Future<void> setInitialLandmarkData() async{
+    for(String buildingId in globalBuildingIds) {
+      var landmarkDataBox = await Hive.openBox('LandmarkDataBox');
+      var data = await landmarkDataBox.get('landmarkData_$buildingId');
+      setState(() {
+        allLandmarkData[buildingId] = data;
+      });
+      print("no data changed in landmark $buildingId");
+    }
   }
   Future<void>DataVersionCheckForLandmarks() async {
     print("in data version");
@@ -263,9 +274,21 @@ class _HomePageState extends State<HomePage> {
         accessToken = newAccessToken;
         return fetchDataVersion(buildingId: buildingId);
       } else {
+        var landmarkDataBox = await Hive.openBox('LandmarkDataBox');
+        var data = await landmarkDataBox.get('landmarkData_$buildingId');
+        setState(() {
+          allLandmarkData[buildingId] = data;
+        });
+        print("no data changed in landmark else $buildingId");
         throw HttpException('Failed to fetch data version: ${response.reasonPhrase}');
       }
     } catch (e) {
+      var landmarkDataBox = await Hive.openBox('LandmarkDataBox');
+      var data = await landmarkDataBox.get('landmarkData_$buildingId');
+      setState(() {
+        allLandmarkData[buildingId] = data;
+      });
+      print("no data changed in landmark $buildingId");
       throw Exception('Error fetching data version: $e');
     }
   }
@@ -2597,10 +2620,8 @@ class _HomePageState extends State<HomePage> {
       },
     ];
 
-    // Create a completer to resolve the Future when data is ready
     final completer = Completer<List<Map<String, dynamic>>>();
 
-    // Use a max timeout for safety (in case landmarks never become true)
     const maxWaitTime = Duration(seconds: 10);
     Timer? timeoutTimer;
 

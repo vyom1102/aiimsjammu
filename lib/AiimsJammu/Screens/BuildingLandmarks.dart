@@ -55,7 +55,7 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
 
   Future<void> loadData() async {
     // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 800));
+    await Future.delayed(const Duration(milliseconds: 500));
 
     // Filter landmarks to only show those with element-type = Rooms
     if (widget.landmarkData['landmarks'] != null) {
