@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -231,13 +232,36 @@ class _CafeteriaScreenState extends State<CafeteriaScreen> {
                               children: [
                                 Stack(
                                   children: [
-                                    Image.network(
-                                      // '${AppConfig.baseUrl}/uploads/$service['image']',
-                                      '${AppConfig.baseUrl}/uploads/${service['image']}',
+                                    // Image.network(
+                                    //   // '${AppConfig.baseUrl}/uploads/$service['image']',
+                                    //   '${AppConfig.baseUrl}/uploads/${service['image']}',
+                                    //   width: cardWidth,
+                                    //   height: 140,
+                                    //   fit: BoxFit.cover,
+                                    // ),
+                                    CachedNetworkImage(
+                                      imageUrl: '${AppConfig.baseUrl}/uploads/${service['image']}',
                                       width: cardWidth,
                                       height: 140,
-                                      fit: BoxFit.cover,
+                                      fit: BoxFit.fill,
+                                      placeholder: (context, url) => Shimmer.fromColors(
+                                        baseColor: Colors.grey[300]!,
+                                        highlightColor: Colors.grey[100]!,
+                                        child: Container(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) => Container(
+                                        width: 250,
+                                        height: 140,
+                                        color: Colors.grey[200],
+                                        child:Image.asset(
+                                          'assets/images/DefaultCorousalImage.png',
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
                                     ),
+
                                     Positioned(
                                       top: 0,
                                       right: 0,
