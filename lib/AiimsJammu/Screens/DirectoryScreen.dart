@@ -103,7 +103,6 @@ class _HospitalDirectoryState extends State<HospitalDirectory> with SingleTicker
           .toList();
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,6 +127,7 @@ class _HospitalDirectoryState extends State<HospitalDirectory> with SingleTicker
               searchController.clear();
               filteredDirectories = directories;
             });
+            Navigator.pop(context);
           },
         ),
 
@@ -181,7 +181,13 @@ class DirectoryTile extends StatelessWidget {
   final Directory directory;
 
   const DirectoryTile({Key? key, required this.directory}) : super(key: key);
-
+  Future<void> makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    await launch(launchUri.toString());
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -215,12 +221,13 @@ class DirectoryTile extends StatelessWidget {
             child: IconButton(
               icon: const Icon(Icons.phone, color: Colors.orange, size: 20),
               onPressed: () async {
-                final Uri phoneUri = Uri.parse('tel:${directory.contactNo}');
-                if (await canLaunchUrl(phoneUri)) {
-                  await launchUrl(phoneUri);
-                } else {
-                  print('Could not launch call');
-                }
+                // final Uri phoneUri = Uri.parse('tel:${directory.contactNo}');
+                // if (await canLaunchUrl(phoneUri)) {
+                //   await launchUrl(phoneUri);
+                // } else {
+                //   print('Could not launch call');
+                // }
+                makePhoneCall(directory.contactNo);
               },
             ),
           ),

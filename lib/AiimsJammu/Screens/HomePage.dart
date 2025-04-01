@@ -1504,7 +1504,7 @@ class _HomePageState extends State<HomePage> {
                   //   ],
                   // ),
                   // SvgPicture.asset('assets/images/dashboardlogo.svg',height: 40,width: 40,),
-                  Image.asset('assets/images/dashboardlogo.png',height: 40,width: 40,),
+                  Image.asset('assets/images/dashboardlogo.png',height: 50,width: 50,),
                   Column(
                     children: [
                       Text(
