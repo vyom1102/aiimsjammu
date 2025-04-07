@@ -139,7 +139,7 @@ class _HomePageState extends State<HomePage> {
   List<dynamic> _filteredDoctors = [];
   Widget? mapPreview;
   Map<dynamic, dynamic> combinedLandmarkData = {};
-  final ws = WebSocketService();
+  final ws = wsocket("com.iwayplus.aiimsjammu");
 
 
   @override
@@ -151,21 +151,19 @@ class _HomePageState extends State<HomePage> {
     checkForUpdate();
     _pageController = PageController(initialPage: _currentPage);
     getLocs();
-
-    ws.updateMessage({
-      "AppInitialization.BID": buildingAllApi.allBuildingID,
-      "AppInitialization.buildingName": "AIIMS JAMMU",
-    });
+    wsocket.message["AppInitialization"]["BID"]=buildingAllApi.selectedBuildingID;
+    wsocket.message["AppInitialization"]["buildingName"]=buildingAllApi.selectedVenue;
     SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID);
     versionApiCheck();
     checkForReload();
     versionApiCall();
-    dataDownload();
+
     fetchAndStoreBuildingIds();
     // fetchAllLandmarkData();
     isUserValid();
     callbackFunc();
     requestNotificationPermission();
+    // dataDownload();
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
 
@@ -449,12 +447,12 @@ class _HomePageState extends State<HomePage> {
       print('selectedlandmarkpolyId from nearby amenities');
       print(selectedlandmarkpolyId);
       if(selectedlandmarkpolyId!=null)
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Navigation(directLandID: selectedlandmarkpolyId!,),
-        ),
-      );
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Navigation(directLandID: selectedlandmarkpolyId!,),
+          ),
+        );
 
     } else {
       print('No landmarks found of type: ${type ?? 'all'} on floor $floorInt in building');
@@ -676,14 +674,14 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> isUserValid() async{
     try{
-     String refreshToken1= await RefreshTokenAPI.refresh();
-     if(refreshToken1=="400"){
-       Navigator.pushAndRemoveUntil(
-         context,
-         MaterialPageRoute(builder: (context) => SignIn()),
-             (route) => false,
-       );
-     }
+      String refreshToken1= await RefreshTokenAPI.refresh();
+      if(refreshToken1=="400"){
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => SignIn()),
+              (route) => false,
+        );
+      }
     }
     catch(e){
 
@@ -778,8 +776,8 @@ class _HomePageState extends State<HomePage> {
             print("directory data updated");
             dashboarddataversion.put('directoryVersion', directoryVersion);
           } else {
-          print("No updates for announcement data");
-        }
+            print("No updates for announcement data");
+          }
         }
       } else if (response.statusCode == 403) {
         String newAccessToken = await RefreshTokenAPI.refresh();
@@ -806,7 +804,7 @@ class _HomePageState extends State<HomePage> {
 
         if (responseData['status'] == true) {
           List<dynamic> data = responseData['data'];
-         directory = data;
+          directory = data;
           DashboardListBox.put('directories', json.encode(data));
         }
       } else if (response.statusCode == 403) {
@@ -830,7 +828,7 @@ class _HomePageState extends State<HomePage> {
 
     if (status.isGranted) {
       print('location permission granted');
-    return true;
+      return true;
 
 
     } else if(status.isPermanentlyDenied) {
@@ -1748,92 +1746,92 @@ class _HomePageState extends State<HomePage> {
                                 child: _buildCard(
                                     'assets/images/Directory.svg', 'Directory')),
                             if(_pharmacyfilteredServices.isNotEmpty)
-                            SizedBox(width: 12),
+                              SizedBox(width: 12),
 
                             if(_pharmacyfilteredServices.isNotEmpty)
-                            GestureDetector(
-                                onTap: () {
-                                  InteractionManager().logInteraction('Pharmacy Category');
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => PharmacyScreen()),
-                                  );
-                                },child: _buildCard('assets/images/Pharmacy.svg', 'Pharmacy')),
+                              GestureDetector(
+                                  onTap: () {
+                                    InteractionManager().logInteraction('Pharmacy Category');
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => PharmacyScreen()),
+                                    );
+                                  },child: _buildCard('assets/images/Pharmacy.svg', 'Pharmacy')),
 
                             if(_emergencyfilteredService.isNotEmpty)
                               SizedBox(width: 12),
                             if(_emergencyfilteredService.isNotEmpty)
-                            GestureDetector(
-                              onTap: () {
-                                InteractionManager().logInteraction('Emergency Category');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => EmergencyScreen()),
-                                );
-                              },
-                              child: _buildCard(
-                                  'assets/images/Doctor (1).svg', 'Emergency'),
-                            ),
-                            if(_atmfilteredServices.isNotEmpty)
-                            SizedBox(width: 12),
-                            if(_atmfilteredServices.isNotEmpty)
-                            GestureDetector(
-                              onTap: () {
-                                InteractionManager().logInteraction('ATM Category');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => ATMScreen()),
-                                );
-                              },
-                              child: _buildCard(
-                                  'assets/images/Atm.svg', 'ATM'),
-                            ),
-                            if(_cafeteriafilteredServices.isNotEmpty)
-                            SizedBox(width: 12),
-                            if(_cafeteriafilteredServices.isNotEmpty)
-                            GestureDetector(
-                              onTap: () {
-                                InteractionManager().logInteraction('Cafeteria Category');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => CafeteriaScreen()),
-                                );
-                              },
-                              child: _buildCard(
-                                  'assets/images/Cafetaria.svg', 'Cafeteria'),
-                            ),
-                            if(_countersfilteredServices.isNotEmpty)
-                            SizedBox(width: 12),
-                            if(_countersfilteredServices.isNotEmpty)
-                            GestureDetector(
+                              GestureDetector(
                                 onTap: () {
-                                  InteractionManager().logInteraction('Counters Category');
+                                  InteractionManager().logInteraction('Emergency Category');
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => CountersScreen()),
+                                        builder: (context) => EmergencyScreen()),
                                   );
                                 },
-
-                                child: _buildCard('assets/images/counter.svg', 'Counters')),
-                            if(_otherfilteredServices.isNotEmpty)
-                            SizedBox(width: 12),
-                            if(_otherfilteredServices.isNotEmpty)
-                            GestureDetector(
+                                child: _buildCard(
+                                    'assets/images/Doctor (1).svg', 'Emergency'),
+                              ),
+                            if(_atmfilteredServices.isNotEmpty)
+                              SizedBox(width: 12),
+                            if(_atmfilteredServices.isNotEmpty)
+                              GestureDetector(
                                 onTap: () {
-                                  InteractionManager().logInteraction('Others Category');
+                                  InteractionManager().logInteraction('ATM Category');
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => OtherServiceScreen()),
+                                        builder: (context) => ATMScreen()),
                                   );
                                 },
+                                child: _buildCard(
+                                    'assets/images/Atm.svg', 'ATM'),
+                              ),
+                            if(_cafeteriafilteredServices.isNotEmpty)
+                              SizedBox(width: 12),
+                            if(_cafeteriafilteredServices.isNotEmpty)
+                              GestureDetector(
+                                onTap: () {
+                                  InteractionManager().logInteraction('Cafeteria Category');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => CafeteriaScreen()),
+                                  );
+                                },
+                                child: _buildCard(
+                                    'assets/images/Cafetaria.svg', 'Cafeteria'),
+                              ),
+                            if(_countersfilteredServices.isNotEmpty)
+                              SizedBox(width: 12),
+                            if(_countersfilteredServices.isNotEmpty)
+                              GestureDetector(
+                                  onTap: () {
+                                    InteractionManager().logInteraction('Counters Category');
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => CountersScreen()),
+                                    );
+                                  },
 
-                                child: _buildCard('assets/images/cat.svg', 'Others')),
+                                  child: _buildCard('assets/images/counter.svg', 'Counters')),
+                            if(_otherfilteredServices.isNotEmpty)
+                              SizedBox(width: 12),
+                            if(_otherfilteredServices.isNotEmpty)
+                              GestureDetector(
+                                  onTap: () {
+                                    InteractionManager().logInteraction('Others Category');
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => OtherServiceScreen()),
+                                    );
+                                  },
+
+                                  child: _buildCard('assets/images/cat.svg', 'Others')),
                             SizedBox(
                               width: 12,
                             ),
@@ -1978,7 +1976,7 @@ class _HomePageState extends State<HomePage> {
                             subText: item['subText'],
                           )).toList(),
                         ),
-                            // ImageCarouselWidget(imagesWithText: carouselImages),
+                        // ImageCarouselWidget(imagesWithText: carouselImages),
 
                       ),
                       // Padding(
@@ -2622,7 +2620,7 @@ class _HomePageState extends State<HomePage> {
 
     final completer = Completer<List<Map<String, dynamic>>>();
 
-    const maxWaitTime = Duration(seconds: 10);
+    const maxWaitTime = Duration(seconds: 20);
     Timer? timeoutTimer;
 
     // Function to check if data is ready
@@ -2750,8 +2748,8 @@ Widget _buildCard(String imagePath, String text) {
 }
 
 Widget _buildImpNote(
-  String imagePath,
-) {
+    String imagePath,
+    ) {
   return Card(
     color: Colors.white,
     elevation: 0,
@@ -2806,7 +2804,7 @@ class AnnouncementAData {
 
   factory AnnouncementAData.fromJson(Map<String, dynamic> json) {
     return AnnouncementAData(
-        department: json['department'],
+      department: json['department'],
       dateTime: json['dateTime'],
       article: json['article'],
 

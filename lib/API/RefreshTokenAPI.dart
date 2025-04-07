@@ -41,6 +41,7 @@ class RefreshTokenAPI {
 
       return newAccessToken;
     } else if (response.statusCode == 400) {
+      print("logout condition");
       return "400";
     } else {
       print("Error refreshing tokens:");
