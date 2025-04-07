@@ -160,12 +160,13 @@ class _HomePageState extends State<HomePage> {
     versionApiCheck();
     checkForReload();
     versionApiCall();
-    dataDownload();
+
     fetchAndStoreBuildingIds();
     // fetchAllLandmarkData();
     isUserValid();
     callbackFunc();
     requestNotificationPermission();
+    // dataDownload();
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
 
@@ -2622,7 +2623,7 @@ class _HomePageState extends State<HomePage> {
 
     final completer = Completer<List<Map<String, dynamic>>>();
 
-    const maxWaitTime = Duration(seconds: 10);
+    const maxWaitTime = Duration(seconds: 20);
     Timer? timeoutTimer;
 
     // Function to check if data is ready
