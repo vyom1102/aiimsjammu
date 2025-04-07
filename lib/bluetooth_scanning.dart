@@ -73,7 +73,7 @@ class BLueToothClass {
     return FlutterBluePlus.isScanningNow ?? false;
   }
   late DateTime SourceTSP;
-  final ws = WebSocketService();
+  final ws = wsocket("com.iwayplus.aiimsjammu");
 
   void startScanning(HashMap<String, beacon> apibeaconmap) {
     latesILMap.clear();
@@ -81,7 +81,7 @@ class BLueToothClass {
     print("proof $latesILMap ${latesILMapTimeStamp}");
     SourceTSP = DateTime.now();
     print("SourceTSP set to : $SourceTSP");
-    ws.updateMessage({"AppInitialization.bleScanResults":{}});
+    wsocket.message["AppInitialization"]["bleScanResults"] = {};
     startbin();
     FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
 
@@ -90,7 +90,7 @@ class BLueToothClass {
         if(result.device.platformName.length > 2){
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
-          ws.updateMessage({"AppInitialization.bleScanResults":{MacId:Rssi}});
+          wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
           if (apibeaconmap.containsKey(MacId)) {
             if (result.timeStamp.difference(SourceTSP).inSeconds>=0 && result.timeStamp.difference(SourceTSP).inSeconds < 10) {
               // print("result.timeStamp.difference(SourceTSP) ${result.timeStamp.difference(SourceTSP)}  ${result.timeStamp.difference(SourceTSP).inSeconds}");

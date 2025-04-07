@@ -70,7 +70,6 @@ import 'ELEMENTS/DirectionInstruction.dart';
 import 'ELEMENTS/ExploreModeWidget.dart';
 import 'Elements/AccessiblePathButton.dart';
 import 'GPSService.dart';
-import 'GPSStreams/GPSTracking.dart';
 import 'GlobalAnnotation/global_annotation_controller.dart';
 import 'GlobalAnnotation/global_rendering.dart';
 import 'UserState.dart';
@@ -439,10 +438,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   final double targetZoom = 22.0;
 
   late DateTime timerStartTime;
-
-  final GpsTracking gpsTrackingService = GpsTracking();
   Set<Marker> gpsTrackingMarker = {};
-  final ws = WebSocketService();
+  final ws = wsocket("com.iwayplus.aiimsjammu");
   var userInfoBox=Hive.box('UserInformation');
   LatLng gpsTrackingUserPosition = LatLng(28.6139, 77.2090);
   Completer<GoogleMapController> gpsTrackingController = Completer();
@@ -471,12 +468,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     // print("WebSocketService().message ${WebSocketService().message}");
       if(userInfoBox.containsKey("userTracking")){
         if(userInfoBox.get("userTracking")){
-          gpsTrackingService.startTracking();
           print(userInfoBox.get("userTracking"));
         }else{
             print("Is Driver not found");
             print("Is User");
-            ws.receiveMessage();
             navigationStartFunction();
         }
       }else{
@@ -547,6 +542,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       speak("${LocaleData.loadingMaps.getString(context)}", _currentLocale);
       apiCalls(context);
     });
+    _messageTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+      wsocket.sendmessg();
+    });
 
     !DebugToggle.Slider ? handleCompassEvents() : () {};
 
@@ -585,16 +583,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Future<void> navigationStartFunction() async {
 
     Uint8List iconMarker = await getImagesFromMarker('assets/GolfCart.png', 155);
-    double lat = WebSocketService.driverLat;
-    double lng = WebSocketService.driverLng;
-    print("navigationStartFunction ${WebSocketService.driverLat} ${WebSocketService.driverLng}");
-    gpsTrackingUserPosition = LatLng(lat,lng);
-    gpsTrackingMarker?.clear();
-    gpsTrackingMarker?.add(Marker(
-      markerId: MarkerId("userLocation"),
-      position: gpsTrackingUserPosition,
-      icon: BitmapDescriptor.fromBytes(iconMarker),
-    ));
+
   }
 
   Future<void> gpsTrackingMoveCamera() async {
@@ -789,7 +778,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Future<void> getDeviceManufacturer() async {
     try {
       manufacturer = await DeviceInformation.deviceManufacturer;
-      ws.updateMessage({"deviceInfo.deviceManufacturer":manufacturer.toString()});
+      wsocket.message["deviceInfo"]["deviceManufacturer"] =
+          manufacturer.toString();
 
       if (manufacturer.toLowerCase().contains("samsung")) {
         step_threshold = 0.12;
@@ -861,10 +851,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   void handleCompassEvents(){
     compassSubscription = FlutterCompass.events!.listen((event) {
       if (!mounted) return; // Prevent setState if the widget is no longer in the tree
-      ws.updateMessage({
-        "deviceInfo.permissions.compass": true,
-        "deviceInfo.sensors.compass": true,
-      });
+
       double? compassHeading = event.heading;
       setState(() {
         user.theta = compassHeading!;
@@ -887,10 +874,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       });
     }, onError: (error) {
       if (!mounted) return;
-      ws.updateMessage({
-        "deviceInfo.permissions.compass": false,
-        "deviceInfo.sensors.compass": false,
-      });
+      wsocket.message["deviceInfo"]["permissions"]["compass"] = false;
+      wsocket.message["deviceInfo"]["sensors"]["compass"] = false;
     });
   }
 
@@ -998,10 +983,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   void pdrstepCount() {
     pdr = accelerometerEventStream().listen((AccelerometerEvent event) {
       if(user.isnavigating && isPdr){
-        ws.updateMessage({
-          "deviceInfo.permissions.activity": true,
-          "deviceInfo.sensors.activity": true,
-        });
+        wsocket.message["deviceInfo"]["permissions"]["activity"] = true;
+        wsocket.message["deviceInfo"]["sensors"]["activity"] = true;
 
         // Apply low-pass filter
         if (detectStep(event.x, event.y, event.z)) {
@@ -1105,10 +1088,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         }
       }
     }, onError: (error) {
-          ws.updateMessage({
-            "deviceInfo.permissions.activity": false,
-            "deviceInfo.sensors.activity": false,
-          });
+      wsocket.message["deviceInfo"]["permissions"]["activity"] = false;
+      wsocket.message["deviceInfo"]["sensors"]["activity"] = false;
         });
   }
 
@@ -1809,12 +1790,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     });
     // Wait for all API calls to complete
     await Future.wait(apiCalls);
-
     try {
       print("got into beacon localization");
-      ws.updateMessage({
-        "AppInitialization.localizedOn": nearestBeacon,
-      });
+      wsocket.message["AppInitialization"]["localizedOn"] = nearestBeacon;
       final beaconData = SingletonFunctionController.apibeaconmap[nearestBeacon];
       if (beaconData == null){
         print("_handleBeaconLocalization: Beacon data not found");
@@ -2875,24 +2853,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     final PermissionStatus permissionStatus = await Permission.bluetoothScan.request();
 
     if (permissionStatus.isGranted) {
-      ws.updateMessage({
-        "deviceInfo.permissions.BLE": true,
-        "deviceInfo.sensors.BLE": true,
-      });
+      wsocket.message["deviceInfo"]["permissions"]["BLE"] = true;
+      wsocket.message["deviceInfo"]["sensors"]["BLE"] = true;
     } else {
-      ws.updateMessage({
-        "deviceInfo.permissions.BLE": false,
-        "deviceInfo.sensors.BLE": false,
-      });
+      wsocket.message["deviceInfo"]["permissions"]["BLE"] = false;
+      wsocket.message["deviceInfo"]["sensors"]["BLE"] = false;
     }
   }
 
   Future<void> requestLocationPermission() async {
     final status = await Permission.locationWhenInUse.request();
-    ws.updateMessage({
-      "deviceInfo.permissions.location": status.isGranted,
-      "deviceInfo.sensors.location": status.isGranted,
-    });
+    wsocket.message["deviceInfo"]["permissions"]["location"] = true;
+    wsocket.message["deviceInfo"]["sensors"]["location"] = true;
   }
 
   List<FilterInfoModel> landmarkListForFilter = [];
@@ -7856,10 +7828,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         path = tools.convertToFourPointerPath(optimizedAStarpath, bid, floor);
       }
     }
-
-    ws.updateMessage({
-      "path.didPathForm": path.isNotEmpty && path.first == sourceIndex && path.last == destinationIndex,
-    });
+    if (path.isEmpty) {
+      wsocket.message["path"]["didPathForm"] = false;
+    } else {
+      wsocket.message["path"]["didPathForm"] =
+          path[0] == sourceIndex && path[path.length - 1] == destinationIndex;
+    }
 
     if(bid == buildingAllApi.outdoorID){
       for (var turn in path) {
@@ -9322,10 +9296,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
       //detected=false;
       //user.SingletonFunctionController.building = SingletonFunctionController.building;
-      ws.updateMessage({
-        "path.source": PathState.sourceName,
-        "path.destination": PathState.destinationName,
-      });
+      wsocket.message["path"]
+      ["source"] =
+          PathState.sourceName;
+      wsocket.message["path"]
+      ["destination"] =
+          PathState
+              .destinationName;
       // user.ListofPaths = PathState.listofPaths;
       // user.patchData = SingletonFunctionController.building.patchData;
       // user.buildingNumber = PathState.listofPaths.length-1;
