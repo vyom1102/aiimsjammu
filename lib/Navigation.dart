@@ -7052,7 +7052,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       fitTwoPoints(points);
     }else{
       print("calling outdoor fittopath");
-      print("calling outdoor fittopath");
       List<LatLng> points = [
         LatLng(dataCurrent["dvalue"][0], dataCurrent["dvalue"][1]),
         LatLng(dataLast["svalue"][0], dataLast["svalue"][1])

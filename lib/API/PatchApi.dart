@@ -6,6 +6,7 @@ import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '../APIMODELS/patchDataModel.dart';
 import '../DATABASE/DATABASEMODEL/PatchAPIModel.dart';
+import '../ELEMENTS/HelperClass.dart';
 import '../api/buildingAllApi.dart';
 import '../config.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -124,6 +125,8 @@ class patchAPI {
     } else {
       print("PATCH API in else error");
       print(Exception);
+      HelperClass.showToast("MishorError in PATCH API \n PATCH API");
+
       throw Exception('Failed to load data ${id??buildingAllApi.getStoredString()} ${response.statusCode} ${response.body}');
     }
   }

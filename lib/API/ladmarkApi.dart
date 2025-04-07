@@ -144,7 +144,7 @@ String getDecryptedData(String encryptedData){
         return landData;
       }
     } else {
-      HelperClass.showToast("MishorError in LANDMARK API API");
+      HelperClass.showToast("MishorError in LANDMARK API API \n LANDMARK API ");
       throw Exception('Failed to load data');
     }
   }

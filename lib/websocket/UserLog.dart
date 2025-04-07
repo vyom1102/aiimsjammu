@@ -16,10 +16,6 @@ class WebSocketService {
   late io.Socket _receiveSocket;
   var userInfoBox = Hive.box('UserInformation');
 
-
-
-
-
   final StreamController<Map<String, dynamic>> _messageController = StreamController.broadcast();
   Stream<Map<String, dynamic>> get messageStream => _messageController.stream;
 

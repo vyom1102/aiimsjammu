@@ -113,7 +113,7 @@ class waypointapi {
       }
     }else {
       if(kDebugMode) {
-        HelperClass.showToast("MishorError in WAYPOINT API API");
+        HelperClass.showToast("MishorError in WAYPOINT API API ${response.statusCode} \n WAYPOINT API");
       }
       print("API Exception");
       print(response.statusCode);

@@ -108,7 +108,7 @@ class PolyLineApi {
       }
     }
     else {
-      HelperClass.showToast("MishorError in POLYLINE API");
+      HelperClass.showToast("MishorError in POLYLINE API \N POLYLINE API");
       print(response.statusCode);
       print(response.body);
       throw Exception('Failed to load data');
