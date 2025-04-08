@@ -69,7 +69,7 @@ class UsergetAPI{
       accessToken = newAccessToken;
       getUserDetailsApi(userId);
     } else {
-      HelperClass.showToast('Failed to load data');
+      HelperClass.showToast('Failed to load data \n USERGET API');
       throw Exception('Failed to load data');
     }
 

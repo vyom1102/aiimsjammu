@@ -291,12 +291,11 @@ class DataVersionApi {
             }
           }
         } else {
-          HelperClass.showToast("Unable to load session!! Try again");
+          HelperClass.showToast("Unable to load session!! Try again \n DATAVERSION API");
           throw Exception('Failed to load data');
         }
       } else {
         print(response.statusCode);
-
         print("Mishorcheck");
         print(Exception);
         throw Exception('Failed to load beacon data');

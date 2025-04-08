@@ -197,10 +197,7 @@ class BLueToothClass {
     }
     try {
       await FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
-    } catch (e) {
-
-    }
-
+    } catch (e) {}
     _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
       _scanResults = results;
       // print("mac $results");

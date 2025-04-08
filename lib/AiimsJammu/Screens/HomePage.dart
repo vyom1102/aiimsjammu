@@ -2635,26 +2635,31 @@ class _HomePageState extends State<HomePage> {
     // Setup polling to check for data readiness
     Timer.periodic(Duration(milliseconds: 200), (timer) {
       // Process landmark data for each service
-      for (var service in services) {
-        List<String> buildingIds = List<String>.from(service['buildingId']);
-        bool anyLandmarkExists = false;
-        List<dynamic> allLandmarks = [];
+      try {
+        for (var service in services) {
+          List<String> buildingIds = List<String>.from(service['buildingId']);
+          bool anyLandmarkExists = false;
+          List<dynamic> allLandmarks = [];
 
-        for (String id in buildingIds) {
-          if (allLandmarkData.containsKey(id)) {
-            if (allLandmarkData[id]['landmarkExist'] == true) {
-              anyLandmarkExists = true;
-            }
-            if (allLandmarkData[id]['landmarks'] is List) {
-              allLandmarks.addAll(List<dynamic>.from(allLandmarkData[id]['landmarks']));
+          for (String id in buildingIds) {
+            if (allLandmarkData.containsKey(id)) {
+              if (allLandmarkData[id]['landmarkExist'] == true) {
+                anyLandmarkExists = true;
+              }
+              if (allLandmarkData[id]['landmarks'] is List) {
+                allLandmarks.addAll(
+                    List<dynamic>.from(allLandmarkData[id]['landmarks']));
+              }
             }
           }
-        }
 
-        service['landmarkData'] = {
-          'landmarkExist': anyLandmarkExists,
-          'landmarks': allLandmarks,
-        };
+          service['landmarkData'] = {
+            'landmarkExist': anyLandmarkExists,
+            'landmarks': allLandmarks,
+          };
+        }
+      }catch(e){
+
       }
 
       // Check if data is ready to be returned

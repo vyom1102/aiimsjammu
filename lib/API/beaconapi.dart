@@ -128,7 +128,7 @@ class beaconapi {
     } else {
 
       // HelperClass.showToast("MishorError in BuildingAll API");
-      HelperClass.showToast("Error Code ${response.statusCode.toString()}");
+      HelperClass.showToast("Error Code ${response.statusCode.toString()} \n BEACONAPI}");
       throw Exception('Failed to load data');
     }
   }
