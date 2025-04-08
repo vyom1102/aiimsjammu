@@ -324,7 +324,11 @@ class _FavouriteServiceState extends State<FavouriteService> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
+
       appBar: AppBar(
+        backgroundColor: Colors.white,
+
         centerTitle: true,
         title: TranslatorWidget(
           'Favourite Services',

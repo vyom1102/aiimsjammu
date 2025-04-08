@@ -153,17 +153,17 @@ class _HomePageState extends State<HomePage> {
     getLocs();
     wsocket.message["AppInitialization"]["BID"]=buildingAllApi.selectedBuildingID;
     wsocket.message["AppInitialization"]["buildingName"]=buildingAllApi.selectedVenue;
-    SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID);
+    // SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID);
     versionApiCheck();
     checkForReload();
     versionApiCall();
-
     fetchAndStoreBuildingIds();
     // fetchAllLandmarkData();
     isUserValid();
     callbackFunc();
     requestNotificationPermission();
     // dataDownload();
+    SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID);
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
 
@@ -203,16 +203,40 @@ class _HomePageState extends State<HomePage> {
     });
     print("Global Building IDs: $globalBuildingIds");
   }
-  Future<void> setInitialLandmarkData() async{
-    for(String buildingId in globalBuildingIds) {
-      var landmarkDataBox = await Hive.openBox('LandmarkDataBox');
+  // Future<void> setInitialLandmarkData() async{
+  //   for(String buildingId in globalBuildingIds) {
+  //     var landmarkDataBox = await Hive.openBox('LandmarkDataBox');
+  //     var data = await landmarkDataBox.get('landmarkData_$buildingId');
+  //     setState(() {
+  //       allLandmarkData[buildingId] = data;
+  //     });
+  //
+  //     print("no data changed in landmark $buildingId");
+  //   }
+  // }
+  Future<void> setInitialLandmarkData() async {
+    bool shouldFetch = false;
+    var landmarkDataBox = await Hive.openBox('LandmarkDataBox');
+
+    for (String buildingId in globalBuildingIds) {
       var data = await landmarkDataBox.get('landmarkData_$buildingId');
-      setState(() {
-        allLandmarkData[buildingId] = data;
-      });
-      print("no data changed in landmark $buildingId");
+
+      if (data != null) {
+        setState(() {
+          allLandmarkData[buildingId] = data;
+        });
+        print("Landmark data loaded from cache for $buildingId");
+      } else {
+        print("No data found for $buildingId, will fetch from API.");
+        shouldFetch = true;
+      }
+    }
+
+    if (shouldFetch) {
+      await fetchLandmarkDataAccToVenue("AIIMSJAMMU");
     }
   }
+
   Future<void>DataVersionCheckForLandmarks() async {
     print("in data version");
     for(String buildingId in globalBuildingIds){
@@ -333,6 +357,48 @@ class _HomePageState extends State<HomePage> {
     // Add landmarks for the specified floor
     // await addLandmarksForFloor(buildingId, currentFloor);
   }
+  Future<void> fetchLandmarkDataAccToVenue(String venueName) async {
+    var headers = {
+      'Content-Type': 'application/json',
+      'x-access-token': '$accessToken'
+    };
+
+    var request = http.Request(
+      'POST',
+      Uri.parse('${AppConfig.baseUrl}/secured/landmarks-venue'),
+    );
+    request.body = json.encode({"venueName": venueName});
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+    print("fetchLandmarkDataAccToVenue");
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      String responseData = await response.stream.bytesToString();
+      var data = jsonDecode(responseData);
+      print(data);
+      // Save each building's landmark data in Hive
+      var landmarkDataBox = await Hive.openBox('LandmarkDataBox');
+
+      data.forEach((buildingId, buildingData) async {
+        await landmarkDataBox.put('landmarkData_$buildingId', buildingData);
+        print("Landmarkvenue data stored for building $buildingId");
+        print(landmarkDataBox.get('landmarkData_$buildingId'));
+        // Update state with each building's data
+        setState(() {
+          allLandmarkData[buildingId] = buildingData;
+        });
+      });
+
+    } else if (response.statusCode == 403) {
+      // Refresh the access token and retry the request
+      accessToken = await RefreshTokenAPI.refresh();
+      await fetchLandmarkDataAccToVenue(venueName);
+    } else {
+      print("Error: ${response.reasonPhrase}");
+    }
+  }
+
 
   Future<void> filterLandmarks(String? type, int floorInt,{String? washroomType}) async {
     print("in filter landmark $type , $floorInt");
