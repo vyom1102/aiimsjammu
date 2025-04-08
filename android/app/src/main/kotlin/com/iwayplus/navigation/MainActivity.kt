@@ -1,5 +1,4 @@
-package com.iwayplus.aiimsjammu
-
+package com.iwayplus.candor
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
@@ -26,6 +25,7 @@ import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
 import android.annotation.SuppressLint
+import android.bluetooth.le.ScanRecord
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -47,9 +47,9 @@ class MainActivity : FlutterActivity() {
             val rssi = result.rssi
 
             if (ActivityCompat.checkSelfPermission(
-                            this@MainActivity,
-                            Manifest.permission.BLUETOOTH_CONNECT
-                    ) != PackageManager.PERMISSION_GRANTED
+                    this@MainActivity,
+                    Manifest.permission.BLUETOOTH_CONNECT
+                ) != PackageManager.PERMISSION_GRANTED
             ) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
@@ -60,17 +60,91 @@ class MainActivity : FlutterActivity() {
                 // for ActivityCompat#requestPermissions for more details.
                 return
             }
+
+
+            // Extract device name
             if (device.name != null && device.name.contains("IW")) {
                 Log.d("BluetoothScan","Device Info $result");
+                val scanRecord = result.scanRecord
 
-                val deviceDetails = "Device Name: ${device.name}\nAddress: ${device.address}\nRSSI: $rssi "
+                val deviceName = device.name ?: scanRecord?.deviceName ?: "Unknown"
+//                val deviceDetails = "Device Name: ${device.name}\nAddress: ${device.address}\nRSSI: $rssi "
+
+                val manufacturerData = extractManufacturerData(scanRecord)
+                val serviceData = extractServiceData(scanRecord)
+
+                val deviceDetails = """
+                Device Name: $deviceName
+                Address: ${device.address}
+                RSSI: $rssi
+                Manufacturer Data: $manufacturerData
+                Service Data: $serviceData
+            """.trimIndent()
+
                 if (!deviceDetailsList.contains(deviceDetails)) {
                     deviceDetailsList.add(deviceDetails)
-//                    Log.d("BluetoothScan", "New Device Found: $deviceDetails")
+                    Log.d("BluetoothScan--", "New Device Found: $deviceDetails")
                     eventSink?.success(deviceDetails)
                 }
             }
         }
+
+
+        private fun extractManufacturerData(scanRecord: ScanRecord?): String {
+            if (scanRecord == null) return "None"
+
+            val manufacturerSpecificData = scanRecord.manufacturerSpecificData
+            val manufacturerDataList = mutableListOf<String>()
+
+            for (i in 0 until manufacturerSpecificData.size()) {
+                val manufacturerId = manufacturerSpecificData.keyAt(i)
+                val data = manufacturerSpecificData.valueAt(i)
+                val hexData = data.joinToString("") { String.format("%02X", it) }
+                manufacturerDataList.add("ID: 0x${manufacturerId.toString(16)} -> Data: 0x$hexData")
+            }
+
+            return if (manufacturerDataList.isNotEmpty()) manufacturerDataList.joinToString("\n") else "None"
+        }
+
+        private fun extractServiceData(scanRecord: ScanRecord?): String {
+            if (scanRecord == null) return "None"
+
+            val serviceDataMap = scanRecord.serviceData
+            val serviceDataList = mutableListOf<String>()
+
+            for ((uuid, data) in serviceDataMap) {
+                val hexData = data.joinToString("") { String.format("%02X", it) }
+                serviceDataList.add("UUID: $uuid -> Data: 0x$hexData")
+                val asciiResult = hexToAscii(hexData)
+                Log.d("BluetoothScan---",asciiResult);
+            }
+
+
+
+            return if (serviceDataList.isNotEmpty()) serviceDataList.joinToString("\n") else "None"
+        }
+
+        fun hexToAscii(hexData: String): String {
+            val cleanHex = hexData.replace("0x", "", ignoreCase = true)
+            val output = StringBuilder()
+
+            var i = 0
+            while (i < cleanHex.length - 1) {
+                val hexByte = cleanHex.substring(i, i + 2)
+                val byteValue = hexByte.toIntOrNull(16)
+
+                // Only include printable ASCII characters (32–126)
+                if (byteValue != null && byteValue in 32..126) {
+                    output.append(byteValue.toChar())
+                }
+
+                i += 2
+            }
+
+            return output.toString()
+        }
+
+
 
         override fun onScanFailed(errorCode: Int) {
             Log.e("BluetoothScan", "Scan failed with error code: $errorCode")
@@ -83,7 +157,7 @@ class MainActivity : FlutterActivity() {
             val action: String? = intent.action
             if (BluetoothDevice.ACTION_FOUND == action) {
                 val device: BluetoothDevice? =
-                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                 device?.let {
                     val deviceDetails = "Device Name: ${"Unknown"}\nAddress: ${it.address}"
                     if (!deviceDetailsList.contains(deviceDetails)) {
@@ -94,14 +168,16 @@ class MainActivity : FlutterActivity() {
             }
         }
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothAdapter = bluetoothManager.adapter
-        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
-
+        if (bluetoothAdapter != null && bluetoothAdapter.isEnabled){
+            bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+        } else {
+            // Handle gracefully — maybe prompt to enable Bluetooth
+            Log.w("BLE", "Bluetooth is OFF or unavailable")
+        }
         if (!hasPermissions()) {
             requestPermissions()
         }
@@ -133,30 +209,30 @@ class MainActivity : FlutterActivity() {
 
         // Bluetooth EventChannel
         EventChannel(flutterEngine.dartExecutor.binaryMessenger, EVENT_CHANNEL).setStreamHandler(
-                object : EventChannel.StreamHandler {
-                    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                        eventSink = events
-                    }
-
-                    override fun onCancel(arguments: Any?) {
-                        eventSink = null
-                    }
+            object : EventChannel.StreamHandler {
+                override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                    eventSink = events
                 }
+
+                override fun onCancel(arguments: Any?) {
+                    eventSink = null
+                }
+            }
         )
 
         // GPS EventChannel
         EventChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setStreamHandler(
-                object : EventChannel.StreamHandler {
-                    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                        Log.d("startLocationUpdates", "starting");
-                        GpseventSink = events
-                        startLocationUpdates()
-                    }
-
-                    override fun onCancel(arguments: Any?) {
-                        stopLocationUpdates()
-                    }
+            object : EventChannel.StreamHandler {
+                override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                    Log.d("startLocationUpdates", "starting");
+                    GpseventSink = events
+                    startLocationUpdates()
                 }
+
+                override fun onCancel(arguments: Any?) {
+                    stopLocationUpdates()
+                }
+            }
         )
     }
 
@@ -220,9 +296,9 @@ class MainActivity : FlutterActivity() {
 
     private fun hasPermissions(): Boolean {
         val permissions = mutableListOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.BLUETOOTH_SCAN,
-                Manifest.permission.BLUETOOTH_CONNECT
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_CONNECT
         )
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -236,9 +312,9 @@ class MainActivity : FlutterActivity() {
 
     private fun requestPermissions() {
         val permissions = mutableListOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.BLUETOOTH_SCAN,
-                Manifest.permission.BLUETOOTH_CONNECT
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_CONNECT
         )
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -281,19 +357,19 @@ class MainActivity : FlutterActivity() {
 
         if (isGpsEnabled) {
             locationManager?.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER,
-                    1000, // Time interval in milliseconds
-                    0f,  // Distance interval in meters
-                    locationListener
+                LocationManager.GPS_PROVIDER,
+                1000, // Time interval in milliseconds
+                0f,  // Distance interval in meters
+                locationListener
             )
         }
 
         if (isNetworkEnabled) {
             locationManager?.requestLocationUpdates(
-                    LocationManager.NETWORK_PROVIDER,
-                    1000,
-                    0f,
-                    locationListener
+                LocationManager.NETWORK_PROVIDER,
+                1000,
+                0f,
+                locationListener
             )
         }
     }
@@ -304,9 +380,9 @@ class MainActivity : FlutterActivity() {
         override fun onLocationChanged(location: Location) {
             Log.d("GPS", "New location received: $location")
             val data = mapOf(
-                    "latitude" to location.latitude,
-                    "longitude" to location.longitude,
-                    "accuracy" to location.accuracy,
+                "latitude" to location.latitude,
+                "longitude" to location.longitude,
+                "accuracy" to location.accuracy,
             )
             GpseventSink?.success(data)
         }
