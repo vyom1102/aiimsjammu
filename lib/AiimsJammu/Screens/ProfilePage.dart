@@ -63,6 +63,10 @@ class _ProfilePageState extends State<ProfilePage> {
     }
     if(userListBox.containsKey('photo')){
       uploadedimage = userListBox.get('photo');
+      print(uploadedimage);
+      if(uploadedimage==null){
+        getUserDetails();
+      }
       print('photo from database');
     }else{
       // getUserDetails();
@@ -147,6 +151,7 @@ class _ProfilePageState extends State<ProfilePage> {
           name = responseBody["name"];
           emailAddress = responseBody["email"];
           username = responseBody["username"];
+          uploadedimage = responseBody['photo'];
           isDriver = responseBody["userTracking"]??false;
           userListBox.put('name', name);
           userListBox.put('username',username);

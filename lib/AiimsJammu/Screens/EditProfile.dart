@@ -39,7 +39,6 @@ class _EditProfileState extends State<EditProfile> {
   String? uploadedimage;
   bool isLoading = false;
 
-
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile
@@ -66,13 +65,15 @@ class _EditProfileState extends State<EditProfile> {
         final responseBody = await response.stream.bytesToString();
         final responseData = json.decode(responseBody);
         print(responseData);
+        print(responseData['filename']);
         if (responseData['status']) {
           setState(() {
             photoUrl = responseData['filename'];
+            uploadedimage = responseData['filename'];
           });
-
+          print(photoUrl);
           userListBox.put('photo', photoUrl);
-
+          print(userListBox.get('photo'));
           await updateUser(context);
         } else {
           print("Failed to upload image: ${responseData['message']}");
@@ -141,10 +142,12 @@ class _EditProfileState extends State<EditProfile> {
       refreshToken = signInBox.get('refreshToken');
       _nameController.text = userListBox.get('name');
       _emailController.text = userListBox.get('username');
-      uploadedimage = userListBox.get("photo");
+      uploadedimage = userListBox.get('photo');
 
     });
-
+  print("photo");
+  print(uploadedimage);
+  print(userListBox.get('photo'));
     if (userId != null) {
       if(_nameController.text.isEmpty || uploadedimage==null ) {
       getUserDetails();
@@ -205,61 +208,6 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
-  Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
-
-    try {
-      final response = await http.post(
-        Uri.parse(refreshTokenUrl),
-        body: json.encode({
-          "refreshToken": refreshToken,
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final newAccessToken = json.decode(response.body)["accessToken"];
-        setState(() {
-          accessToken = newAccessToken;
-        });
-
-        await getUserDetailsWithNewToken(baseUrl);
-      } else {
-        // Handle token refresh failure
-      }
-    } catch (e) {
-      // Handle errors
-    }
-  }
-
-  Future<void> getUserDetailsWithNewToken(String baseUrl) async {
-    try {
-      final response = await http.post(
-        Uri.parse(baseUrl),
-        body: json.encode({"userId": userId}),
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': '$accessToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        Map<String, dynamic> responseBody = json.decode(response.body);
-        _emailController.text = responseBody["email"];
-        originalName = responseBody["name"];
-        _nameController.text = originalName!;
-        uploadedimage = responseBody["photo"]??"not available";
-
-      } else {
-        // Handle other status codes after token refresh
-      }
-    } catch (e) {
-      // Handle errors after token refresh
-    }
-  }
-
 
 
   // Future<void> updateUser() async {
@@ -312,6 +260,7 @@ class _EditProfileState extends State<EditProfile> {
         body: json.encode({
           "email": _emailController.text,
           "name": _nameController.text,
+          "photo":uploadedimage
         }),
         headers: {
           'Content-Type': 'application/json',

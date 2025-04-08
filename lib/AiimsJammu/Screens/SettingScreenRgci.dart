@@ -174,13 +174,14 @@ class _SettingScreenState extends State<SettingScreen> {
     final overlay = Overlay.of(context);
     final overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
-        top: position.dy - 35, // Position tooltip just above the icon
+        top: position.dy - 35,
+        right: 0,
         child: Material(
           color: Colors.transparent,
           child: Container(
             padding: EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.black87,
+              color: Colors.black26,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -862,7 +863,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       GestureDetector(
                         key: _infoIconKey1,
                         onTap: () => _showTooltip(
-                            context, "Adjust your orientation preference for accurate guidance", _infoIconKey1),
+                            context, "Orientation preference for accurate guidance", _infoIconKey1),
 
                         child: Container(
                           width: 13,
@@ -1010,7 +1011,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       GestureDetector(
                         key: _infoIconKey2,
                         onTap: () => _showTooltip(
-                            context, "Select your preferred navigation mode for a better experience", _infoIconKey2),
+                            context, "Preferred navigation mode ", _infoIconKey2),
                         child: Container(
                           width: 13,
                           height: 13,
