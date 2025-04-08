@@ -74,7 +74,7 @@ class _EditProfileState extends State<EditProfile> {
           print(photoUrl);
           userListBox.put('photo', photoUrl);
           print(userListBox.get('photo'));
-          await updateUser(context);
+          await updateUser(context,photo: "Profile picture");
         } else {
           print("Failed to upload image: ${responseData['message']}");
         }
@@ -242,9 +242,9 @@ class _EditProfileState extends State<EditProfile> {
   //     // Handle errors
   //   }
   // }
-  Future<void> updateUser(BuildContext context) async {
+  Future<void> updateUser(BuildContext context,{String? photo}) async {
     final String updateUrl = "${AppConfig.baseUrl}/secured/user/update/$userId";
-
+    String text = photo??"Name";
     // Show a loading indicator
     QuickAlert.show(
       context: context,
@@ -276,7 +276,7 @@ class _EditProfileState extends State<EditProfile> {
           context: context,
           type: QuickAlertType.success,
           title: 'Success',
-          text: 'Name updated successfully',
+          text: '$text updated successfully',
           confirmBtnText: 'OK',
           onConfirmBtnTap: () {
             userListBox.put('name', _nameController.text);
