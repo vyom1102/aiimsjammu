@@ -1,4 +1,4 @@
-package com.iwayplus.candor
+package com.iwayplus.aiimsjammu
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
