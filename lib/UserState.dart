@@ -52,6 +52,7 @@ class UserState {
   GPSStreamHandler gpsStreamHandler = GPSStreamHandler();
   static double? geoLat ;
   static double? geoLng ;
+  static bool geoFenced=false;
   static Function autoRecenter=() {};
   static bool ttsAllStop = false;
   static bool ttsOnlyTurns = false;

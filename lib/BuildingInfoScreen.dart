@@ -321,7 +321,6 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                           currentData = widget.receivedAllBuildingList![index];
                           print("currentData.geofencing");
                           print(currentData.geofencing);
-
                           final isFavourite = value.get(currentData.buildingName)!=null;
                           return Container(
                             width: 208,

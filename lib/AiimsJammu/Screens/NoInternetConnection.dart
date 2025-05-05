@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 import '../Widgets/Translator.dart';
 
@@ -30,17 +29,17 @@ class _NoInternetConnectionState extends State<NoInternetConnection> {
   }
   @override
   void initState() {
-    _internetConnection = InternetConnection().onStatusChange.listen((event) {
-      switch(event){
-        case InternetStatus.connected:
-          Navigator.pop(context);
-        default:
-          setState(() {
-            isConnectedToInternet = false;
-          });
-          break;
-      }
-    });
+    // _internetConnection = InternetConnection().onStatusChange.listen((event) {
+    //   switch(event){
+    //     case InternetStatus.connected:
+    //       Navigator.pop(context);
+    //     default:
+    //       setState(() {
+    //         isConnectedToInternet = false;
+    //       });
+    //       break;
+    //   }
+    // });
     super.initState();
   }
   @override

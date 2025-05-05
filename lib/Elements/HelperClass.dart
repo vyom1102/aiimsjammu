@@ -6,11 +6,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:iwaymaps/ELEMENTS/UserCredential.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:url_launcher/url_launcher.dart';
+import '../API/BuildingAPI.dart';
 import '../API/buildingAllApi.dart';
 import '../APIMODELS/buildingAll.dart';
 import '../MODELS/VenueModel.dart';
@@ -204,22 +206,53 @@ class HelperClass{
 
   }
 
-  static Future<int> getGeoFenced(String venueName,Position userPos)async{
-  await buildingApicall();
-  List<buildingAll>? buildingList=venueHashMap[venueName];
-  for(int i=0;i<buildingList!.length;i++){
-    var currentData=buildingList[i];
-    if(currentData.geofencing!=null && currentData.geofencing!){
-      for(int j=0;j<venueList.length;j++){
-        if(userPos.latitude.toStringAsFixed(2)==venueList[j].coordinates[0].toStringAsFixed(2) && userPos.longitude.toStringAsFixed(2)==venueList[j].coordinates[1].toStringAsFixed(2)){
-          return 0;
+ static bool isPointInsidePolygon(List<dynamic> polygon, Position point) {
+    double x = 75.0363750964818; // longitude
+    double y = 32.56359925717899; // latitude
+
+    bool inside = false;
+    int n = polygon.length;
+
+    for (int i = 0, j = n - 1; i < n; j = i++) {
+      double xi = polygon[i][1];
+      double yi = polygon[i][0];
+      double xj = polygon[j][1];
+      double yj = polygon[j][0];
+
+      bool intersect = ((yi > y) != (yj > y)) &&
+          (x < (xj - xi) * (y - yi) / (yj - yi + 0.00000001) + xi);
+
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+  static Future<bool> getGeoFenced(Position userPos)async{
+    bool res=false;
+    await BuildingAPI().fetchBuildData().then((value){
+      for(int i=0;i<value.data!.length;i++){
+        if(isPointInsidePolygon(value.data![i].boundary!,userPos) || UserCredentials().getRoles().contains('admin')){
+          print("got inside geo fenced condition");
+          res=true;
+          return;
         }
       }
-    }else{
-      return 1;
-    }
-  }
-  return 2;
+    });
+    return res;
+  // await buildingApicall();
+  // List<buildingAll>? buildingList=venueHashMap[venueName];
+  // for(int i=0;i<buildingList!.length;i++){
+  //   var currentData=buildingList[i];
+  //   if(currentData.geofencing!=null && currentData.geofencing!){
+  //     for(int j=0;j<venueList.length;j++){
+  //       if(userPos.latitude.toStringAsFixed(2)==venueList[j].coordinates[0].toStringAsFixed(2) && userPos.longitude.toStringAsFixed(2)==venueList[j].coordinates[1].toStringAsFixed(2)){
+  //         return 0;
+  //       }
+  //     }
+  //   }else{
+  //     return 1;
+  //   }
+  // }
+  // return 2;
 
   }
 
