@@ -1,5 +1,6 @@
 package com.iwayplus.aiimsjammu
 
+
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -25,7 +26,6 @@ import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
 import android.annotation.SuppressLint
-import android.bluetooth.le.ScanRecord
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -40,6 +40,8 @@ class MainActivity : FlutterActivity() {
     private val METHOD_CHANNEL = "com.example.bluetooth/scan"
     private val EVENT_CHANNEL = "com.example.bluetooth/scanUpdates"
     private var eventSink: EventChannel.EventSink? = null
+
+
 
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
@@ -61,90 +63,48 @@ class MainActivity : FlutterActivity() {
                 return
             }
 
-
             // Extract device name
             if (device.name != null && device.name.contains("IW")) {
-                Log.d("BluetoothScan","Device Info $result");
+//                Log.d("BluetoothScan","Device Info $result");
                 val scanRecord = result.scanRecord
 
-                val deviceName = device.name ?: scanRecord?.deviceName ?: "Unknown"
-//                val deviceDetails = "Device Name: ${device.name}\nAddress: ${device.address}\nRSSI: $rssi "
+                val scanRecord1 = result.scanRecord
+                val deviceName1 = device.name ?: scanRecord1?.deviceName ?: "Unknown"
+                val address = device.address
+                val timestampNanos = result.timestampNanos
+                val advBytes = scanRecord1?.bytes
+                val manufacturerData1 = scanRecord1?.manufacturerSpecificData
 
-                val manufacturerData = extractManufacturerData(scanRecord)
-                val serviceData = extractServiceData(scanRecord)
+//                Log.d("BluetoothScan", "Device Name: $deviceName1")
+//                Log.d("BluetoothScan", "Address: $address")
+//                Log.d("BluetoothScan", "RSSI: $rssi dBm")
+//                Log.d("BluetoothScan", "Timestamp: $timestampNanos") // You can convert it to time if needed
+
+                // Extract Manufacturer ID and Data
+                for (i in 0 until (manufacturerData1?.size() ?: 0)) {
+                    val id = manufacturerData1?.keyAt(i)
+                    val data = id?.let { manufacturerData1?.get(it) }
+                    val hexData = data?.joinToString("-") { "%02X".format(it) }
+                    //Log.d("BluetoothScan", "Manufacturer ID: ${String.format("%04X", id)}")
+                    //Log.d("BluetoothScan", "Manufacturer Data: $hexData")
+                }
+
+                // Get Raw Bytes
+                val rawData = advBytes?.joinToString("-") { String.format("%02X", it) }
+                //Log.d("BluetoothScan", "Raw Data: $rawData")
 
                 val deviceDetails = """
-                Device Name: $deviceName
-                Address: ${device.address}
+                Device Name: $deviceName1
+                Address: ${address}
                 RSSI: $rssi
-                Manufacturer Data: $manufacturerData
-                Service Data: $serviceData
-            """.trimIndent()
+                Manufacturer Data: $manufacturerData1
+                Raw Data: $rawData""".trimIndent()
 
-                if (!deviceDetailsList.contains(deviceDetails)) {
-                    deviceDetailsList.add(deviceDetails)
-                    Log.d("BluetoothScan--", "New Device Found: $deviceDetails")
-                    eventSink?.success(deviceDetails)
-                }
+
+//                Log.d("BluetoothScan--", "New Device Found: $deviceDetails")
+                eventSink?.success(deviceDetails)
             }
         }
-
-
-        private fun extractManufacturerData(scanRecord: ScanRecord?): String {
-            if (scanRecord == null) return "None"
-
-            val manufacturerSpecificData = scanRecord.manufacturerSpecificData
-            val manufacturerDataList = mutableListOf<String>()
-
-            for (i in 0 until manufacturerSpecificData.size()) {
-                val manufacturerId = manufacturerSpecificData.keyAt(i)
-                val data = manufacturerSpecificData.valueAt(i)
-                val hexData = data.joinToString("") { String.format("%02X", it) }
-                manufacturerDataList.add("ID: 0x${manufacturerId.toString(16)} -> Data: 0x$hexData")
-            }
-
-            return if (manufacturerDataList.isNotEmpty()) manufacturerDataList.joinToString("\n") else "None"
-        }
-
-        private fun extractServiceData(scanRecord: ScanRecord?): String {
-            if (scanRecord == null) return "None"
-
-            val serviceDataMap = scanRecord.serviceData
-            val serviceDataList = mutableListOf<String>()
-
-            for ((uuid, data) in serviceDataMap) {
-                val hexData = data.joinToString("") { String.format("%02X", it) }
-                serviceDataList.add("UUID: $uuid -> Data: 0x$hexData")
-                val asciiResult = hexToAscii(hexData)
-                Log.d("BluetoothScan---",asciiResult);
-            }
-
-
-
-            return if (serviceDataList.isNotEmpty()) serviceDataList.joinToString("\n") else "None"
-        }
-
-        fun hexToAscii(hexData: String): String {
-            val cleanHex = hexData.replace("0x", "", ignoreCase = true)
-            val output = StringBuilder()
-
-            var i = 0
-            while (i < cleanHex.length - 1) {
-                val hexByte = cleanHex.substring(i, i + 2)
-                val byteValue = hexByte.toIntOrNull(16)
-
-                // Only include printable ASCII characters (32–126)
-                if (byteValue != null && byteValue in 32..126) {
-                    output.append(byteValue.toChar())
-                }
-
-                i += 2
-            }
-
-            return output.toString()
-        }
-
-
 
         override fun onScanFailed(errorCode: Int) {
             Log.e("BluetoothScan", "Scan failed with error code: $errorCode")
@@ -170,9 +130,10 @@ class MainActivity : FlutterActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothAdapter = bluetoothManager.adapter
-        if (bluetoothAdapter != null && bluetoothAdapter.isEnabled){
+        if (bluetoothAdapter != null && bluetoothAdapter.isEnabled) {
             bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
         } else {
             // Handle gracefully — maybe prompt to enable Bluetooth
@@ -252,21 +213,24 @@ class MainActivity : FlutterActivity() {
             }
 
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                Log.d("grant permission","Bluetooth permission")
                 requestPermissions()
                 return
             }
 
-            val scanSettings = ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY) // Aggressive scanning
-                .setReportDelay(0) // Get results instantly
-                .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE) // Detects more advertisements
-                .setNumOfMatches(ScanSettings.MATCH_NUM_MAX_ADVERTISEMENT) // Capture max advertisements
-                .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES) // Get all advertisements
-                .build()
+//            val scanSettings = ScanSettings.Builder()
+//                .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
+//                .setLegacy(false)
+//                .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
+//                .setNumOfMatches(ScanSettings.MATCH_NUM_MAX_ADVERTISEMENT)
+//                .setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED)
+//                .setReportDelay(0)
+//                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+//                .build()
 
 
             Log.d("BluetoothScan", "Starting BLE scan...")
-            bluetoothLeScanner.startScan(null, scanSettings, scanCallback)
+            bluetoothLeScanner.startScan(scanCallback)
 
             isScanning = true
         }
