@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 class AppConfig {
   static String get baseUrl {
     if (kDebugMode) {
-      return 'https://dev.iwayplus.in';
+      return 'https://maps.iwayplus.in';
     } else {
       return 'https://maps.iwayplus.in';
     }

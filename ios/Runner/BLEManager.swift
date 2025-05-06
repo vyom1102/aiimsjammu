@@ -72,7 +72,14 @@ import CoreBluetooth
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String: Any], rssi RSSI: NSNumber) {
         
         if let singledeviceName = advertisementData[CBAdvertisementDataLocalNameKey] as? String {
-            //print("Advertisement Name: \(singledeviceName)")
+            print("Advertisement Name: \(singledeviceName)")
+        }
+        if let manufacturerData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data {
+            print("Manufacturer Data (raw): \(manufacturerData as NSData)")
+
+                // Optional: Convert to hex string for readability
+            let hexString = manufacturerData.map { String(format: "%02x", $0) }.joined()
+            print("Manufacturer Data (hex): \(hexString)")
         }
         
         guard let singledeviceName = advertisementData[CBAdvertisementDataLocalNameKey] as? String else {
@@ -81,6 +88,7 @@ import CoreBluetooth
         }
 
         let rssiValue = RSSI // RSSI is of type NSNumber
+
         let currentTime = Date()
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm:ss" // Time format: Hours:Minutes:Seconds

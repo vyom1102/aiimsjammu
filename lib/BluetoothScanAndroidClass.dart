@@ -279,7 +279,11 @@ class BluetoothScanAndroidClass{
     String deviceMacId = "";
     // Start listening to the stream continuously
     _scanSubscription = eventChannel.receiveBroadcastStream().listen((deviceDetail){
+      print("DEVICESSS $deviceDetail");
       BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
+      String dataaa = parseLog(deviceDetail);
+      print("dataaa = ${deviceDetails.rawData}");
+
       wsocket.message["AppInitialization"]["nearByDevices"][deviceDetails.rawData] = deviceDetails.DeviceRssi;
       if(apibeaconmap.containsKey(deviceDetails.DeviceName)) {
         DateTime currentTime = DateTime.now();
@@ -401,6 +405,37 @@ class BluetoothScanAndroidClass{
 
     return sumMap;
   }
+
+  String parseLog(String log) {
+    final lines = log.split('\n');
+    String? name;
+    String? address;
+    String? manufacturerData;
+    String? serviceData;
+    for (String line in lines) {
+      if (line.contains("Device Name:")) {
+        name = line.split("Device Name:").last.trim();
+      } else if (line.contains("Address:")) {
+        address = line.split("Address:").last.trim();
+      } else if (line.contains("Manufacturer Data:")) {
+        final match = RegExp(r'Data: (0x[0-9A-Fa-f]+)').firstMatch(line);
+        if (match != null) {
+          manufacturerData = match.group(1);
+        }
+      } else if (line.contains("Service Data:")) {
+        final match = RegExp(r'Data: (0x[0-9A-Fa-f]+)').firstMatch(line);
+        if (match != null) {
+          serviceData = match.group(1);
+        }
+      }
+    }
+    // print("Name: $name");
+    // print("Address: $address");
+    print("Manufacturer Data: $manufacturerData");
+    print("Service Data: $serviceData");
+    return serviceData??"";
+  }
+
 
 
   double calculateDistance(double rssi) {
