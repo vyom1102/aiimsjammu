@@ -207,7 +207,7 @@ class _SettingScreenState extends State<SettingScreen> {
   Future<bool> willPopScope() async {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
-        builder: (context) => MainScreen(initialIndex: 0),
+        builder: (context) => MainScreen(initialIndex: 4),
       ),
           (Route<dynamic> route) => false, // Remove all routes
     );
@@ -574,9 +574,9 @@ class _SettingScreenState extends State<SettingScreen> {
                                   UserCredentials().setUserPersonWithDisability(0);
                                 }else{
                                   UserCredentials().setUserPersonWithDisability(1);
-                                  setState(() {
-                                    _selectedDisability[0]=true;
-                                  });
+                                  // setState(() {
+                                  //   _selectedDisability[0]=true;
+                                  // });
                                 }
                                 DisabilityswitchValue = value;
                               });

@@ -1119,7 +1119,6 @@ class _HomePageState extends State<HomePage> {
     try {
       final response = await http.post(
         Uri.parse(baseUrl),
-        body: json.encode({"userId": userId}),
         headers: {
           'Content-Type': 'application/json',
           'x-access-token': '$accessToken',
@@ -1612,57 +1611,36 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
               SizedBox(height: 10,),
-              Container(
-                padding: EdgeInsets.only(left: 16, right: 8),
-                decoration: BoxDecoration(
-                  // color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(10),
-                  border:
-                  Border.all(color: Color(0xFFE0E0E0), width: 1),
-                ),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      child: SvgPicture.asset(
-                          'assets/images/searchicon.svg'),
+              GestureDetector(
+                onTap: () {
+                  InteractionManager().logInteraction('Search Bar');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GlobalSearchPage(voiceInputEnabled: false),
                     ),
-                    // Icon(Icons.search),
-                    SizedBox(width: 16),
-                    // Semantics(
-                    //   header: true,
-                    //   // label: "Search Bar",
-                    //   child: GestureDetector(
-                    //     onTap: (){
-                    //       Navigator.push(
-                    //         context,
-                    //         MaterialPageRoute(
-                    //             builder: (context) => DestinationSearchPage(voiceInputEnabled: false)),
-                    //       );
-                    //     },
-                    //     child: Container(
-                    //       width: MediaQuery.sizeOf(context).width * 0.67,
-                    //       child: TextField(
-                    //         decoration: InputDecoration(
-                    //           hintText: 'Doctor, services..',
-                    //           border: InputBorder.none,
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ),
-                    // ),
-                    Semantics(
-                      header: true,
-                      // label: "Search Bar",
-                      child: GestureDetector(
-                        onTap: () {
-                          InteractionManager().logInteraction('Search Bar');
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => GlobalSearchPage(voiceInputEnabled: false),
-                            ),
-                          ).then((value) => PassLocationId(context, value));
-                        },
+                  ).then((value) => PassLocationId(context, value));
+                },
+                child: Container(
+                  padding: EdgeInsets.only(left: 16, right: 8),
+                  decoration: BoxDecoration(
+                    // color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(10),
+                    border:
+                    Border.all(color: Color(0xFFE0E0E0), width: 1),
+                  ),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        child: SvgPicture.asset(
+                            'assets/images/searchicon.svg'),
+                      ),
+                      // Icon(Icons.search),
+                      SizedBox(width: 16),
+
+                      Semantics(
+                        header: true,
+                        // label: "Search Bar",
                         child: Container(
                             padding: EdgeInsets.only(top: 8),
                             width: MediaQuery.of(context).size.width * 0.67,
@@ -1680,18 +1658,18 @@ class _HomePageState extends State<HomePage> {
                             )
                         ),
                       ),
-                    ),
 
-                    // SizedBox(width: 26,),
-                    // Spacer(),
-                    // Semantics(
-                    //   label: "Microphone",
-                    //   child: Icon(
-                    //     Icons.mic_none_outlined,
-                    //     color: Color(0xff8E8C8C),
-                    //   ),
-                    // ),
-                  ],
+                      // SizedBox(width: 26,),
+                      // Spacer(),
+                      // Semantics(
+                      //   label: "Microphone",
+                      //   child: Icon(
+                      //     Icons.mic_none_outlined,
+                      //     color: Color(0xff8E8C8C),
+                      //   ),
+                      // ),
+                    ],
+                  ),
                 ),
               ),
               SizedBox(height: 10,),
@@ -2423,122 +2401,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-  // Widget _buildMainServices() {
-  //   final List<Map<String, dynamic>> services = [
-  //     {
-  //       'image': 'assets/images/opd.svg',
-  //       'color': Color(0xFFEAF2FF),
-  //       'iconColor': Color(0xFF003366),
-  //       'title': 'OPD & Ayush',
-  //       'buildingId':['66794105b80a6778c53c4856','679ca3fde7e7001d98497002'],
-  //     },
-  //     {
-  //       'image':  'assets/images/emergency.svg',
-  //       'color': Color(0xFFFAE9E9),
-  //       'iconColor': Colors.red,
-  //       'title': 'Emergency',
-  //       'buildingId':['6798c6df96af63c3e82659ec'],
-  //     },
-  //     {
-  //       'image':  'assets/images/ward.svg',
-  //       'color': Color(0xFFFAF8E9),
-  //       'iconColor': Color(0xFF6B8E23),
-  //       'title': 'Ward',
-  //       'buildingId':['6798c99e96af63c3e828203d','6798c81c96af63c3e826add3'],
-  //     },
-  //     {
-  //       'image':  'assets/images/diagnostic.svg',
-  //       'color': Color(0xFFE4F8EB),
-  //       'iconColor': Color(0xFF00796B),
-  //       'title': 'Diagnostic',
-  //       'buildingId':['6798c8fa96af63c3e8277db2'],
-  //     },
-  //   ];
-  //
-  //   return GridView.count(
-  //     shrinkWrap: true,
-  //     physics: NeverScrollableScrollPhysics(),
-  //     crossAxisCount: 2,
-  //     crossAxisSpacing: 16,
-  //     mainAxisSpacing: 16,
-  //     childAspectRatio: 1.2,
-  //     children: services.map((service) {
-  //       return InkWell(
-  //         onTap: (){
-  //
-  //           bool anyLandmarkExists = false;
-  //           List<dynamic> allLandmarks = [];
-  //           List<String> buildingIds = List<String>.from(service['buildingId']);
-  //
-  //           print("Selected service: ${service['title']}");
-  //           print("Building IDs: $buildingIds");
-  //
-  //           // First, collect all landmarks from all buildings
-  //           for (String id in buildingIds) {
-  //             print("Processing building ID: $id");
-  //             if (allLandmarkData.containsKey(id)) {
-  //               print("Found landmarks for building: $id");
-  //
-  //               // Check if landmarks exist
-  //               if (allLandmarkData[id]['landmarkExist'] == true) {
-  //                 anyLandmarkExists = true;
-  //               }
-  //
-  //               // Get landmarks list from this building and add to our collection
-  //               if (allLandmarkData[id]['landmarks'] != null &&
-  //                   allLandmarkData[id]['landmarks'] is List) {
-  //                 List<dynamic> buildingLandmarks = List<dynamic>.from(allLandmarkData[id]['landmarks']);
-  //                 print("Adding ${buildingLandmarks.length} landmarks from building $id");
-  //                 allLandmarks.addAll(buildingLandmarks);
-  //               }
-  //             } else {
-  //               print("No landmarks found for building: $id");
-  //             }
-  //           }
-  //
-  //           // Create the combined data with merged content
-  //           Map<String, dynamic> combinedData = {
-  //             'landmarkExist': anyLandmarkExists,
-  //             'landmarks': allLandmarks
-  //           };
-  //
-  //           print("Final combined landmarks count: ${allLandmarks.length}");
-  //
-  //           // Navigate to Buildinglandmarks with the combined data
-  //           Navigator.push(
-  //             context,
-  //             MaterialPageRoute(
-  //               builder: (context) => Buildinglandmarks(
-  //                 buildingName: service['title'],
-  //                 buildingId: buildingIds.join(','),
-  //                 landmarkData: combinedData,
-  //               ),
-  //             ),
-  //           );
-  //         },
-  //         child: Container(
-  //           decoration: BoxDecoration(
-  //             color: service['color'],
-  //             borderRadius: BorderRadius.circular(16),
-  //           ),
-  //           child: Column(
-  //             mainAxisAlignment: MainAxisAlignment.center,
-  //             children: [
-  //               SvgPicture.asset(service['image']),
-  //               TranslatorWidget(
-  //                 service['title'],
-  //                 style: TextStyle(
-  //                   fontWeight: FontWeight.w500,
-  //                   fontSize: 16,
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       );
-  //     }).toList(),
-  //   );
-  // }
+
   Widget _buildMainServices() {
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: _fetchServiceData(),
@@ -2596,62 +2459,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Future<List<Map<String, dynamic>>> _fetchServiceData() async {
-  //   final List<Map<String, dynamic>> services = [
-  //     {
-  //       'image': 'assets/images/opd.svg',
-  //       'color': Color(0xFFEAF2FF),
-  //       'iconColor': Color(0xFF003366),
-  //       'title': 'OPD & Ayush',
-  //       'buildingId':['66794105b80a6778c53c4856','679ca3fde7e7001d98497002'],
-  //     },
-  //     {
-  //       'image': 'assets/images/emergency.svg',
-  //       'color': Color(0xFFFAE9E9),
-  //       'iconColor': Colors.red,
-  //       'title': 'Emergency',
-  //       'buildingId':['6798c6df96af63c3e82659ec'],
-  //     },
-  //     {
-  //       'image': 'assets/images/ward.svg',
-  //       'color': Color(0xFFFAF8E9),
-  //       'iconColor': Color(0xFF6B8E23),
-  //       'title': 'Ward',
-  //       'buildingId':['6798c99e96af63c3e828203d','6798c81c96af63c3e826add3'],
-  //     },
-  //     {
-  //       'image': 'assets/images/diagnostic.svg',
-  //       'color': Color(0xFFE4F8EB),
-  //       'iconColor': Color(0xFF00796B),
-  //       'title': 'Diagnostic',
-  //       'buildingId':['6798c8fa96af63c3e8277db2'],
-  //     },
-  //   ];
-  //
-  //   for (var service in services) {
-  //     List<String> buildingIds = List<String>.from(service['buildingId']);
-  //     bool anyLandmarkExists = false;
-  //     List<dynamic> allLandmarks = [];
-  //
-  //     for (String id in buildingIds) {
-  //       if (allLandmarkData.containsKey(id)) {
-  //         if (allLandmarkData[id]['landmarkExist'] == true) {
-  //           anyLandmarkExists = true;
-  //         }
-  //         if (allLandmarkData[id]['landmarks'] is List) {
-  //           allLandmarks.addAll(List<dynamic>.from(allLandmarkData[id]['landmarks']));
-  //         }
-  //       }
-  //     }
-  //
-  //     service['landmarkData'] = {
-  //       'landmarkExist': anyLandmarkExists,
-  //       'landmarks': allLandmarks,
-  //     };
-  //   }
-  //
-  //   return Future.delayed(Duration(seconds: 2), () => services); // Simulated API delay
-  // }
+
   Future<List<Map<String, dynamic>>> _fetchServiceData() async {
     final List<Map<String, dynamic>> services = [
       {

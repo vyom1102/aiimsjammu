@@ -530,7 +530,8 @@ class _ServiceInfoState extends State<ServiceInfo> {
                 ],
               ),
               SizedBox(height: 16,),
-              Padding(
+              if(widget.about.isNotEmpty)
+                Padding(
                 padding: const EdgeInsets.only(top: 8.0,left: 16,right: 16),
                 child: Row(
                   children: [
@@ -547,6 +548,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                   ],
                 ),
               ),
+              if(widget.about.isNotEmpty)
               Padding(
                 padding: EdgeInsets.only(top: 12.0,right: 16,left: 16,bottom: 16),
                 child: TranslatorWidget('Designing the operation hours section for a mobile app involves displaying the opening and closing hours of a business ',
@@ -636,7 +638,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                         Column(
                           children: [
                             TranslatorWidget(
-                              'Monday to Sunday',
+                              '    Monday to Sunday',
                               style: TextStyle(
                                 color: Color(0xFF595967),
                                 fontSize: 14,
@@ -647,7 +649,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                             ),
                             SizedBox(height: 4,),
                             TranslatorWidget(
-                              '     ${widget.startTime} Am - ${widget.endTime} Pm',
+                              '${widget.startTime} - ${widget.endTime} ',
                               style: TextStyle(
                                 color: Color(0xFF595967),
                                 fontSize: 14,

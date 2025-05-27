@@ -631,7 +631,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 16),
                   child: TranslatorWidget(
-                    '${day['day']} - ${day['openingTime']} AM - ${day['closingTime']} PM',
+                    '${day['day']} - ${day['openingTime']} - ${day['closingTime']} ',
                     style: TextStyle(
                       color: Color(0xFF6B7280),
                       fontSize: 14,

@@ -195,9 +195,9 @@ class LocationTrackingService {
       _socket.emit('user-log-socket', locationData);
       print(" LocationTrackingService Sent message: $locationData");
       // if(kDebugMode)
-      if(kDebugMode) {
-        Fluttertoast.showToast(msg: "$locationData ");
-      }
+      // if(kDebugMode) {
+      //   Fluttertoast.showToast(msg: "$locationData ");
+      // }
       print('LocationTrackingService: Location sent - Lat: ${_currentPosition!.latitude}, Lng: ${_currentPosition!.longitude}');
 
     }

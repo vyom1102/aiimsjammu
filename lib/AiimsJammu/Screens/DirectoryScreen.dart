@@ -99,13 +99,14 @@ class _HospitalDirectoryState extends State<HospitalDirectory> with SingleTicker
   void filterSearchResults(String query) {
     setState(() {
       filteredDirectories = directories
-          .where((dir) => dir.name.toLowerCase().contains(query.toLowerCase()) || dir.department.toLowerCase().contains(query.toLowerCase()))
+          .where((dir) => dir.name.toLowerCase().contains(query.toLowerCase()) || dir.department.toLowerCase().contains(query.toLowerCase()) || dir.contactNo.contains(query))
           .toList();
     });
   }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color(0xFF0A4A7F),
         title: isSearching
@@ -144,6 +145,7 @@ class _HospitalDirectoryState extends State<HospitalDirectory> with SingleTicker
         ]
             : null,
         bottom: TabBar(
+          indicatorSize: TabBarIndicatorSize.tab,
           controller: _tabController,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,

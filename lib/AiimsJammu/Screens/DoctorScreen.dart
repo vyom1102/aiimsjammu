@@ -919,6 +919,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> {
                                           ),
                                         ),
                                         Spacer(),
+                                        if (doctorsOfSpeciality.length > 1)
                                         SizedBox(
                                           height: 20,
                                           child: TextButton(

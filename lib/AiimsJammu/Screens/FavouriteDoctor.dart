@@ -15,6 +15,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../API/RefreshTokenAPI.dart';
+import '../../MainScreen.dart';
 import '../../config.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/Translator.dart';
@@ -65,9 +66,15 @@ class _FavouriteDoctorState extends State<FavouriteDoctor> {
     await launch(launchUri.toString());
   }
 
-  // Future<void> _shareContent(String text) async {
-  //   await Share.share(text);
-  // }
+  Future<bool> willPopScope() async {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (context) => MainScreen(initialIndex: 3),
+      ),
+          (Route<dynamic> route) => false, // Remove all routes
+    );
+    return false;
+  }
 
   Future<void> _shareContent(String text) async {
     try {
@@ -205,7 +212,7 @@ class _FavouriteDoctorState extends State<FavouriteDoctor> {
       }
     }
 
-  Future<void> updateUserFavorites(String id) async {
+  Future<void> updateUserFavorites(String id, int index) async {
     // print(widget.docId);
     String baseUrl = "${AppConfig.baseUrl}/secured/user/toggle-favourites";
 
@@ -235,7 +242,14 @@ class _FavouriteDoctorState extends State<FavouriteDoctor> {
 
     if (response.statusCode == 200) {
       print('Doctor added to favorites!');
-
+      setState(() {
+        doctorNames.removeAt(index);
+        doctorLocations.removeAt(index);
+        doctorSpeciality.removeAt(index);
+        FdoctorId.removeAt(index);
+        doctorLocationId.removeAt(index);
+        favoriteStates.removeAt(index);
+      });
         Fluttertoast.showToast(
           msg: "Removed from favorites!",
           toastLength: Toast.LENGTH_LONG,
@@ -245,45 +259,11 @@ class _FavouriteDoctorState extends State<FavouriteDoctor> {
         );
 
     } else if (response.statusCode == 403) {
-      // Access token expired, refresh token and retry the call
-      // await refreshTokenAndRetryForGetUserDetails(baseUrl);
       String newAccessToken = await RefreshTokenAPI.refresh();
       accessToken = newAccessToken;
-      updateUserFavorites(id);
+      updateUserFavorites(id,index);
     } else {
       print('Failed to add doctor to favorites: ${response.statusCode}');
-    }
-  }
-  Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
-
-    try {
-      final response = await http.post(
-        Uri.parse(refreshTokenUrl),
-        body: json.encode({
-          "refreshToken": refreshToken,
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final newAccessToken = json.decode(response.body)["accessToken"];
-        setState(() {
-          accessToken = newAccessToken;
-        });
-
-        // Save the new access token to Hive
-        final signInBox = await Hive.openBox('SignInDatabase');
-        signInBox.put('accessToken', accessToken);
-
-        await getUserDetails();
-      } else {
-
-      }
-    } catch (e) {
-
     }
   }
 
@@ -331,329 +311,314 @@ class _FavouriteDoctorState extends State<FavouriteDoctor> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        centerTitle: true,
-        title: TranslatorWidget(
-          'Favourite Doctors',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Color(0xFF18181B),
-            fontSize: 16,
-            fontFamily: 'Roboto',
-            fontWeight: FontWeight.w500,
+    return WillPopScope(
+      onWillPop: willPopScope,
 
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          centerTitle: true,
+          title: TranslatorWidget(
+            'Favourite Doctors',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Color(0xFF18181B),
+              fontSize: 16,
+              fontFamily: 'Roboto',
+              fontWeight: FontWeight.w500,
+
+            ),
           ),
         ),
-      ),
-      body: SingleChildScrollView(
-        child: Container(
-          padding: EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (!_isConnected)
-                _buildNoNetworkState()
-              else if (doctorNames.isEmpty)
-              Container(
-                height: MediaQuery.sizeOf(context).height*0.7,
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/images/noFavourite.png',
-                        width: 150,
-                        height: 150,
-                      ),
-                      TranslatorWidget(
-                        'No Favorites Yet',
-                        style: TextStyle(
-                          color: Color(0xFF18181B),
-                          fontSize: 18,
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w700,
+        body: SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (!_isConnected)
+                  _buildNoNetworkState()
+                else if (doctorNames.isEmpty)
+                Container(
+                  height: MediaQuery.sizeOf(context).height*0.7,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          'assets/images/noFavourite.png',
+                          width: 150,
+                          height: 150,
                         ),
-                      ),
-                      SizedBox(
-                        height: 8,
-                      ),
-                      TranslatorWidget(
-                        'Explore our services, doctors, and medicines to add your favorites here.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFFA1A1AA),
-                          fontSize: 14,
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w400,
+                        TranslatorWidget(
+                          'No Favorites Yet',
+                          style: TextStyle(
+                            color: Color(0xFF18181B),
+                            fontSize: 18,
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      )
-                    ],
+                        SizedBox(
+                          height: 8,
+                        ),
+                        TranslatorWidget(
+                          'Explore our services, doctors, and medicines to add your favorites here.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Color(0xFFA1A1AA),
+                            fontSize: 14,
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w400,
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
-              ),
-        
-              if (doctorNames.isNotEmpty && doctorLocations.isNotEmpty)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: List.generate(
-                    doctorNames.length,
-                        (index) => InkWell(
-                          onTap: (){
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => DoctorProfile1(
-                                  docId: FdoctorId[index],
+
+                if (doctorNames.isNotEmpty && doctorLocations.isNotEmpty)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: List.generate(
+                      doctorNames.length,
+                          (index) => InkWell(
+                            onTap: (){
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DoctorProfile1(
+                                    docId: FdoctorId[index],
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                          child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                          Container(
-                            padding: EdgeInsets.only(top: 8, left: 8, right: 8, bottom: 12),
-
-                            decoration: ShapeDecoration(
-                          shape: RoundedRectangleBorder(
-                              side: BorderSide(width: 1, color: Color(0xFFE5E7EB)),
-                                              borderRadius: BorderRadius.circular(4),
-                                            ),
-
-                            ),
+                              );
+                            },
                             child: Column(
-                              children: [
-                                Row(
-                                  children: [
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                            Container(
+                              padding: EdgeInsets.only(top: 8, left: 8, right: 8, bottom: 12),
 
-                            TranslatorWidget(
+                              decoration: ShapeDecoration(
+                            shape: RoundedRectangleBorder(
+                                side: BorderSide(width: 1, color: Color(0xFFE5E7EB)),
+                                                borderRadius: BorderRadius.circular(4),
+                                              ),
 
-                                      doctorNames[index],
-                                      style: TextStyle(
-                                        color: Color(0xFF18181B),
-                                        fontSize: 16,
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    Spacer(),
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
 
-                                    IconButton(
-                                      onPressed: () async {
-                                        setState(() {
-                                          favoriteStates[index] = !favoriteStates[index];
-                                        });
-                                        await updateUserFavorites(FdoctorId[index]);
-                                      },
-                                      icon: Icon(
-                                        favoriteStates[index] ? Icons.favorite_border:Icons.favorite ,
-                                        color: favoriteStates[index] ? null:Colors.red,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                // SizedBox(height: 8,),
-                                Row(
-                                  children: [
-                                    TranslatorWidget(
-                                      doctorSpeciality[index],
-                                      style: TextStyle(
-                                        color: Color(0xFFA1A1AA),
-                                        fontSize: 14,
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.w400,
+                              TranslatorWidget(
 
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 8,),
-                                // Row(
-                                //   children: [
-                                //
-                                //     Icon(
-                                //       Icons.location_on_outlined,
-                                //       color: Color(0xFF8D8C8C),
-                                //       size: 16,
-                                //     ),
-                                //
-                                //     Text(
-                                //       doctorLocations[index],
-                                //       style: TextStyle(
-                                //         color: Color(0xFFA1A1AA),
-                                //         fontSize: 14,
-                                //         fontFamily: 'Roboto',
-                                //         fontWeight: FontWeight.w400,
-                                //       ),
-                                //     ),
-                                //   ],
-                                // ),
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.location_on_outlined,
-                                      color: Color(0xFF8D8C8C),
-                                      size: 16,
-                                    ),
-                                    SizedBox(width: 4), // Add some spacing between icon and text
-                                    Expanded(
-                                      child: SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: TranslatorWidget(
-                                          doctorLocations[index],
-                                          style: TextStyle(
-                                            color: Color(0xFFA1A1AA),
-                                            fontSize: 14,
-                                            fontFamily: 'Roboto',
-                                            fontWeight: FontWeight.w400,
-                                          ),
+                                        doctorNames[index],
+                                        style: TextStyle(
+                                          color: Color(0xFF18181B),
+                                          fontSize: 16,
+                                          fontFamily: 'Roboto',
+                                          fontWeight: FontWeight.w500,
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
+                                      Spacer(),
 
-                                SizedBox(height: 8,),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    Expanded(
-                                      child: ElevatedButton(
-                                        onPressed: () {
-                                          print('called');
-                                          print(" id od doc $doctorLocationId[index]");
-                                          PassLocationId(context,doctorLocationId[index]);
+                                      IconButton(
+                                        onPressed: () async {
+                                          setState(() {
+                                            favoriteStates[index] = !favoriteStates[index];
+                                          });
+                                          await updateUserFavorites(FdoctorId[index],index);
                                         },
-                                        style: ElevatedButton
-                                            .styleFrom(
-                                          backgroundColor:
-                                          Color(0xFF0B6B94),
-                                          padding: EdgeInsets
-                                              .symmetric(
-                                              vertical: 12),
-                                          shape:
-                                          RoundedRectangleBorder(
-                                            borderRadius:
-                                            BorderRadius
-                                                .circular(4),
+                                        icon: Icon(
+                                          favoriteStates[index] ? Icons.favorite_border:Icons.favorite ,
+                                          color: favoriteStates[index] ? null:Colors.red,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  // SizedBox(height: 8,),
+                                  Row(
+                                    children: [
+                                      TranslatorWidget(
+                                        doctorSpeciality[index],
+                                        style: TextStyle(
+                                          color: Color(0xFFA1A1AA),
+                                          fontSize: 14,
+                                          fontFamily: 'Roboto',
+                                          fontWeight: FontWeight.w400,
+
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 8,),
+
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.location_on_outlined,
+                                        color: Color(0xFF8D8C8C),
+                                        size: 16,
+                                      ),
+                                      SizedBox(width: 4), // Add some spacing between icon and text
+                                      Expanded(
+                                        child: SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: TranslatorWidget(
+                                            doctorLocations[index],
+                                            style: TextStyle(
+                                              color: Color(0xFFA1A1AA),
+                                              fontSize: 14,
+                                              fontFamily: 'Roboto',
+                                              fontWeight: FontWeight.w400,
+                                            ),
                                           ),
                                         ),
-                                        child: Row(
-                                          mainAxisSize:
-                                          MainAxisSize.min,
-                                          mainAxisAlignment:
-                                          MainAxisAlignment
-                                              .center,
-                                          crossAxisAlignment:
-                                          CrossAxisAlignment
-                                              .center,
-                                          children: [
-                                            Transform.rotate(
-                                              angle: 180 * 3.1415926535 / 180,
-                                              child: Icon(
-                                                Icons.subdirectory_arrow_left_outlined,
-                                                color: Colors.white,
+                                      ),
+                                    ],
+                                  ),
+
+                                  SizedBox(height: 8,),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Expanded(
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            print('called');
+                                            print(" id od doc $doctorLocationId[index]");
+                                            PassLocationId(context,doctorLocationId[index]);
+                                          },
+                                          style: ElevatedButton
+                                              .styleFrom(
+                                            backgroundColor:
+                                            Color(0xFF0B6B94),
+                                            padding: EdgeInsets
+                                                .symmetric(
+                                                vertical: 12),
+                                            shape:
+                                            RoundedRectangleBorder(
+                                              borderRadius:
+                                              BorderRadius
+                                                  .circular(4),
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize:
+                                            MainAxisSize.min,
+                                            mainAxisAlignment:
+                                            MainAxisAlignment
+                                                .center,
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment
+                                                .center,
+                                            children: [
+                                              Transform.rotate(
+                                                angle: 180 * 3.1415926535 / 180,
+                                                child: Icon(
+                                                  Icons.subdirectory_arrow_left_outlined,
+                                                  color: Colors.white,
+                                                  size: 18,
+                                                ),
+                                              ),
+                                              SizedBox(width: 8),
+                                              TranslatorWidget(
+                                                'Directions',
+                                                style: TextStyle(
+                                                  color:
+                                                  Colors.white,
+                                                  fontSize: 14,
+                                                  fontFamily:
+                                                  'Roboto',
+                                                  fontWeight:
+                                                  FontWeight
+                                                      .w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(width: 8,),
+                                      Expanded(
+                                        child: OutlinedButton(
+                                          onPressed: () {
+                                            _shareContent("${AppConfig.baseUrl}/#/iway-apps/aiimsj.com/doctor?docId=${FdoctorId[index]}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
+
+                                            // _shareContent(shareText);
+                                          },
+                                          style: OutlinedButton
+                                              .styleFrom(
+                                            padding: EdgeInsets
+                                                .symmetric(
+                                                vertical: 12),
+                                            shape:
+                                            RoundedRectangleBorder(
+                                              borderRadius:
+                                              BorderRadius
+                                                  .circular(4),
+                                            ),
+                                            side: BorderSide(
+                                                color: Color(
+                                                    0xFF0B6B94)),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize:
+                                            MainAxisSize.min,
+                                            mainAxisAlignment:
+                                            MainAxisAlignment
+                                                .center,
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment
+                                                .center,
+                                            children: [
+
+                                              Icon(
+                                                Icons
+                                                    .share,
+                                                color: Color(
+                                                    0xFF0B6B94),
                                                 size: 18,
                                               ),
-                                            ),
-                                            SizedBox(width: 8),
-                                            TranslatorWidget(
-                                              'Directions',
-                                              style: TextStyle(
-                                                color:
-                                                Colors.white,
-                                                fontSize: 14,
-                                                fontFamily:
-                                                'Roboto',
-                                                fontWeight:
-                                                FontWeight
-                                                    .w500,
+                                              SizedBox(width: 8),
+                                              TranslatorWidget(
+                                                'Share',
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 14,
+                                                  fontFamily:
+                                                  'Roboto',
+                                                  fontWeight:
+                                                  FontWeight
+                                                      .w500,
+                                                ),
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 8,),
-                                    Expanded(
-                                      child: OutlinedButton(
-                                        onPressed: () {
-                                          _shareContent("${AppConfig.baseUrl}/#/iway-apps/aiimsj.com/doctor?docId=${FdoctorId[index]}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
 
-                                          // _shareContent(shareText);
-                                        },
-                                        style: OutlinedButton
-                                            .styleFrom(
-                                          padding: EdgeInsets
-                                              .symmetric(
-                                              vertical: 12),
-                                          shape:
-                                          RoundedRectangleBorder(
-                                            borderRadius:
-                                            BorderRadius
-                                                .circular(4),
+                                            ],
                                           ),
-                                          side: BorderSide(
-                                              color: Color(
-                                                  0xFF0B6B94)),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize:
-                                          MainAxisSize.min,
-                                          mainAxisAlignment:
-                                          MainAxisAlignment
-                                              .center,
-                                          crossAxisAlignment:
-                                          CrossAxisAlignment
-                                              .center,
-                                          children: [
-
-                                            Icon(
-                                              Icons
-                                                  .share,
-                                              color: Color(
-                                                  0xFF0B6B94),
-                                              size: 18,
-                                            ),
-                                            SizedBox(width: 8),
-                                            TranslatorWidget(
-                                              'Share',
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 14,
-                                                fontFamily:
-                                                'Roboto',
-                                                fontWeight:
-                                                FontWeight
-                                                    .w500,
-                                              ),
-                                            ),
-
-                                          ],
                                         ),
                                       ),
-                                    ),
 
 
-                                  ],
-                                ),
-                              ],
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
+                            SizedBox(height: 16,),
+
+                                                  ],
+                                                ),
                           ),
-                          SizedBox(height: 16,),
-
-                                                ],
-                                              ),
-                        ),
+                    ),
                   ),
-                ),
-        
-        
 
-            ],
+
+
+              ],
+            ),
           ),
         ),
       ),

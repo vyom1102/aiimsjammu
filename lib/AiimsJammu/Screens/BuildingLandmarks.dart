@@ -351,114 +351,116 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
         ),
       );
     } else {
-      return ListView.builder(
-        itemCount: filteredLandmarks.length,
-        itemBuilder: (context, index) {
-          final landmark = filteredLandmarks[index];
-          final polyId = landmark['properties']['polyId'] ?? landmark["_id"];
-          return Container(
-            margin: const EdgeInsets.only(bottom: 12.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  spreadRadius: 1,
-                  blurRadius: 2,
-                  offset: const Offset(0, 1),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: TranslatorWidget(
-                          (landmark['name'] ?? 'Unknown Landmark').length > 25
-                              ? (landmark['name'] as String).substring(0, 25) +
-                              '...'
-                              : landmark['name'] ?? 'Unknown Landmark',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  Navigation(directLandID: polyId),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(50),
-                            border: Border.all(
-                                color: const Color(0xFFE6E6E6), width: 1),
-                          ),
-                          padding: const EdgeInsets.all(8),
-                          child: SvgPicture.asset(
-                              'assets/images/assistant_direction.svg'),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Icon(Icons.calendar_today,
-                          size: 16, color: Colors.blue[900]),
-                      const SizedBox(width: 8),
-                      TranslatorWidget(
-                        landmark['properties']['timings'] ??
-                            'Monday - Saturday | 9 AM - 5 PM',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.location_on, size: 16, color: Colors.blue[900]),
-                      const SizedBox(width: 5),
-                      Expanded(
-                        child: TranslatorWidget(
-                          buildingNames[landmark['building_ID']] ??
-                              'No Location Info',
-                          style:
-                          const TextStyle(fontSize: 14, color: Colors.black54),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  TranslatorWidget(
-                    'Open Now',
-                    style: TextStyle(
-                      color: Colors.green,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                    ),
+      return Scrollbar(
+        child: ListView.builder(
+          itemCount: filteredLandmarks.length,
+          itemBuilder: (context, index) {
+            final landmark = filteredLandmarks[index];
+            final polyId = landmark['properties']['polyId'] ?? landmark["_id"];
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 2,
+                    offset: const Offset(0, 1),
                   ),
                 ],
               ),
-            ),
-          );
-        },
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: TranslatorWidget(
+                            (landmark['name'] ?? 'Unknown Landmark').length > 25
+                                ? (landmark['name'] as String).substring(0, 25) +
+                                '...'
+                                : landmark['name'] ?? 'Unknown Landmark',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    Navigation(directLandID: polyId),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(50),
+                              border: Border.all(
+                                  color: const Color(0xFFE6E6E6), width: 1),
+                            ),
+                            padding: const EdgeInsets.all(8),
+                            child: SvgPicture.asset(
+                                'assets/images/assistant_direction.svg'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today,
+                            size: 16, color: Colors.blue[900]),
+                        const SizedBox(width: 8),
+                        TranslatorWidget(
+                          landmark['properties']['timings'] ??
+                              'Monday - Saturday | 9 AM - 5 PM',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.location_on, size: 16, color: Colors.blue[900]),
+                        const SizedBox(width: 5),
+                        Expanded(
+                          child: TranslatorWidget(
+                            buildingNames[landmark['building_ID']] ??
+                                'No Location Info',
+                            style:
+                            const TextStyle(fontSize: 14, color: Colors.black54),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    TranslatorWidget(
+                      'Open Now',
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       );
     }
   }
