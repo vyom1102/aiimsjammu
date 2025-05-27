@@ -43,7 +43,6 @@ class _FavouriteServiceState extends State<FavouriteService> {
   List<String> doctorLocationId = [];
   List<bool> favoriteStates = [];
 
-  final String shareText = 'https://play.google.com/store/apps/details?id=com.iwayplus.rgcinavigation';
 
 
   Future<void> updateUserFavorites(String id,int index) async {
@@ -85,9 +84,7 @@ class _FavouriteServiceState extends State<FavouriteService> {
     } else if (response.statusCode == 403) {
       String newAccessToken = await RefreshTokenAPI.refresh();
       accessToken = newAccessToken;
-      // updateUserFavorites(id);
       updateUserFavorites(id,index);
-      // await refreshTokenAndRetryForGetUserDetails(baseUrl);
     } else {
       print('Failed to add service to favorites: ${response.statusCode}');
     }
