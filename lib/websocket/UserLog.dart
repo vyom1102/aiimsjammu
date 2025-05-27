@@ -1,18 +1,18 @@
 import 'dart:ui';
+
+import 'package:iwaymaps/config.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:convert';
 import 'package:socket_io_client/socket_io_client.dart' as io;
-
-import '../config.dart';
 class wsocket{
-  static String appID = "";
+  static String appId = "";
   static final channel = io.io('${AppConfig.baseUrl}', <String, dynamic>{
     'transports': ['websocket'],
     'autoConnect': false,
   });
 //message ["userId"]=123456;
   static Map message = {
-    "appId" : appID,
+    "appId":appId,
     "userId": "",
     "deviceInfo": {
       "sensors": {
@@ -33,8 +33,10 @@ class wsocket{
       "BID": "",
       "buildingName": "",
       "bleScanResults": {
-
+        "IW122": 0,
+        "IW123": 0,
       },
+      "nearByDevices" : {},
       "localizedOn": ""
     },
     "userPosition": {
@@ -42,21 +44,18 @@ class wsocket{
       "Y": 0,
       "floor": 0
     },
-    "path": {
+    "path":{
       "source": "",
       "destination": "",
       "didPathForm": false
-
     }
   };
-
-
   wsocket(String appid){
-    appID = appid;
+    appId = appid;
     channel.connect();
-
   }
   static void sendmessg() {
     channel.emit("user-log-socket", message);
   }
+
 }

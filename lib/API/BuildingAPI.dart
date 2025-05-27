@@ -39,7 +39,9 @@ class BuildingAPI {
     );
     if (response.statusCode == 200) {
       print("responseeeee ${response.body}");
-      Map<String,dynamic> responseBody = json.decode(response.body);
+      List<dynamic> responseList = json.decode(response.body);
+      Map<String, dynamic> responseBody = {"status":true};
+      responseBody['data'] = responseList;
       final BuildingData = BuildingAPIModel(responseBody: responseBody);
       print(responseBody);
       print('BUILDING DATA FROM API');

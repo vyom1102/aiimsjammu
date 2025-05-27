@@ -219,12 +219,17 @@ class _MainScreenState extends State<MainScreen> {
             heroTag: 'mainscreen',
 
             onPressed: (){
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Navigation(),
-                ),
-              );
+              if(UserState.geoFenced){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Navigation(),
+                  ),
+                );
+              }else{
+                HelperClass.showToast("Not at the current venue");
+              }
+
             },
             backgroundColor: Color(0xFFFEAB01),
             shape: CircleBorder(),

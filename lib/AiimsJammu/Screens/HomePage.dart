@@ -22,7 +22,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:iwaymaps/API/DataVersionApi.dart';
 import 'package:iwaymaps/API/buildingAllApi.dart';
@@ -39,6 +38,7 @@ import '../../API/waypoint.dart';
 import '../../APIMODELS/DataVersion.dart';
 import '../../APIMODELS/landmark.dart';
 import '../../DATABASE/BOXES/BeaconAPIModelBOX.dart';
+import '../../DATABASE/BOXES/BuildingAPIModelBox.dart';
 import '../../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import '../../DATABASE/BOXES/DataVersionLocalModelBOX.dart';
 import '../../DATABASE/BOXES/LandMarkApiModelBox.dart';
@@ -638,7 +638,7 @@ class _HomePageState extends State<HomePage> {
   Position? userLoc;
   bool isLocating=false;
   void getLocs()async{
-    setState(() {
+    setState((){
       isLocating=true;
     });
     userLoc= await getUsersCurrentLatLng();
@@ -647,15 +647,12 @@ class _HomePageState extends State<HomePage> {
         isLocating=false;
       });
     }
-
     print("userLoc");
     print(userLoc);
-    // UserState.geoFenced=await HelperClass.getGeoFenced("AIIMSJAMMU", userLoc!);
-
+    UserState.geoFenced=await HelperClass.getGeoFenced(userLoc!);
   }
 
   Future<Position?> getUsersCurrentLatLng()async{
-
     if (await Permission.location.isGranted) {
       Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
       return position;
@@ -1243,7 +1240,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _checkInternetConnection() async {
-    bool isConnected = await InternetConnection().hasInternetAccess;
+    bool isConnected = true;
     if (isConnected) {
       _hideNoInternetSnackbar();
     } else {
@@ -1405,6 +1402,7 @@ class _HomePageState extends State<HomePage> {
       final BeaconBox = BeaconAPIModelBOX.getData();
       final DataBox = DataVersionLocalModelBOX.getData();
       final BuildingAllBox = BuildingAllAPIModelBOX.getData();
+      final buildingData = BuildingAPIModelBox.getData();
       final LandMarkBox = LandMarkApiModelBox.getData();
       final PatchBox = PatchAPIModelBox.getData();
       final PolyLineBox = PolylineAPIModelBOX.getData();
@@ -1413,6 +1411,7 @@ class _HomePageState extends State<HomePage> {
 
       BeaconBox.clear();
       BuildingAllBox.clear();
+      buildingData.clear();
       LandMarkBox.clear();
       PatchBox.clear();
       PolyLineBox.clear();
