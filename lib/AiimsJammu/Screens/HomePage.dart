@@ -146,6 +146,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     getUserDataFromHive();
+    fetchAndStoreBuildingIds();
     getDriverDetail();
     NotificationSocket.receiveMessage();
     checkForUpdate();
@@ -157,7 +158,6 @@ class _HomePageState extends State<HomePage> {
     versionApiCheck();
     checkForReload();
     versionApiCall();
-    fetchAndStoreBuildingIds();
     // fetchAllLandmarkData();
     isUserValid();
     callbackFunc();
@@ -529,6 +529,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> getUserDataFromHive() async {
     final signInBox = await Hive.openBox('SignInDatabase');
     setState(() {
+
       accessToken = signInBox.get("accessToken");
       refreshToken = signInBox.get("refreshToken");
     });
