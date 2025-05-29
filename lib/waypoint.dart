@@ -1,12 +1,11 @@
 class PathModel {
-  final String? id;
-  final String? buildingID;
-  final int? floor;
-  final Map<String, List<dynamic>>? pathNetwork;
-  final Map<String, List<dynamic>>? pathNetworkGlobal;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-  final int? v;
+  final String id;
+  final String buildingID;
+  final int floor;
+  final Map<String, List<dynamic>> pathNetwork;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final int v;
 
   PathModel({
     required this.id,
@@ -16,11 +15,9 @@ class PathModel {
     required this.createdAt,
     required this.updatedAt,
     required this.v,
-    required this.pathNetworkGlobal
   });
 
   factory PathModel.fromJson(Map<dynamic, dynamic> json) {
-
     return PathModel(
       id: json['_id'],
       buildingID: json['building_ID'],
@@ -30,14 +27,9 @@ class PathModel {
               (key, value) => MapEntry(key, List<String>.from(value)),
         ),
       ),
-      createdAt: json['createdAt'] != null?DateTime.parse(json['createdAt']):json['createdAt'],
-      updatedAt: json['updatedAt'] != null?DateTime.parse(json['updatedAt']):json['updatedAt'],
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
       v: json['__v'],
-      pathNetworkGlobal: Map<String, List<dynamic>>.from(
-        json['pathNetworkGlobal']??{}.map(
-              (key, value) => MapEntry(key, List<String>.from(value)),
-        ),
-      ),
     );
   }
 }
@@ -88,7 +80,6 @@ class BuildingPath {
   final int floor;
   final List<PathLine> pathLines;
   final PathNetwork pathNetwork;
-  final PathNetwork pathNetworkGlobal;
   final DateTime createdAt;
   final DateTime updatedAt;
   final int version;
@@ -99,7 +90,6 @@ class BuildingPath {
     required this.floor,
     required this.pathLines,
     required this.pathNetwork,
-    required this.pathNetworkGlobal,
     required this.createdAt,
     required this.updatedAt,
     required this.version,
@@ -115,7 +105,6 @@ class BuildingPath {
       floor: json['floor'],
       pathLines: pathLines,
       pathNetwork: PathNetwork.fromJson(json['pathNetwork']),
-      pathNetworkGlobal: PathNetwork.fromJson(json['pathNetworkGlobal']),
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
       version: json['__v'],
@@ -129,7 +118,6 @@ class BuildingPath {
       'floor': floor,
       'pathLines': pathLines.map((line) => line.toJson()).toList(),
       'pathNetwork': pathNetwork.toJson(),
-      'pathNetworkGlobal': pathNetworkGlobal.toJson(),
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       '__v': version,

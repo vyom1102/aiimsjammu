@@ -23,7 +23,7 @@ class buildingAllApi {
   static outdoormodel? outBuildingData = null;
   static String selectedID="";
   static String selectedBuildingID="";
-  static String selectedVenue="AIIMSJAMMU";
+  static String selectedVenue="AIIMSBhopal";
   static Map<String,g.LatLng> allBuildingID = {};
 
   static String outdoorID = "";

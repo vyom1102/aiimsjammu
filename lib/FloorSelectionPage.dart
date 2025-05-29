@@ -126,10 +126,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
           if (searchResults.length < 10) {
             if (value.name != null && value.element!.subType != "beacons") {
               if(floor.isNotEmpty){
-                print("floor.isNotEmptyif");
-                print(value.floor);
-                print(floor);
-                print(floor.contains(value.floor));
                 if (value.name!.toLowerCase().contains(filterText.toLowerCase()) && value.buildingName!.toLowerCase().contains(buildingText.toLowerCase()) && floor.contains(value.floor)) {
                   print("inside floor.isNotEmptyif");
                   searchResults.add(SearchpageResults(name: "${value.name}",
@@ -141,18 +137,6 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
                     floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!,accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,));
                 }else{
                   print("floor.isNotEmptyelse");
-                }
-              }else{
-                if (value.name!.toLowerCase().contains(filterText.toLowerCase()) && value.buildingName!.toLowerCase().contains(buildingText.toLowerCase())) {
-                  searchResults.add(SearchpageResults(name: "${value.name}",
-                    location: "Floor ${value.floor}, ${value
-                        .buildingName}, ${value.venueName}",
-                    onClicked: onVenueClicked,
-                    ID: value.properties!.polyId!,
-                    bid: value.buildingID!,
-                    floor: value.floor!,coordX: value.doorX?? value.coordinateX!,coordY: value.doorY?? value.coordinateY!,accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,));
-                }else{
-                  print("NO-");
                 }
               }
             }

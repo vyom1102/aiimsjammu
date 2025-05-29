@@ -7,17 +7,19 @@ import 'package:flutter_tts/flutter_tts.dart';
 //import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
-import '/newSearchPage.dart';
-import '/Elements/HelperClass.dart';
-import '/Elements/locales.dart';
-import '/SourceAndDestinationPage.dart';
+import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/Elements/HomepageFilter.dart';
+import 'package:iwaymaps/Elements/locales.dart';
+import 'package:iwaymaps/SourceAndDestinationPage.dart';
 
-import '/APIMODELS/landmark.dart';
+import '../APIMODELS/landmark.dart';
 import '../DestinationSearchPage.dart';
 import 'package:animated_checkmark/animated_checkmark.dart';
 
 import '../UserState.dart';
 import 'HomepageFilter.dart';
+
+
 
 class HomepageSearch extends StatefulWidget {
   final searchText;
@@ -39,6 +41,27 @@ class _HomepageSearchState extends State<HomepageSearch> {
     'Reception', 'Lift',
   ];
 
+
+  String getIcon(String option) {
+    switch (option.toLowerCase()) {
+      case 'washroom':
+        return 'assets/washroomIcon.png';
+      case 'cafeteria':
+        return 'assets/cafeteria.png';
+      case 'drinking water':
+        return 'assets/waterPoint.png';
+      case 'atm':
+        return 'assets/atmIcon.png';
+      case 'entry':
+        return 'assets/entryExit.png';
+      case 'lift':
+        return 'assets/liftIcon.png';
+      case 'reception':
+        return 'assets/receptionIcon.png';
+      default:
+        return ''; // Return a default icon if no match is found
+    }
+  }
   List<IconData> _icons = [
     Icons.wash_sharp,
     Icons.door_front_door_outlined,
@@ -105,13 +128,12 @@ class _HomepageSearchState extends State<HomepageSearch> {
                         child: Semantics(
                           sortKey: const OrdinalSortKey(0),
                           label: "${LocaleData.waytogo.getString(context)}",
-
                           child: InkWell(
                             onTap: (){
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => NewSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
+                                      builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
                               ).then((value){
                                 print("POP22");
                                 widget.onVenueClicked(value,DirectlyStartNavigation: false);
@@ -147,7 +169,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => NewSearchPage(hintText: 'Destination location',voiceInputEnabled: true,))
+                                  builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: true,))
                           ).then((value){
                             print("POPPP");
                             widget.onVenueClicked(value);
@@ -165,11 +187,10 @@ class _HomepageSearchState extends State<HomepageSearch> {
                       ),
                     ),
                   ),
-
                   Container(
                     width: 47,
                     height: 48,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Color(0xff24B9B0),
                       borderRadius: BorderRadius.only(
                         topRight: Radius.circular(3), // Adjust the radius as needed
@@ -203,13 +224,14 @@ class _HomepageSearchState extends State<HomepageSearch> {
         ),
         Semantics(
           header: true,
-          label: "Facilities Filter",
+          label: "Filters",
           child: Container(
             width: screenWidth,
             child: ChipsChoice<int>.single(
               value: vall,
               onChanged: (val){
                 setState(() => vall = val);
+
                 if(HelperClass.SemanticEnabled){
                   speak("${options[val]} selected");
                 }else if(lastValueStored == val){
@@ -235,29 +257,6 @@ class _HomepageSearchState extends State<HomepageSearch> {
     );
   }
 }
-
-IconData getIcon(String option) {
-  switch (option.toLowerCase()) {
-    case 'washroom':
-      return Icons.wash_sharp;
-    case 'cafeteria':
-      return Icons.local_cafe;
-    case 'drinking water':
-      return Icons.water_drop;
-    case 'atm':
-      return Icons.atm_sharp;
-    case 'entry':
-      return Icons.door_front_door_outlined;
-    case 'lift':
-      return Icons.elevator;
-    case 'reception':
-      return Icons.desk_sharp;
-    default:
-      return Icons.help_outline; // Return a default icon if no match is found
-  }
-}
-
-
 
 class CustomChip extends StatelessWidget {
   final String label;

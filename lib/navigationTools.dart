@@ -711,12 +711,61 @@ class tools {
     return [match, nonMatch];
   }
 
+  static List<int> findpoint(int x1, int y1, int x2, int y2, Map<String, double> data) {
+    // Calculate the slope (m)
+    double angleInRadians = atan(data['slope']!);
+    double angleInDegrees = angleInRadians * (180 / pi);
+    double normalizedSlope = angleInDegrees % 360;
+    if (normalizedSlope < 0) {
+      normalizedSlope += 360;
+    }
+    int dx = x2-x1;
+    int dy = y2-y1;
+    if(dx<0){
+      dx = dx*-1;
+    }
+    if(dy<0){
+      dy = dy*-1;
+    }
+
+    if(dy<dx){
+      if(x1<x2){
+        x1++;
+      }else{
+        x1--;
+      }
+      print("returned ${[x1,((x1*data['slope']!)+data['intercept']!).round()]}");
+      return [x1,((x1*data['slope']!)+data['intercept']!).round()];
+    }else if(dx<dy){
+      if(y1<y2){
+        y1++;
+      }else{
+        y1--;
+      }
+      print("returned ${[((y1-data['intercept']!)/data['slope']!).round(),y1]}");
+      return [((y1-data['intercept']!)/data['slope']!).round(),y1];
+    }else{
+      if(x1<x2){
+        x1++;
+      }else{
+        x1--;
+      }
+      if(y1<y2){
+        y1++;
+      }else{
+        y1--;
+      }
+      return [x1,y1];
+    }
+  }
 
 
-  static double PathDistance(List<Cell> mergedList) {
+  static double PathDistance(List<Cell> mergedList, {int index = 0}) {
     double totalDistance = 0.0;
 
     if (mergedList.isEmpty) return totalDistance;
+
+    mergedList = mergedList.sublist(index);
 
     if (mergedList.every((item) => (item.bid == buildingAllApi.outdoorID && item.floor == mergedList.first.floor))) {
       for (int i = 1; i < mergedList.length; i++) {
@@ -1811,7 +1860,7 @@ class tools {
     pCoord.add(user.coordY!);
     landmarksMap.forEach((key, value) {
 
-      if(user.bid == value.buildingID && value.element!.subType != "beacons" && value.coordinateX!=null){
+      if(user.Bid == value.buildingID && value.element!.subType != "beacons" && value.coordinateX!=null){
         if (user.floor == value.floor) {
 
           double d = 0.0;
@@ -2061,6 +2110,7 @@ class tools {
     }
     return newPath;
   }
+
 
   static List<int> findLocalCoordinates(Cell A, Cell C, List<double> globalB) {
     // Step 1: Calculate the parameter `t` (the proportion of B on the line AC in the global system)

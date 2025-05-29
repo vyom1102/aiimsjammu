@@ -1362,27 +1362,16 @@ bool isWithinRange(List<int> target, List<int> p1, List<int> p2, double range) {
 }
 
 List<Cell> findCorridorSegments(
-    List<String> path, Map<String, Map<int, List<int>>> nonWalkables, Map<String,patchDataModel> patchData) {
+    List<int> path, List<int> nonWalkable, int numCols,String? bid, int floor,Map<String,patchDataModel> patchData) {
+  int? coorridorWidth=(patchData[bid]!.patchData!.corridorWidth!=null)?int.parse(patchData[bid]!.patchData!.corridorWidth!):10;
+  print("coorirdor width");
+  print(coorridorWidth);
   List<Cell> single = [];
-  List<String> turns = tools.getTurnPointsFromString(path);
+  List<int> turnPoints = tools.getTurnpoints(path, numCols);
   for (int i = 0; i < path.length; i++) {
-    String stringPoint = path[i];
-    List<int> point = tools.extractCoordinates(stringPoint);
-    String bid = tools.extractBid(stringPoint);
-    int? coorridorWidth=(patchData[bid]!.patchData!.corridorWidth!=null)?int.parse(patchData[bid]!.patchData!.corridorWidth!):10;
-    int floor = point[2];
-    var nonWalkable = SingletonFunctionController.building.nonWalkable[bid]![floor]??[];
-    print("cellpathdebug $stringPoint bid $bid $floor ${SingletonFunctionController.building.floorDimenssion[bid]}");
-    int numCols = 0;
-    try{
-      numCols = SingletonFunctionController.building.floorDimenssion[bid]![floor]![0];
-    }catch(e){
-      numCols = SingletonFunctionController.building.floorDimenssion[bid]!.values.first[0];
-    }
-
-    int row = point[0];
-    int col = point[1];
-    int pos = (point[1]*numCols)+point[0];
+    int pos = path[i];
+    int row = pos % numCols;
+    int col = pos ~/ numCols;
 
     int nextrow = row;
     int nextcol = col;
@@ -1391,9 +1380,8 @@ List<Cell> findCorridorSegments(
     double lat = v[0];
     double lng = v[1];
     if (i + 1 < path.length) {
-      List<int> nextpoint = tools.extractCoordinates(path[i+1]);
-      nextrow = nextpoint[0];
-      nextcol = nextpoint[1];
+      nextrow = path[i + 1] % numCols;
+      nextcol = path[i + 1] ~/ numCols;
     }
 
     bool northCollision =
@@ -1417,7 +1405,7 @@ List<Cell> findCorridorSegments(
     } else if (nextrow != row && nextcol != col) {
       //
       single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,bid,floor,numCols,ttsEnabled: false));
-    } else if (turns.contains(stringPoint)) {
+    } else if (turnPoints.contains(pos)) {
       //
       single.add(Cell(pos, row, col, tools.eightcelltransitionforTurns, lat, lng,bid,floor,numCols,ttsEnabled: false));
     } else if ((northCollision && southCollision)) {

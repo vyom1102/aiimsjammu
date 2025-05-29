@@ -956,24 +956,24 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
     }
   }
 
-  IconData getIcon(String option) {
+  String getIcon(String option) {
     switch (option.toLowerCase()) {
       case 'washroom':
-        return Icons.wash_sharp;
+        return 'assets/washroomIcon.png';
       case 'cafeteria':
-        return Icons.local_cafe;
+        return 'assets/cafeteria.png';
       case 'drinking water':
-        return Icons.water_drop;
+        return 'assets/waterPoint.png';
       case 'atm':
-        return Icons.atm_sharp;
+        return 'assets/atmIcon.png';
       case 'entry':
-        return Icons.door_front_door_outlined;
+        return 'assets/entryExit.png';
       case 'lift':
-        return Icons.elevator;
+        return 'assets/liftIcon.png';
       case 'reception':
-        return Icons.desk_sharp;
+        return 'assets/receptionIcon.png';
       default:
-        return Icons.help_outline; // Return a default icon if no match is found
+        return ''; // Return a default icon if no match is found
     }
   }
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '/newSearchPage.dart';
 
 import '../DestinationSearchPage.dart';
 import '../SourceAndDestinationPage.dart';
@@ -10,7 +9,7 @@ class HomepageFilter extends StatefulWidget {
   final String svgPath;
   final String text;
   bool selected;
-  IconData icon;
+  String icon;
   final Function(bool selected) onSelect;
 
   HomepageFilter({
@@ -50,7 +49,7 @@ class _HomepageFilterState extends State<HomepageFilter> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => NewSearchPage(previousFilter: widget.text.toLowerCase(),voiceInputEnabled: false,))
+                  builder: (context) => DestinationSearchPage(previousFilter: widget.text,voiceInputEnabled: false,))
           ).then((value){
             widget.onClicked(value);
           });
@@ -60,7 +59,7 @@ class _HomepageFilterState extends State<HomepageFilter> {
           children: <Widget>[
             Container(
               margin: EdgeInsets.only(left: 4),
-              child: Icon(widget.icon,size: 18,),
+              child:  Image.asset(widget.icon, width:  18,height: 18, color: widget.selected? Colors.white: Colors.black,),
             ),
             Container(
               margin: EdgeInsets.only(left: 8, right: 4),

@@ -219,7 +219,7 @@ class _MainScreenState extends State<MainScreen> {
             heroTag: 'mainscreen',
 
             onPressed: (){
-              if(UserState.geoFenced){
+              if(true){
                 Navigator.push(
                   context,
                   MaterialPageRoute(

@@ -10,7 +10,7 @@ class DestinationPageChipsWidget extends StatefulWidget {
   final String svgPath;
   final String text;
   bool selected;
-  final IconData icon;
+  final String icon;
   final Function(bool selected) onSelect;
   final Function(String Text) onTap;
 
@@ -35,8 +35,7 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: widget.text,
-      toggled: widget.selected,
+      label: widget.text + (widget.selected?"selected":""),
       child: AnimatedContainer(
         margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 7),
         padding: EdgeInsets.all(8),
@@ -59,22 +58,21 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
             setState(() {
               widget.selected = !widget.selected;
             });
-            if(widget.selected){
-              widget.onTap(widget.text);
-              widget.onSelect(widget.selected);
-              widget.selected ? print("black") : print("white");
-            }else{
-              setState(() {
-                widget.onTap("");
-              });
-            }
+            widget.onTap(widget.text);
+            widget.onSelect(widget.selected);
+            widget.selected ? print("black") : print("white");
+            // Navigator.push(
+            //     context,
+            //     MaterialPageRoute(
+            //         builder: (context) => DestinationSearchPage(previousFilter: widget.text,))
+            // );
           },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Container(
                 margin: EdgeInsets.only(left: 4),
-                child: Icon(widget.icon, size: 18, color: widget.selected? Colors.white: Colors.black,),
+                child: Image.asset(widget.icon, width:  18,height: 18, color: widget.selected? Colors.white: Colors.black,),
               ),
               Semantics(
                 excludeSemantics: true,
@@ -93,21 +91,18 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
                   ),
                 ),
               ),
-              widget.selected? Semantics(
-                excludeSemantics: true,
-                child: InkWell(
-                  onTap: (){
-                    setState(() {
-                      widget.selected=!widget.selected;
-                      widget.onTap("");
-                    });
-                  },
-                  child: Container(
-                    margin: EdgeInsets.only(left: 4),
-                    child: Semantics(
-                        label: "Unselect ${widget.text}",
-                        child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,)),
-                  ),
+              widget.selected? InkWell(
+                onTap: (){
+                  setState(() {
+                    widget.selected=!widget.selected;
+                    widget.onTap("");
+                  });
+                },
+                child: Container(
+                  margin: EdgeInsets.only(left: 4),
+                  child: Semantics(
+                    label: "Unselect ${widget.text}",
+                      child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,)),
                 ),
               ) : Container()
 
