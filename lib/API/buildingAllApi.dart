@@ -23,7 +23,7 @@ class buildingAllApi {
   static outdoormodel? outBuildingData = null;
   static String selectedID="";
   static String selectedBuildingID="";
-  static String selectedVenue="AIIMSBhopal";
+  static String selectedVenue="AIIMS Bhopal";
   static Map<String,g.LatLng> allBuildingID = {};
 
   static String outdoorID = "";
@@ -121,16 +121,20 @@ class buildingAllApi {
   }
 
   static void findBuildings(List<buildingAll> allBuildings){
+    print("allBuildings $allBuildings");
     List<buildingAll> buildings = [];
     for (var building in allBuildings) {
       if(building.venueName == selectedVenue){
         buildings.add(building);
       }
     }
+    print("buildings $buildings");
+
     for (var element in buildings) {
       g.LatLng kk = g.LatLng(element.coordinates![0], element.coordinates![1]);
       allBuildingID[element.sId!] = kk;
     }
+    print("allBuildingIDallBuildingID $allBuildingID");
     selectedID = allBuildingID.keys.first;
     selectedBuildingID = allBuildingID.keys.first;
   }
@@ -139,6 +143,9 @@ class buildingAllApi {
   static Future<void> setStoredString(String value) async {
     selectedID = value;
     return;
+
+
+
   }
 
   // Method to get the stored string
