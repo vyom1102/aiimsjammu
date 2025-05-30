@@ -996,44 +996,44 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                 ),
               ),
             ):Container(),
-            searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
-
-            InkWell(
-              onTap: (){
-              Navigator.push(context,  MaterialPageRoute(
-                builder: (BuildContext context) => SelectOnMapScreen(poly: SingletonFunctionController.building.polyLineData!, patchData: SingletonFunctionController
-                    .building.patchData[buildingAllApi
-                    .getStoredString()]!, destiPoint: (widget.hintText=="Source location")?false:true,)
-              ),).then((value){
-                print("poly id:::${value}");
-                Navigator.pop(context,value);
-              });
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(),
-                ),
-                margin: EdgeInsets.only(top:24,left: 17,right: 17,bottom: 8),
-                child: Column(
-                  children:[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        SizedBox(width: 16,),
-                        Icon(Icons.map_rounded,size: 25,),
-                        SizedBox(width: 24,),
-                        Text(style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xff000000),
-                        ),(widget.hintText=="Source location" || widget.hintText.isEmpty)?"Select Source On Map":"Select Destination On Map")
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            // searchHintString.toLowerCase().contains("source")?Divider(thickness: 6,color: Color(0xfff2f3f5),):Container(),
+            //
+            // InkWell(
+            //   onTap: (){
+            //   Navigator.push(context,  MaterialPageRoute(
+            //     builder: (BuildContext context) => SelectOnMapScreen(poly: SingletonFunctionController.building.polyLineData!, patchData: SingletonFunctionController
+            //         .building.patchData[buildingAllApi
+            //         .getStoredString()]!, destiPoint: (widget.hintText=="Source location")?false:true,)
+            //   ),).then((value){
+            //     print("poly id:::${value}");
+            //     Navigator.pop(context,value);
+            //   });
+            //   },
+            //   child: Container(
+            //     decoration: BoxDecoration(
+            //       border: Border.all(),
+            //     ),
+            //     margin: EdgeInsets.only(top:24,left: 17,right: 17,bottom: 8),
+            //     child: Column(
+            //       children:[
+            //         Row(
+            //           mainAxisAlignment: MainAxisAlignment.start,
+            //           children: [
+            //             SizedBox(width: 16,),
+            //             Icon(Icons.map_rounded,size: 25,),
+            //             SizedBox(width: 24,),
+            //             Text(style: const TextStyle(
+            //               fontFamily: "Roboto",
+            //               fontSize: 16,
+            //               fontWeight: FontWeight.w400,
+            //               color: Color(0xff000000),
+            //             ),(widget.hintText=="Source location" || widget.hintText.isEmpty)?"Select Source On Map":"Select Destination On Map")
+            //           ],
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
             Semantics(
               label: "Filter Section",
               header: true,
