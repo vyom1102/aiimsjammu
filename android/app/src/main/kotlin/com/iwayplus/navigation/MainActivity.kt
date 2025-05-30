@@ -199,55 +199,40 @@ class MainActivity : FlutterActivity() {
 
 
     private fun startScan() {
-        if (isScanning) {
-            Log.d("BluetoothScan", "Scan already in progress.")
-            return
-        }
+        if (!isScanning) {
+            if (!bluetoothAdapter.isEnabled) {
+                Log.d("BluetoothScan--", "Bluetooth is OFF")
+                return
+            } else {
+                Log.d("BluetoothScan--", "Bluetooth is ON")
+            }
 
-        if (!bluetoothAdapter.isEnabled) {
-            Toast.makeText(this, "Bluetooth is not enabled", Toast.LENGTH_SHORT).show()
-            Log.d("BluetoothScan", "Bluetooth is OFF")
-            return
-        }
+            if (!bluetoothAdapter.isEnabled) {
+                Toast.makeText(this, "Bluetooth is not enabled", Toast.LENGTH_SHORT).show()
+                return
+            }
 
-        // Permissions check
-        val requiredPermissions = mutableListOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.BLUETOOTH_SCAN,
-            Manifest.permission.BLUETOOTH_CONNECT
-        )
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                Log.d("grant permission","Bluetooth permission")
+                requestPermissions()
+//                return
+            }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            requiredPermissions.add(Manifest.permission.BLUETOOTH_ADVERTISE)
-        }
+//            val scanSettings = ScanSettings.Builder()
+//                .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
+//                .setLegacy(false)
+//                .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
+//                .setNumOfMatches(ScanSettings.MATCH_NUM_MAX_ADVERTISEMENT)
+//                .setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED)
+//                .setReportDelay(0)
+//                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+//                .build()
 
-        val missingPermissions = requiredPermissions.filter {
-            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
-        }
 
-        if (missingPermissions.isNotEmpty()) {
-            ActivityCompat.requestPermissions(this, missingPermissions.toTypedArray(), 101)
-            Log.d("BluetoothScan", "Requesting missing permissions.")
-            return
-        }
-
-        if (!::bluetoothLeScanner.isInitialized) {
-            bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
-        }
-
-        val scanSettings = ScanSettings.Builder()
-            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-            .build()
-
-        try {
+            Log.d("BluetoothScan", "Starting BLE scan...")
             bluetoothLeScanner.startScan(scanCallback)
+
             isScanning = true
-            Log.d("BluetoothScan", "BLE scanning started.")
-        } catch (e: SecurityException) {
-            Log.e("BluetoothScan", "Scan failed due to missing permissions: ${e.message}")
-            Toast.makeText(this, "Permission denied for scanning", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            Log.e("BluetoothScan", "Scan failed: ${e.message}")
         }
     }
 
