@@ -27,6 +27,7 @@ import 'AiimsJammu/Widgets/WebSocketDriver.dart';
 import 'DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/BuildingByVenueAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
 import 'DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
 import 'DATABASE/DATABASEMODEL/GlobalAnnotationAPIModel.dart';
@@ -77,6 +78,8 @@ Future<void> main() async {
   await Hive.openBox<LocalNotificationAPIDatabaseModel>('LocalNotificationAPIDatabaseModel');
   Hive.registerAdapter(GlobalAnnotationAPIModelAdapter());
   await Hive.openBox<GlobalAnnotationAPIModel>('GlobalAnnotationAPIModelFile');
+  Hive.registerAdapter(BuildingByVenueAPIModelAdapter());
+  await Hive.openBox<BuildingByVenueAPIModel>('BuildingByVenueModelFile');
 
   await interactionManager.initialize();
   await sessionManager.initialize();
