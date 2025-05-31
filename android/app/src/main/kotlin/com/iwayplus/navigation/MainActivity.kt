@@ -1,6 +1,5 @@
 package com.iwayplus.aiimsjammu
 
-
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -26,6 +25,7 @@ import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
 import android.annotation.SuppressLint
+import android.bluetooth.le.ScanRecord
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -49,9 +49,9 @@ class MainActivity : FlutterActivity() {
             val rssi = result.rssi
 
             if (ActivityCompat.checkSelfPermission(
-                    this@MainActivity,
-                    Manifest.permission.BLUETOOTH_CONNECT
-                ) != PackageManager.PERMISSION_GRANTED
+                            this@MainActivity,
+                            Manifest.permission.BLUETOOTH_CONNECT
+                    ) != PackageManager.PERMISSION_GRANTED
             ) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
@@ -101,7 +101,7 @@ class MainActivity : FlutterActivity() {
                 Raw Data: $rawData""".trimIndent()
 
 
-//                Log.d("BluetoothScan--", "New Device Found: $deviceDetails")
+                // Log.d("BluetoothScan--", "New Device Found: $deviceDetails")
                 eventSink?.success(deviceDetails)
             }
         }
@@ -117,7 +117,7 @@ class MainActivity : FlutterActivity() {
             val action: String? = intent.action
             if (BluetoothDevice.ACTION_FOUND == action) {
                 val device: BluetoothDevice? =
-                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                 device?.let {
                     val deviceDetails = "Device Name: ${"Unknown"}\nAddress: ${it.address}"
                     if (!deviceDetailsList.contains(deviceDetails)) {
@@ -170,71 +170,87 @@ class MainActivity : FlutterActivity() {
 
         // Bluetooth EventChannel
         EventChannel(flutterEngine.dartExecutor.binaryMessenger, EVENT_CHANNEL).setStreamHandler(
-            object : EventChannel.StreamHandler {
-                override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                    eventSink = events
-                }
+                object : EventChannel.StreamHandler {
+                    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                        eventSink = events
+                    }
 
-                override fun onCancel(arguments: Any?) {
-                    eventSink = null
+                    override fun onCancel(arguments: Any?) {
+                        eventSink = null
+                    }
                 }
-            }
         )
 
         // GPS EventChannel
         EventChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setStreamHandler(
-            object : EventChannel.StreamHandler {
-                override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                    Log.d("startLocationUpdates", "starting");
-                    GpseventSink = events
-                    startLocationUpdates()
-                }
+                object : EventChannel.StreamHandler {
+                    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                        // Log.d("startLocationUpdates", "starting");
+                        GpseventSink = events
+                        startLocationUpdates()
+                    }
 
-                override fun onCancel(arguments: Any?) {
-                    stopLocationUpdates()
+                    override fun onCancel(arguments: Any?) {
+                        stopLocationUpdates()
+                    }
                 }
-            }
         )
     }
 
 
     private fun startScan() {
-        if (!isScanning) {
-            if (!bluetoothAdapter.isEnabled) {
-                Log.d("BluetoothScan--", "Bluetooth is OFF")
-                return
-            } else {
-                Log.d("BluetoothScan--", "Bluetooth is ON")
-            }
+        if (isScanning) {
+            Log.d("BluetoothScan", "Scan already in progress.")
+            return
+        }
 
-            if (!bluetoothAdapter.isEnabled) {
-                Toast.makeText(this, "Bluetooth is not enabled", Toast.LENGTH_SHORT).show()
-                return
-            }
+        if (!bluetoothAdapter.isEnabled) {
+            Toast.makeText(this, "Bluetooth is not enabled", Toast.LENGTH_SHORT).show()
+            Log.d("BluetoothScan", "Bluetooth is OFF")
+            return
+        }
 
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-                Log.d("grant permission","Bluetooth permission")
-                requestPermissions()
-//                return
-            }
+        // Permissions check
+        val requiredPermissions = mutableListOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT
+        )
 
-//            val scanSettings = ScanSettings.Builder()
-//                .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
-//                .setLegacy(false)
-//                .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
-//                .setNumOfMatches(ScanSettings.MATCH_NUM_MAX_ADVERTISEMENT)
-//                .setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED)
-//                .setReportDelay(0)
-//                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-//                .build()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            requiredPermissions.add(Manifest.permission.BLUETOOTH_ADVERTISE)
+        }
 
+        val missingPermissions = requiredPermissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
 
-            Log.d("BluetoothScan", "Starting BLE scan...")
+        if (missingPermissions.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, missingPermissions.toTypedArray(), 101)
+            Log.d("BluetoothScan", "Requesting missing permissions.")
+            return
+        }
+
+        if (!::bluetoothLeScanner.isInitialized) {
+            bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+        }
+
+        val scanSettings = ScanSettings.Builder()
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                .build()
+
+        try {
             bluetoothLeScanner.startScan(scanCallback)
-
             isScanning = true
+            Log.d("BluetoothScan", "BLE scanning started.")
+        } catch (e: SecurityException) {
+            Log.e("BluetoothScan", "Scan failed due to missing permissions: ${e.message}")
+            Toast.makeText(this, "Permission denied for scanning", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Log.e("BluetoothScan", "Scan failed: ${e.message}")
         }
     }
+
 
     private fun stopScan() {
         try {
@@ -260,9 +276,9 @@ class MainActivity : FlutterActivity() {
 
     private fun hasPermissions(): Boolean {
         val permissions = mutableListOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.BLUETOOTH_SCAN,
-            Manifest.permission.BLUETOOTH_CONNECT
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT
         )
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -276,9 +292,9 @@ class MainActivity : FlutterActivity() {
 
     private fun requestPermissions() {
         val permissions = mutableListOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.BLUETOOTH_SCAN,
-            Manifest.permission.BLUETOOTH_CONNECT
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT
         )
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -290,7 +306,12 @@ class MainActivity : FlutterActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(discoveryReceiver)
+        try {
+            unregisterReceiver(discoveryReceiver)
+        } catch (e: IllegalArgumentException) {
+            Log.w("MainActivity", "Receiver not registered: ${e.message}")
+        }
+
     }
 
 
@@ -321,19 +342,19 @@ class MainActivity : FlutterActivity() {
 
         if (isGpsEnabled) {
             locationManager?.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER,
-                1000, // Time interval in milliseconds
-                0f,  // Distance interval in meters
-                locationListener
+                    LocationManager.GPS_PROVIDER,
+                    1000, // Time interval in milliseconds
+                    0f,  // Distance interval in meters
+                    locationListener
             )
         }
 
         if (isNetworkEnabled) {
             locationManager?.requestLocationUpdates(
-                LocationManager.NETWORK_PROVIDER,
-                1000,
-                0f,
-                locationListener
+                    LocationManager.NETWORK_PROVIDER,
+                    1000,
+                    0f,
+                    locationListener
             )
         }
     }
@@ -342,22 +363,22 @@ class MainActivity : FlutterActivity() {
     // Persistent LocationListener to prevent garbage collection
     private val locationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
-            Log.d("GPS", "New location received: $location")
+//            Log.d("GPS", "New location received: $location")
             val data = mapOf(
-                "latitude" to location.latitude,
-                "longitude" to location.longitude,
-                "accuracy" to location.accuracy,
+                    "latitude" to location.latitude,
+                    "longitude" to location.longitude,
+                    "accuracy" to location.accuracy,
             )
             GpseventSink?.success(data)
         }
 
         override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
         override fun onProviderEnabled(provider: String) {
-            Log.d("GPS", "GPS Provider enabled")
+//            Log.d("GPS", "GPS Provider enabled")
         }
 
         override fun onProviderDisabled(provider: String) {
-            Log.d("GPS", "GPS Provider disabled")
+//            Log.d("GPS", "GPS Provider disabled")
             GpseventSink?.error("GPS_DISABLED", "GPS provider is disabled", null)
         }
     }

@@ -103,8 +103,8 @@ class BluetoothScanAndroidClass{
 
           EM_RSSI_VALUES[deviceDetails.DeviceAddress]!.add(int.parse(deviceDetails.DeviceRssi));
           EM_RSSI_WEIGHT[deviceDetails.DeviceAddress]!.add(getWeight(getBinNumber(int.parse(deviceDetails.DeviceRssi).abs())));
-          print("EM_RSSI_VALUES");
-          print(EM_RSSI_VALUES);
+          // print("EM_RSSI_VALUES");
+          // print(EM_RSSI_VALUES);
 
 
           if (EM_RSSI_VALUES[deviceDetails.DeviceAddress]!.length > 7) {
@@ -161,7 +161,7 @@ class BluetoothScanAndroidClass{
   }
 
   Future<String> listenToScanInitialLocalization(HashMap<String, beacon> apibeaconmap) async {
-    print("listenToScanInitialLocalization");
+    // print("listenToScanInitialLocalization");
     Map<String, String> IL_DEVICE_NAME = {};
     Map<String, List<int>> IL_RSSI_VALUES = {};
     Map<String, List<double>> IL_RSSI_WEIGHT = {};
@@ -170,18 +170,18 @@ class BluetoothScanAndroidClass{
 
     String closestDeviceDetails = "";
 
-    print("Starting scan...");
+    // print("Starting scan...");
     startScan(); // Ensure this function is implemented and starts the Bluetooth scan
 
     StreamSubscription? subscription;
     try {
       // Listen to the stream continuously
       subscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
-        print("Received device detail: $deviceDetail");
+        // print("Received device detail: $deviceDetail");
 
         BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
         if (apibeaconmap.containsKey(deviceDetails.DeviceName)) {
-          print("Device found in apibeaconmap: ${deviceDetails.DeviceName}");
+          // print("Device found in apibeaconmap: ${deviceDetails.DeviceName}");
           String deviceMacId = deviceDetails.DeviceAddress;
           IL_DEVICE_NAME[deviceDetails.DeviceAddress] = deviceDetails.DeviceName;
 
@@ -201,14 +201,14 @@ class BluetoothScanAndroidClass{
 
     await Future.delayed(Duration(seconds: 6));
 
-    print("Stopping scan...");
+    // print("Stopping scan...");
     await subscription?.cancel();
     stopScan();
 
-    print("Processing scan results...");
-    print("Device Names: $IL_DEVICE_NAME");
-    print("RSSI Values: $IL_RSSI_VALUES");
-    print("RSSI Weights: $IL_RSSI_WEIGHT");
+    // print("Processing scan results...");
+    // print("Device Names: $IL_DEVICE_NAME");
+    // print("RSSI Values: $IL_RSSI_VALUES");
+    // print("RSSI Weights: $IL_RSSI_WEIGHT");
 
     IL_RSSI_AVERAGE = calculateAverageFromRssi(IL_RSSI_VALUES, IL_DEVICE_NAME, IL_RSSI_WEIGHT);
     closestDeviceDetails = findLowestRssiDevice(IL_RSSI_AVERAGE);
@@ -218,7 +218,7 @@ class BluetoothScanAndroidClass{
       SingletonFunctionController.SC_IL_RSSI_AVERAGE = IL_RSSI_AVERAGE;
     }
 
-    print("Closest Device Details: $closestDeviceDetails");
+    // print("Closest Device Details: $closestDeviceDetails");
     // if(closestDeviceDetails != "No devices found"){
     //
     // }
@@ -246,9 +246,9 @@ class BluetoothScanAndroidClass{
   late Timer cleanupTimer;
   Map<String, DateTime> lastSeenTimestamps = {};
   void startCleanupTimer(){
-    print("proofstartCleanupTimer");
+    // print("proofstartCleanupTimer");
     cleanupTimer = Timer.periodic(Duration(seconds: 2), (timer)  {
-      print("startCleanupTimer");
+      // print("startCleanupTimer");
       DateTime currTime = DateTime.now();
 
       lastSeenTimestamps.forEach((key,value){
@@ -261,15 +261,15 @@ class BluetoothScanAndroidClass{
           }
         }
       });
-      print(rssiValues);
-      print(rssiWeight);
+      // print(rssiValues);
+      // print(rssiWeight);
       candorAverage = calculateCandorAverage(rssiWeight);
-      print("candorAverage$candorAverage");
+      // print("candorAverage$candorAverage");
       Map<String, double> sumMap = calculateAverage();
       // Sort the map by value (e.g., strongest signal first)
       Map<String, double> sortedSumMap = sortMapByValue(sumMap);
       sumMapCallBack = sortedSumMap;
-      print("SortedSumMap: $sortedSumMap");
+      // print("SortedSumMap: $sortedSumMap");
     });
   }
 
@@ -279,10 +279,10 @@ class BluetoothScanAndroidClass{
     String deviceMacId = "";
     // Start listening to the stream continuously
     _scanSubscription = eventChannel.receiveBroadcastStream().listen((deviceDetail){
-      print("DEVICESSS $deviceDetail");
+      // print("DEVICESSS $deviceDetail");
       BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
       String dataaa = parseLog(deviceDetail);
-      print("dataaa = ${deviceDetails.rawData}");
+      // print("dataaa = ${deviceDetails.rawData}");
 
       wsocket.message["AppInitialization"]["nearByDevices"][deviceDetails.rawData] = deviceDetails.DeviceRssi;
       if(apibeaconmap.containsKey(deviceDetails.DeviceName)) {
@@ -325,9 +325,9 @@ class BluetoothScanAndroidClass{
 
 
   Map<String, List<double>> giveSumMapCallBack(){
-    print("newList");
+    // print("newList");
 
-    print(newList);
+    // print(newList);
     return newList;
   }
 
@@ -356,9 +356,9 @@ class BluetoothScanAndroidClass{
         // Update the newList for debugging or other purposes
         newList[deviceList[address]!] = rssiList;
 
-        print("deviceList[address]");
-        print(average);
-        print(newList);
+        // print("deviceList[address]");
+        // print(average);
+        // print(newList);
 
         // Add the average to the map
         averagedRssiValues[deviceList[address]!] = average;
@@ -431,8 +431,8 @@ class BluetoothScanAndroidClass{
     }
     // print("Name: $name");
     // print("Address: $address");
-    print("Manufacturer Data: $manufacturerData");
-    print("Service Data: $serviceData");
+    // print("Manufacturer Data: $manufacturerData");
+    // print("Service Data: $serviceData");
     return serviceData??"";
   }
 
@@ -456,8 +456,8 @@ class BluetoothScanAndroidClass{
       }
     });
     closestRSSI = lowestValue.toString();
-    print("findLowestRssiDevice");
-    print(lowestValue);
+    // print("findLowestRssiDevice");
+    // print(lowestValue);
 
     return lowestKey ?? "No devices found";
   }
@@ -465,8 +465,8 @@ class BluetoothScanAndroidClass{
   String EM_findLowestRssiDevice(Map<String, double> rssiAverage) {
     String? lowestKey;
     double? lowestValue = 3;
-    print("rssiAverage");
-    print(rssiAverage);
+    // print("rssiAverage");
+    // print(rssiAverage);
     rssiAverage.forEach((key, value) {
 
       if (lowestValue == null || value > lowestValue!) {
@@ -475,9 +475,9 @@ class BluetoothScanAndroidClass{
       }
     });
     closestRSSI = lowestValue.toString();
-    print("findLowestRssiDevice");
-    print(lowestValue);
-    print(lowestKey);
+    // print("findLowestRssiDevice");
+    // print(lowestValue);
+    // print(lowestKey);
 
     return lowestKey ?? "No devices found";
   }

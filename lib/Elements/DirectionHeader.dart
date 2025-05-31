@@ -795,6 +795,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         widget.direction = userdirection;
       }
 
+      widget.direction = userdirection;
+
       int index = widget.user.Cellpath.indexOf(nextTurn);
       //
       double a = 0;
@@ -831,8 +833,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         if (oldWidget.direction == "Straight") {
           _speakTimer?.cancel(); // Cancel any previous timer
           _turnSpoken = false; // Reset flag
-          if(turnPoints
-              .contains(widget.user.Cellpath[widget.user.pathobj.index])){
+          if(turnPoints.contains(widget.user.Cellpath[widget.user.pathobj.index])){
             Vibration.vibrate();
             speak(
                 convertTolng(
@@ -866,7 +867,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           }
         }
         else if (widget.direction == "Straight") {
-          if (!_turnSpoken) return; // Skip "Straight" if "Turn" was never spoken
+          if (!turnPoints.contains(widget.user.Cellpath[widget.user.pathobj.index]) && !_turnSpoken) return; // Skip "Straight" if "Turn" was never spoken
 
           Vibration.vibrate();
           UserState.isTurn = false;
