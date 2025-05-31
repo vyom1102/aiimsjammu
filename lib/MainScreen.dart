@@ -157,14 +157,7 @@ class _MainScreenState extends State<MainScreen> {
         }
       },
       child: Scaffold(
-        body: Stack(children: [screens[index],
-        Center(
-          child: Container(
-            height: 50,
-              width: 400,
-              color: Colors.red,
-              child: Text(buildingAllApi.allBuildingID.toString())),
-        )]),
+        body: screens[index],
         bottomNavigationBar: NavigationBarTheme(
           data: NavigationBarThemeData(
             indicatorColor: Colors.transparent,

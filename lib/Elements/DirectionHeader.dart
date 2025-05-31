@@ -701,6 +701,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     return "";
   }
 
+  Timer? _speakTimer;
+  bool _turnSpoken = false;
   @override
   void didUpdateWidget(DirectionHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -827,36 +829,57 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
       if (oldWidget.direction != widget.direction) {
         if (oldWidget.direction == "Straight") {
-          Vibration.vibrate();
+          _speakTimer?.cancel(); // Cancel any previous timer
+          _turnSpoken = false; // Reset flag
+          if(turnPoints
+              .contains(widget.user.Cellpath[widget.user.pathobj.index])){
+            Vibration.vibrate();
+            speak(
+                convertTolng(
+                    "Turn ${LocaleData.getProperty5(widget.direction, context)}",
+                    _currentLocale,
+                    widget.direction,
+                    "",
+                    0,
+                    ""),
+                _currentLocale,
+                prevpause: true);
+          }else{
+            _speakTimer = Timer(Duration(seconds: 2), () {
+              if (mounted && oldWidget.direction == widget.direction) {
+                return; // Direction changed back, do not proceed
+              }
+              _turnSpoken = true; // Mark that turn instruction was spoken
 
-          // if(nextTurn == turnPoints.last){
-          //   speak("${widget.direction} ${widget.distance} meter then you will reach ${widget.user.pathobj.destinationName}");
-          // }else{
-          //   speak("${widget.direction} ${widget.distance} meter");
-          // }
-
-          speak(
-              convertTolng(
-                  "Turn ${LocaleData.getProperty5(widget.direction, context)}",
+              Vibration.vibrate();
+              speak(
+                  convertTolng(
+                      "Turn ${LocaleData.getProperty5(widget.direction, context)}",
+                      _currentLocale,
+                      widget.direction,
+                      "",
+                      0,
+                      ""),
                   _currentLocale,
-                  widget.direction,
-                  "",
-                  0,
-                  ""),
-              _currentLocale,
-              prevpause: true);
+                  prevpause: true);
+            });
+          }
+        }
+        else if (widget.direction == "Straight") {
+          if (!_turnSpoken) return; // Skip "Straight" if "Turn" was never spoken
 
-          //speak("Turn ${widget.direction}, and Go Straight ${(widget.distance/UserState.stepSize).ceil()} steps");
-        } else if (widget.direction == "Straight") {
           Vibration.vibrate();
           UserState.isTurn = false;
           if (!UserState.ttsOnlyTurns) {
             speak(
-                "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context)}}",
-                _currentLocale,
-                prevpause: true);
+              "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context)}",
+              _currentLocale,
+              prevpause: true,
+            );
           }
         }
+
+
       }
 
       if (nextTurn == turnPoints.last && widget.distance == 7) {
