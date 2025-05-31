@@ -42,6 +42,7 @@ class SingletonFunctionController {
     return true;
   }
   Future<void> executeFunction(Map<String,LatLng> allBuildingID) async {
+
     if (_isRunning) {
       // Wait for the currently running instance to finish
       return _completer?.future;
@@ -52,8 +53,6 @@ class SingletonFunctionController {
     _completer = Completer<void>();
 
 
-    var beaconData = await beaconapi().fetchBeaconData("65d9cacfdb333f8945861f0f");
-    building.beacondata = beaconData;
     print("building.beacondata.length");
     try {
       // Perform your task here

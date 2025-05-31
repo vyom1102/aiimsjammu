@@ -84,7 +84,7 @@ class BLueToothClass {
     wsocket.message["AppInitialization"]["bleScanResults"] = {};
     startbin();
     FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
-
+    print("apibeaconmap $apibeaconmap");
     FlutterBluePlus.scanResults.listen((results) async {
       for (ScanResult result in results) {
         if(result.device.platformName.length > 2){

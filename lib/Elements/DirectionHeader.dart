@@ -1287,19 +1287,19 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             //     ),
             //   ),
             // ),
-            // Container(
-            //   width: 300,
-            //   height: 100,
-            //   child: SingleChildScrollView(
-            //     scrollDirection: Axis.horizontal,
-            //     child: Column(
-            //       crossAxisAlignment: CrossAxisAlignment.start,
-            //       children: [
-            //         Text(sumMap.toString()),
-            //       ],
-            //     ),
-            //   ),
-            // ),
+            Container(
+              width: 300,
+              height: 100,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(sumMapAvg.toString()),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),

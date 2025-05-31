@@ -163,10 +163,9 @@ class _HomePageState extends State<HomePage> {
     versionApiCall();
     // fetchAllLandmarkData();
     isUserValid();
-    callbackFunc();
+    // callbackFunc();
     requestNotificationPermission();
     // dataDownload();
-    SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID);
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
 
@@ -574,6 +573,7 @@ class _HomePageState extends State<HomePage> {
     var signInDatabaseBox = Hive.box('SignInDatabase');
     if (signInDatabaseBox.containsKey("accessToken")) {
        var data = await Buildingbyvenueapi.findBuildings();
+       SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID);
        return data;
     }else{
       return null;
