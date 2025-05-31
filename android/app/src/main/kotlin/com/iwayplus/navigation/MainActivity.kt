@@ -63,6 +63,7 @@ class MainActivity : FlutterActivity() {
                 return
             }
 
+
             // Extract device name
             if (device.name != null && device.name.contains("IW")) {
 //                Log.d("BluetoothScan","Device Info $result");
@@ -101,7 +102,7 @@ class MainActivity : FlutterActivity() {
                 Raw Data: $rawData""".trimIndent()
 
 
-                // Log.d("BluetoothScan--", "New Device Found: $deviceDetails")
+                 Log.d("BluetoothScan--", "New Device Found: $deviceDetails")
                 eventSink?.success(deviceDetails)
             }
         }
@@ -228,7 +229,7 @@ class MainActivity : FlutterActivity() {
         if (missingPermissions.isNotEmpty()) {
             ActivityCompat.requestPermissions(this, missingPermissions.toTypedArray(), 101)
             Log.d("BluetoothScan", "Requesting missing permissions.")
-            return
+//            return
         }
 
         if (!::bluetoothLeScanner.isInitialized) {
