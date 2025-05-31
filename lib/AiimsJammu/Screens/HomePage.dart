@@ -5,6 +5,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter_platform_interface/src/types/location.dart';
 import 'package:hive/hive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/BuildingLandmarks.dart';
@@ -569,10 +570,13 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> loadBuildings() async {
+  Future<Map<String, LatLng>?> loadBuildings() async {
     var signInDatabaseBox = Hive.box('SignInDatabase');
     if (signInDatabaseBox.containsKey("accessToken")) {
-      Buildingbyvenueapi.findBuildings();
+       var data = await Buildingbyvenueapi.findBuildings();
+       return data;
+    }else{
+      return null;
     }
   }
 

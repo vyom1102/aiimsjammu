@@ -52,6 +52,8 @@ class land {
       for (var landmark in landmarksList) {
         if (landmark.properties!.polyId != null) {
           landmarksMap![landmark.properties!.polyId!] = landmark;
+        }else{
+          landmarksMap![landmark.sId!] = landmark; // Add to the map using polyID as the key
         }
         if (landmark.name != null) {
           landmarkNames ??= [];

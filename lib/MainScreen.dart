@@ -23,6 +23,7 @@ import '/VenueSelectionScreen.dart';
 import '/Navigation.dart';
 
 import './AiimsJammu/Screens/HomePage.dart';
+import 'API/buildingAllApi.dart';
 import 'AiimsJammu/Screens/ProfilePage.dart';
 import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
@@ -156,7 +157,14 @@ class _MainScreenState extends State<MainScreen> {
         }
       },
       child: Scaffold(
-        body: screens[index],
+        body: Stack(children: [screens[index],
+        Center(
+          child: Container(
+            height: 50,
+              width: 400,
+              color: Colors.red,
+              child: Text(buildingAllApi.allBuildingID.toString())),
+        )]),
         bottomNavigationBar: NavigationBarTheme(
           data: NavigationBarThemeData(
             indicatorColor: Colors.transparent,

@@ -65,12 +65,12 @@ class Buildingbyvenueapi {
     }
   }
 
-  static Future<void> findBuildings() async {
+  static Future<Map<String, g.LatLng>?> findBuildings() async {
       List<Buildingbyvenue> allBuildings = await Buildingbyvenueapi().fetchBuildingIDS(buildingAllApi.selectedVenue).timeout(const Duration(seconds: 5), onTimeout: () {
         print("Timeout: Failed to fetch building IDS within 5 seconds");
         return []; // Return an empty list on timeout
       });
-      if (allBuildings.isEmpty) return; // Exit if no buildings fetched
+      if (allBuildings.isEmpty) return null; // Exit if no buildings fetched
       String? selectedID;
       String? selectedBuildingID;
       Map<String, g.LatLng> allBuildingID = {};
@@ -93,9 +93,11 @@ class Buildingbyvenueapi {
         buildingAllApi.selectedBuildingID = selectedBuildingID;
         buildingAllApi.allBuildingID = allBuildingID;
         print("Success to fetch building IDS: ${buildingAllApi.allBuildingID}");
+        return allBuildingID;
       }else{
         print("Failed to fetch building IDS: selectedID $selectedID   selectedBuildingID $selectedBuildingID   allBuildingID ${allBuildingID.length}");
       }
+      return null;
 
   }
 }

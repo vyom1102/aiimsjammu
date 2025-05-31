@@ -118,7 +118,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     setState(() {
       searchHintString = widget.hintText;
     });
-    loadLandmarkData();
 
 
     // fetchRecents();
@@ -374,18 +373,19 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   }
 
   void fetchandBuild() async {
-    await fetchlist();
-    setState(() {
-      if (_controller.text.isNotEmpty) {
-        search(_controller.text);
-      } else {
-        // print("Filter cleared");
-        topSearchesFunc();
-        loadLandmarkData();
-        searchResults = [];
-        searcCategoryhResults = [];
-        vall = -1;
-      }
+    await fetchlist().then((value){
+      setState(() {
+        if (_controller.text.isNotEmpty) {
+          search(_controller.text);
+        } else {
+          // print("Filter cleared");
+          topSearchesFunc();
+          loadLandmarkData();
+          searchResults = [];
+          searcCategoryhResults = [];
+          vall = -1;
+        }
+      });
     });
   }
 
@@ -437,7 +437,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
   bool isUpdated=false;
   Future<void> loadLandmarkData() async {
-    try {
+    // try {
       print("entered here ${landmarkData.landmarksMap}");
       await Future.forEach(
           landmarkData.landmarksMap!.entries,(MapEntry keyValue) async {
@@ -471,9 +471,9 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       setState(() {
         isUpdated=true;
       });
-    }catch(e){
-      print("error in updating liist ");
-    }
+    // }catch(e){
+    //   print("error in updating liist ");
+    // }
     setState(() {
       isUpdated=false;
     });

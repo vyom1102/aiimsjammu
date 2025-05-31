@@ -4312,8 +4312,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     } else {
       print("apicalls testing 10 ${widget.directLandID}");
       //got here using a destination qr
-      await localizeUser(speakTTS: false,providePinSelection: false);
       await onLandmarkVenueClicked(widget.directLandID, DirectlyStartNavigation: false);
+      await localizeUser(speakTTS: false,providePinSelection: false);
       SingletonFunctionController.building.destinationQr = true;
       print("apicalls testing 11");
     }
