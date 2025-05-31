@@ -149,9 +149,6 @@ bool isLoading = false;
       });
       HelperClass.showToast("Invalid Username or Password");
     } else {
-      await buildingAllApi().fetchBuildingAllData().then((value){
-        buildingAllApi.findBuildings(value);
-      });
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(

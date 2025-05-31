@@ -365,92 +365,67 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   }
 
 
-  String? extractLandmarkId(String url) {
-    try {
-      // Using RegExp to find the landmark parameter
-      final RegExp regExp = RegExp(r'[?&]landmark=([^&#]*)');
-      final Match? match = regExp.firstMatch(url);
-
-      if (match != null && match.groupCount >= 1) {
-        return match.group(1);
-      }
-
-      return null; // Return null if no landmark ID is found
-    } catch (e) {
-      print('Error extracting landmark ID: $e');
-      return null;
-    }
-  }
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) async {
-      if (!_isDeepLinkHandled) {
-        _isDeepLinkHandled = true;
-        try {
-          final uri = Uri.parse(scanData.code ?? '');
-          String qrCode = uri.fragment.split('/').last;
-          print("qrCode");
-          print(qrCode);
+      if (_isDeepLinkHandled) return;
+      _isDeepLinkHandled = true;
 
-          bool isHandled = false;
-          bool isSecondHandled = false;
-          List<QRDataAPIModel>? qrData = await QRDataAPI().fetchQRData(buildingAllApi.allBuildingID.keys.toList());
+      try {
+        final scannedUrl = scanData.code ?? '';
+        print("Scanned QR code: $scannedUrl");
 
-          if (qrData != null) {
-            for (var e in qrData) {
-              if (e.code == qrCode) {
-                if (e.landmarkId == null) {
-                  HelperClass.launchURL(scanData.code!);
-                } else {
-                  PassLocationId(context, e.landmarkId!);
-                }
-                isHandled = true;
-                break;
-              }
-            }
-          }
-
-          if (!isHandled && uri.toString().contains("/aiimsj.com/landmark")) {
-            final b = uri.queryParameters['bid'];
-            final l = uri.queryParameters['landmark'];
-
-            if (b != null) bid = b;
-            if (l != null) landmarkID = l;
-            String? id = extractLandmarkId(uri.toString());
-            print(id);
-            print("bid  landmarkID  source $bid <-----> $landmarkID <------> $source");
-
-            await buildingAllApi().fetchBuildingAllData().then((value) async {
-              buildingAllApi.findBuildings(value);
-              print("deeplink $bid ${uri.queryParameters['bid']}");
-              isSecondHandled = true;
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => Navigation(directLandID: id ?? "")),
-                );
-
-            });
-          }else{
-            HelperClass.showToast("Invalid/Unassigned QR");
-            print("qr pop");
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        MainScreen(initialIndex: 0,)));
-          }
-
-
-          print(qrData);
-          print("qrScanner");
-          print(uri);
-          controller.stopCamera();
-        } catch (e) {
-          print('Error parsing URL: $e');
+        final landmarkId = extractLandmarkId(scannedUrl);
+        if (landmarkId != null) {
+          print("Navigating via landmarkId: $landmarkId");
+          PassLocationId(context, landmarkId);
+          return;
         }
+
+        final qrCode = getQrCodeFromUrl(scannedUrl);
+        print("CMS QR Code: $qrCode");
+
+        final qrDataList = await QRDataAPI().fetchQRData(buildingAllApi.allBuildingID.keys.toList());
+
+        for(int i = 0; i<qrDataList!.length; i++){
+          if(qrDataList[i].code == qrCode){
+            print("Navigating via CMS: ${qrDataList[i].landmarkId!}");
+            PassLocationId(context, qrDataList[i].landmarkId!);
+            return;
+          }
+        }
+
+        controller.stopCamera();
+        HelperClass.showToast("Invalid/Unassigned QR");
+        print("qr pop");
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MainScreen(initialIndex: 0,)));
+        return;
+      } catch (e) {
+        print('Error while handling QR scan: $e');
       }
     });
+  }
+
+  String? extractLandmarkId(String url) {
+    try {
+      final uri = Uri.parse(url);
+      final parts = uri.fragment.split('/');
+
+      final index = parts.indexOf('landmarkId');
+      if (index != -1 && index + 1 < parts.length) {
+        return parts[index + 1];
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  String getQrCodeFromUrl(String url) {
+    try {
+      final uri = Uri.parse(url);
+      return uri.fragment.split('/').last;
+    } catch (_) {
+      return '';
+    }
   }
 
   @override

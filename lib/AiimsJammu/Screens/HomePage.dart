@@ -32,6 +32,7 @@ import '../../API/PatchApi.dart';
 import '../../API/PolyLineApi.dart';
 import '../../API/RefreshTokenAPI.dart';
 import '../../API/UsergetAPI.dart';
+import '../../API/buildingByVenueAPI.dart';
 import '../../API/ladmarkApi.dart';
 import '../../API/outBuilding.dart';
 import '../../API/waypoint.dart';
@@ -145,6 +146,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    loadBuildings();
     getUserDataFromHive();
     fetchAndStoreBuildingIds();
     getDriverDetail();
@@ -564,6 +566,13 @@ class _HomePageState extends State<HomePage> {
     }
     if (nearestBeacon != "" && Building.apibeaconmap[nearestBeacon] != null) {
       SingletonFunctionController.currentBeacon = nearestBeacon;
+    }
+  }
+
+  Future<void> loadBuildings() async {
+    var signInDatabaseBox = Hive.box('SignInDatabase');
+    if (signInDatabaseBox.containsKey("accessToken")) {
+      Buildingbyvenueapi.findBuildings();
     }
   }
 
@@ -1384,6 +1393,7 @@ class _HomePageState extends State<HomePage> {
 
 
   Future<void> _refresh() async {
+    loadBuildings();
     var connectivityResult = await (Connectivity().checkConnectivity());
     print("Connectivity Result: $connectivityResult");
 

@@ -23,6 +23,7 @@ import '../../API/RefreshTokenAPI.dart';
 import '../../APIMODELS/landmark.dart';
 import '../../Elements/SearchpageCategoryResult.dart';
 import '../../Elements/SearchpageResults.dart';
+import '../../StringStorage.dart';
 import '../../config.dart';
 import '../../navigationTools.dart';
 import '../../selectOnMapScreen.dart';
@@ -206,45 +207,64 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
       }
     });
   }
-  void topSearchesFunc(){
+  Future<void> topSearchesFunc() async {
+    List<String> strings = await StringStorage.getStrings();
     setState(() {
-      topSearches.add(Container(margin:EdgeInsets.only(left: 26,top: 12,bottom: 12),child: Row(
-        children: [
-          Icon(Icons.search_sharp),
-          SizedBox(width: 26,),
-          Text(
-            "Top Searches",
-            style: const TextStyle(
-              fontFamily: "Roboto",
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: Color(0xff000000),
-              height: 24/18,
-            ),
-            textAlign: TextAlign.left,
-          )
-        ],
-      ),));
-      landmarkData.landmarksMap!.forEach((key, value) {
-        if (value.name != null && value.element!.subType != "beacon") {
-          if(value.priority!=null && value.priority!>1){
-            topCategory = true;
-            topSearches.add(SearchpageResults(
-              name: "${value.name}",
-              location:
-              "Floor ${value.floor}, ${value
-                  .buildingName}, ${value.venueName}",
-              onClicked: onVenueClicked,
-              ID: value.properties!.polyId!,
-              bid: value.buildingID!,
-              floor: value.floor!,
-              coordX: value.coordinateX!,
-              coordY: value.coordinateY!, accessible: '', distance: 0,
-            ));
-          }
+      try{
+        if(landmarkData.landmarksMap!=null){
+          landmarkData.landmarksMap!.forEach((key, value) {
+            if (value.name != null && strings.contains(value.properties?.polyId)) {
+              topSearches.add(SearchpageResults(
+                name: "${value.name}",
+                location:
+                "Floor ${value.floor}, ${value
+                    .buildingName}, ${value.venueName}",
+                onClicked: onVenueClicked,
+                ID: value.properties!.polyId!,
+                bid: value.buildingID!,
+                floor: value.floor!,
+                coordX: value.coordinateX!,
+                coordY: value.coordinateY!,
+                accessible:  value.properties!.wheelChairAccessibility??"", distance: 0,
+                icon: Icon(
+                  Icons.access_time,
+                  color: Color(0xff000000),
+                  size: 25,
+                ),
+              ));
+            }
+          });
 
+          landmarkData.landmarksMap!.forEach((key, value) {
+            if (value.name != null && value.element!.subType != "beacon" && !strings.contains(value.properties?.polyId)) {
+              if(value.priority!=null && value.priority!>1){
+                topSearches.add(SearchpageResults(
+                  name: "${value.name}",
+                  location:
+                  "Floor ${value.floor}, ${value
+                      .buildingName}, ${value.venueName}",
+                  onClicked: onVenueClicked,
+                  ID: value.properties!.polyId!,
+                  bid: value.buildingID!,
+                  floor: value.floor!,
+                  coordX: value.coordinateX!,
+                  coordY: value.coordinateY!,
+                  accessible:  value.properties!.wheelChairAccessibility??"", distance: 0,
+                  icon: Icon(
+                    Icons.star,
+                    color: Color(0xff000000),
+                    size: 25,
+                  ),
+                ));
+              }
+            }
+          });
         }
-      });
+
+      }catch(e){
+
+      }
+
     });
   }
   Future<void> fetchlist() async {
@@ -948,7 +968,8 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
   }
 
 
-  void onVenueClicked(String name, String location, String ID, String bid) {
+  Future<void> onVenueClicked(String name, String location, String ID, String bid) async {
+    await StringStorage.addString(ID);
     if(widget.frombottombar){
       PassLocationId(context, ID);
     }else if(!widget.frombottombar) {
@@ -1221,17 +1242,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
                           label: 'Related Search',
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Show topSearches only when both `!category` and `topCategory` are true
-                              if (!category && topCategory) ...topSearches,
-                              // Show searchCategoryResults only when `category` is true
-                              if (category) ...searcCategoryhResults,
-                              // Show searchResults and searchResults1 for the default case
-                              if (!topCategory && !category) ...[
-                                ...searchResults,
-                                ...searchResults1,
-                              ],
-                            ],
+                            children: (searcCategoryhResults.isEmpty && searchResults.isEmpty)?topSearches:((category)?searcCategoryhResults:searchResults),
                           ),
                         ),
                       ),

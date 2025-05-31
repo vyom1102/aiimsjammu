@@ -104,14 +104,6 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  var signInDatabaseBox = Hive.box('SignInDatabase');
-  if (signInDatabaseBox.containsKey("accessToken")) {
-    await buildingAllApi().fetchBuildingAllData().then((value){
-      buildingAllApi.findBuildings(value);
-    });
-  }
-
-
   WakelockPlus.enable();
 
   runApp(const MyApp());
