@@ -13,6 +13,7 @@ import 'package:iwaymaps/somethingWentWrong.dart';
 import 'package:iwaymaps/websocket/PushNotifications.dart';
 import 'package:iwaymaps/websocket/navigationLogManager.dart';
 import 'package:iwaymaps/websocket/navigationLogModel.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '/ELEMENTS/PickupLocationPin.dart';
 import '/pannels/PinLandmarkPannel.dart';
 import '/path.dart';
@@ -596,6 +597,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
 
   //--------------------------------------------------------------------------------------
   double _progressValue = 0.0;
+  bool initialInAppLoading = true;
+
   @override
   void initState() {
     super.initState();
@@ -4309,10 +4312,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     } else {
       print("apicalls testing 10 ${widget.directLandID}");
       //got here using a destination qr
-      onLandmarkVenueClicked(widget.directLandID,
-          DirectlyStartNavigation: false);
-      localizeUser(speakTTS: false,providePinSelection: false);
-
+      await localizeUser(speakTTS: false,providePinSelection: false);
+      await onLandmarkVenueClicked(widget.directLandID, DirectlyStartNavigation: false);
       SingletonFunctionController.building.destinationQr = true;
       print("apicalls testing 11");
     }
@@ -4320,7 +4321,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     print("apicalls testing 12");
     buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
     print("apicalls testing 13");
-    await Future.delayed(Duration(seconds: 3));
+    // await Future.delayed(Duration(seconds: 3));
     if(mounted){
       print("apicalls testing 14");
       setState(() {
@@ -4329,7 +4330,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       });
       print("apicalls testing 15");
     }
-
+    // Future.delayed(Duration(seconds: 5));
+    SingletonFunctionController.building.buildingsLoaded = true;
   }
 
   var versionBox = Hive.box('VersionData');
@@ -4482,6 +4484,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       }
     }
     SingletonFunctionController.btadapter.BIN.clear();
+    initialInAppLoading = false;
+    setState(() {});
   }
 
   String nearbeacon = 'null';
@@ -12427,7 +12431,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     Future.delayed(Duration(seconds: 5));
     _feedbackController.open();
   }
-  void onLandmarkVenueClicked(String ID, {bool DirectlyStartNavigation = false})async{
+  Future<void> onLandmarkVenueClicked(String ID, {bool DirectlyStartNavigation = false})async{
     land snapshot = land();
     // Collect all API call futures
     List<Future<void>> apiCalls = [];
@@ -12530,6 +12534,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
       await Future.delayed(const Duration(milliseconds: 2000));
     }
     polygonTap(null, ID);
+    return;
   }
 
   void fromSourceAndDestinationPage(List<String> value) {
@@ -12772,6 +12777,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
     SingletonFunctionController.btadapter.BIN.clear();
     SingletonFunctionController.currentBeacon="";
     SingletonFunctionController.building.qrOpened = false;
+    SingletonFunctionController.building.destinationQr = false;
     SingletonFunctionController.building.dispose();
     SingletonFunctionController.apibeaconmap.clear();
     magneticValues.clear();
@@ -13714,10 +13720,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin {
             //       .white, // Set the background color of the FAB
             // ),
 
-            (!SingletonFunctionController.building.destinationQr ||
-                !user.initialallyLocalised ||
-                !SingletonFunctionController.building.qrOpened || PinLandmarkPannel.isPanelOpened())
-                ? Container(): Container(
+            (SingletonFunctionController.building.buildingsLoaded || SingletonFunctionController.building.destinationQr || SingletonFunctionController.building.qrOpened || PinLandmarkPannel.isPanelOpened())
+                ? initialInAppLoading? Container(
+              height: screenHeight,
+              width: screenWidth,
+              color: Colors.black.withOpacity(0.3),
+              child: Center(
+                child: LoadingAnimationWidget.progressiveDots(
+                    color: Colors.teal,
+                    size: 55
+                ),
+              ),
+            ) : Container() : Container(
               height: screenHeight,
               width: screenWidth,
               color: Colors.white.withOpacity(0.8),
