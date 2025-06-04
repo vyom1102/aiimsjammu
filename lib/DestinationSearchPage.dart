@@ -112,8 +112,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       setState(() {
         _controller.text = widget.previousFilter;
       });
-
-      pushToFloorSelection();
     }
     setState(() {
       searchHintString = widget.hintText;
@@ -175,7 +173,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
 
   pushToFloorSelection() async {
-      await fetchFloors("AiimsBhopal",widget.previousFilter.toUpperCase()).then((_){
+      await fetchFloors("AIIMS Bhopal",widget.previousFilter.toUpperCase()).then((_){
         print("floors list $floors ");
         Navigator.push(
           context,
@@ -378,6 +376,12 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         if (_controller.text.isNotEmpty) {
           search(_controller.text);
         } else {
+          if (widget.previousFilter != "") {
+            setState(() {
+              _controller.text = widget.previousFilter;
+            });
+            pushToFloorSelection();
+          }
           // print("Filter cleared");
           topSearchesFunc();
           loadLandmarkData();
@@ -437,7 +441,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
   bool isUpdated=false;
   Future<void> loadLandmarkData() async {
-    // try {
+    try {
       print("entered here ${landmarkData.landmarksMap}");
       await Future.forEach(
           landmarkData.landmarksMap!.entries,(MapEntry keyValue) async {
@@ -471,9 +475,9 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       setState(() {
         isUpdated=true;
       });
-    // }catch(e){
-    //   print("error in updating liist ");
-    // }
+    }catch(e){
+      print("error in updating liist ");
+    }
     setState(() {
       isUpdated=false;
     });
@@ -542,98 +546,65 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
         if (landmarkData.landmarksMap != null) {
           String normalizedSearchText = normalizeText(searchText);
 
-          landmarkData.landmarksMap!.forEach((key, value) {
-            if (searchResults.length >= 25 || value.name == null || value.element!.subType == "beacon") {
-              return;
-            }
+          final fuse = Fuzzy(
+            landmarkData.landmarks!.map((e) => normalizeText(e.name??e.element?.subType??e.element!.type!)).toList(),
+            options: FuzzyOptions(
+              findAllMatches: true,
+              threshold: 0.4,  // adjust sensitivity
+              tokenize: false, // optional
+            ),
+          );
+          final result = fuse.search(normalizedSearchText);
+          result.sort((a, b) {
+            print("${normalizedSearchText.toLowerCase()} a.item.toLowerCase().split(' ') ${a.item.toLowerCase().split(' ')}");
+            final aHasExact = a.item.toLowerCase().split(' ').contains(normalizedSearchText.toLowerCase());
+            final bHasExact = b.item.toLowerCase().split(' ').contains(normalizedSearchText.toLowerCase());
 
-            String normalizedValueName = normalizeText(value.name!);
+            if (aHasExact && !bHasExact) return -1;
+            if (!aHasExact && bHasExact) return 1;
 
-            if(searchText.toLowerCase() == ("entry")){
-              final fuse = Fuzzy(
-                [normalizedValueName],
-                options: FuzzyOptions(
-                  findAllMatches: true,
-                  tokenize: true,
-                  threshold: 0.5,
-                ),
-              );
-
-              final result = fuse.search(normalizedSearchText);
-
-              result.forEach((fuseResult){
-                print("fuseResult");
-                print(fuseResult);
-                if (fuseResult.score < 0.2) {
-                  if(wantToFilter.isNotEmpty && value.buildingName == wantToFilter){
-                    print('In--IF');
-                    searchResults.add(SearchpageResults(
-                      name: value.name!,
-                      location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value.venueName}",
-                      onClicked: onVenueClicked,
-                      ID: value.properties!.polyId!,
-                      bid: value.buildingID!,
-                      floor: value.floor!,
-                      coordX: value.coordinateX!,
-                      coordY: value.coordinateY!,
-                      accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,
-                    ));
-                  }else{
-                    print('In--ELSE');
-                    searchResults.add(SearchpageResults(
-                      name: value.name!,
-                      location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value.venueName}",
-                      onClicked: onVenueClicked,
-                      ID: value.properties!.polyId!,
-                      bid: value.buildingID!,
-                      floor: value.floor!,
-                      coordX: value.coordinateX!,
-                      coordY: value.coordinateY!,
-                        accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,
-                    ));
-                  }
-                }
-              });
-            }
-            else if (partialMatch(normalizedValueName, normalizedSearchText)) {
-
-              if (partialMatch(normalizedValueName, normalizedSearchText)) {
-                print('Match found!');
-              } else {
-                print('No match found.');
-              }
-              final fuse = Fuzzy(
-                [normalizedSearchText],
-                options: FuzzyOptions(
-                  findAllMatches: true,
-                  tokenize: true,
-                  threshold: 1,
-                ),
-              );
-              final result = fuse.search(normalizedSearchText);
-              result.forEach((fuseResult) {
-                if (fuseResult.score < 0.5) {
-                  if((searchResults.isNotEmpty || wantToFilter.isNotEmpty) && SingletonFunctionController().getlocalizedBeacon()!=null){
-                    sortAndSeparateByUserLocation(SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,SingletonFunctionController().getlocalizedBeacon()!.coordinateY!,SingletonFunctionController().getlocalizedBeacon()!.floor!,SingletonFunctionController().getlocalizedBeacon()!.buildingID!,value,normalizedSearchText);
-                  }else{
-                    print("got into this");
-                    searchResults.add(SearchpageResults(
-                      name: value.name!,
-                      location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value.venueName}",
-                      onClicked: onVenueClicked,
-                      ID: value.properties!.polyId!,
-                      bid: value.buildingID!,
-                      floor: value.floor!,
-                      coordX: value.coordinateX!,
-                      coordY: value.coordinateY!,
-                      accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,
-                    ));
-                  }
-
-                }
-              });
-            }
+            return a.score!.compareTo(b.score!);
           });
+
+          for (var fuseResult in result) {
+            if (fuseResult.score < 0.5) {
+              Landmarks landmark = landmarkData.landmarks!.firstWhere((value)=>normalizeText(value.name??value.element?.subType??value.element!.type!) == fuseResult.item);
+              if ((searchResults.isNotEmpty || wantToFilter.isNotEmpty) &&
+                  SingletonFunctionController().getlocalizedBeacon() !=
+                      null && false) {
+                print("adding ${landmark.name} with score ${fuseResult.score}");
+                sortAndSeparateByUserLocation(
+                    SingletonFunctionController().getlocalizedBeacon()!
+                        .coordinateX!,
+                    SingletonFunctionController().getlocalizedBeacon()!
+                        .coordinateY!,
+                    SingletonFunctionController().getlocalizedBeacon()!
+                        .floor!,
+                    SingletonFunctionController().getlocalizedBeacon()!
+                        .buildingID!, landmark, normalizedSearchText);
+              } else {
+                print("adding ${landmark.name} with score ${fuseResult.score}");
+                print("got into this");
+                searchResults.add(SearchpageResults(
+                  name: landmark.name??landmark.element?.subType??landmark.element!.type!,
+                  location: landmark.buildingID == buildingAllApi.outdoorID
+                      ? "${landmark.venueName}"
+                      : "Floor ${landmark.floor}, ${landmark.venueName}",
+                  onClicked: onVenueClicked,
+                  ID: landmark.properties!.polyId!,
+                  bid: landmark.buildingID!,
+                  floor: landmark.floor!,
+                  coordX: landmark.coordinateX!,
+                  coordY: landmark.coordinateY!,
+                  accessible: landmark.element!.subType == "restRoom" &&
+                      landmark.properties!.washroomType == "Handicapped"
+                      ? "true"
+                      : "false",
+                  distance: 0,
+                ));
+              }
+            }
+          }
         }
       }
     });
@@ -758,7 +729,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
 
 
   String normalizeText(String text) {
-    return text.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toLowerCase();
+    return text.replaceAll(RegExp(r'[^a-zA-Z0-9]'), ' ').toLowerCase();
   }
 
   Future<void> onVenueClicked(String name, String location, String ID, String bid) async {
@@ -909,10 +880,13 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                                     search(value);
                                   },
                                   onChanged: (value) {
-                                    search(value);
                                     if(_controller.text.isEmpty){
+                                      searchResults.clear();
+                                      searcCategoryhResults.clear();
                                       topSearches.clear();
                                       topSearchesFunc();
+                                    }else{
+                                      search(value);
                                     }
                                     // print("Final Set");
                                     // print(cardSet);
@@ -1034,7 +1008,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
             //     ),
             //   ),
             // ),
-            Semantics(
+            optionListForUI.isNotEmpty?Semantics(
               label: "Filter Section",
               header: true,
               child: Container(
@@ -1106,7 +1080,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                   direction: Axis.horizontal,
                 ),
               ),
-            ),
+            ):Container(),
             // !category && _controller.text.isNotEmpty ? Semantics(
             //   header: true,
             //   label: "Building Filter section",
@@ -1173,11 +1147,11 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     header: true,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: (searcCategoryhResults.isEmpty && searchResults.isEmpty)?topSearches:((category)?searcCategoryhResults:searchResults)
+                      children: (searcCategoryhResults.isEmpty && searchResults.isEmpty && _controller.text.isEmpty)?topSearches:((category)?searcCategoryhResults:searchResults)
                     ),
                   ),
                 )),
-            if (_controller.text.isNotEmpty && searchResults.isEmpty && (category ? searcCategoryhResults : (!category && topCategory ? topSearches : [])).isEmpty)
+            if (_controller.text.isNotEmpty && searchResults.isEmpty && searcCategoryhResults.isEmpty)
               Column(
                   children: [
                     SizedBox(height: 16,),

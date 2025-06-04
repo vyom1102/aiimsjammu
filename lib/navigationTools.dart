@@ -1692,8 +1692,11 @@ class tools {
 
             d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
           }
-          if (d < distance) {
-
+          if(value.name == "Entry to Dental and Physiatry OPD"){
+            print("distance calculated for ${value.name} is $d");
+          }
+          if (d <= distance) {
+            print("adding ${value.name} to the list");
             if (!nearbyLandmarks.contains(value)) {
 
               nearbyLandmarks.add(value);
@@ -1856,8 +1859,8 @@ class tools {
       distance = 100;
     }
     List<int> pCoord = [];
-    pCoord.add(user.coordX!);
-    pCoord.add(user.coordY!);
+    pCoord.add(user.showcoordX!);
+    pCoord.add(user.showcoordY!);
     landmarksMap.forEach((key, value) {
 
       if(user.Bid == value.buildingID && value.element!.subType != "beacons" && value.coordinateX!=null){
@@ -2864,9 +2867,13 @@ class tools {
     return feet / UserState.stepSize.ceil();
   }
 
-  static String convertFeet(int feet,context) {
+  static String convertFeet(int feet,context, {String lngcode = "en"}) {
     if (UserCredentials().getUserPathDetails().contains('Distance in meters')) {
-      return '${feetToMeters(feet).toStringAsFixed(0)} meter';
+      if(lngcode == "hi"){
+        return '${feetToMeters(feet).toStringAsFixed(0)} मीटर';
+      }else{
+        return '${feetToMeters(feet).toStringAsFixed(0)} meter';
+      }
     }else {
       return '${feetToSteps(feet).toStringAsFixed(0)} ${LocaleData.steps.getString(context)}';
     }

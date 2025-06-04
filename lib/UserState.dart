@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
-import 'package:iwaymaps/routeOption.dart';
 import '/MotionModel.dart';
 import '/pathState.dart';
 import '/API/buildingAllApi.dart';
@@ -384,12 +383,10 @@ class UserState {
       }
 
       //lift check
+      List<int> liftCoordinates = [(pathobj.connections[Bid]?[pathobj.sourceFloor]??1)%cols, (pathobj.connections[Bid]?[pathobj.sourceFloor]??1)~/cols];
+      print("liftCoordinates $liftCoordinates");
 
-
-
-      if (floor != pathobj.destinationFloor &&
-          pathobj.connections[Bid]?[floor] ==
-              (showcoordY * cols + showcoordX)) {
+      if(floor != pathobj.destinationFloor && pathobj.connections[Bid]?[floor] == showcoordY * cols + showcoordX){
         // UserState.reachedLift=true;
         onConnection = true;
         createCircle(lat, lng);
@@ -404,19 +401,6 @@ class UserState {
                 0.0,"",""),
             lngCode,
             prevpause: true);
-
-
-
-        waitingTimer = Timer.periodic(Duration(seconds: 1), (timer) {
-          checkCondition(context);
-        });
-
-        // Clean up the timer when the context is destroyed (if necessary)
-        Future.delayed(Duration(seconds: 23), () {
-          waitingTimer?.cancel();
-        });
-
-
       }
 
       if (0 < pathobj.index &&
@@ -425,8 +409,10 @@ class UserState {
           !tools.isCellTurn(Cellpath[pathobj.index - 1],
               Cellpath[pathobj.index], Cellpath[pathobj.index + 1])) {
         pathState.nearbyLandmarks.retainWhere((element) {
-          if (element.element!.subType == "room door" &&
+          if ((element.element!.subType == "room door" ||
+          element.element!.subType == "Entrance Only") &&
               element.properties!.polygonExist != true) {
+            print(element.name);
             if (tools.calculateDistance([
               showcoordX,
               showcoordY
@@ -466,9 +452,9 @@ class UserState {
               if(!UserState.ttsOnlyTurns){
                 speak(
                     convertTolng(
-                        "${element.name} is on your ${LocaleData.getProperty5(tools.angleToClocks(agl, context), context)}",
+                        "${element.name} is on your ${tools.angleToClocks(agl, context)}",
                         element.name!,
-                        0.0,
+                        agl,
                         context,
                         0.0,"",""),
                     lngCode);
@@ -507,61 +493,13 @@ class UserState {
       offPathDistance.add(d);
     }
   }
-  DateTime? startWaitingTime;
-  Timer? waitingTimer;
-  void checkCondition(context,) {
-    if (floor != pathobj.destinationFloor) {
-      print("got inside it11");
-      if (startWaitingTime == null) {
-        // Start tracking time if user is on the wrong floor
-        startWaitingTime = DateTime.now();
-      } else {
-        // Calculate elapsed time
-        Duration elapsed = DateTime.now().difference(startWaitingTime!);
-        print("got inside it12 ${elapsed} ${waitingTimer}");
-        if (elapsed.inSeconds >=20) {
-          // Trigger the function after 15 seconds
-          showRouteSelector(context, pathobj.accessiblePath);
-          waitingTimer?.cancel(); // Stop further triggers
-        }
-      }
-    } else {
-      // Reset the timer and waiting state if user moves to the correct floor
-      startWaitingTime = null;
-      waitingTimer?.cancel();
-      waitingTimer = null;
-    }
-  }
-
-
-
-  void showRouteSelector(BuildContext context,String acc) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16),
-          child: RouteSelector(
-            onRouteSelected: (String selectedRoute) {
-              // Print the selected route ID
-            }, acc: acc,
-          ),
-        );
-      },
-    ).then((result) {
-      if (result != null) {
-        reroute(acc: result); // Handle the result after the dialog is closed
-      }
-    });
-  }
 
   String convertTolng(
       String msg, String? name, double agl, BuildContext context, double a,String nextBuildingName ,String currentBuildingName,
       {String destname = ""}) {
 
-    print(
-        "$msg");
+    print("convertTolng $msg \n"
+        "${name} is on your ${tools.angleToClocks(agl, context)}");
     if (msg ==
         "You have reached ${destname}. It is ${tools.angleToClocks3(a, context)}") {
       if (lngCode == 'en') {
@@ -591,14 +529,13 @@ class UserState {
       }
     } else if (name != null &&
         msg ==
-            "${name} is on your ${(
-            tools.angleToClocks(agl, context),
-            context
-            )}") {
+            "${name} is on your ${
+            tools.angleToClocks(agl, context)
+            }") {
       if (lngCode == 'en') {
         return msg;
       } else {
-        return "${name} आपके ${LocaleData.getProperty5(tools.angleToClocks(agl, context), context)} पर है";
+        return "${name} आपके ${LocaleData.getProperty5(tools.angleToClocks(agl, context), context)} ओर है";
       }
     }else if (nextBuildingName != "" && currentBuildingName!="" &&
         msg ==
@@ -627,6 +564,8 @@ class UserState {
       } else {
         return "$destname की ओर आगे बढ़ते रहें";
       }
+    }else{
+      return msg;
     }
     return "";
   }

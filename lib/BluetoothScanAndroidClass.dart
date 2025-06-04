@@ -282,7 +282,7 @@ class BluetoothScanAndroidClass{
       // print("DEVICESSS $deviceDetail");
       BluetoothDevice deviceDetails = parseDeviceDetails(deviceDetail);
       String dataaa = parseLog(deviceDetail);
-      // print("dataaa = ${deviceDetails.rawData}");
+      print("dataaa = ${deviceDetails.rawData}");
 
       wsocket.message["AppInitialization"]["nearByDevices"][deviceDetails.rawData] = deviceDetails.DeviceRssi;
       if(apibeaconmap.containsKey(deviceDetails.DeviceName)) {
@@ -513,7 +513,7 @@ class BluetoothScanAndroidClass{
   double getWeight(int num){
     switch(num) {
       case 0:
-        return 12.0;
+        return 9.0;
       case 1:
         return 6.0;
       case 2:

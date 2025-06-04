@@ -210,7 +210,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           widget.direction = "Go Straight";
           if (!UserState.ttsOnlyTurns) {
             speak(
-                "${LocaleData.getProperty6('Go Straight', widget.context)} ${tools.convertFeet(widget.distance, widget.context)}}",
+                "${LocaleData.getProperty6('Go Straight', widget.context)} ${tools.convertFeet(widget.distance, widget.context, lngcode: _currentLocale)}}",
                 _currentLocale,
                 prevpause: true);
           }
@@ -226,7 +226,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             speak("${widget.direction}", _currentLocale, prevpause: true);
           }
           widget.getSemanticValue =
-          "Turn ${widget.direction}, and Go Straight ${tools.convertFeet(widget.distance, widget.context)}";
+          "Turn ${widget.direction}, and Go Straight ${tools.convertFeet(widget.distance, widget.context, lngcode: _currentLocale)}";
         }
       });
     }
@@ -262,7 +262,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   double highestAverage = double.negativeInfinity;
 
 
-  double highestweight = Platform.isIOS?3.25 : 3.25;
+  double highestweight = Platform.isIOS?3.25 : 2.5;
 
   String? parseString(String input) {
     final regex = RegExp(r'Optional\("(.+?)"\)\s+(\d+\.\d+)');
@@ -346,10 +346,8 @@ class _DirectionHeaderState extends State<DirectionHeader> {
     print("localizedOn $localizedOn");
     print("highestweight");
     print(highestweight);
+    List<int> liftCoordinates = [(widget.user.pathobj.connections[widget.user.Bid]?[widget.user.floor]??1)%UserState.cols, (widget.user.pathobj.connections[widget.user.Bid]?[widget.user.floor]??1)~/UserState.cols];
     if (nearestBeacon != "") {
-      if (widget
-          .user.pathobj.path[Building.apibeaconmap[nearestBeacon]!.floor] !=
-          null) {
         if (widget.user.key != Building.apibeaconmap[nearestBeacon]!.sId) {
           print("wilsoninifff $highestweight");
           print(widget.user.floor ==
@@ -381,7 +379,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               }
             });
 
-            if (distanceFromPath > 10) {
+            if (distanceFromPath > 30) {
               print("calling expected function22");
               _timer.cancel();
               widget.repaint(nearestBeacon);
@@ -390,19 +388,22 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               nextTurnIndex = 1;
               return false; //away from path
             } else {
+              await speak(
+                  "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor",
+                  _currentLocale);
+              await Future.delayed(Duration(seconds: 1));
               widget.user.onConnection = false;
 
               widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
               UserState.createCircle(widget.user.lat, widget.user.lng);
-              speak(
-                  "You have reached ${tools.numericalToAlphabetical(Building.apibeaconmap[nearestBeacon]!.floor!)} floor",
-                  _currentLocale);
               DirectionIndex = nextTurnIndex;
               //need to render on beacon for aiims jammu
               print("calling expected function");
               widget.paint(nearestBeacon,null,null,render: false);
               return true;
             }
+          }else if(tools.calculateDistance(liftCoordinates, [widget.user.showcoordX, widget.user.showcoordY])<10){
+            return false;
           }
 
           // else if(widget.user.floor != Building.apibeaconmap[nearestBeacon]!.floor &&  highestweight >= 1.1){
@@ -412,12 +413,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           //   return true;
           // }
 
-          else if (widget.user.floor ==
+          else if (!widget.user.onConnection && widget.user.floor ==
               Building.apibeaconmap[nearestBeacon]!.floor &&
               highestweight <= double.parse(threshold!)) {
             print("inelseiflocal");
             localizedOn.add(nearestBeacon);
-            widget.user.onConnection = false;
             //
             List<int> beaconcoord = [
               Building.apibeaconmap[nearestBeacon]!.coordinateX!,
@@ -444,7 +444,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               }
             });
 
-            if (distanceFromPath > 10) {
+            if (distanceFromPath > 30) {
               print("calling expected function22");
               _timer.cancel();
               widget.repaint(nearestBeacon);
@@ -458,11 +458,11 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                   beaconcoord);
 
               widget.user.key = Building.apibeaconmap[nearestBeacon]!.sId!;
-              if (!UserState.ttsOnlyTurns) {
-                speak(
-                    "${widget.direction} ${tools.convertFeet(widget.distance, widget.context)}",
-                    _currentLocale);
-              }
+              // if (!UserState.ttsOnlyTurns) {
+              //   speak(
+              //       "${widget.direction} ${tools.convertFeet(widget.distance, widget.context)}",
+              //       _currentLocale);
+              // }
               widget.user.moveToPointOnPath(indexOnPath!);
 
               widget.moveUser();
@@ -525,19 +525,6 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           print(widget.user.key );
           print(Building.apibeaconmap[nearestBeacon]!.sId);
         }
-      } else {
-        //
-        //
-
-        //
-        if (highestweight > 1.2) {
-          print("calling expected function 3");
-          _timer.cancel();
-          widget.repaint(nearestBeacon);
-          widget.reroute;
-        }
-        return false;
-      }
     }else{
       print("nearestBeacon $nearestBeacon");
     }
@@ -714,13 +701,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
             ?[widget.user.pathobj.sourceFloor]) {
     } else if (widget.user.path.isNotEmpty &&
         widget.user.Cellpath.length - 1 > widget.user.pathobj.index) {
-      widget.user.pathobj.connections.forEach((key, value) {
-        value.forEach((inkey, invalue) {
-          if (widget.user.path[widget.user.pathobj.index] == invalue) {
-            widget.direction = "You have reached ";
-          }
-        });
-      });
+
       List<Cell> remainingPath =
       widget.user.Cellpath.sublist(widget.user.pathobj.index + 1);
       //
@@ -873,7 +854,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           UserState.isTurn = false;
           if (!UserState.ttsOnlyTurns) {
             speak(
-              "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context)}",
+              "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context, lngcode: _currentLocale)}",
               _currentLocale,
               prevpause: true,
             );
@@ -1176,10 +1157,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                   ),
                   scrollableDirection(
                       "${widget.direction}",
-                      '${tools.convertFeet(widget.distance, widget.context)}',
+                      '${tools.convertFeet(widget.distance, widget.context, lngcode: _currentLocale)}',
                       getCustomIcon(widget.direction),
                       DirectionIndex,
-                      nextTurnIndex,
+                      DirectionIndex,
                       widget.user.pathobj.directions,
                       widget.user,
                       widget.context),
@@ -1343,7 +1324,7 @@ class scrollableDirection extends StatelessWidget {
           return angle != null
               ? "${listOfDirections[DirectionIndex].turnDirection} ${LocaleData.willbe.getString(context)} ${LocaleData.getProperty(tools.angleToClocks3(angle, context), context)}"
               : "${listOfDirections[DirectionIndex].turnDirection} ${LocaleData.willbeonyourfront.getString(context)}";
-        } else if (DirectionIndex == nextTurnIndex) {
+        } else if (nextTurnIndex == -1 || DirectionIndex == nextTurnIndex) {
           return "${Direction == "Straight" ? "${LocaleData.gostraight.getString(context)}" : LocaleData.getProperty(Direction, context)}";
         } else {
           if (DirectionIndex < listOfDirections.length) {

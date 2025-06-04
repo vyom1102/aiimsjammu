@@ -565,51 +565,66 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
 
           print("Searching landmarks...");
           if (landmarkData.landmarksMap != null) {
-            landmarkData.landmarksMap!.forEach((key, value) {
-              if (locationCount < 30 && searchResults.length < 50) {
-                if (value.name != null && value.element!.subType != "beacon") {
-                  String normalizedSearchText = normalizeText(searchText);
-                  String normalizedValueName = normalizeText(value.name!);
+            String normalizedSearchText = normalizeText(searchText);
 
-                  if (partialMatch(normalizedValueName, normalizedSearchText)) {
-                    final fuse = Fuzzy(
-                      [normalizedSearchText],
-                      options: FuzzyOptions(
-                        findAllMatches: true,
-                        tokenize: true,
-                        threshold: 1,
-                      ),
-                    );
-                    final result = fuse.search(normalizedSearchText);
-                    print("Landmark match found: ${value.name}");
-                    result.forEach((fuseResult) {
-                      if (fuseResult.score < 0.5) {
-                        if((searchResults.isNotEmpty) && SingletonFunctionController().getlocalizedBeacon()!=null){
-                          sortAndSeparateByUserLocation(SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,SingletonFunctionController().getlocalizedBeacon()!.coordinateY!,SingletonFunctionController().getlocalizedBeacon()!.floor!,SingletonFunctionController().getlocalizedBeacon()!.buildingID!,value,normalizedSearchText);
-                        }
-                        else{
-                          print("got into this");
-                          searchResults.add(SearchpageResults(
-                            name: value.name!,
-                            location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
-                            onClicked: onVenueClicked,
-                            ID: value.properties!.polyId!,
-                            bid: value.buildingID!,
-                            floor: value.floor!,
-                            coordX: value.coordinateX!,
-                            coordY: value.coordinateY!,
-                            accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,
-                          ));
-                        }
-                        locationCount++;
-                      }
-                    });
-                  }
+            final fuse = Fuzzy(
+              landmarkData.landmarks!.map((e) => normalizeText(e.name??e.element?.subType??e.element!.type!)).toList(),
+              options: FuzzyOptions(
+                findAllMatches: true,
+                threshold: 0.4,  // adjust sensitivity
+                tokenize: false, // optional
+              ),
+            );
+            final result = fuse.search(normalizedSearchText);
+            result.sort((a, b) {
+              print("${normalizedSearchText.toLowerCase()} a.item.toLowerCase().split(' ') ${a.item.toLowerCase().split(' ')}");
+              final aHasExact = a.item.toLowerCase().split(' ').contains(normalizedSearchText.toLowerCase());
+              final bHasExact = b.item.toLowerCase().split(' ').contains(normalizedSearchText.toLowerCase());
 
+              if (aHasExact && !bHasExact) return -1;
+              if (!aHasExact && bHasExact) return 1;
 
+              return a.score!.compareTo(b.score!);
+            });
+
+            for (var fuseResult in result) {
+              if (fuseResult.score < 0.5) {
+                Landmarks landmark = landmarkData.landmarks!.firstWhere((value)=>normalizeText(value.name??value.element?.subType??value.element!.type!) == fuseResult.item);
+                if ((searchResults.isNotEmpty) &&
+                    SingletonFunctionController().getlocalizedBeacon() != null) {
+                  print("adding ${landmark.name} with score ${fuseResult.score}");
+                  sortAndSeparateByUserLocation(
+                      SingletonFunctionController().getlocalizedBeacon()!
+                          .coordinateX!,
+                      SingletonFunctionController().getlocalizedBeacon()!
+                          .coordinateY!,
+                      SingletonFunctionController().getlocalizedBeacon()!
+                          .floor!,
+                      SingletonFunctionController().getlocalizedBeacon()!
+                          .buildingID!, landmark, normalizedSearchText);
+                } else {
+                  print("adding ${landmark.name} with score ${fuseResult.score}");
+                  print("got into this");
+                  searchResults.add(SearchpageResults(
+                    name: landmark.name??landmark.element?.subType??landmark.element!.type!,
+                    location: landmark.buildingID == buildingAllApi.outdoorID
+                        ? "${landmark.venueName}"
+                        : "Floor ${landmark.floor}, ${landmark.venueName}",
+                    onClicked: onVenueClicked,
+                    ID: landmark.properties!.polyId!,
+                    bid: landmark.buildingID!,
+                    floor: landmark.floor!,
+                    coordX: landmark.coordinateX!,
+                    coordY: landmark.coordinateY!,
+                    accessible: landmark.element!.subType == "restRoom" &&
+                        landmark.properties!.washroomType == "Handicapped"
+                        ? "true"
+                        : "false",
+                    distance: 0,
+                  ));
                 }
               }
-            });
+            }
           }
 
           print("Searching doctors...");
@@ -960,7 +975,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
   //   });
   // }
   String normalizeText(String text) {
-    return text.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toLowerCase();
+    return text.replaceAll(RegExp(r'[^a-zA-Z0-9]'), ' ').toLowerCase();
   }
   void clearAllRecents() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -1080,10 +1095,13 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
                                             search(value);
                                           },
                                           onChanged: (value) {
-                                            search(value);
                                             if(_controller.text.isEmpty){
+                                              searchResults.clear();
+                                              searcCategoryhResults.clear();
                                               topSearches.clear();
                                               topSearchesFunc();
+                                            }else{
+                                              search(value);
                                             }
                                             // print("Final Set");
                                             // print(cardSet);
@@ -1242,12 +1260,12 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
                           label: 'Related Search',
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: (searcCategoryhResults.isEmpty && searchResults.isEmpty)?topSearches:((category)?searcCategoryhResults:searchResults),
+                              children: (searcCategoryhResults.isEmpty && searchResults.isEmpty && _controller.text.isEmpty)?topSearches:((category)?searcCategoryhResults:searchResults)
                           ),
                         ),
                       ),
                     ),
-                    if (_controller.text.isNotEmpty && searchResults.isEmpty && (category ? searcCategoryhResults : (!category && topCategory ? topSearches : [])).isEmpty)
+                    if (_controller.text.isNotEmpty && searchResults.isEmpty && searcCategoryhResults.isEmpty)
 
                       Column(
                           children: [
