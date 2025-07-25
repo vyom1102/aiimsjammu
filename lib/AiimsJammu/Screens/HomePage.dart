@@ -149,7 +149,7 @@ class _HomePageState extends State<HomePage> {
     fetchAndStoreBuildingIds();
     getDriverDetail();
     NotificationSocket.receiveMessage();
-    checkForUpdate();
+    // checkForUpdate();
     _pageController = PageController(initialPage: _currentPage);
     getLocs();
     wsocket.message["AppInitialization"]["BID"]=buildingAllApi.selectedBuildingID;

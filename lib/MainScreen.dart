@@ -24,6 +24,7 @@ import '/Navigation.dart';
 
 import './AiimsJammu/Screens/HomePage.dart';
 import 'AiimsJammu/Screens/ProfilePage.dart';
+import 'AiimsJammu/Widgets/upgradeAlert.dart';
 import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'DATABASE/BOXES/LandMarkApiModelBox.dart';
@@ -155,88 +156,95 @@ class _MainScreenState extends State<MainScreen> {
           });
         }
       },
-      child: Scaffold(
-        body: screens[index],
-        bottomNavigationBar: NavigationBarTheme(
-          data: NavigationBarThemeData(
-            indicatorColor: Colors.transparent,
-            labelTextStyle: MaterialStateProperty.all(TextStyle(
-              fontFamily: "Roboto",
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-              color: Color(0xff4B4B4B),
-              height: 20/14,
-            )),
-          ),
-
-          child: Container(
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  spreadRadius: 0,
-                  blurRadius: 8,
-                  offset: Offset(0, -2), // Negative y-offset for shadow above
-                ),
-              ],
+      child: CoolUpgradeAlert(
+        mandatory: true,
+        customTitle: "🎉 New Version Available!",
+        customMessage: "We've added incredible new features!",
+        primaryColor: Color(0xFF011660),
+        secondaryColor: Color(0xFF164E87),
+        child: Scaffold(
+          body: screens[index],
+          bottomNavigationBar: NavigationBarTheme(
+            data: NavigationBarThemeData(
+              indicatorColor: Colors.transparent,
+              labelTextStyle: MaterialStateProperty.all(TextStyle(
+                fontFamily: "Roboto",
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
+                color: Color(0xff4B4B4B),
+                height: 20/14,
+              )),
             ),
-            child: NavigationBar(
-              surfaceTintColor: Colors.white,
-              backgroundColor: Color(0xffFFFFFF),
-              selectedIndex: index,
-              onDestinationSelected: (index)=>setState(() {
 
-                if(index==0){
-                  InteractionManager().logInteraction("Home Button");
-                }else if(index==1){
-                  InteractionManager().logInteraction("Global Search");
-                }else if(index==2){
-                  InteractionManager().logInteraction("Scan Button");
-                }else if(index==3){
-                  InteractionManager().logInteraction("Favourite Button");
-                }else if(index==4){
-                  InteractionManager().logInteraction("Profile Button");
-                }
-                // if (index==1){
-                //     Navigator.push(context, MaterialPageRoute(builder: (context) => GlobalSearchPage(voiceInputEnabled: false)));
-                //
-                // } else {
-                  this.index = index;
-                  print(index);
-                // }
-              }),
-              destinations: [
-                NavigationDestination(icon: SvgPicture.asset("assets/MainScreen_home.svg",color: Color(0xff1C1B1F)),selectedIcon: SvgPicture.asset("assets/MainScreen_home.svg",color: Color(0xFF0B6B94),), label: 'Home',),
-                NavigationDestination(icon: SvgPicture.asset("assets/images/searchicon.svg",color: Color(0xff1C1B1F)),selectedIcon: SvgPicture.asset("assets/images/searchicon.svg",color: Color(0xFF0B6B94),), label: "Search",),
-                NavigationDestination(icon: SvgPicture.asset("assets/MainScreen_Scanner.svg",color: Color(0xff1C1B1F),),selectedIcon: SvgPicture.asset("assets/MainScreen_Scanner.svg",color: Color(0xFF0B6B94),width: 34,height: 34,), label: 'Scan',),
-                NavigationDestination(icon: SvgPicture.asset("assets/MainScreen_Favourite.svg",color: Color(0xff1C1B1F),),selectedIcon: SvgPicture.asset("assets/MainScreen_Favourite.svg",color: Color(0xFF0B6B94),), label: "Favourite",),
-                NavigationDestination(icon: SvgPicture.asset("assets/MainScreen_Profile.svg",color: Color(0xff1C1B1F),),selectedIcon: SvgPicture.asset("assets/MainScreen_Profile.svg",color: Color(0xFF0B6B94),), label: "Profile"),
-              ],
-            ),
-          ),
-        ),
-          floatingActionButton: FloatingActionButton(
-            heroTag: 'mainscreen',
-
-            onPressed: (){
-              if(UserState.geoFenced){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Navigation(),
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    spreadRadius: 0,
+                    blurRadius: 8,
+                    offset: Offset(0, -2), // Negative y-offset for shadow above
                   ),
-                );
-              }else{
-                HelperClass.showToast("Not at the current venue");
-              }
+                ],
+              ),
+              child: NavigationBar(
+                surfaceTintColor: Colors.white,
+                backgroundColor: Color(0xffFFFFFF),
+                selectedIndex: index,
+                onDestinationSelected: (index)=>setState(() {
 
-            },
-            backgroundColor: Color(0xFFFEAB01),
-            shape: CircleBorder(),
-            child: Semantics(
-                label: "Map",
-                child: Lottie.asset('assets/images/floatingmap.json')),
+                  if(index==0){
+                    InteractionManager().logInteraction("Home Button");
+                  }else if(index==1){
+                    InteractionManager().logInteraction("Global Search");
+                  }else if(index==2){
+                    InteractionManager().logInteraction("Scan Button");
+                  }else if(index==3){
+                    InteractionManager().logInteraction("Favourite Button");
+                  }else if(index==4){
+                    InteractionManager().logInteraction("Profile Button");
+                  }
+                  // if (index==1){
+                  //     Navigator.push(context, MaterialPageRoute(builder: (context) => GlobalSearchPage(voiceInputEnabled: false)));
+                  //
+                  // } else {
+                    this.index = index;
+                    print(index);
+                  // }
+                }),
+                destinations: [
+                  NavigationDestination(icon: SvgPicture.asset("assets/MainScreen_home.svg",color: Color(0xff1C1B1F)),selectedIcon: SvgPicture.asset("assets/MainScreen_home.svg",color: Color(0xFF0B6B94),), label: 'Home',),
+                  NavigationDestination(icon: SvgPicture.asset("assets/images/searchicon.svg",color: Color(0xff1C1B1F)),selectedIcon: SvgPicture.asset("assets/images/searchicon.svg",color: Color(0xFF0B6B94),), label: "Search",),
+                  NavigationDestination(icon: SvgPicture.asset("assets/MainScreen_Scanner.svg",color: Color(0xff1C1B1F),),selectedIcon: SvgPicture.asset("assets/MainScreen_Scanner.svg",color: Color(0xFF0B6B94),width: 34,height: 34,), label: 'Scan',),
+                  NavigationDestination(icon: SvgPicture.asset("assets/MainScreen_Favourite.svg",color: Color(0xff1C1B1F),),selectedIcon: SvgPicture.asset("assets/MainScreen_Favourite.svg",color: Color(0xFF0B6B94),), label: "Favourite",),
+                  NavigationDestination(icon: SvgPicture.asset("assets/MainScreen_Profile.svg",color: Color(0xff1C1B1F),),selectedIcon: SvgPicture.asset("assets/MainScreen_Profile.svg",color: Color(0xFF0B6B94),), label: "Profile"),
+                ],
+              ),
+            ),
           ),
+            floatingActionButton: FloatingActionButton(
+              heroTag: 'mainscreen',
+
+              onPressed: (){
+                if(UserState.geoFenced){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Navigation(),
+                    ),
+                  );
+                }else{
+                  HelperClass.showToast("Not at the current venue");
+                }
+
+              },
+              backgroundColor: Color(0xFFFEAB01),
+              shape: CircleBorder(),
+              child: Semantics(
+                  label: "Map",
+                  child: Lottie.asset('assets/images/floatingmap.json')),
+            ),
+        ),
       ),
     );
   }
