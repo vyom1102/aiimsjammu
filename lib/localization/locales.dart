@@ -39,6 +39,7 @@ mixin LocaleData {
   static const String less5Feet = '< 5 Feet';
   static const String between56Feet = '5 to 6 Feet';
   static const String more6Feet = '> 6 Feet';
+  static const String changingaccessiblepath= 'Calculating new path.';
 
   static const String straight='Straight';
   static const String right='Right';
@@ -59,7 +60,6 @@ mixin LocaleData {
   static const String ttssharpleft='ttsSharpLeft';
   static const String ttsuturn='ttsUTurn';
 
-  static const String changingaccessiblepath= 'Calculating new path.';
 
 
   static const String uturn='U Turn';
@@ -122,7 +122,7 @@ mixin LocaleData {
   static const String clickstarttonavigate= 'Click Start to Navigate';
   static const String exploremodenabled= 'Explore Mode Enabled';
   static const String direction='Get Direction';
-  static const String turnfrm='turn from';
+  static const String turnfrm='Turn from';
   static const String approaching='Approaching';
   static const String location='Location';
   static const String none='None';
@@ -131,7 +131,42 @@ mixin LocaleData {
   static const String scanQr="Scan nearby QR to know your location";
   static const String reroute="You are going away from the path. Rerouting you to the destination";
   static const String upToDate ='upToDate';
-
+  static const String welcomeBack ='welcome';
+  static const String emailorphnno ='email or mobile number';
+  static const String password ='password';
+  static const String signin ='signin';
+  static const String forgetpassword ='forget password';
+  static const String signup ='sign up';
+  static const String donthaveanacc ='dont have an account';
+  static const String or ='or';
+  static const String emailphnverify ='Enter your email or mobile number to verify';
+  static const String verifyotp ='verify otp';
+  static const String sendotp='send otp';
+  static const String enterotp='enter otp';
+  static const String verifyacc='verify acc';
+  static const String entercode='enter code';
+  static const String tryagain='try again';
+  static const String createacc='create acc';
+  static const String fullname='full name';
+  static const String selectrole='select role';
+  static const String confirmpass='confirm password';
+  static const String accessprofile='access profile';
+  static const String visualImpairment = 'visualImpairment';
+  static const String hearingImpairment = 'hearingImpairment';
+  static const String locomotiveImpairment = 'locomotiveImpairment';
+  static const String otherImpairment = 'otherImpairment';
+  static const String noDisability = 'noDisability';
+  static const String vendor = 'vendor';
+  static const String employee = 'employee';
+  static const String visitor = 'visitor';
+  static const String owner = 'owner';
+  static const String guest = 'guest';
+  static const String passwordRequirement = 'passwordRequirement';
+  static const String passwordsDoNotMatch = 'passwordsDoNotMatch';
+  static const String mobileno ='mobile number';
+  static const String email ='Email';
+  static const String passwordLogin ='Password Login';
+  static const String otpLogin ='Otp Login';
 
 
   static Map<String, String> get properties => {
@@ -155,6 +190,9 @@ mixin LocaleData {
 
 
   };
+
+
+
 
 
   static String getProperty(String propertyName,context) {
@@ -220,7 +258,6 @@ mixin LocaleData {
     'Sharp Left':ttssharpleft,
     'Sharp Right':ttssharpright,
     'U Turn':ttsuturn,
-
   };
 
 
@@ -247,8 +284,6 @@ mixin LocaleData {
     }
     return propertyName;
   }
-
-
 
 
   static const Map<String, dynamic> EN = {
@@ -290,13 +325,13 @@ mixin LocaleData {
     'Slight Left':'Slight Left',
     'Sharp Right':'Sharp Right',
 
-    'tsRight':'turn right and go straight',
-    'tsU Turn':'turn around and go straight',
-    'tsSharp Left':'turn sharp left and go straight',
-    'tsLeft':'turn left and go straight',
-    'tsSlight Right':'turn slight right and go straight',
-    'tsSlight Left':'turn slight left and go straight',
-    'tsSharp Right':'turn sharp right and go straight',
+    'tsRight':'Turn right and go straight',
+    'tsU Turn':'Turn around and go straight',
+    'tsSharp Left':'Turn sharp left and go straight',
+    'tsLeft':'Turn left and go straight',
+    'tsSlight Right':'Turn slight right and go straight',
+    'tsSlight Left':'Turn slight left and go straight',
+    'tsSharp Right':'Turn sharp right and go straight',
 
     'tRight':'Right',
     'tLeft':'Left',
@@ -339,14 +374,14 @@ mixin LocaleData {
     'You are on': 'You are on',
     'is on your':'is on your',
     'near':'near',
-    'Unable to find your location': 'Unable to find your location',
+    'Unable to find your location': 'Unable to find your location. Scan nearby QR to know your location',
     'You are going away from the path. Click Reroute to Navigate from here.': 'You are going away from the path. Click Reroute to Navigate from here.',
     'is': 'is',
     'meter away': 'meter away',
     'Click Start to Navigate' : 'Click Start to Navigate',
     'Explore Mode Enabled' : 'Explore Mode Enabled',
     'Get Direction':'Get Direction',
-    'turn from':'turn from',
+    'Turn from':'Turn from',
     'Approaching': 'Approaching',
     'hRight':'',
     'hLeft':'',
@@ -366,12 +401,42 @@ mixin LocaleData {
     'Scan nearby QR to know your location':'Scan nearby QR to know your location',
     'You are going away from the path. Rerouting you to the destination':'You are going away from the path. Rerouting you to the destination',
     'upToDate':'Up to date',
-
-
-
-
-
-
+    'welcome':'Welcome Back',
+    'email or mobile number':'Email or Mobile Number',
+    'password':'Password',
+    'signin':'Sign in',
+    'forget password':'Forgot Password',
+    'sign up':'Sign Up',
+    'dont have an account':"Don't have an account?",
+    'or':'or',
+    'Enter your email or mobile number to verify':'Enter your mobile number or email address to receive a verification code.',
+    'verify otp':'Verify OTP',
+    'send otp':'Send OTP',
+    'enter otp':'Enter your 4-digit otp here',
+    'verify acc':'Verify Your Account',
+    'enter code':'Please enter the verification code we’ve sent you on',
+    'try again':'Try Again',
+    'create acc':'Create a New Account',
+    'full name':'Full Name',
+    'select role':'Select your role',
+    'confirm password':'Confirm Password',
+    'access profile':'Accessibility Profile',
+    'visualImpairment': 'Visual Impairment',
+    'hearingImpairment': 'Hearing Impairment',
+    'locomotiveImpairment': 'Locomotive Impairment',
+    'otherImpairment': 'Other Impairment',
+    'noDisability': 'No Disability',
+    'vendor': 'Vendor',
+    'employee': 'Employee',
+    'visitor': 'Visitor',
+    'owner': 'Owner',
+    'guest': 'Guest',
+    'passwordRequirement': '8 characters password required.',
+    'passwordsDoNotMatch': 'Passwords do not match.',
+    'mobile number':'Mobile Number',
+    'Email':'Email',
+    'Password Login':'Password Login',
+    'Otp Login':'OTP Login',
   };
 
   static const Map<String, dynamic> HI = {
@@ -466,14 +531,14 @@ mixin LocaleData {
     'You are on': 'आप हैं',
     'is on your':'आपके पर है',
     'near':'पास',
-    'Unable to find your location': 'आपकी वर्तमान जगह हम ढूँढ़ नहीं पा रहे है',
+    'Unable to find your location': 'आपकी वर्तमान जगह हम ढूँढ़ नहीं पा रहे है अपना स्थान जानने के लिए नजदिकी QR को स्कैन करें',
     'You are going away from the path. Click Reroute to Navigate from here.': 'आप मार्ग से भटक रहे हैं। यहाँ से मार्गदर्शन करने के लिए पुनर्निर्देशित पर क्लिक करें।',
     'is': '',
     'meter away': 'मीटर दूर है',
     'Click Start to Navigate' : 'नेविगेट करने के लिए इस्टार्ट पर क्लिक करें',
     'Explore Mode Enabled' : 'एक्सप्लोर मोड सक्षम',
     'Get Direction':'दिशा',
-    'turn from':'से मुड़ो',
+    'Turn from':'से मुड़ो',
     'Approaching': 'पास आ रहे हैं',
     'Location':'लोकेशन',
 
@@ -492,6 +557,42 @@ mixin LocaleData {
     'Scan nearby QR to know your location':'अपना स्थान जानने के लिए नजदिकी QR को स्कैन करें',
     'You are going away from the path. Rerouting you to the destination':'आप रास्ते से दूर जा रहे हैं। आपको आपकी मंजिल की दिशा में रीरूट किया जाया जा रहा है',
     'upToDate':'अप टू डेट',
+    'welcome':'नमस्ते',
+    'email or mobile number':'ईमेल या फ़ोन नंबर',
+    'password':'पासवर्ड',
+    'signin':'लॉग इन करें',
+    'forget password':'पासवर्ड भूल गए?',
+    'sign up':'साइन अप करें',
+    "dont have an account":"कोई अकाउंट नहीं है?",
+    'or':'या',
+    'Enter your email or mobile number to verify':'सत्यापन कोड प्राप्त करने के लिए अपना मोबाइल नंबर या ईमेल पता दर्ज करें।',
+    'verify otp':'वेरीफाई ओटीपी',
+    'send otp':'ओटीपी भेजें',
+    'enter otp':'यहां अपना 4 अंकों का ओटीपी दर्ज करें',
+    'verify acc':'अपना खाता वेरीफाई करें',
+    'enter code':'कृपया वह वेरिफिकेशन कोड दर्ज करें जो हमने आपके पास भेजा है',
+    'try again':'पुनः प्रयास कर',
+    'create acc':'एक नया खाता बनाएँ',
+    'full name':'पूरा नाम',
+    'select role':'अपनी भूमिका चुनें',
+    'confirm password':'पासवर्ड की पुष्टि कीजिये',
+    'access profile':'अभिगम्यता प्रोफ़ाइल',
+    'visualImpairment': 'दृष्टिबाधित',
+    'hearingImpairment': 'श्रवण बाधित',
+    'locomotiveImpairment': 'गतिशीलता बाधित',
+    'otherImpairment': 'अन्य विकलांगता',
+    'noDisability': 'कोई विकलांगता नहीं',
+    'vendor': 'विक्रेता',
+    'employee': 'कर्मचारी',
+    'visitor': 'आगंतुक',
+    'owner': 'मालिक',
+    'guest': 'मेहमान',
+    'passwordRequirement': '8 अक्षरों का पासवर्ड आवश्यक है।',
+    'passwordsDoNotMatch': 'पासवर्ड मेल नहीं खाते हैं।',
+    'mobile number':'मोबाइल नंबर',
+    'Email':'ईमेल',
+    'Password Login':'पासवर्ड लॉगिन',
+    'Otp Login':'ओटीपी लॉगिन',
 
   };
 

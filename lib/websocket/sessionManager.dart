@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import '/config.dart';
 
 class SessionManager {
   static final SessionManager _instance = SessionManager._internal();
@@ -60,7 +61,7 @@ class SessionManager {
     try{
       print("session logs:${sessionLogs}");
       final response = await http.post(
-        Uri.parse((kDebugMode)?"https://dev.iwayplus.in/secured/save-session-log":"https://maps.iwayplus.in/secured/save-session-log"),
+        Uri.parse("${AppConfig.baseUrl}/secured/save-session-log"),
         headers:{
           'Content-Type': 'application/json',
           'x-access-token': accessToken

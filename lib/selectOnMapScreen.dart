@@ -216,7 +216,7 @@ class _SelectOnMapScreenState extends State<SelectOnMapScreen>
   }
 
   renderGlobalAnnotation() async {
-    closedpolygons[Building.GlobalAnnotation!.mappingElements!.first.buildingID!] = await globalRendering(Building.GlobalAnnotation!,null)??Set();
+    // closedpolygons[Building.GlobalAnnotation!.mappingElements!.first.buildingID!] = await globalRendering(data,polygonTap!)??Set();
   }
 
 

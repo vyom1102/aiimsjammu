@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 
-import '/API/buildingAllApi.dart';
-import '/Elements/locales.dart';
+import '../API/buildingAllApi.dart';
+import '../Elements/locales.dart';
 import '../directionClass.dart';
 
 class DirectionInstructionViewModel extends ChangeNotifier {
@@ -23,8 +23,7 @@ class DirectionInstructionViewModel extends ChangeNotifier {
   double _sourceDownHeight = 0;
   String sourceLiftString = "";
   int totalSourceTurns = 0;
-  double totalSourceDistance = 0;
-
+  int totalSourceDistance = 0;
   String destinationBID;
   String destinationName;
   int destionationFloor;
@@ -36,12 +35,15 @@ class DirectionInstructionViewModel extends ChangeNotifier {
   double _destinationDownHeight = 0;
   String destinationLiftString = "";
   int totalDestinationTurns = 0;
-  double totalDestinationDistance = 0;
+  int totalDestinationDistance = 0;
 
 
   List<direction> _outdoorDirection = [];
   double _outdoorWidgetHeight = 1.1;
   double totalOutdoorLength = 0.0;
+  int totalOutdoorDistance = 0;
+
+  int totalOutdoorTurn = 0;
 
   bool _MultiBuilding = false;
 
@@ -62,7 +64,6 @@ class DirectionInstructionViewModel extends ChangeNotifier {
   DirectionInstructionViewModel(this.directionList, this.sourceBID, this.sourceName, this.sourceFloor, this.destinationBID,this.destinationName,this.destionationFloor,this.buildingData, this.context) {
     _makeList();
   }
-
   void _makeList() {
     buildingData?.forEach((k,v){
       if(k==sourceBID){
@@ -101,34 +102,42 @@ class DirectionInstructionViewModel extends ChangeNotifier {
       if(toggleForLiftFoundS){
         _sourceDownHeight+=50;
       }else{
-        _sourceUPHeight+=68;
+        _sourceUPHeight+=58;
       }
-      totalSourceTurns++;
+      if(dir.turnDirection!.contains("Turn")) {
+        totalSourceTurns++;
+      }
       if(dir.distanceToNextTurnInFeet != null) {
-        totalSourceDistance += dir.distanceToNextTurnInFeet!;
+        totalSourceDistance += (dir.distanceToNextTurnInFeet! * 0.3048).ceil();
       }
     }
     if(_MultiBuilding){
-      for (var dir in _destinationDirection) {
-        if (dir.turnDirection!.split(' ').first.toLowerCase() == "take") {
-          toggleForLiftFoundD = true;
-          destinationLiftString = dir.turnDirection.toString();
-        }
-        if(toggleForLiftFoundD){
-          _destinationDownHeight+=50;
-        }else{
-          _destinationUpHeight+=50;
-        }
-        totalDestinationTurns++;
-        if(dir.distanceToNextTurnInFeet != null) {
-          totalDestinationDistance += dir.distanceToNextTurnInFeet!;
+      if(_destinationDirection.length > 1) {
+        for (var dir in _destinationDirection) {
+          if (dir.turnDirection!.split(' ').first.toLowerCase() == "take") {
+            toggleForLiftFoundD = true;
+            destinationLiftString = dir.turnDirection.toString();
+          }
+          if (toggleForLiftFoundD) {
+            _destinationDownHeight += 50;
+          } else {
+            _destinationUpHeight += 55;
+          }
+          if(dir.turnDirection!.contains("Turn")) {
+            totalDestinationTurns++;
+          }
+          if(dir.distanceToNextTurnInFeet != null) {
+            totalDestinationDistance += (dir.distanceToNextTurnInFeet! * 0.3048).ceil();
+          }
         }
       }
-
       _outdoorWidgetHeight = 50 * _outdoorDirection.length.toDouble();
       for (var dir in _outdoorDirection) {
         if(dir.distanceToNextTurnInFeet != null) {
-          totalOutdoorLength += dir.distanceToNextTurnInFeet!;
+          totalOutdoorDistance += (dir.distanceToNextTurnInFeet! * 0.3048).ceil();
+        }
+        if(dir.turnDirection!.contains("Turn")){
+          totalOutdoorTurn++;
         }
       }
     }

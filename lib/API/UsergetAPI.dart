@@ -34,11 +34,9 @@ class UsergetAPI{
       print(responseBody);
       UsergetAPIModel currentUsergetAPI = UsergetAPIModel.fromJson(responseBody);
       print("response.statusCode--");
-      print(currentUsergetAPI.userTracking);
       print(currentUsergetAPI.username);
       print(currentUsergetAPI.sId);
       print("userTracking");
-      print(currentUsergetAPI.userTracking);
       UserCredentials().setUserId(currentUsergetAPI.sId!);
       userInfoBox.put("sId", currentUsergetAPI.sId);
       userInfoBox.put("name", currentUsergetAPI.name);
@@ -56,7 +54,6 @@ class UsergetAPI{
       userInfoBox.put("mobileVerification", currentUsergetAPI.mobileVerification);
       userInfoBox.put("username", currentUsergetAPI.username);
       print("currentUsergetAPI.userTracking");
-      print(currentUsergetAPI.userTracking);
       print(currentUsergetAPI.appId);
       userInfoBox.put("userTracking", currentUsergetAPI.userTracking??false);
       print(userInfoBox.keys);

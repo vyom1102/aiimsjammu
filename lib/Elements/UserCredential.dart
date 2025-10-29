@@ -14,7 +14,6 @@ class UserCredentials{
   String UserPathDetails = '';
   String userName = '';
 
-  var signInBox =  Hive.box('SignInDatabase');
 
   String getuserName(){
     userName = userInformationBox.get('username')??'username';
@@ -42,7 +41,6 @@ class UserCredentials{
   void setUserNavigationModeSetting(String userNavigationModeSetting){
     userInformationBox.put('UserNavigationModeSetting', userNavigationModeSetting);
   }
-
   String getuserNavigationModeSetting(){
     UserNavigationModeSetting = userInformationBox.get('UserNavigationModeSetting')??'Natural Direction';
     return UserNavigationModeSetting;
@@ -51,7 +49,6 @@ class UserCredentials{
   void setUserOrentationSetting(String userOrentationSetting){
     userInformationBox.put('UserOrentationSetting', userOrentationSetting);
   }
-
   String getUserOrentationSetting(){
     UserOrentationSetting = userInformationBox.get('UserOrentationSetting')??"Explore Mode";
     return UserOrentationSetting;
@@ -60,11 +57,15 @@ class UserCredentials{
   void setUserPathDetails(String userUserPathDetails){
     userInformationBox.put('UserPathDetails', userUserPathDetails);
   }
-
   String getUserPathDetails(){
     UserPathDetails = userInformationBox.get('UserPathDetails')??"Distance in meters";
     return UserPathDetails;
   }
+
+
+
+
+
 
   bool containsAccessToken(){
     return AccessToken.length!=0;
@@ -85,7 +86,6 @@ class UserCredentials{
   }
 
   List<dynamic> getRoles(){
-    Roles=signInBox.get("roles");
     return Roles;
   }
   void setRoles(List<dynamic> roles){

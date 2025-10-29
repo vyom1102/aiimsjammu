@@ -40,6 +40,11 @@ class PathModel {
       ),
     );
   }
+
+  static List<dynamic> fromJsonToList(dynamic jsonData){
+    return jsonData.map((data) => PathModel.fromJson(data as Map<dynamic, dynamic>)).toList();
+  }
+
 }
 
 class PathLine {

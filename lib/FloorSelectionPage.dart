@@ -1,29 +1,15 @@
-import 'dart:collection';
-import 'dart:convert';
-
 import 'package:chips_choice/chips_choice.dart';
-import 'package:easter_egg_trigger/easter_egg_trigger.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:fuzzy/data/result.dart';
-import 'package:fuzzy/fuzzy.dart';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/adapters.dart';
-import '/singletonClass.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:iwaymaps/singletonClass.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
-import '/API/buildingAllApi.dart';
+import 'API/buildingAllApi.dart';
 import 'API/ladmarkApi.dart';
 import 'APIMODELS/landmark.dart';
-import 'Elements/DestinationPageChipsWidget.dart';
-import 'Elements/HomepageFilter.dart';
-
-import 'Elements/SearchpageCategoryResult.dart';
 import 'Elements/SearchpageResults.dart';
+import 'Repository/RepositoryManager.dart';
 import 'navigationTools.dart';
 class FloorSelectionPage extends StatefulWidget {
   String filterName ;
@@ -98,7 +84,7 @@ class _FloorSelectionPageState extends State<FloorSelectionPage> {
   }
   Future<void> fetchlist()async{
     buildingAllApi.getStoredAllBuildingID().forEach((key, value)async{
-      await landmarkApi().fetchLandmarkData(id: key).then((value){
+      await RepositoryManager().getLandmarkDataNew(key).then((value){
         landmarkData.mergeLandmarks(value.landmarks);
       });
     });

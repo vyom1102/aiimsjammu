@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:geolocator/geolocator.dart';
 
 class GPS {
@@ -7,15 +8,12 @@ class GPS {
 
   // Expose the stream so other classes can listen
   Stream<Position> get positionStream => _positionController.stream;
-
   Future<void> startGpsUpdates() async {
     // Check and request location permissions
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-
     if (!serviceEnabled) {
       throw Exception('Location services are disabled.');
     }
-
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -23,11 +21,9 @@ class GPS {
         throw Exception('Location permissions are denied.');
       }
     }
-
     if (permission == LocationPermission.deniedForever) {
       throw Exception('Location permissions are permanently denied.');
     }
-
     // Start GPS subscription
     DateTime time = DateTime.now();
     _gpsSubscription = Geolocator.getPositionStream(
@@ -40,30 +36,6 @@ class GPS {
       },
     );
   }
-
-  Future<Position> getCurrentCoordinates() async {
-
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-
-    if (!serviceEnabled) {
-      throw Exception('Location services are disabled.');
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        throw Exception('Location permissions are denied.');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      throw Exception('Location permissions are permanently denied.');
-    }
-
-    return Geolocator.getCurrentPosition();
-  }
-
   void stopGpsUpdates() {
     _gpsSubscription?.cancel();
     _gpsSubscription = null;

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hive/hive.dart';
-import '/BuildingInfoScreen.dart';
-import '/DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
-import '../Navigation.dart';
+import '../DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
 
 class NavigatonFilterCard extends StatefulWidget {
   String LandmarkName;

@@ -1,28 +1,28 @@
-import 'dart:collection';
 import 'dart:math';
-import 'package:geolocator/geolocator.dart';
-import 'package:intl/intl.dart';
+
 import 'package:collection/collection.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '/singletonClass.dart';
-import '/API/buildingAllApi.dart';
-import '/Elements/UserCredential.dart';
-import '/UserState.dart';
-import '/pathState.dart';
+import 'package:intl/intl.dart';
+import 'package:iwaymaps/pannels/PinSelectionLocationModel.dart';
+import 'package:iwaymaps/pathState.dart';
+import 'package:iwaymaps/singletonClass.dart';
+import 'API/PatchApi.dart';
+import 'API/buildingAllApi.dart';
 import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart' as PDM;
-import 'API/PatchApi.dart';
 import 'APIMODELS/patchDataModel.dart';
-import 'APIMODELS/polylinedata.dart';
 import 'Cell.dart';
+import 'ELEMENTS/UserCredential.dart';
+import 'Elements/locales.dart';
 import 'Navigation.dart';
+import 'UserState.dart';
 import 'directionClass.dart';
-import 'localization/locales.dart';
 
 
 class tools {
+
   static List<PDM.Coordinates>? _cachedCordData;
   static List<Point<double>> corners = [];
   static double AngleBetweenBuildingandGlobalNorth = 0.0;
@@ -127,8 +127,8 @@ class tools {
 
   static List<double> localtoglobal(int x, int y,PDM.patchDataModel? patchData) {
 
-    x = x - UserState.xdiff;
-    y = y - UserState.ydiff;
+    // x = x - UserState.xdiff;
+    // y = y - UserState.ydiff;
 
     ////
     PDM.patchDataModel Data = PDM.patchDataModel();
@@ -287,6 +287,27 @@ class tools {
     return sqrt(dist);
   }
 
+  static List<int> extractCoordinates(String node) {
+    var parts = node.split(',');
+    return parts.sublist(1,4).map(int.parse).toList();
+  }
+
+  static String extractBid(String node) {
+    var parts = node.split(',');
+    return parts[0];
+  }
+
+  static List<String> convertToFourPointerPath(List<int> path, String bid, int floor){
+    List<String> newPath = [];
+    int numCols = SingletonFunctionController.building.floorDimenssion[bid]![floor]![0];
+    for (var node in path) {
+      int x = node % numCols;
+      int y = node ~/ numCols;
+      newPath.add("$bid,$x,$y,$floor");
+    }
+    return newPath;
+  }
+
   static String angleToClocks(double angle,context) {
     if (angle < 0) {
       angle = angle + 360;
@@ -397,33 +418,31 @@ class tools {
       return (currentDir == 'Natural Direction')
           ? "on your Front"
           : "on 12 o'clock";
-    } else if (angle > 45 && angle <= 180) {
+    }else if (angle > 45 && angle <= 180) {
       return (currentDir == 'Natural Direction')
           ? "on your Right"
           : "3 o'clock";
-    } else if (angle > 180 && angle <= 315) {
+    }else if (angle > 180 && angle <= 315) {
       return (currentDir == 'Natural Direction') ? "on your Left" : "9 o'clock";
-    } else {
+    }else{
       return (currentDir == 'Natural Direction') ? "on your Back" : "6 o'clock";
     }
   }
 
-
-  static String angleToClocksForNearestLandmarkToBeacon(double angle,context) {
+  static String angleToClocksForNearestLandmarkToBeacon(double angle,context){
     if (angle < 0) {
       angle = angle + 360;
     }
     String currentDir = UserCredentials().getuserNavigationModeSetting();
-
     if ((angle >= 315 && angle <= 360) || (angle >= 0 && angle <= 45)) {
       return (currentDir == 'Natural Direction') ? "Front" : "12 o'clock";
-    } else if (angle > 45 && angle <= 135) {
+    }else if (angle > 45 && angle <= 135) {
       return (currentDir == 'Natural Direction') ? "Right" : "3 o'clock";
-    } else if (angle > 135 && angle <= 225) {
+    }else if (angle > 135 && angle <= 225) {
       return (currentDir == 'Natural Direction') ? "Back" : "6 o'clock";
-    } else if (angle > 225 && angle < 315) {
+    }else if (angle > 225 && angle < 315) {
       return (currentDir == 'Natural Direction') ? "Left" : "9 o'clock";
-    } else {
+    }else{
       return "None";
     }
   }
@@ -431,30 +450,22 @@ class tools {
   static double calculateAngle(List<int> a, List<int> b, List<int> c) {
     double angle1 = atan2(b[1] - a[1], b[0] - a[0]);
     double angle2 = atan2(c[1] - b[1], c[0] - b[0]);
-
     double angle = (angle2 - angle1) * 180 / pi;
-
     if (angle < 0) {
       angle += 360;
     }
-
     return angle;
   }
-
   static double calculateAnglefifth(int node1, int node2, int node3, int cols) {
     List<int> a = [node1 % cols , node1 ~/cols];
     List<int> b = [node2 % cols , node2 ~/cols];
     List<int> c = [node3 % cols , node3 ~/cols];
-
     double angle1 = atan2(b[1] - a[1], b[0] - a[0]);
     double angle2 = atan2(c[1] - b[1], c[0] - b[0]);
-
     double angle = (angle2 - angle1) * 180 / pi;
-
     if (angle < 0) {
       angle += 360;
     }
-
     return angle;
   }
 
@@ -477,6 +488,17 @@ class tools {
 
   static double toRadians(double degree) {
     return degree * pi / 180.0;
+  }
+
+  static List<String> findIntermediateBuildings(List<Cell> path){
+    Set<String> bids = Set();
+    for (var node in path) {
+      if(node.bid != null){
+        bids.add(node.bid!);
+      }
+    }
+    print("findIntermediateBuildings ${bids.toList()}");
+    return bids.toList();
   }
 
   static String generateNarration(List<Map<String, dynamic>> instructions, {bool isMultiFloor = false}) {
@@ -631,20 +653,44 @@ class tools {
   //   return bearingDegrees;
   // }
 
+  static double calculatePolygonArea(List<LatLng> polygonPoints) {
+    if (polygonPoints.length < 3) return 0.0; // not a polygon
+
+    double area = 0.0;
+    for (int i = 0; i < polygonPoints.length; i++) {
+      LatLng p1 = polygonPoints[i];
+      LatLng p2 = polygonPoints[(i + 1) % polygonPoints.length];
+
+      // convert lat/lng to radians
+      double x1 = p1.longitude * (3.141592653589793 / 180.0);
+      double y1 = p1.latitude * (3.141592653589793 / 180.0);
+      double x2 = p2.longitude * (3.141592653589793 / 180.0);
+      double y2 = p2.latitude * (3.141592653589793 / 180.0);
+
+      area += (x2 - x1) * (2 +
+          sin(y1) + sin(y2));
+    }
+
+    // Earth radius in meters
+    const double earthRadius = 6378137.0;
+    area = area * earthRadius * earthRadius / 2.0;
+
+    return area.abs(); // ensure positive
+  }
+
   static double calculateBearing(List<double> pointA, List<double> pointB) {
-    double lat1 = toRadians(pointA[0]); //user
-    double lon1 = toRadians(pointA[1]); //user
-    double lat2 = toRadians(pointB[0]); //path next point
-    double lon2 = toRadians(pointB[1]); //path next point
+    double lat1 = toRadians(pointA[0]);
+    double lon1 = toRadians(pointA[1]);
+    double lat2 = toRadians(pointB[0]);
+    double lon2 = toRadians(pointB[1]);
 
     double dLon = lon2 - lon1;
 
-    double x = sin(dLon) * cos(lat2);
-    double y = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
+    double y = sin(dLon) * cos(lat2);  // Swapped
+    double x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);  // Swapped
 
-    double bearingRadians = atan2(x, y);
+    double bearingRadians = atan2(y, x);  // Note: atan2(y, x) not atan2(x, y)
     double bearingDegrees = bearingRadians * 180.0 / pi;
-    // Normalize the bearing to be within the range 0° to 360°
     bearingDegrees = (bearingDegrees + 360) % 360;
 
     return bearingDegrees;
@@ -713,10 +759,12 @@ class tools {
 
 
 
-  static double PathDistance(List<Cell> mergedList) {
+  static double PathDistance(List<Cell> mergedList, {int index = 0}) {
     double totalDistance = 0.0;
 
     if (mergedList.isEmpty) return totalDistance;
+
+    mergedList = mergedList.sublist(index);
 
     if (mergedList.every((item) => (item.bid == buildingAllApi.outdoorID && item.floor == mergedList.first.floor))) {
       for (int i = 1; i < mergedList.length; i++) {
@@ -819,6 +867,58 @@ class tools {
     return [x1, y1];
   }
 
+  static List<double> findGeoPoint(
+  double lat1, double lon1, double lat2, double lon2, double stepMeters) {
+    if(calculateAerialDist(lat1, lon1, lat2, lon2) < stepMeters) return [lat2, lon2];
+  const double earthRadius = 6371000; // meters
+
+  // Convert to radians
+  double lat1Rad = lat1 * pi / 180;
+  double lon1Rad = lon1 * pi / 180;
+  double lat2Rad = lat2 * pi / 180;
+  double lon2Rad = lon2 * pi / 180;
+
+  // Calculate the angular distance using proper haversine formula
+  double deltaLat = lat2Rad - lat1Rad;
+  double deltaLon = lon2Rad - lon1Rad;
+
+  double a = pow(sin(deltaLat / 2), 2) +
+  cos(lat1Rad) * cos(lat2Rad) * pow(sin(deltaLon / 2), 2);
+  double delta = 2 * asin(sqrt(a));
+
+  // Handle edge case: same points
+  if (delta == 0 || delta.isNaN) return [lat1, lon1];
+
+  // Calculate total distance in meters
+  double totalDistance = earthRadius * delta;
+
+  // Handle edge case: step is larger than or equal to total distance
+  if (stepMeters >= totalDistance) return [lat2, lon2];
+
+  // Fraction of total distance
+  double fraction = stepMeters / totalDistance;
+
+  // Handle edge case: very small distances (use linear interpolation)
+  if (delta < 1e-6) {
+  double newLat = lat1Rad + fraction * (lat2Rad - lat1Rad);
+  double newLon = lon1Rad + fraction * (lon2Rad - lon1Rad);
+  return [newLat * 180 / pi, newLon * 180 / pi];
+  }
+
+  // Spherical linear interpolation (SLERP)
+  double A = sin((1 - fraction) * delta) / sin(delta);
+  double B = sin(fraction * delta) / sin(delta);
+
+  double x = A * cos(lat1Rad) * cos(lon1Rad) + B * cos(lat2Rad) * cos(lon2Rad);
+  double y = A * cos(lat1Rad) * sin(lon1Rad) + B * cos(lat2Rad) * sin(lon2Rad);
+  double z = A * sin(lat1Rad) + B * sin(lat2Rad);
+
+  double newLat = atan2(z, sqrt(x * x + y * y));
+  double newLon = atan2(y, x);
+
+  return [newLat * 180 / pi, newLon * 180 / pi];
+  }
+
 
   static int stepsToReachTarget(int x1, int y1, int x2, int y2, Map<String, double> data) {
     print("$x1, $y1, $x2, $y2, $data");
@@ -848,9 +948,22 @@ class tools {
 
   static Cell findingprevpoint(List<Cell> path, int index){
 
+    List<Map<String, dynamic>> imaginedIndicesWithCoordinates = path
+        .asMap()
+        .entries
+        .where((entry) => !entry.value.imaginedCell)
+        .map((entry) => {
+      'index': entry.key,
+      'x': entry.value.x,
+      'y': entry.value.y,
+    })
+        .toList();
+
+    print("imaginedIndicesWithCoordinates $imaginedIndicesWithCoordinates");
+
     for(int i = index-1; i>=0; i--){
-      if(!path[i].imaginedCell){
-        print("found point without imagined Cell ${path[i].x},${path[i].y}");
+      if(!path[i].imaginedCell && path[i].floor == path[index].floor && path[i].bid == path[index].bid){
+        print("found point without imagined Cell $i ${path[i].x},${path[i].y}");
          return path[i];
       }
     }
@@ -861,7 +974,7 @@ class tools {
   static Cell findingnextpoint(List<Cell> path, int index){
 
     for(int i = index+1; i<=path.length; i++){
-      if(!path[i].imaginedCell){
+      if(!path[i].imaginedCell && path[i].floor == path[index].floor && path[i].bid == path[index].bid){
         print("found point without imagined Cell ${path[i].x},${path[i].y}");
         return path[i];
       }
@@ -888,11 +1001,14 @@ class tools {
     int x3 = C[0], y3 = C[1];
 
     // Check if C is within the bounding box of A and B
-    bool withinBounds = (x1 == x2)
-        ? (y3 >= min(y1, y2) && y3 <= max(y1, y2)) // Only check y for vertical lines
-        : (x3 >= min(x1, x2) && x3 <= max(x1, x2)) &&
-        (y3 >= min(y1, y2) && y3 <= max(y1, y2));
-
+    bool withinBounds = false;
+    if(x1 == x2){
+      withinBounds = true;
+    }else if(y1 == y2){
+      withinBounds = (x3 >= min(x1, x2) && x3 <= max(x1, x2));
+    }else{
+      withinBounds = (x3 >= min(x1, x2) && x3 <= max(x1, x2)) && (y3 >= min(y1, y2) && y3 <= max(y1, y2));
+    }
 
     if (!withinBounds) return double.infinity; // C is not between A and B
 
@@ -962,9 +1078,11 @@ class tools {
   }
 
 
-  static List<Cell>? findSegmentContainingPoint(List<Cell> points, int index) {
+  static List<Cell>? findSegmentContainingPoint(List<Cell> points, int index, {bool filterLong = true}) {
     List<List<Cell>> segments = findStraightSegments(points);
-    segments = filterLongSegments(segments);
+    if(filterLong){
+      segments = filterLongSegments(segments);
+    }
 
     for (List<Cell> segment in segments) {
       if (segment.first == points[index] || segment.last == points[index] ||
@@ -1047,6 +1165,10 @@ class tools {
     // Step 3: Calculate the closest integers
     int base = numerator ~/ n;  // Base value for each integer (typically 2 or 3)
     int remainder = numerator % n;  // The remainder to distribute
+
+    if(remainder == 0){
+      return [double.parse(d.toStringAsFixed(1)).toInt()];
+    }
 
     // Step 4: Generate the list with base values (minimum integers)
     List<int> integers = List.generate(n, (i) => base);
@@ -1146,15 +1268,17 @@ class tools {
   }
 
 
-  static void setBuildingAngle(String angle){
+  static double setBuildingAngle(String angle){
     AngleBetweenBuildingandGlobalNorth = double.parse(angle);
     AngleBetweenBuildingandGlobalNorth = AngleBetweenBuildingandGlobalNorth + 90;
     if(AngleBetweenBuildingandGlobalNorth>360){
       AngleBetweenBuildingandGlobalNorth=AngleBetweenBuildingandGlobalNorth-360;
     }
+    return AngleBetweenBuildingandGlobalNorth;
   }
 
   static bool isNowBetween(String startTime, String endTime) {
+    try{
     // Get the current time
     DateTime now = DateTime.now();
 
@@ -1176,8 +1300,113 @@ class tools {
 
     // Check if now is between startTime and endTime
     return now.isAfter(startDateTime) && now.isBefore(endDateTime);
+    }catch(e){
+      return false;
+    }
   }
 
+  static LatLng calculateRoomCenter(List<LatLng> polygonPoints) {
+    double earthRadius = 6371000; // Earth radius in meters
+    if (polygonPoints.isEmpty) {
+      throw ArgumentError('Polygon points cannot be empty');
+    }
+
+    // Choose the first point as reference
+    double lat0 = polygonPoints[0].latitude * pi / 180;
+    double lng0 = polygonPoints[0].longitude * pi / 180;
+
+    // Convert LatLng to local Cartesian (x, y) in meters
+    List<Point<double>> points = polygonPoints.map((point) {
+      double latRad = point.latitude * pi / 180;
+      double lngRad = point.longitude * pi / 180;
+
+      double x = (lngRad - lng0) * cos(lat0) * earthRadius;
+      double y = (latRad - lat0) * earthRadius;
+
+      return Point<double>(x, y);
+    }).toList();
+
+    // Compute centroid in local coordinates
+    double signedArea = 0.0;
+    double centroidX = 0.0;
+    double centroidY = 0.0;
+    int n = points.length;
+
+    for (int i = 0; i < n; i++) {
+      Point<double> current = points[i];
+      Point<double> next = points[(i + 1) % n];
+
+      double cross = (current.x * next.y) - (next.x * current.y);
+      signedArea += cross;
+      centroidX += (current.x + next.x) * cross;
+      centroidY += (current.y + next.y) * cross;
+    }
+
+    signedArea *= 0.5;
+
+    if (signedArea == 0) {
+      // Fallback: Average lat/lng if polygon is degenerate
+      double avgLat = 0.0;
+      double avgLng = 0.0;
+      for (var pt in polygonPoints) {
+        avgLat += pt.latitude;
+        avgLng += pt.longitude;
+      }
+      return LatLng(avgLat / n, avgLng / n);
+    }
+
+    centroidX /= (6 * signedArea);
+    centroidY /= (6 * signedArea);
+
+    // Convert centroid back to LatLng
+    double centroidLat = (centroidY / earthRadius + lat0) * 180 / pi;
+    double centroidLng = (centroidX / (earthRadius * cos(lat0)) + lng0) * 180 / pi;
+
+    return LatLng(centroidLat, centroidLng);
+  }
+
+  static Point<double> calculateGridPolygonCenter(List<List<int>> polygonPoints) {
+    if (polygonPoints.isEmpty) {
+      throw ArgumentError('Polygon points cannot be empty');
+    }
+
+    // Convert to Point<double>
+    List<Point<double>> points = polygonPoints
+        .map((coords) => Point<double>(coords[0].toDouble(), coords[1].toDouble()))
+        .toList();
+
+    double signedArea = 0.0;
+    double centroidX = 0.0;
+    double centroidY = 0.0;
+    int n = points.length;
+
+    for (int i = 0; i < n; i++) {
+      Point<double> current = points[i];
+      Point<double> next = points[(i + 1) % n];
+
+      double cross = (current.x * next.y) - (next.x * current.y);
+      signedArea += cross;
+      centroidX += (current.x + next.x) * cross;
+      centroidY += (current.y + next.y) * cross;
+    }
+
+    signedArea *= 0.5;
+
+    if (signedArea == 0) {
+      // Fallback: average of points
+      double avgX = 0.0, avgY = 0.0;
+      for (var pt in points) {
+        avgX += pt.x;
+        avgY += pt.y;
+      }
+      return Point<double>(avgX / n, avgY / n);
+    }
+
+    centroidX /= (6 * signedArea);
+    centroidY /= (6 * signedArea);
+
+    return Point<double>(centroidX, centroidY);
+  }
 
   static double calculateAngleBWUserandPath(UserState user, int node , int cols) {
     List<int> a = [user.showcoordX, user.showcoordY];
@@ -1287,13 +1516,6 @@ class tools {
     List<int> b = [user.x+tval[0], user.y+tval[1]];
     List<int> c = [node.x , node.y];
 
-
-    //
-    //
-    //
-    //
-    //
-    // //
     // Convert the points to vectors
     List<int> ab = [b[0] - a[0], b[1] - a[1]];
     List<int> ac = [c[0] - a[0], c[1] - a[1]];
@@ -1321,6 +1543,9 @@ class tools {
 
     // Convert radians to degrees
     double angleInDegrees = angleInRadians * 180 / pi;
+
+
+
 
 
     return angleInDegrees;
@@ -1454,26 +1679,41 @@ class tools {
 
     return angleInDegrees;
   }
+  static List<Cell> findTurnPoints(List<Cell> points) {
+    List<Cell> turnPoints = [];
+
+    for (int i = 1; i < points.length - 1; i++) {
+      if (points[i - 1].imaginedCell || points[i].imaginedCell || points[i + 1].imaginedCell) {
+        continue;
+      }
+
+      double turnAngle = angle(points[i - 1], points[i], points[i + 1]);
+
+      if (turnAngle > 22.5) {
+        turnPoints.add(points[i]);
+      }
+    }
+    return turnPoints;
+  }
 
   static List<direction> getDirections(List<Cell> path,Map<int,Landmarks> associateTurnWithLandmark,pathState PathState,List<direction?> lifts, context) {
     print("liftdirection checker in tools $lifts");
-    List<Cell> turns = tools.getTurnpoints_inCell(path);
+    List<Cell> turns = tools.findTurnPoints(path);
     turns.insert(0, path[0]);
     turns.add(path.last);
     print("turns $turns");
-    double Nextdistance = tools.calculateAerialDist(turns[0].lat,turns[0].lng, turns[1].lat,turns[1].lng);
+    double Nextdistance = tools.calculateDistance([turns[0].x,turns[0].y], [turns[1].x,turns[1].y]);
     print("adding turn distance as $Nextdistance between ${[turns[0].x,turns[0].y]} and ${[turns[1].x,turns[1].y]}");
 
     List<direction> Directions = [direction(path[0].node, "Straight", null, Nextdistance, null,path[0].x,path[0].y,path[0].floor,path[0].bid,numCols:path[0].numCols)];
-    print("liftdirection checker in tools $lifts");
     for(int i = 1 ; i<turns.length-1 ; i++){
+      print("i $i turns[i] ${turns[i].x},${turns[i].y}  turns[i-1] ${turns[i-1].x},${turns[i-1].y} Directions ${Directions.isNotEmpty?Directions.last.turnDirection:"none"}");
       if(turns[i].bid != turns[i-1].bid || turns[i].floor != turns[i-1].floor){
-        if(lifts.isNotEmpty){
-          if(lifts.isNotEmpty && lifts.last != null){
-            Directions.insert(Directions.length-1, lifts.removeLast()!);
-          }else{
-            lifts.removeLast();
-          }
+        if(lifts.last != null){
+          print("i $i");
+          Directions.add(lifts.removeLast()!);
+        }else{
+          lifts.removeLast();
         }
       }
       if(turns[i].bid != turns[i+1].bid){
@@ -1485,11 +1725,11 @@ class tools {
       print("adding turn distance as $Nextdistance between ${[turns[i].x,turns[i].y]} and ${[turns[i+1].x,turns[i+1].y]} distance $Nextdistance and $Prevdistance");
 
       double angle = tools.calculateAnglefifth_inCell(path[index-1], path[index], path[index+1]);
-      if(path[index-1].bid != path[index].bid){
+      if(path[index-1].bid != path[index].bid || path[index-1].floor != path[index].floor){
         angle = 0;
       }
       String direc = tools.angleToClocks(angle,context);
-      Directions.add(direction(turns[i].node, direc, associateTurnWithLandmark[turns[i]], Nextdistance, Prevdistance,turns[i].x,turns[i].y,turns[i].floor,turns[i].bid,numCols:turns[i].numCols));
+      Directions.add(direction(turns[i].node, direc, associateTurnWithLandmark[turns[i]], Nextdistance.ceil().toDouble(), Prevdistance.ceil().toDouble(),turns[i].x,turns[i].y,turns[i].floor,turns[i].bid,numCols:turns[i].numCols));
     }
     Directions.add(direction(turns.last.node, "Straight", null, 1, null,turns.last.x,turns.last.y,turns.last.floor,turns.last.bid,numCols:turns.last.numCols));
     return Directions;
@@ -1592,61 +1832,45 @@ class tools {
     return point;
   }
 
-  static Future<Map<Landmarks,List<int>>> findFloorTransitionPoints(List<String> path) async {
-
-    Map<String, Landmarks> landmarksMap = Map();
-    await SingletonFunctionController.building.landmarkdata!.then((value){
-      landmarksMap = value.landmarksMap??Map();
-    });
-    Map<Landmarks,List<int>> nodes = Map();
-    for(int i = 0; i<path.length-1; i++){
-      String currentBid = extractBid(path[i]);
-      String nextBid = extractBid(path[i+1]);
-      List<int> currentPoint = extractCoordinates(path[i]);
-      int currentFloor = currentPoint[2];
-      List<int> nextPoint = extractCoordinates(path[i+1]);
-      int nextFloor = nextPoint[2];
-      if(currentBid == nextBid && currentFloor != nextFloor){
-        double d = double.infinity;
-        Landmarks? lm ;
-        landmarksMap.forEach((key,landmark){
-          if(landmark.buildingID == currentBid && landmark.floor == currentFloor){
-            double distance = calculateDistance([landmark.doorX??landmark.coordinateX!,landmark.doorY??landmark.coordinateY!], [currentPoint[0],currentPoint[1]]);
-            if(distance<d){
-              d = distance;
-              lm = landmark;
-            }
-          }
-        });
-        if(lm !=null){
-          nodes.putIfAbsent(lm!, ()=>[currentFloor,nextFloor]);
-        }
-      }
-    }
-    return nodes;
-  }
-
   static List<Landmarks> findNearbyLandmark(
       List<Cell> path,
       Map<String, Landmarks> landmarksMap,
       int distance) {
+    List<Cell> turnPoints = tools.getTurnpoints_inCell(path);
     List<Landmarks> nearbyLandmarks = [];
+
     for (Cell node in path) {
       landmarksMap.forEach((key, value) {
-        if (node.floor == value.floor && value.name != null && value.buildingID == node.bid && value.element!.subType != "beacons" && value.element!.subType != "lift") {
-          List<int> pCoord = [node.x,node.y];
+        if (node.floor == value.floor &&
+            value.name != null &&
+            value.buildingID == node.bid &&
+            value.element!.subType != "beacons" &&
+            value.element!.subType != "lift") {
+          List<int> pCoord = [node.x, node.y];
           double d = 0.0;
-          if (value.doorX == null) {
-            d = calculateDistance(
-                pCoord, [value.coordinateX!, value.coordinateY!]);
-          } else {
 
+          if (value.doorX == null) {
+            d = calculateDistance(pCoord, [value.coordinateX!, value.coordinateY!]);
+          } else {
             d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
           }
+
           if (d < distance) {
+            // ✅ Extra check: ensure landmark is not within 10 feet of any turn point
+            bool tooCloseToTurnPoint = turnPoints.any((tp) {
+              double turnDist;
+              if (value.doorX == null) {
+                turnDist = calculateDistance(
+                    [tp.x, tp.y], [value.coordinateX!, value.coordinateY!]);
+              } else {
+                turnDist = calculateDistance(
+                    [tp.x, tp.y], [value.doorX!, value.doorY!]);
+              }
+              return turnDist <= 10; // 10 feet threshold
+            });
 
-            if (!nearbyLandmarks.contains(value)) {
-
+            if (!tooCloseToTurnPoint &&
+                !nearbyLandmarks.contains(value)) {
               nearbyLandmarks.add(value);
             }
           }
@@ -1658,16 +1882,13 @@ class tools {
 
 
   static Landmarks? localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
-
     PriorityQueue<MapEntry<Landmarks, double>> priorityQueue = PriorityQueue<MapEntry<Landmarks, double>>((a, b) => a.value.compareTo(b.value));
-    int distance=20;
+    int distance=100;
     List<int> pCoord = [];
     pCoord.add(Beacon.coordinateX!);
     pCoord.add(Beacon.coordinateY!);
     landmarksMap.forEach((key, value) {
-
-      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" &&  value.element?.subType != "AR" &&
-          value.element?.subType != "Alert" && value.coordinateX!=null){
+      if(Beacon.buildingID == value.buildingID && value.element!.subType != "beacons" && value.coordinateX!=null){
         if (Beacon.floor! == value.floor) {
           double d = 0.0;
           if (value.doorX != null) {
@@ -1684,7 +1905,7 @@ class tools {
         }
       }
     });
-
+print("priority queuee:${priorityQueue}");
     Landmarks? nearestLandmark;
     if(priorityQueue.isNotEmpty){
       MapEntry<Landmarks, double> entry = priorityQueue.removeFirst();
@@ -1700,18 +1921,14 @@ class tools {
         }
       });
     }
-
     return nearestLandmark;
   }
 
-  static List<Landmarks>? findListOfNearbyLandmark(
-      beacon beacon, Map<String, Landmarks> landmarksMap) {
+  static List<Landmarks>? findListOfNearbyLandmarkBLE(Pinselectionlocationmodel location, Map<String, Landmarks> landmarksMap, {double maxDistance = 4.0}) {
 
     List<Landmarks> queue = [];
     List<Landmarks> nodesQueue = [];
     Set<String> visitedNodes = {}; // Stores visited coordinates
-    int maxDistance = 10;
-    List<int> beaconCoords = [beacon.coordinateX!, beacon.coordinateY!];
 
     // Helper function to check if a node is already present
     bool isAlreadyPresent(int x, int y) {
@@ -1720,17 +1937,36 @@ class tools {
 
     // Find nearby landmarks
     for (var landmark in landmarksMap.values) {
-      if (beacon.buildingID == landmark.buildingID &&
+      if (location.bid == landmark.buildingID &&
           landmark.element?.subType != "beacons" &&
-          landmark.coordinateX != null &&
-          beacon.floor == landmark.floor) {
+          landmark.properties!.latitude != null &&
+          location.floor == landmark.floor) {
 
-        double distance = landmark.doorX != null
-            ? calculateDistance(beaconCoords, [landmark.doorX!, landmark.doorY!])
-            : calculateDistance(beaconCoords, [landmark.coordinateX!, landmark.coordinateY!]);
+        // double distance = calculateAerialDist(location.lat, location.lng, double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!));
+        double distance = calculateDistance([location.coordX!, location.coordY!], [landmark.doorX??landmark.coordinateX!, landmark.doorY??landmark.coordinateY!]) * 0.3048;
+        print("distance for ${landmark.name} is $distance");
 
         if (distance < maxDistance) {
+          print("adding ${landmark.name} in queue");
           queue.add(landmark);
+        }
+      }
+    }
+
+    if(queue.isEmpty){
+      for (var landmark in landmarksMap.values) {
+        if (location.bid == landmark.buildingID &&
+            landmark.element?.subType != "beacons" &&
+            landmark.properties!.latitude != null &&
+            location.floor == landmark.floor) {
+
+          double distance = calculateAerialDist(location.lat, location.lng, double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!));
+          print("distance for ${landmark.name} is $distance");
+
+          if (distance < 5) {
+            print("adding ${landmark.name} in queue");
+            queue.add(landmark);
+          }
         }
       }
     }
@@ -1748,14 +1984,14 @@ class tools {
 
     // Process waypoints
     var polylineData = SingletonFunctionController.building.polylinedatamap;
-    if (polylineData.containsKey(beacon.buildingID) && queue.isNotEmpty) {
-      for (var floor in polylineData[beacon.buildingID]!.polyline!.floors!) {
+    if (polylineData.containsKey(location.bid) && queue.isNotEmpty) {
+      for (var floor in polylineData[location.bid]!.polyline!.floors!) {
         for (var polyline in floor.polyArray!) {
           if (polyline.polygonType == "Waypoints" &&
-              polyline.floor == tools.numericalToAlphabetical(beacon.floor ?? 0)) {
+              polyline.floor == tools.numericalToAlphabetical(location.floor ?? 0)) {
 
             for (var node in polyline.nodes!) {
-              double distance = calculateDistance(beaconCoords, [node.coordx!, node.coordy!]);
+              double distance = calculateAerialDist(location.lat, location.lng, node.lat!, node.lon!);
               if (distance < maxDistance && !isAlreadyPresent(node.coordx!, node.coordy!)) {
 
                 print("Found waypoint close to beacon");
@@ -1779,7 +2015,7 @@ class tools {
                   ..properties!.isWaypoint = true
                   ..sId = node.sId;
 
-                nodesQueue.add(duplicateLandmark);
+                // nodesQueue.add(duplicateLandmark);
                 visitedNodes.add('${node.coordx},${node.coordy}');
               }
             }
@@ -1797,6 +2033,90 @@ class tools {
 
     return queue.isNotEmpty ? queue : null;
   }
+
+  static List<Landmarks>? findNearbyLandmarksFromFingerprintPoint(
+      FingerPrintPoint point,
+      Map<String, Landmarks> landmarksMap,
+      int maxDistance,
+      {bool includeWaypoints = true}) {
+
+    List<Landmarks> landmarkQueue = [];
+    List<Landmarks> waypointQueue = [];
+    Set<String> visitedNodes = {};
+
+    List<int> fingerprintCoords = [point.fingerX, point.fingerY];
+
+    // Check if node is already added
+    bool isAlreadyPresent(int x, int y) => visitedNodes.contains('$x,$y');
+
+    // Filter nearby landmarks
+    for (var landmark in landmarksMap.values) {
+      if (point.fingerBid == landmark.buildingID &&
+          point.fingerFloor == landmark.floor &&
+          landmark.coordinateX != null &&
+          landmark.element?.subType != "beacons") {
+
+        double distance = landmark.doorX != null
+            ? calculateDistance(fingerprintCoords, [landmark.doorX!, landmark.doorY!])
+            : calculateDistance(fingerprintCoords, [landmark.coordinateX!, landmark.coordinateY!]);
+
+        if (distance < maxDistance) {
+          landmarkQueue.add(landmark);
+        }
+      }
+    }
+
+    // Include waypoints from polyline data
+    if (includeWaypoints && SingletonFunctionController.building.polylinedatamap.containsKey(point.fingerBid) && landmarkQueue.isNotEmpty) {
+      var polylineData = SingletonFunctionController.building.polylinedatamap[point.fingerBid]!;
+
+      for (var floor in polylineData.polyline!.floors!) {
+        for (var polyline in floor.polyArray!) {
+          if (polyline.polygonType == "Waypoints" &&
+              polyline.floor == tools.numericalToAlphabetical(point.fingerFloor)) {
+
+            for (var node in polyline.nodes!) {
+              double distance = calculateDistance(fingerprintCoords, [node.coordx!, node.coordy!]);
+              if (distance < maxDistance && !isAlreadyPresent(node.coordx!, node.coordy!)) {
+
+                // Get closest landmark
+                var closestLandmark = landmarkQueue.reduce((a, b) =>
+                calculateDistance([node.coordx!, node.coordy!], [a.coordinateX!, a.coordinateY!]) <
+                    calculateDistance([node.coordx!, node.coordy!], [b.coordinateX!, b.coordinateY!])
+                    ? a
+                    : b);
+
+                var duplicateLandmark = Landmarks.fromJson(closestLandmark.toJson());
+                duplicateLandmark
+                  ..coordinateX = node.coordx
+                  ..coordinateY = node.coordy
+                  ..doorX = node.coordx
+                  ..doorY = node.coordy
+                  ..properties!.latitude = node.lat.toString()
+                  ..properties!.longitude = node.lon.toString()
+                  ..properties!.isWaypoint = true
+                  ..sId = node.sId;
+
+                waypointQueue.add(duplicateLandmark);
+                visitedNodes.add('${node.coordx},${node.coordy}');
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Combine and sort all landmarks by distance
+    List<Landmarks> allNearby = [...landmarkQueue, ...waypointQueue];
+    allNearby.sort((a, b) {
+      double distanceA = calculateDistance(fingerprintCoords, [a.coordinateX!, a.coordinateY!]);
+      double distanceB = calculateDistance(fingerprintCoords, [b.coordinateX!, b.coordinateY!]);
+      return distanceA.compareTo(distanceB);
+    });
+
+    return allNearby.isNotEmpty ? allNearby : null;
+  }
+
 
 
   static Landmarks? localizefindNearbyLandmarkSecond(UserState user, Map<String, Landmarks> landmarksMap,{bool increaserange = false}) {
@@ -2030,37 +2350,32 @@ class tools {
     return sqrt(pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2));
   }
 
-  static List<int> extractCoordinates(String node) {
-    var parts = node.split(',');
-    return parts.sublist(1).map(int.parse).toList();
-  }
+  static bool isPointNearLine(List<int> point, List<int> a, List<int> b, {double tolerance = 3.0}) {
+    // Compute perpendicular distance from point to line segment AB
+    final px = point[0].toDouble();
+    final py = point[1].toDouble();
+    final ax = a[0].toDouble();
+    final ay = a[1].toDouble();
+    final bx = b[0].toDouble();
+    final by = b[1].toDouble();
 
-  static String extractBid(String node) {
-    var parts = node.split(',');
-    return parts[0];
-  }
+    final dx = bx - ax;
+    final dy = by - ay;
 
-  static List<String> findIntermediateBuildings(List<Cell> path){
-    Set<String> bids = Set();
-    for (var node in path) {
-      if(node.bid != null){
-        bids.add(node.bid!);
-      }
+    if (dx == 0 && dy == 0) {
+      // A and B are the same point
+      return sqrt(pow(px - ax, 2) + pow(py - ay, 2)) <= tolerance;
     }
-    print("findIntermediateBuildings ${bids.toList()}");
-    return bids.toList();
+
+    final t = ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy);
+    final closestX = ax + t * dx;
+    final closestY = ay + t * dy;
+
+    final dist = sqrt(pow(px - closestX, 2) + pow(py - closestY, 2));
+    print("distance is :${dist}");
+    return dist <= tolerance && t >= 0 && t <= 1;
   }
 
-  static List<String> convertToFourPointerPath(List<int> path, String bid, int floor){
-    List<String> newPath = [];
-    int numCols = SingletonFunctionController.building.floorDimenssion[bid]![floor]![0];
-    for (var node in path) {
-      int x = node % numCols;
-      int y = node ~/ numCols;
-      newPath.add("$bid,$x,$y,$floor");
-    }
-    return newPath;
-  }
 
   static List<int> findLocalCoordinates(Cell A, Cell C, List<double> globalB) {
     // Step 1: Calculate the parameter `t` (the proportion of B on the line AC in the global system)
@@ -2169,21 +2484,21 @@ class tools {
     if (angle < 0) {
       angle = angle + 360;
     }
-    if (angle >= 345 || angle <= 15) {
+    if (angle >= 337.5 || angle <= 22.5) {
       return [0, -1];
-    } else if (angle > 30 && angle <= 60) {
+    } else if (angle > 22.5 && angle <= 67.5) {
       return [1, -1];
-    } else if (angle > 75 && angle <= 105) {
+    } else if (angle > 67.5 && angle <= 112.5) {
       return [1, 0];
-    } else if (angle > 120 && angle <= 150) {
+    } else if (angle > 112.5 && angle <= 157.5) {
       return [1, 1];
-    } else if (angle > 165 && angle <= 195) {
+    } else if (angle > 157.5 && angle <= 202.5) {
       return [0, 1];
-    } else if (angle > 210 && angle <= 240) {
+    } else if (angle > 202.5 && angle <= 247.5) {
       return [-1, 1];
-    } else if (angle > 255 && angle <= 285) {
+    } else if (angle > 247.5 && angle <= 292.5) {
       return [-1, 0];
-    } else if (angle > 300 && angle <= 330) {
+    } else if (angle > 292.5 && angle <= 337.5) {
       return [-1, -1];
     } else {
       return [0, 0];
@@ -2314,8 +2629,6 @@ class tools {
       if(dotProduct == 0){
         turns.add(currPos);
       }
-
-
     }
 
     turns.forEach((turn) {
@@ -2380,137 +2693,57 @@ class tools {
     return res;
   }
 
-  static List<String> getTurnPointsFromString(List<String> pathNodes){
-    List<String> res=[];
-
-    for(int i=1;i<pathNodes.length-1;i++){
-
-
-
-      String currPos = pathNodes[i];
-      String nextPos=pathNodes[i+1];
-      String prevPos=pathNodes[i-1];
-
-      List<int> currPoint = extractCoordinates(currPos);
-      int x1 = currPoint[0];
-      int y1 = currPoint[1];
-
-      List<int> nextPoint = extractCoordinates(nextPos);
-      int x2 = nextPoint[0];
-      int y2 = nextPoint[1];
-
-      List<int> prevPoint = extractCoordinates(prevPos);
-      int x3 = prevPoint[0];
-      int y3 = prevPoint[1];
-
-      int prevDeltaX=x1-x3;
-      int prevDeltaY=y1-y3;
-      int nextDeltaX=x2-x1;
-      int nextDeltaY=y2-y1;
-
-      if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
-        if(prevDeltaX==0 && nextDeltaX==0){
-
-        }else if(prevDeltaY==0 && nextDeltaY==0){
-
-        }else{
-
-          res.add(currPos);
+  static Cell? findPrevTurn(List<Cell> turns, List<Cell> path, int index) {
+    int? prevTurn;
+    // Iterate through the sorted list
+    for (int i = index; i >=0; i--) {
+      for (int j = 0; j < turns.length; j++) {
+        if (path[i].x == turns[j].x && path[i].y == turns[j].y) {
+          print("turns[j].x ${turns[j].x},${turns[j].y}");
+          prevTurn = i;
+          prevTurn = i;
+          if(prevTurn>0){
+            return path[prevTurn-1];
+          }else{
+            return path[prevTurn];
+          }
         }
-
       }
-
-
-
     }
-    return res;
+    print("path.length index ${path.length} $index");
+    // If no number is greater than the target, return null
+    if (path.length >= index) {
+      return path[index];
+    } else {
+      return null;
+    }
+  }
+
+  static Cell? findNextTurn(List<Cell> turns, List<Cell> path, int index) {
+    // Iterate through the sorted list
+    for (int i = index; i < path.length; i++) {
+      for (int j = 0; j < turns.length; j++) {
+        if (path[i] == turns[j]) {
+          return path[i];
+        }
+      }
+    }
+
+    // If no number is greater than the target, return null
+    if (path.length >= index) {
+      return path[index];
+    } else {
+      return null;
+    }
   }
 
   static List<Cell> getTurnpoints_inCell(List<Cell> pathNodes){
     List<Cell> res=[];
 
-
-
     for(int i=1;i<pathNodes.length-1;i++){
-
-
-
-      Cell currPos = pathNodes[i];
-      Cell nextPos=pathNodes[i+1];
-      Cell prevPos=pathNodes[i-1];
-
-      int x1 = (currPos.x);
-      int y1 = (currPos.y);
-
-      int x2 = (nextPos.x);
-      int y2 = (nextPos.y);
-
-      int x3 = (prevPos.x);
-      int y3 = (prevPos.y);
-
-      int prevDeltaX=x1-x3;
-      int prevDeltaY=y1-y3;
-      int nextDeltaX=x2-x1;
-      int nextDeltaY=y2-y1;
-
-      if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
-        if(prevDeltaX==0 && nextDeltaX==0){
-
-        }else if(prevDeltaY==0 && nextDeltaY==0){
-
-        }else{
-          print("adding turn ${currPos.x},${currPos.y}");
-          res.add(currPos);
-        }
-
-      }
-
-
-
-    }
-    return res;
-  }
-
-  static List<Cell> getCellTurnpoints(List<Cell> pathNodes){
-    List<Cell> res=[];
-
-
-
-    for(int i=1;i<pathNodes.length-1;i++){
-
-
-      if(pathNodes[i].bid == buildingAllApi.outdoorID){
+      if(tools.angle(pathNodes[i-1], pathNodes[i], pathNodes[i+1]) > 46){
         res.add(pathNodes[i]);
-        continue;
       }
-
-
-
-      Cell currPos = pathNodes[i];
-      Cell nextPos=pathNodes[i+1];
-      Cell prevPos=pathNodes[i-1];
-
-
-      int prevDeltaX=currPos.x-prevPos.x;
-      int prevDeltaY=currPos.y-prevPos.y;
-      int nextDeltaX=nextPos.x-currPos.x;
-      int nextDeltaY=nextPos.y-currPos.y;
-
-      if((prevDeltaX!=nextDeltaX)|| (prevDeltaY!=nextDeltaY)){
-        if(prevDeltaX==0 && nextDeltaX==0){
-
-        }else if(prevDeltaY==0 && nextDeltaY==0){
-
-        }else{
-
-
-          res.add(currPos);
-        }
-
-      }
-
-
-
     }
     return res;
   }
@@ -2858,6 +3091,18 @@ class tools {
       default:
         return 'Invalid clock direction';
     }
+  }
+
+  static double? findPathLeft(List<Cell> points, int index){
+    List<Cell>? segment = tools.findSegmentContainingPoint(points, index);
+    if(segment == null) return null;
+    Cell user = points[index];
+    double distanceBetweenSegment = calculateAerialDist(segment[1].lat, segment[1].lng, segment[0].lat, segment[0].lng);
+    double distanceBetweenUser = calculateAerialDist(segment[1].lat, segment[1].lng, user.lat, user.lng);
+    print(" distanceBetweenSegment $distanceBetweenSegment distanceBetweenUser $distanceBetweenUser");
+    double value = distanceBetweenUser/distanceBetweenSegment;
+    print("pathLeft $value");
+    return value;
   }
 
 }

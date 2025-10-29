@@ -6,12 +6,23 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:intl/intl.dart' as intl;
+
 import 'dart:ui';
+import 'package:app_settings/app_settings.dart';
+import 'package:device_meta/device_meta.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:iwaymaps/APIMODELS/GlobalAnnotationModel.dart';
+import 'package:iwaymaps/APIMODELS/landmark.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/GlobalSearch.dart';
+import 'package:iwaymaps/MODELS/RoadInfo.dart';
+import 'package:iwaymaps/pannels/PinSelectionLocationModel.dart';
 import 'package:iwaymaps/websocket/PushNotifications.dart';
+import 'package:iwaymaps/websocket/interactionManager.dart';
 import 'package:iwaymaps/websocket/navigationLogManager.dart';
 import 'package:iwaymaps/websocket/navigationLogModel.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:universal_ble/universal_ble.dart';
 import '/ELEMENTS/PickupLocationPin.dart';
 import '/pannels/PinLandmarkPannel.dart';
 import '/path.dart';
@@ -57,7 +68,6 @@ import 'API/RatingsaveAPI.dart';
 import 'API/outBuilding.dart';
 import 'API/waypoint.dart';
 import 'APIMODELS/DataVersion.dart';
-import 'APIMODELS/landmark.dart';
 import 'APIMODELS/outdoormodel.dart';
 import 'BluetoothScanAndroidClass.dart';
 import 'BluetoothScanIOSClass.dart';
@@ -69,13 +79,25 @@ import 'ELEMENTS/DirectionHeader.dart';
 import 'ELEMENTS/DirectionInstruction.dart';
 import 'ELEMENTS/ExploreModeWidget.dart';
 import 'Elements/AccessiblePathButton.dart';
+import 'EventModel/EventStatus.dart';
+import 'EventModel/EventsState.dart';
+import 'EventModel/UI/card.dart';
+import 'GPSBuffer.dart';
 import 'GPSService.dart';
 import 'GlobalAnnotation/global_annotation_controller.dart';
 import 'GlobalAnnotation/global_rendering.dart';
+import 'MODELS/MarkerIconWithAnchor.dart';
+import 'MapMarkerCluster/MarkerClustering.dart';
+import 'MapMarkerCluster/PointForCenter.dart';
+import 'MapMarkerCluster/PolygonCalculations.dart';
+import 'PlayPreview/PlayPreviewManager.dart';
+import 'Repository/RepositoryManager.dart';
+import 'Sensor/SensorManager.dart';
 import 'UserState.dart';
 import 'VersioInfo.dart';
 import 'ViewModel/DirectionInstructionViewModel.dart';
 import 'centeroid.dart';
+import 'config.dart';
 import 'dijkastra.dart';
 import 'directionClass.dart';
 import 'package:chips_choice/chips_choice.dart';
@@ -121,13 +143,20 @@ import 'buildingState.dart';
 import 'buildingState.dart';
 import 'cutommarker.dart';
 import 'dart:math' as math;
+import 'package:turf/centroid.dart' as turf;
+import 'package:image/image.dart' as img;
+import 'package:device_meta/device_meta.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'APIMODELS/landmark.dart' as la;
 import 'dart:ui' as ui;
 import 'package:geodesy/geodesy.dart' as geo;
 import 'package:lottie/lottie.dart' as lott;
-
+import 'APIMODELS/landmark.dart' as landmark;
 import 'fetchrouteParams.dart';
 import 'localization/locales.dart';
+import 'low_fedility/homepage.dart';
+import 'low_fedility/lowFedility.dart';
+import 'main.dart';
 import 'navigationTools.dart';
 
 import 'navigation_api_controller.dart';
@@ -160,7 +189,11 @@ class Navigation extends StatefulWidget {
   State<Navigation> createState() => _NavigationState();
 }
 
-class _NavigationState extends State<Navigation> with TickerProviderStateMixin, WidgetsBindingObserver {
+class _NavigationState extends State<Navigation>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
+  // NetworkManager networkManager = NetworkManager();
+
+  ///update above this
   MapState mapState = new MapState();
   Timer? _exploreModeTimer;
   String maptheme = "";
@@ -169,10 +202,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     zoom: 0,
   );
   late GoogleMapController _googleMapController;
+
+  //BLOCK LAYER
+  Set<Polygon> globalBlock = Set();
+  Set<Polygon> outDoorGlobalBlock = Set();
+  Set<Marker> blockMarker = Set();
+  Set<Marker> outdoorBlockMarker = Set();
+  Set<Polygon> allGlobalBlocks = Set();
+
   Set<Polygon> patch = Set();
   Set<Polygon> otherpatch = Set();
-  Set<Polygon> blurPatch = Set();
+  // Set<Polygon> blurPatch = Set();
   Map<String, Set<gmap.Polyline>> polylines = Map();
+  Map<String, Set<gmap.Polyline>> dottedPath = Map();
   Set<gmap.Polyline> otherpolylines = Set();
   Set<gmap.Polyline> focusturn = Set();
   Set<Marker> focusturnArrow = Set();
@@ -180,7 +222,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Set<Polygon> globalCampus = Set();
   Set<Polygon> otherclosedpolygons = Set();
   Set<Marker> Markers = Set();
+  Set<Marker> landmarkMarkers = Set();
   Set<Marker> builidngNameMarker = Set();
+  int currentSelectedFloor = 0;
+
   Map<String, Set<Marker>> selectedroomMarker = Map();
   Map<String, Map<int, Set<Marker>>> pathMarkers = {};
   Map<String, List<Marker>> markers = Map();
@@ -188,6 +233,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Map<String, Map<int, Set<gmap.Polyline>>> singleroute = {};
   Map<String, Map<int, Set<gmap.Polyline>>> pathCovered = {};
   Map<int, Set<Marker>> dottedSingleRoute = {};
+  // List<RoadInfo> roadPointMarkerList = [];
   // BLueToothClass SingletonFunctionController.btadBLueToothClass();
   bool _isLandmarkPanelOpen = false;
   bool _isRoutePanelOpen = false;
@@ -199,9 +245,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   bool checkedForPatchDataUpdated = false;
   bool checkedForLandmarkDataUpdated = false;
   pac.PriorityQueue<MapEntry<String, double>> debugPQ = new pac.PriorityQueue();
-  late final Uint8List userloc;
-  late final Uint8List userlocdebug;
-
+  late Uint8List userloc;
+  late Uint8List userlocdebug;
+  PlayPreviewManager? playPreviewManager;
   // HashMap<String, beacon> SingletonFunctionController.apibeaconmap = HashMap();
   late FlutterTts flutterTts;
   double mapbearing = 0.0;
@@ -221,10 +267,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   DateTime? _gyroscopeUpdateTime;
   DateTime? _magnetometerUpdateTime;
   final _streamSubscriptions = <StreamSubscription<dynamic>>[];
-  StreamSubscription<AccelerometerEvent>? pdr;
+  late StreamSubscription<AccelerometerEvent>? pdr;
   Duration sensorInterval = Duration(milliseconds: 100);
   final pinLandmarkPannel PinLandmarkPannel = pinLandmarkPannel();
-
 
   late StreamSubscription<CompassEvent> compassSubscription;
   bool detected = false;
@@ -240,221 +285,59 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   late String _currentLocale = '';
   final GlobalKey rerouteButton = GlobalKey();
 
-  BluetoothScanAndroidClass bluetoothScanAndroidClass = BluetoothScanAndroidClass();
-
-
-
-  //-----------------------------------------------------------------------------------------
-  /// Set of displayed markers and cluster markers on the map
-
-  /// Minimum zoom at which the markers will cluster
-  final int _minClusterZoom = 0;
-
-  /// Maximum zoom at which the markers will cluster
-  final int _maxClusterZoom = 19;
-
-  /// [Fluster] instance used to manage the clusters
-  Fluster<MapMarker>? _clusterManager;
-
-  /// Current map zoom. Initial zoom will be 15, street level
-  double _currentZoom = 15;
-
-  /// Map loading flag
-  bool _isMapLoading = true;
-
-  /// Markers loading flag
-  bool _areMarkersLoading = true;
-
-  /// Url image used on normal markers
-  final String _markerImageUrl =
-      'https://img.icons8.com/office/80/000000/marker.png';
-  /// Color of the cluster circle
-  final Color _clusterColor = Color(0xfffddaa9);
-  /// Color of the cluster text
-  final Color _clusterTextColor = Colors.white;
-  /// Example marker coordinates
-  final List<InitMarkerModel> mapMarkerLocationMapAndName = [];
-  final Map<LatLng, String> _markerLocationsMap = {};
-  final Map<LatLng, String> _markerLocationsMapLanName = {};
-  final Map<LatLng, String> _markerLocationsMapLanNameBID = {};
-
-  /// Inits [Fluster] and all the markers with network images and updates the loading state.
-
-  void _initMarkers() async {
-    final List<MapMarker> markers = [];
-
-    try {
-      for (LatLng keys in _markerLocationsMap.keys) {
-        final String values = _markerLocationsMap[keys]!;
-        final String LandmarkValue = _markerLocationsMapLanName[keys]!;
-        final String buildingValue = _markerLocationsMapLanNameBID[keys]!;
-
-        // Uint8List iconMarker = await getImagesFromMarker('assets/user.png', 45);
-        //
-        final BitmapDescriptor markerImage =
-        await MapHelper.getMarkerImageFromUrl(_markerImageUrl);
-        //BitmapDescriptor bb = await getImageMarker(5,Colors.black,Colors.white,60,'Entry','assets/lift.png');
-
-        if (values == 'Lift') {
-          Uint8List iconMarker =
-          await getImagesFromMarker('assets/MapLift.png', 85);
-          markers.add(
-            MapMarker(
-              id: keys.toString() + buildingValue,
-              position: keys,
-              icon: BitmapDescriptor.fromBytes(iconMarker),
-              Landmarkname: LandmarkValue,
-              mapController: _googleMapController,
-            ),
-          );
-        } else if (values == 'Entry') {
-          Uint8List iconMarker =
-          await getImagesFromMarker('assets/MapEntry.png', 85);
-          try {
-            markers.add(
-              MapMarker(
-                id: keys.toString() + buildingValue,
-                position: keys,
-                icon: BitmapDescriptor.fromBytes(iconMarker),
-                Landmarkname: LandmarkValue,
-                mapController: _googleMapController,
-              ),
-            );
-          } catch (e) {}
-        } else if (values == 'Pharmacy') {
-          Uint8List iconMarker =
-          await getImagesFromMarker('assets/hospital.png', 85);
-          markers.add(
-            MapMarker(
-                id: keys.toString() + buildingValue,
-                position: keys,
-                icon: BitmapDescriptor.fromBytes(iconMarker),
-                Landmarkname: LandmarkValue,
-                mapController: _googleMapController),
-          );
-        } else if (values == 'Kitchen') {
-          Uint8List iconMarker =
-          await getImagesFromMarker('assets/cutlery.png', 85);
-          markers.add(
-            MapMarker(
-                id: keys.toString() + buildingValue,
-                position: keys,
-                icon: BitmapDescriptor.fromBytes(iconMarker),
-                Landmarkname: LandmarkValue,
-                mapController: _googleMapController),
-          );
-        }else if(values == 'Female'){
-          Uint8List iconMarker =
-          await getImagesFromMarker('assets/MapFemaleWashroom.png', 95);
-          markers.add(
-            MapMarker(
-              id: keys.toString() + buildingValue,
-              position: keys,
-              icon: BitmapDescriptor.fromBytes(iconMarker),
-              Landmarkname: LandmarkValue,
-              mapController: _googleMapController,
-            ),
-          );
-        }else if (values == 'Male'){
-          Uint8List iconMarker =
-          await getImagesFromMarker('assets/MapMaleWashroom.png', 95);
-          markers.add(
-            MapMarker(
-              id: keys.toString() + buildingValue,
-              position: keys,
-              icon: BitmapDescriptor.fromBytes(iconMarker),
-              Landmarkname: LandmarkValue,
-              mapController: _googleMapController,
-            ),
-          );
-        }
-        // markers.add(
-        //   MapMarker(
-        //     id: keys.toString(),
-        //     position: keys,
-        //     icon: BitmapDescriptor.fromBytes(values=='Lift'? await getImagesFromMarker('assets/lift.png', 45) : await getImagesFromMarker('assets/user.png', 45)),
-        //   ),
-        // );
-      }
-    }catch (e){}
-    _clusterManager = await MapHelper.initClusterManager(
-        markers, _minClusterZoom, _maxClusterZoom, _googleMapController);
-    await _updateMarkers11();
-  }
-  Future<void> _updateMarkers11([double? updatedZoom]) async {
-    if (updatedZoom != null && updatedZoom! > 15.5) {
-      if (_clusterManager == null || updatedZoom == _currentZoom) return;
-
-      if (updatedZoom != null) {
-        _currentZoom = updatedZoom;
-      }
-      setState(() {
-        _areMarkersLoading = true;
-      });
-      final updatedMarkers = await MapHelper.getClusterMarkers(
-          _clusterManager,
-          _currentZoom,
-          _clusterColor,
-          _clusterTextColor,
-          70,
-          _googleMapController);
-
-      updatedMarkers.forEach((currentMarker) {
-        if (currentMarker.markerId.toString().contains(closestBuildingId)) {
-          currentMarker.visible = true;
-        } else {
-          currentMarker.visible = false;
-        }
-      });
-      _markers
-        ..clear()
-        ..addAll(updatedMarkers);
-
-      setState(() {
-        _areMarkersLoading = false;
-      });
-    }
-  }
-
-  Future<Uint8List> getIconBytes(String path, int width) async {
-    ByteData data = await rootBundle.load(path);
-    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
-        targetWidth: width);
-    ui.FrameInfo fi = await codec.getNextFrame();
-    final Uint8List bytes =
-    (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
-        .buffer
-        .asUint8List();
-    return bytes;
-  }
-
+  BluetoothScanAndroidClass bluetoothScanAndroidClass =
+  BluetoothScanAndroidClass();
 
   late AnimationController PB_controller;
   late Animation<double> PBanimation;
   bool PB_isProgressing = false;
-
-  //--------------------------------------------------------------------------------------
   double _progressValue = 0.0;
   final double targetZoom = 22.0;
 
   late DateTime timerStartTime;
-  Set<Marker> gpsTrackingMarker = {};
-  final ws = wsocket("com.iwayplus.aiimsjammu");
-  var userInfoBox=Hive.box('UserInformation');
-  LatLng gpsTrackingUserPosition = LatLng(28.6139, 77.2090);
-  Completer<GoogleMapController> gpsTrackingController = Completer();
+  SensorManager accData = SensorManager();
+  SensorManager magnetoData = SensorManager();
 
-
+  bool initialInAppLoading = false;
+  late StreamSubscription<beacon> _subscription;
+  beacon? _currentPoint;
+  late AnimationController _moveController;
+  late Animation<LatLng> _moveAnimation;
+  LatLng? _oldPosition;
+  LatLng? _newPosition;
+  Marker? animatedMarker;
+  late MapClustering mapClustering;
+  final eventsState = EventsState();
   @override
   void initState() {
     super.initState();
+    gpsSubscription = GPSService.locationStream.listen((Location location) {
+      gpsBuffer.add(location.latitude, location.longitude);
+    }, onError: (error) {
+      print("Error receiving GPS data: $error");
+    });
+    initBluetooth();
+
+    _initializeClustering();
+    mapClustering = MapClustering(onMarkerTapCallback: (String sId) {
+      print("sId $sId");
+      onLandmarkVenueClicked(sId);
+    });
+    Homepage.relocalize = relocalizeUser;
+    Homepage.onVenueClicked = onLandmarkVenueClicked;
     initializeMarkers();
+    NavigationLogManager().initialize();
+    magnetoData.startMagnetometer();
+    accData.startAccelerometer();
+
     //add a timer of duration 5sec
     //PolylineTestClass.polylineSet.clear();
     // StartPDR();
+
+
     WidgetsBinding.instance.addObserver(this);
     _flutterLocalization = FlutterLocalization.instance;
-    _currentLocale = _flutterLocalization.currentLocale!.languageCode;
+    _currentLocale = 'en';
 
     if (UserCredentials().getUserOrentationSetting() == 'Focus Mode') {
       UserState.ttsOnlyTurns = true;
@@ -464,58 +347,55 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       UserState.ttsAllStop = false;
     }
 
-      // ws.sendMessage(WebSocketService().message);
-    // print("WebSocketService().message ${WebSocketService().message}");
-      if(userInfoBox.containsKey("userTracking")){
-        if(userInfoBox.get("userTracking")){
-          print(userInfoBox.get("userTracking"));
-        }else{
-            print("Is Driver not found");
-            print("Is User");
-            navigationStartFunction();
-        }
-      }else{
-        print("Is containsKeyfalse");
-      }
+    if (!HelperClass.SemanticEnabled) {
+      setState(() {
+        _mainIcon = Icons.volume_down_outlined;
+        _mainColor = Colors.blueAccent;
+      });
+      UserState.ttsOnlyTurns = true;
+      UserState.ttsAllStop = false;
+    }
 
-    if(!kIsWeb){
-      print("kIsWeb");
+    _messageTimer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+      wsocket.sendmessg();
+    });
+
+    if (!kIsWeb) {
       if (SingletonFunctionController.timer == null) {
-        SingletonFunctionController.timer = Future.delayed(const Duration(seconds: 7));
+        SingletonFunctionController.timer =
+            Future.delayed(const Duration(seconds: 7));
         timerStartTime = DateTime.now();
-      }else{
+      } else {
         print("timer already initialized");
       }
-      callbackFunc();
+      //  callbackFunc();
     }
     listenToMagnetometer();
-
+    _moveController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500), // Smooth duration
+    );
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
     )..repeat(reverse: true);
-
     _animationController = AnimationController(
       duration: Duration(milliseconds: 800), // Adjust for smoother animation
       vsync: this,
     );
-
     _animationController1 = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 5), // Adjust as needed
     );
-
     _zoomAnimation = CurvedAnimation(
       parent: _animationController1!,
       curve: Curves.easeInOut,
     ).drive(Tween<double>(begin: 0.0, end: targetZoom));
-
     // Create the animation
     _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
       ..addListener(() {
         _updateCircle(user.lat, user.lng);
       });
-
     SingletonFunctionController.building.floor.putIfAbsent("", () => 0);
     flutterTts = FlutterTts();
     setState(() {
@@ -534,64 +414,136 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         curve: Curves.easeInOut, // Smooth linear curve for even progress
       ),
     );
-    //  calibrate();
-
-    //SingletonFunctionController.btadapter.strtScanningIos(SingletonFunctionController.apibeaconmap);
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       speak("${LocaleData.loadingMaps.getString(context)}", _currentLocale);
       apiCalls(context);
     });
-    _messageTimer = Timer.periodic(Duration(seconds: 5), (timer) {
-      wsocket.sendmessg();
-    });
-
     !DebugToggle.Slider ? handleCompassEvents() : () {};
-
     DefaultAssetBundle.of(context)
         .loadString("assets/mapstyle.json")
         .then((value) {
       maptheme = value;
     });
-    checkPermissions();
-    if(!kIsWeb){
+    if (!kIsWeb) {
+      checkPermissions();
       setPdrThreshold();
       getDeviceManufacturer();
     }
-    try {
-      _streamSubscriptions.add(
-        userAccelerometerEventStream(samplingPeriod: sensorInterval).listen(
-                (UserAccelerometerEvent event) {
-              final now = DateTime.now();
-              // setState(() {
-              //   _userAccelerometerEvent = event;
-              //   if (_userAccelerometerUpdateTime != null) {
-              //     final interval = now.difference(_userAccelerometerUpdateTime!);
-              //     if (interval > _ignoreDuration) {
-              //       _userAccelerometerLastInterval = interval.inMilliseconds;
-              //     }
-              //   }
-              // });
-              _userAccelerometerUpdateTime = now;
-            }),
-      );
-    } catch (E) {}
+    // try {
+    //   _streamSubscriptions.add(
+    //     userAccelerometerEventStream(samplingPeriod: sensorInterval).listen(
+    //             (UserAccelerometerEvent event) {
+    //           final now = DateTime.now();
+    //           // setState(() {
+    //           //   _userAccelerometerEvent = event;
+    //           //   if (_userAccelerometerUpdateTime != null) {
+    //           //     final interval = now.difference(_userAccelerometerUpdateTime!);
+    //           //     if (interval > _ignoreDuration) {
+    //           //       _userAccelerometerLastInterval = interval.inMilliseconds;
+    //           //     }
+    //           //   }
+    //           // });
+    //           _userAccelerometerUpdateTime = now;
+    //         }, onError: (e) {
+    //       showDialog(
+    //           context: context,
+    //           builder: (context) {
+    //             return const AlertDialog(
+    //               title: Text("Sensor Not Found"),
+    //               content: Text(
+    //                   "It seems that your device doesn't support User Accelerometer Sensor"),
+    //             );
+    //           });
+    //       cancelOnError:
+    //       true;
+    //     }),
+    //   );
+    // } catch (E) {}
     // fetchlist();
     // filterItems();
   }
 
-  Future<void> navigationStartFunction() async {
+  AvailabilityState? _currentState;
 
-    Uint8List iconMarker = await getImagesFromMarker('assets/GolfCart.png', 155);
+  final gpsBuffer = GPSBuffer();
 
+  Future<void> initBluetooth() async {
+    // Check Bluetooth state
+    _currentState=await UniversalBle.getBluetoothAvailabilityState();
+    if(Platform.isAndroid){
+      final state = await UniversalBle.getBluetoothAvailabilityState();
+      if (state != AvailabilityState.poweredOn) {
+        print('initBluetooth${AvailabilityState.poweredOn} ${state}');
+        // try {
+        //   UniversalBle.availabilityStream.listen((state) {
+        //     if (state == AvailabilityState.poweredOn) {
+        //       print("state is powered on");
+        //       Navigator.push(context,MaterialPageRoute<void>(
+        //         builder: (BuildContext context) => MainScreen(),
+        //       ),);
+        //     }
+        //   });
+        // }catch(e){
+        //
+        // }
+        // This will show the system prompt on Android
+        // On iOS, nothing happens (must enable manually in Settings)
+        final success = await UniversalBle.enableBluetooth();
+        print('initBluetooth${success}');
+        if (success) {
+          print("Bluetooth enabled ✅");
+        } else {
+          print("Bluetooth not enabled ❌");
+        }
+      } else {
+        print("Bluetooth already ON ✅");
+      }
+    }
   }
 
-  Future<void> gpsTrackingMoveCamera() async {
-    final GoogleMapController controller = await gpsTrackingController.future;
-    controller.animateCamera(CameraUpdate.newCameraPosition(
-      CameraPosition(target: gpsTrackingUserPosition, zoom: 16),
-    ));
+  void _initializeClustering() async {
+    MapClustering(onMarkerTapCallback: (String sId) {
+      print("sId $sId");
+      onLandmarkVenueClicked(sId);
+    }).initMarkers().then((_) {
+      MapClustering(onMarkerTapCallback: (String sId) {
+        print("sId $sId");
+        onLandmarkVenueClicked(sId);
+      }).createBitmapMarker();
+    });
+    // Optionally: trigger cluster recalculation
+    setState(() {
+      // trigger rebuild if needed
+    });
   }
+
+  void _produceNameMarker() async {
+    listOfCoordinates.forEach((key, value) async {
+      LatLng midpoint(LatLng p1, LatLng p2) {
+        return LatLng(
+          (p1.latitude + p2.latitude) / 2,
+          (p1.longitude + p2.longitude) / 2,
+        );
+      }
+
+      LatLng topMid = midpoint(value[0], value[3]);
+      LatLng bottomMid = midpoint(value[0], value[3]);
+
+      MarkerIconWithAnchor result = await HelperClass()
+          .bitmapDescriptorFromTextAndImageUpdatedWithAnchor(key, null);
+      roomNameMarkers.add(Marker(
+          markerId: MarkerId("${key}}"),
+          visible: true,
+          flat: true,
+          position: LatLng((topMid.longitude + bottomMid.longitude) / 2,
+              (topMid.latitude + bottomMid.latitude) / 2),
+          icon: result.icon,
+          anchor: result.anchor));
+    });
+    print("_produceNameMarker ${listOfCoordinates.length}");
+  }
+
+  // Start the animation loop
   void PB_startAnimation() {
     if (!PB_isProgressing) {
       setState(() {
@@ -611,101 +563,58 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
   }
 
+  void updateMarkers() {
+    print("updating");
+    setState(() {});
+  }
 
-  void initializeMarkers() async {
+  void clearMarkers() {
+    // fingerprinting.clearMarkers();
+  }
+  bool isFromLocalize = true; // Initialize at class level
+  Future<void> initializeMarkers() async {
     userloc = await getImagesFromMarker('assets/userloc0.png', 130);
-    if (kDebugMode) {
+    if (!kIsWeb && kDebugMode) {
       userlocdebug = await getImagesFromMarker('assets/tealtorch.png', 35);
     }
   }
-  bool isAppinForeground=true;
-
+  bool isAppinForeground = true;
+  AppLifecycleState? _lastLifecycleState;
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.paused) {
+    if(state == AppLifecycleState.detached &&
+        (_lastLifecycleState == AppLifecycleState.paused ||
+            _lastLifecycleState == AppLifecycleState.inactive)){
+      print("App is killed");
+      if(currentNavigationLog!=null){
+        markNavigationUnsuccessful("User abruptly ended Navigation");
+        NavigationLogManager().syncLogsToServer().then((_){
+          currentNavigationLog=null;
+        });
+      }
+    }else if (state == AppLifecycleState.paused) {
       // App went to background
       print("App is in the background");
-      if(user.isnavigating){
+      if (user.isnavigating) {
         StopPDR();
         setState(() {
-          isAppinForeground=false;
+          isAppinForeground = false;
         });
       }
     } else if (state == AppLifecycleState.resumed) {
       // App came to foreground
       print("App is in the foreground");
+      setState(() {
+        isAppinForeground=true;
+      });
+      // App came to foreground
+      print("App is in the foreground");
       if(user.isnavigating){
-        setState(() {
-          isAppinForeground=true;
-        });
+        StartPDR();
       }
     }
-  }
-
-  Future<void> zoomWhileWait(
-      Map<String, LatLng> allBuildingID, GoogleMapController controller) async {
-    print("allbuilding id ${allBuildingID}");
-
-    if (allBuildingID.length > 1) {
-      while (!SingletonFunctionController.building.destinationQr &&
-          !user.initialallyLocalised &&
-          !SingletonFunctionController.building.qrOpened) {
-        for (var entry in allBuildingID.entries) {
-          if (SingletonFunctionController.building.destinationQr ||
-              user.initialallyLocalised ||
-              SingletonFunctionController.building.qrOpened) {
-            return;
-          }
-          await controller.animateCamera(CameraUpdate.newCameraPosition(
-            CameraPosition(target: entry.value, zoom: 16),
-          ));
-          if (SingletonFunctionController.building.destinationQr ||
-              user.initialallyLocalised ||
-              SingletonFunctionController.building.qrOpened) {
-            return;
-          }
-          await Future.delayed(Duration(milliseconds: 500));
-          if (SingletonFunctionController.building.destinationQr ||
-              user.initialallyLocalised ||
-              SingletonFunctionController.building.qrOpened) {
-            return;
-          }
-          await controller.animateCamera(CameraUpdate.newCameraPosition(
-            CameraPosition(target: entry.value, zoom: 20),
-          ));
-          if (SingletonFunctionController.building.destinationQr ||
-              user.initialallyLocalised ||
-              SingletonFunctionController.building.qrOpened) {
-            return;
-          }
-          await Future.delayed(Duration(seconds: 3));
-          if (SingletonFunctionController.building.destinationQr ||
-              user.initialallyLocalised ||
-              SingletonFunctionController.building.qrOpened) {
-            return;
-          }
-          await controller.animateCamera(CameraUpdate.newCameraPosition(
-            CameraPosition(target: entry.value, zoom: 16),
-          ));
-          if (SingletonFunctionController.building.destinationQr ||
-              user.initialallyLocalised ||
-              SingletonFunctionController.building.qrOpened) {
-            return;
-          }
-        }
-
-        // Check the conditions before starting the next loop iteration
-        if (user.initialallyLocalised ||
-            SingletonFunctionController.building.qrOpened) {
-          return; // Exit the function if conditions are met
-        }
-      }
-    } else {
-      if (patch.isNotEmpty) {
-        fitPolygonInScreen(patch.first);
-      }
-    }
+    _lastLifecycleState = state;
   }
 
   void excludeFloorSemanticWorkchange() {
@@ -776,11 +685,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
   Future<void> getDeviceManufacturer() async {
+    DeviceMeta deviceMeta = await DeviceMeta.init(storageKey: "exampleapp");
     try {
-      manufacturer = await DeviceInformation.deviceManufacturer;
+      manufacturer = deviceMeta.manufacturer!;
       wsocket.message["deviceInfo"]["deviceManufacturer"] =
           manufacturer.toString();
-
+      // networkManager.ws.updateDeviceManufacturer(manufacturer.toString());
       if (manufacturer.toLowerCase().contains("samsung")) {
         step_threshold = 0.12;
       } else if (manufacturer.toLowerCase().contains("oneplus")) {
@@ -798,14 +708,34 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
   Future<void> setPdrThreshold() async {
-    if(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!=null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold != null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold!.isNotEmpty){
-      peakThreshold = double.parse(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.pdrThreshold!);
-      valleyThreshold = peakThreshold*-1;
+    if (SingletonFunctionController
+        .building.patchData[buildingAllApi.selectedBuildingID] !=
+        null &&
+        SingletonFunctionController
+            .building
+            .patchData[buildingAllApi.selectedBuildingID]!
+            .patchData!
+            .pdrThreshold !=
+            null &&
+        SingletonFunctionController
+            .building
+            .patchData[buildingAllApi.selectedBuildingID]!
+            .patchData!
+            .pdrThreshold!
+            .isNotEmpty) {
+      peakThreshold = double.parse(SingletonFunctionController
+          .building
+          .patchData[buildingAllApi.selectedBuildingID]!
+          .patchData!
+          .pdrThreshold!);
+      valleyThreshold = peakThreshold * -1;
       return;
     }
+    DeviceMeta deviceMeta = await DeviceMeta.init(storageKey: "exampleapp");
+
     try {
-      manufacturer = await DeviceInformation.deviceManufacturer;
-      String deviceModel = await DeviceInformation.deviceModel;
+      manufacturer = deviceMeta.manufacturer!;
+      String deviceModel = deviceMeta.model!;
 
       if (manufacturer.toLowerCase().contains("samsung")) {
         if (deviceModel.startsWith("A", 3)) {
@@ -839,20 +769,23 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         valleyThreshold = -11.111111;
       }
 
-      if(UserCredentials().getUserPersonWithDisability()>0)
-      {
-        peakThreshold= peakThreshold+0.5;
-        valleyThreshold= valleyThreshold-0.5;
+      if (UserCredentials().getUserPersonWithDisability() > 0) {
+        peakThreshold = peakThreshold + 0.5;
+        valleyThreshold = valleyThreshold - 0.5;
       }
     } catch (e) {
       throw (e);
     }
   }
-  void handleCompassEvents(){
-    compassSubscription = FlutterCompass.events!.listen((event) {
-      if (!mounted) return; // Prevent setState if the widget is no longer in the tree
 
+  void handleCompassEvents() {
+    magnetoData.magnetometerStream.listen((event) {
+      wsocket.message["deviceInfo"]["sensors"]["compass"] = true;
+      wsocket.message["deviceInfo"]["permissions"]["compass"] = true;
+      // networkManager.ws.updateSensorStatus(compass: true);
+      // networkManager.ws.updatePermissions(compass: true);
       double? compassHeading = event.heading;
+      if (disposed) return;
       setState(() {
         user.theta = compassHeading!;
         if (mapState.interaction2) {
@@ -866,21 +799,23 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               ),
             ),
           );
-        }else{
-          if(markers.isNotEmpty && markers[user.bid] != null){
-            markers[user.bid]![0] = customMarker.rotate(compassHeading! - mapbearing, markers[user.bid]![0]);
+        } else {
+          if (markers.isNotEmpty && markers[user.bid] != null) {
+            markers[user.bid]![0] = customMarker.rotate(
+                compassHeading! - mapbearing, markers[user.bid]![0]);
           }
         }
       });
     }, onError: (error) {
-      if (!mounted) return;
-      wsocket.message["deviceInfo"]["permissions"]["compass"] = false;
       wsocket.message["deviceInfo"]["sensors"]["compass"] = false;
+      wsocket.message["deviceInfo"]["permissions"]["compass"] = false;
+      // networkManager.ws.updateSensorStatus(compass: false);
+      // networkManager.ws.updatePermissions(compass: false);
     });
   }
 
-
   void showToast(String mssg) {
+    if(!kDebugMode) return;
     Fluttertoast.showToast(
       msg: mssg,
       toastLength: Toast.LENGTH_SHORT,
@@ -892,38 +827,47 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     );
   }
 
-  bool disposed = false;
-  Future<void> speak(String msg, String lngcode, {bool prevpause = false}) async {
+  // bool disposed = false;
+  // final List<_TtsItem> _ttsQueue = [];
+  // bool _isSpeaking = false;
+  Future<void> speak(String msg, String lngcode,
+      {bool prevpause = false}) async {
+    final stackTrace = StackTrace.current;
+    print("speak Stack: \n$stackTrace");
     if (!UserState.ttsAllStop) {
       if (disposed) return;
-      if (prevpause) {
-        await flutterTts.pause();
-      }
 
-      if (lngcode == "hi") {
-        if (Platform.isAndroid) {
-          await flutterTts
-              .setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
+      try {
+        if (lngcode == "hi") {
+          if (Platform.isAndroid) {
+            await flutterTts
+                .setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
+          } else {
+            await flutterTts.setVoice({"name": "Lekha", "locale": "hi-IN"});
+          }
         } else {
-          await flutterTts.setVoice({"name": "Lekha", "locale": "hi-IN"});
+          await flutterTts
+              .setVoice({"name": "en-US-language", "locale": "en-US"});
         }
-      } else {
-        await flutterTts.setVoice({"name": "en-US-language", "locale": "en-IN"});
-      }
-      await flutterTts.stop();
-      if (Platform.isAndroid) {
-        await flutterTts.setSpeechRate(0.7);
-      } else {
-        await flutterTts.setSpeechRate(0.55);
-      }
 
-      await flutterTts.setPitch(1.0);
-      if(isSemanticEnabled){
-        PushNotifications.showSimpleNotification(body: "",payload: "",title: msg);
-      }else {
-        await flutterTts.speak(msg);
-      }
+        await flutterTts.stop();
+        if (Platform.isAndroid) {
+          await flutterTts.setSpeechRate(0.7);
+        } else {
+          await flutterTts.setSpeechRate(0.55);
+        }
 
+        await flutterTts.setPitch(1.0);
+
+        // Check if Semantic Mode is enabled
+        if (isSemanticEnabled) {
+          //PushNotifications.showSimpleNotification(body: "", payload: "", title: msg);
+        } else {
+          await flutterTts.speak(msg);
+        }
+      } catch (e) {
+        print("Error during TTS: $e");
+      }
     }
   }
 
@@ -935,27 +879,30 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
   Future<void> enableBT() async {
-    BluetoothEnable.enableBluetooth.then((value) {});
+    // BluetoothEnable.enableBluetooth.then((value) {});
   }
-
   bool isPdr = false;
   // Function to start the timer
   void StartPDR() {
-    final stackTrace = StackTrace.current;
-    print("StartPDR Stack: \n$stackTrace");
-    isPdr = true;
-    if(pdr == null || pdr!.isPaused){
+    setState(() {
+      isPdr = true;
+    });
+    if (isAppinForeground) {
       pdrstepCount();
     }
   }
 
+// Function to stop the timer
+  bool isPdrStop = false;
+  double stepmagnitude = 0.0;
   void StopPDR() async {
-    if(pdr == null){
-      return ;
-    }
+    if (isPdrStop) return;
+    await pdr?.cancel();
+    pdr = null;
+    print("pdrstate:${pdr}");
     setState(() {
+      isPdrStop = true;
       isPdr = false;
-      pdr!.pause();
     });
   }
 
@@ -976,23 +923,86 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   bool restartScanning = false;
 
   List<double> orientationHistory = [];
-  int orientationWindowSize = 10;  // Number of readings for stability check
+  int orientationWindowSize = 10; // Number of readings for stability check
   double orientationThreshold = 0.1;
-
 // late StreamSubscription<AccelerometerEvent>? pdr;
+  //sideways movement 12.10
   void pdrstepCount() {
-    pdr = accelerometerEventStream().listen((AccelerometerEvent event) {
-      if(user.isnavigating && isPdr){
-        wsocket.message["deviceInfo"]["permissions"]["activity"] = true;
-        wsocket.message["deviceInfo"]["sensors"]["activity"] = true;
+    pdr = accData.accelerometerStream.listen((event) {
+      wsocket.message["deviceInfo"]["sensors"]["activity"] = true;
+      wsocket.message["deviceInfo"]["permissions"]["activity"] = true;
+      // networkManager.ws.updateSensorStatus(activity: true);
+      // networkManager.ws.updatePermissions(activity: true);
+      // Apply low-pass filter
+      if (pdr == null) {
+        return; // Exit the event listener if subscription is canceled
+      }
+      if (detectStep(event.x, event.y, event.z)) {
+        setState(() {
+          lastPeakTime = DateTime.now().millisecondsSinceEpoch;
+          stepCount++;
 
-        // Apply low-pass filter
-        if (detectStep(event.x, event.y, event.z)) {
+          bool isvalid = MotionModel.isValidStep(
+              user,
+              SingletonFunctionController
+                  .building.floorDimenssion[user.bid]![user.floor]![0],
+              SingletonFunctionController
+                  .building.floorDimenssion[user.bid]![user.floor]![1],
+              SingletonFunctionController
+                  .building.nonWalkable[user.bid]![user.floor]!,
+              reroute,
+              context);
+          if (isvalid) {
+            user.move(context).then((value) {
+              renderHere();
+            });
+          } else {
+            if (user.isnavigating) {
+              // reroute();
+              // showToast("You are out of path");
+            }
+          }
+        });
+      } else {
+        filteredX = alpha * filteredX + (1 - alpha) * event.x;
+        filteredY = alpha * filteredY + (1 - alpha) * event.y;
+        filteredZ = alpha * filteredZ + (1 - alpha) * event.z;
+        // Compute orientation angle from accelerometer data (e.g., pitch or roll)
+        double orientation = atan2(
+            filteredY, sqrt(filteredX * filteredX + filteredZ * filteredZ));
+        // Add orientation to history and check variabilityf
+        orientationHistory.add(orientation);
+        if (orientationHistory.length > orientationWindowSize) {
+          orientationHistory.removeAt(0); // Maintain a fixed window size
+
+          // Calculate standard deviation of orientation
+          double avgOrientation = orientationHistory.reduce((a, b) => a + b) /
+              orientationWindowSize;
+          double orientationVariance = orientationHistory.fold(
+              0,
+                  (sum, value) =>
+              sum + pow(value - avgOrientation, 2).toInt()) /
+              orientationWindowSize;
+          double orientationStability = sqrt(orientationVariance);
+          // Suppress step detection if orientation is too variable
+          if (orientationStability > orientationThreshold) {
+            // Too random, assume the user is stationary or talking, ignore steps
+            return;
+          }
+        }
+        // Compute magnitude of acceleration vector
+        double magnitude = sqrt((filteredX * filteredX +
+            filteredY * filteredY +
+            filteredZ * filteredZ));
+        // Detect peak and valley
+        if (magnitude > peakThreshold &&
+            DateTime.now().millisecondsSinceEpoch - lastPeakTime >
+                peakInterval) {
           setState(() {
-            lastPeakTime = DateTime
-                .now()
-                .millisecondsSinceEpoch;
+            lastPeakTime = DateTime.now().millisecondsSinceEpoch;
             stepCount++;
+
+            stepmagnitude = magnitude;
             bool isvalid = MotionModel.isValidStep(
                 user,
                 SingletonFunctionController
@@ -1001,96 +1011,31 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                     .building.floorDimenssion[user.bid]![user.floor]![1],
                 SingletonFunctionController
                     .building.nonWalkable[user.bid]![user.floor]!,
-                reroute, context);
+                reroute,
+                context);
+            // Valid walking step
             if (isvalid) {
               user.move(context).then((value) {
                 renderHere();
               });
             } else {
-              if (user.isnavigating) {
-                // reroute();
-                // showToast("You are out of path");
-              }
+              if (user.isnavigating) {}
             }
           });
-        }
-        else {
-          filteredX = alpha * filteredX + (1 - alpha) * event.x;
-          filteredY = alpha * filteredY + (1 - alpha) * event.y;
-          filteredZ = alpha * filteredZ + (1 - alpha) * event.z;
-          // Compute orientation angle from accelerometer data (e.g., pitch or roll)
-          double orientation = atan2(filteredY,
-              sqrt(filteredX * filteredX + filteredZ * filteredZ))
-          ;
-          // Add orientation to history and check variability
-          orientationHistory.add(orientation);
-          if (orientationHistory.length > orientationWindowSize) {
-            orientationHistory.removeAt(0); // Maintain a fixed window size
-
-            // Calculate standard deviation of orientation
-            double avgOrientation = orientationHistory.reduce((a, b) =>
-            a + b) / orientationWindowSize;
-            double orientationVariance = orientationHistory.fold(
-                0, (sum, value) => sum +
-                pow(value - avgOrientation, 2).toInt()) /
-                orientationWindowSize;
-            double orientationStability = sqrt(orientationVariance);
-
-            // Suppress step detection if orientation is too variable
-            if (orientationStability > orientationThreshold) {
-              // Too random, assume the user is stationary or talking, ignore steps
-              return;
-            }
-          }
-          // Compute magnitude of acceleration vector
-          double magnitude = sqrt((filteredX * filteredX +
-              filteredY * filteredY +
-              filteredZ * filteredZ));
-          // Detect peak and valley
-          if (magnitude > peakThreshold && DateTime.now().millisecondsSinceEpoch - lastPeakTime > peakInterval) {
-            setState(() {
-              lastPeakTime = DateTime
-                  .now()
-                  .millisecondsSinceEpoch;
-              stepCount++;
-              print("${SingletonFunctionController.building.floorDimenssion}");
-              bool isvalid = MotionModel.isValidStep(
-                  user,
-                  SingletonFunctionController
-                      .building.floorDimenssion[user.bid]![user.floor]![0],
-                  SingletonFunctionController
-                      .building.floorDimenssion[user.bid]![user.floor]![1],
-                  SingletonFunctionController
-                      .building.nonWalkable[user.bid]![user.floor]!,
-                  reroute, context);
-              if (isvalid) {
-                user.move(context).then((value) {
-                  renderHere();
-                });
-              } else {
-                if (user.isnavigating) {
-                  // reroute();
-                  // showToast("You are out of path");
-                }
-              }
-            });
-          } else if (magnitude < valleyThreshold &&
-              DateTime
-                  .now()
-                  .millisecondsSinceEpoch - lastValleyTime >
-                  valleyInterval) {
-            setState(() {
-              lastValleyTime = DateTime
-                  .now()
-                  .millisecondsSinceEpoch;
-            });
-          }
+        } else if (magnitude < valleyThreshold &&
+            DateTime.now().millisecondsSinceEpoch - lastValleyTime >
+                valleyInterval) {
+          setState(() {
+            lastValleyTime = DateTime.now().millisecondsSinceEpoch;
+          });
         }
       }
     }, onError: (error) {
-      wsocket.message["deviceInfo"]["permissions"]["activity"] = false;
       wsocket.message["deviceInfo"]["sensors"]["activity"] = false;
-        });
+      wsocket.message["deviceInfo"]["permissions"]["activity"] = false;
+      // networkManager.ws.updateSensorStatus(activity: false);
+      // networkManager.ws.updatePermissions(activity: false);
+    });
   }
 
   DateTime? lastStepTime; // To track the last step detection time
@@ -1107,20 +1052,21 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     // Calculate movement magnitude
     double magnitude = sqrt(x * x + y * y + z * z);
     // Threshold to detect significant movement
-    double movementThreshold = 9.85;// Adjust based on your testing
+    double movementThreshold = 9.85; // Adjust based on your testing
     // Check if a step is detected
     if (isProblematicOrientation && magnitude > movementThreshold) {
       DateTime now = DateTime.now();
 
       // Ensure cooldown between steps
-      if (lastStepTime == null || now.difference(lastStepTime!) > stepCooldown) {
-
+      if (lastStepTime == null ||
+          now.difference(lastStepTime!) > stepCooldown) {
         lastStepTime = now; // Update the last step detection time
         return true; // Step detected
       }
     }
     return false; // No step detected
   }
+
   Future<void> paintMarker(LatLng Location) async {
     if (markers.containsKey(user.bid)) {
       markers[user.bid]?.add(Marker(
@@ -1129,7 +1075,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
-      if (kDebugMode) {
+      if (!kIsWeb && kDebugMode) {
         markers[user.bid]?.add(Marker(
           markerId: MarkerId("debug"),
           position: Location,
@@ -1145,7 +1091,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
-      if (kDebugMode) {
+      if (!kIsWeb && kDebugMode) {
         markers[user.bid]?.add(Marker(
           markerId: MarkerId("debug"),
           position: Location,
@@ -1163,44 +1109,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         .building.patchData[newBid]!.patchData!.buildingAngle!);
   }
 
-  // void renderHere() {
-  //   setState(() {
-  //     if (markers.length > 0) {
-  //       List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(),
-  //           user.showcoordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
-  //       markers[user.Bid]?[0] = customMarker.move(
-  //           LatLng(user.lat, user.lng), markers[user.Bid]![0]);
-  //
-  //       print("insideee thiss");
-  //
-  //       mapState.target = LatLng(lvalue[0], lvalue[1]);
-  //       _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
-  //         CameraPosition(
-  //             target: mapState.target,
-  //             zoom: mapState.zoom,
-  //             bearing: mapState.bearing!,
-  //             tilt: mapState.tilt),
-  //       ));
-  //
-  //       List<double> ldvalue = tools.localtoglobal(user.coordX.toInt(),
-  //           user.coordY.toInt(), SingletonFunctionController.building.patchData[user.Bid]);
-  //       markers[user.Bid]?[1] = customMarker.move(
-  //           LatLng(ldvalue[0], ldvalue[1]), markers[user.Bid]![1]);
-  //     }
-  //   });
-  // }
   Animation<LatLng>? _markerAnimation;
 
   void renderHere() async {
-    double screenHeight = MediaQuery.of(context).size.height;
-    double pixelRatio = MediaQuery.of(context).devicePixelRatio;
-
     if (markers.isNotEmpty) {
-      List<double> lvalue = tools.localtoglobal(
-          user.showcoordX.toInt(),
-          user.showcoordY.toInt(),
-          SingletonFunctionController.building.patchData[user.bid]
-      );
+      List<double> lvalue = [user.lat, user.lng];
 
       LatLng currentMarkerPosition = markers[user.bid]![0].position;
       LatLng newMarkerPosition = LatLng(lvalue[0], lvalue[1]);
@@ -1227,47 +1140,101 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
       mapState.target = newMarkerPosition;
 
-      // ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
-      //
-      // int newY = Platform.isAndroid
-      //     ? screenCenter.y - (screenHeight * 0.58).toInt()
-      //     : screenCenter.y - (screenHeight * 0.58).toInt();
-      //
-      // LatLng newCameraTarget = await _googleMapController.getLatLng(
-      //     ScreenCoordinate(x: screenCenter.x, y: newY)
-      // );
-
       _googleMapController.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
             target: (UserState.isTurn || onStart == false)
                 ? mapState.target
-                :  mapState.target,
+                : mapState.target,
             zoom: mapState.zoom,
             bearing: mapState.bearing ?? 0,
             tilt: mapState.tilt,
           ),
         ),
       );
-
+      try {
+        alignMapToPath(lvalue,
+            [
+              user.cellPath[user.pathobj.index + 1].lat,
+              user.cellPath[user.pathobj.index + 1].lng
+            ]
+        );
+        mapState.aligned = true;
+      } catch (e) {}
       List<double> ldvalue = tools.localtoglobal(
-          user.coordX.toInt(), user.coordY.toInt(),
-          SingletonFunctionController.building.patchData[user.bid]
-      );
-
-      markers[user.bid]?[1] = customMarker.move(
-          LatLng(ldvalue[0], ldvalue[1]),
-          markers[user.bid]![1]
-      );
-
+          user.coordX.toInt(),
+          user.coordY.toInt(),
+          SingletonFunctionController.building.patchData[user.bid]);
+      try {
+        markers[user.bid]?[1] = customMarker.move(
+            LatLng(ldvalue[0], ldvalue[1]), markers[user.bid]![1]);
+      }catch(e){
+        print("renderHere:${e}");
+      }
       //modifyPathCovered(user.bid, user.floor, newMarkerPosition);
     }
   }
 
+  void _recenterMap() {
+    try {
+      alignMapToPath([
+        user.cellPath[user.pathobj.index].lat,
+        user.cellPath[user.pathobj.index].lng
+      ], [
+        user.cellPath[user.pathobj.index + 1].lat,
+        user.cellPath[user.pathobj.index + 1].lng
+      ]);
+      mapState.aligned = true;
+    } catch (e) {}
+  }
+
+  void onStepCount() {
+    setState(() {
+      if (_userAccelerometerEvent?.y != null) {
+        if (_userAccelerometerEvent!.y > step_threshold ||
+            _userAccelerometerEvent!.y < -step_threshold) {
+          bool isvalid = MotionModel.isValidStep(
+              user,
+              SingletonFunctionController
+                  .building.floorDimenssion[user.bid]![user.floor]![0],
+              SingletonFunctionController
+                  .building.floorDimenssion[user.bid]![user.floor]![1],
+              SingletonFunctionController
+                  .building.nonWalkable[user.bid]![user.floor]!,
+              reroute,
+              context);
+          if (isvalid) {
+            user.move(context).then((value) {
+              setState(() {
+                if (markers.length > 0) {
+                  markers[user.bid]![0] = customMarker.move(
+                      LatLng(
+                          tools.localtoglobal(
+                              user.showcoordX.toInt(),
+                              user.showcoordY.toInt(),
+                              SingletonFunctionController
+                                  .building.patchData[user.bid])[0],
+                          tools.localtoglobal(
+                              user.showcoordX.toInt(),
+                              user.showcoordY.toInt(),
+                              SingletonFunctionController
+                                  .building.patchData[user.bid])[1]),
+                      markers[user.bid]![0]);
+                }
+              });
+            });
+          } else {
+            showToast("You are out of path");
+          }
+        }
+      }
+    });
+  }
+
   List<String> finalDirections = [];
 
-  List<String> calcDirectionsExploreMode(List<int> userCords, List<int> newUserCord, List<nearestLandInfo> nearbyLandmarkCoords) {
-
+  List<String> calcDirectionsExploreMode(List<int> userCords,
+      List<int> newUserCord, List<nearestLandInfo> nearbyLandmarkCoords) {
     List<String> finalDirections = [];
     for (int i = 0; i < nearbyLandmarkCoords.length; i++) {
       double value = tools.calculateAngle2(userCords, newUserCord, [
@@ -1277,7 +1244,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
       //
       //
-      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value, context);
+      String finalvalue =
+      tools.angleToClocksForNearestLandmarkToBeacon(value, context);
       //
       finalDirections.add(finalvalue);
     }
@@ -1285,7 +1253,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
   List<String> EM_finalDirections = [];
-  List<String> EM_calcDirectionsExploreMode(List<int> userCords, List<int> newUserCord, List<Landmarks> nearbyLandmarkCoords) {
+  List<String> EM_calcDirectionsExploreMode(List<int> userCords,
+      List<int> newUserCord, List<Landmarks> nearbyLandmarkCoords) {
     List<String> finalDirections = [];
     for (int i = 0; i < nearbyLandmarkCoords.length; i++) {
       double value = tools.calculateAngle2(userCords, newUserCord, [
@@ -1295,7 +1264,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
       //
       //
-      String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value, context);
+      String finalvalue =
+      tools.angleToClocksForNearestLandmarkToBeacon(value, context);
       //
       finalDirections.add(finalvalue);
     }
@@ -1304,16 +1274,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   void repaintUser(String nearestBeacon) {
     reroute();
-    paintUser(nearestBeacon, null, null, speakTTS: false);
+    paintUser(nearestBeacon, null, speakTTS: false);
   }
 
   String convertTolng(String msg, String lngcode, String finalvalue) {
     if (msg ==
-        "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}") {
+        "You are on ${tools.numericalToAlphabetical(user.floor)} floor, near ${user.locationName}") {
       if (lngcode == 'en') {
         return msg;
       } else {
-        return "आप ${tools.numericalToAlphabetical(user.floor)} मंज़िल, ${user.locationName} पर हैं";
+        return "आप ${tools.numericalToAlphabetical(user.floor)} मंज़िल, ${user.locationName} आपके नज़दीक है";
       }
     } else if (msg ==
         "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}") {
@@ -1328,6 +1298,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       } else {
         return "नीचे दी गई सूची में से अपना स्थान पुष्टि करें";
       }
+    } else if (msg == "Turn $finalvalue") {
+      if (lngcode == 'en') {
+        return msg;
+      } else {
+        print(
+            "LocaleData.properties5[finalvalue]:${LocaleData.properties5[finalvalue]}");
+        return "${LocaleData.properties5[finalvalue]?.getString(context)} मुड़ें";
+      }
+    } else if (msg == "Go Straight") {
+      if (lngcode == 'en') {
+        return msg;
+      } else {
+        return "सीधे जाएं";
+      }
     }
     return "";
   }
@@ -1337,53 +1321,57 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   // land userSetLandmarkMap = land().landmarksMap;
   Future<Landmarks?> getGlobalCoords(LatLng coordinates) async {
     Landmarks? closestLandmark;
-    double minDistance = 1000;
+    double minDistance = 150;
 
     // Fetch landmark data
-    final landmarkData = await SingletonFunctionController.building.landmarkdata;
+    final landmarkData =
+    await SingletonFunctionController.building.landmarkdata;
     if (landmarkData?.landmarks == null) return null;
 
     for (var landmark in landmarkData!.landmarks!) {
-      if (landmark.buildingID == buildingAllApi.outdoorID &&
-          landmark.element?.type != "FloorConnection" &&
+      if (landmark.element?.type != "FloorConnection" &&
           landmark.element?.subType != "restRoom" &&
           landmark.element?.subType != "AR" &&
           landmark.element?.subType != "Alert" &&
+          landmark.element?.subType != "BP" &&
+          landmark.floor == 0 &&
           landmark.coordinateX != null &&
-          landmark.coordinateY != null) {
-
-        List<double> latLngValue = tools.localtoglobal(
-            landmark.coordinateX!,
-            landmark.coordinateY!,
-            SingletonFunctionController.building.patchData[landmark.buildingID]
-        );
-
-        double dist = tools.calculateAerialDist(
-            latLngValue[0], latLngValue[1],
-            coordinates.latitude, coordinates.longitude
-        );
-
-        if (landmark.properties?.polyId != null && landmark.name?.isNotEmpty == true && dist < minDistance) {
+          landmark.coordinateY != null &&
+          landmark.properties!.latitude != null &&
+          landmark.properties!.longitude != null) {
+        List<double> latLngValue = [double.parse(landmark.properties!.doorLat??landmark.properties!.latitude!), double.parse(landmark.properties!.doorLng??landmark.properties!.longitude!)];
+        double dist = tools.calculateAerialDist(latLngValue[0], latLngValue[1],
+            coordinates.latitude, coordinates.longitude);
+        print("distance for ${landmark.name} is ${dist} m");
+        if (landmark.properties?.polyId != null &&
+            landmark.name?.isNotEmpty == true &&
+            dist < minDistance) {
           minDistance = dist;
-          closestLandmark = landmark;
+          closestLandmark = Landmarks.fromJson(landmark.toJson());
         }
       }
     }
+    print(
+        "closestLandmark $closestLandmark ${SingletonFunctionController.building.polylinedatamap[buildingAllApi.outdoorID]?.polyline?.floors}");
 
     if (closestLandmark == null || Building.waypoint[buildingAllApi.outdoorID] == null) return closestLandmark;
 
     // Find closest waypoint
-    Map<double,Nodes> waypoints = {};
+    Map<double, Nodes> waypoints = {};
     final polylineData = SingletonFunctionController.building.polylinedatamap;
-    PathModel model = Building.waypoint[buildingAllApi.outdoorID]!.firstWhere((e) => e.floor == 0);
+    PathModel model = Building.waypoint[buildingAllApi.outdoorID]!
+        .firstWhere((e) => e.floor == 0);
     Map<String, List<dynamic>> adj = model.pathNetwork ?? {};
     Map<String, List<dynamic>> adjGlobal = model.pathNetworkGlobal ?? {};
 
     polylineData[buildingAllApi.outdoorID]?.polyline?.floors?.forEach((floor) {
       floor.polyArray?.forEach((polyline) {
-        if (polyline.polygonType == "Waypoints" && polyline.floor == tools.numericalToAlphabetical(closestLandmark?.floor ?? 0)) {
+        if (polyline.polygonType == "Waypoints" &&
+            polyline.floor ==
+                tools.numericalToAlphabetical(closestLandmark?.floor ?? 0)) {
           for (var node in polyline.nodes ?? []) {
-            double dist = tools.calculateAerialDist(node.lat!, node.lon!, coordinates.latitude, coordinates.longitude);
+            double dist = tools.calculateAerialDist(node.lat!, node.lon!,
+                coordinates.latitude, coordinates.longitude);
             if (adj.containsKey("${node.coordx},${node.coordy}")) {
               waypoints[dist] = node;
             }
@@ -1404,20 +1392,22 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
     List<Nodes> nearestWaypoints = getTop3Nearest(waypoints);
 
+    print("nearestWaypoints $nearestWaypoints");
 
     if (waypoints.isNotEmpty) {
-      Map<Nodes,ClosestPointResult> result = {};
+      Map<Nodes, ClosestPointResult> result = {};
       for (var waypoint in nearestWaypoints) {
         List<dynamic>? adjList = adj["${waypoint?.coordx},${waypoint?.coordy}"];
-        List<dynamic>? adjGlobalList = adjGlobal["${waypoint?.lat},${waypoint?.lon}"];
+        List<dynamic>? adjGlobalList =
+        adjGlobal["${waypoint?.lat},${waypoint?.lon}"];
         print("adj $adj");
         print("adjGlobalList $adjGlobalList");
 
         ClosestPointResult closestPoint = ClosestPointResult(
             LatLng(waypoint!.lat!, waypoint!.lon!),
             IntPoint(waypoint!.coordx!, waypoint!.coordy!),
-            tools.calculateAerialDist(coordinates.latitude, coordinates.longitude, waypoint!.lat!, waypoint!.lon!)
-        );
+            tools.calculateAerialDist(coordinates.latitude,
+                coordinates.longitude, waypoint!.lat!, waypoint!.lon!));
 
         if (adjList != null && adjGlobalList != null) {
           adjList.remove("${waypoint!.coordx},${waypoint!.coordy}");
@@ -1425,35 +1415,48 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
           List<LatLng> latLngPoints = tools.convertToLatLngList(adjGlobalList);
           List<IntPoint> intPoints = tools.convertToIntPointList(adjList);
-          closestPoint = shortestPoint(coordinates, closestPoint.latLngPoint, closestPoint.intPoint, latLngPoints, intPoints);
+          closestPoint = shortestPoint(coordinates, closestPoint.latLngPoint,
+              closestPoint.intPoint, latLngPoints, intPoints);
           result[waypoint] = closestPoint;
         }
       }
 
-      MapEntry<Nodes, ClosestPointResult> shortestProjection = result.entries.reduce((a, b) => a.value.projectLength < b.value.projectLength ? a : b);
+      MapEntry<Nodes, ClosestPointResult> shortestProjection = result.entries
+          .reduce(
+              (a, b) => a.value.projectLength < b.value.projectLength ? a : b);
       ClosestPointResult closestPoint = shortestProjection.value;
-      if (tools.calculateDistance([shortestProjection.value.intPoint.x, shortestProjection.value.intPoint.y], [shortestProjection.key!.coordx!, shortestProjection.key!.coordy!]) <= 10) {
-        closestPoint = ClosestPointResult(LatLng(shortestProjection.key!.lat!, shortestProjection.key!.lon!), IntPoint(shortestProjection.key!.coordx!, shortestProjection.key!.coordy!), 0);
+      if (tools.calculateDistance([
+        shortestProjection.value.intPoint.x,
+        shortestProjection.value.intPoint.y
+      ], [
+        shortestProjection.key!.coordx!,
+        shortestProjection.key!.coordy!
+      ]) <=
+          10) {
+        closestPoint = ClosestPointResult(
+            LatLng(shortestProjection.key!.lat!, shortestProjection.key!.lon!),
+            IntPoint(shortestProjection.key!.coordx!,
+                shortestProjection.key!.coordy!),
+            0);
       }
-
       closestLandmark!
         ..coordinateX = closestPoint.intPoint.x
         ..coordinateY = closestPoint.intPoint.y
         ..doorX = closestPoint.intPoint.x
         ..doorY = closestPoint.intPoint.y
+        ..buildingID = buildingAllApi.outdoorID
         ..properties!.latitude = closestPoint.latLngPoint.latitude.toString()
-        ..properties!.longitude = closestPoint.latLngPoint.longitude.toString();
+        ..properties!.longitude = closestPoint.latLngPoint.longitude.toString()
+        ..properties!.doorLat = closestPoint.latLngPoint.latitude.toString()
+        ..properties!.doorLng = closestPoint.latLngPoint.longitude.toString();
     }
 
     return closestLandmark;
   }
 
-
-
-
   Set<Marker> debugMarker = Set();
-  void addDebugMarkers(LatLng point, {double? hue,int? id}){
-    if(kDebugMode){
+  void addDebugMarkers(LatLng point, {double? hue, int? id}) {
+    if (!kIsWeb && kDebugMode) {
       print("adding marker at $point");
       setState(() {
         debugMarker.add(Marker(
@@ -1466,19 +1469,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               // snippet: '${landmarks[i].properties!.polyId}',
               // Replace with additional information
               onTap: () {}),
-          icon: BitmapDescriptor.defaultMarkerWithHue(hue??BitmapDescriptor.hueAzure),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+              hue ?? BitmapDescriptor.hueAzure),
         ));
       });
     }
   }
 
   Set<Marker> GpsMarker = Set();
-  void addGpsMarkers(Location point, {double? hue,int? id}){
-    if(kDebugMode){
+  void addGpsMarkers(Location point, {double? hue, int? id}) {
+    if (true) {
       GpsMarker.clear();
       print("adding GPS marker at $point");
       setState(() {
-
         GpsMarker.add(Marker(
           markerId: MarkerId("debug${DateTime.now().toString()}"),
           position: LatLng(point.latitude, point.longitude),
@@ -1489,16 +1492,17 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               // snippet: '${landmarks[i].properties!.polyId}',
               // Replace with additional information
               onTap: () {}),
-          icon: BitmapDescriptor.defaultMarkerWithHue(hue??BitmapDescriptor.hueAzure),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+              hue ?? BitmapDescriptor.hueAzure),
         ));
       });
     }
   }
 
   Map<MarkerId, Marker> nearbyLandmarks = {};
-  Landmarks? PinedLandmark ;
+  Landmarks? PinedLandmark;
 
-  Future<void> addNearbyLandmarkMarkers(LatLng point,String id, String name, bool visible) async {
+  Future<void> addNearbyLandmarkMarkers(LatLng point,String id, String name, bool visible, {String? road}) async {
     final Uint8List iconMarker = await getImagesFromMarker('assets/OptionLandmark.png', 85);
     BitmapDescriptor optionLandmark = BitmapDescriptor.fromBytes(iconMarker);
 
@@ -1509,7 +1513,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         print("already exists a landmark ${markerId.value}");
       }
       nearbyLandmarks[markerId] = Marker(
-        markerId: MarkerId("$name#${visible?"true":"false"}"),
+        markerId: MarkerId("$name${road!=null?"#$road":"#"}#${visible?"true":"false"}#$id"),
         position: point,
         visible: visible,
         icon: optionLandmark,
@@ -1519,36 +1523,45 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     print("Added NearbyLandmark at $point with ID: $markerId");
   }
 
-  void selectPinLandmark(CameraPosition cameraposition){
+  void selectPinLandmark(CameraPosition cameraposition) {
     double distance = 5;
     MarkerId? id;
-    nearbyLandmarks.forEach((key,value){
-      double d = tools.calculateAerialDist(cameraposition.target.latitude, cameraposition.target.longitude, value.position.latitude, value.position.longitude);
-      if(d<distance){
+    nearbyLandmarks.forEach((key, value) {
+      double d = tools.calculateAerialDist(
+          cameraposition.target.latitude,
+          cameraposition.target.longitude,
+          value.position.latitude,
+          value.position.longitude);
+      if (d < distance) {
         distance = d;
+        updateNearbyLandmarkMarkers(id!);
         id = key;
       }
     });
-    if(id != null){
+    if (id != null) {
       updateNearbyLandmarkMarkers(id!);
+    }else{
+      updateNearbyLandmarkMarkers(nearbyLandmarks.keys.first);
     }
   }
 
   Future<void> focusOnPinLandmark(LatLng position) async {
     LatLngBounds bounds = await _googleMapController.getVisibleRegion();
-
     LatLng center = LatLng(
       (bounds.northeast.latitude + bounds.southwest.latitude) / 2,
       (bounds.northeast.longitude + bounds.southwest.longitude) / 2,
     );
-    if(center.latitude.toStringAsFixed(5) != position.latitude.toStringAsFixed(5) || center.longitude.toStringAsFixed(5) != position.longitude.toStringAsFixed(5)){
+    if (center.latitude.toStringAsFixed(5) !=
+        position.latitude.toStringAsFixed(5) ||
+        center.longitude.toStringAsFixed(5) !=
+            position.longitude.toStringAsFixed(5)) {
       print("focusing map");
       _googleMapController.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
             target: position, // Use the last known target
-            zoom: 22,     // Use the last known zoom
-            bearing: user.theta,               // Update the bearing
+            zoom: 22, // Use the last known zoom
+            bearing: user.theta, // Update the bearing
           ),
         ),
       );
@@ -1556,42 +1569,57 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
   Future<void> updateNearbyLandmarkMarkers(MarkerId id) async {
-
-    if(PinedLandmark == SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!.where((landmark)=>landmark.sId == id.value).first){
+    if (PinedLandmark ==
+        SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!
+            .where((landmark) => landmark.sId == id.value)
+            .first) {
       focusOnPinLandmark(nearbyLandmarks[id]!.position);
     }
+    if (!nearbyLandmarks.containsKey(id) ||
+        PinedLandmark ==
+            SingletonFunctionController
+                .building.listOfNearbyLandmarksToLocalize!
+                .where((landmark) => landmark.sId == id.value)
+                .first) return;
+    final Uint8List selectedMarker =
+    await getImagesFromMarker('assets/LandmarkSelected.png', 85);
+    BitmapDescriptor selectedLandmark =
+    BitmapDescriptor.fromBytes(selectedMarker);
 
-    if (!nearbyLandmarks.containsKey(id) || PinedLandmark == SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!.where((landmark)=>landmark.sId == id.value).first) return;
-
-    final Uint8List selectedMarker = await getImagesFromMarker('assets/LandmarkSelected.png', 85);
-    BitmapDescriptor selectedLandmark = BitmapDescriptor.fromBytes(selectedMarker);
-
-    final Uint8List iconMarker = await getImagesFromMarker('assets/OptionLandmark.png', 85);
+    final Uint8List iconMarker =
+    await getImagesFromMarker('assets/OptionLandmark.png', 85);
     BitmapDescriptor optionLandmark = BitmapDescriptor.fromBytes(iconMarker);
-
     setState(() {
       // Update all markers to default
       nearbyLandmarks.updateAll((markerId, marker) {
         return marker.copyWith(iconParam: optionLandmark);
       });
-
       // Update the selected marker to a different icon
-      nearbyLandmarks[id] = nearbyLandmarks[id]!.copyWith(iconParam: selectedLandmark);
+      nearbyLandmarks[id] =
+          nearbyLandmarks[id]!.copyWith(iconParam: selectedLandmark);
     });
     focusOnPinLandmark(nearbyLandmarks[id]!.position);
-    if(SingletonFunctionController.building.listOfNearbyLandmarksToLocalize != null){
-      PinedLandmark = SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!.where((landmark)=>landmark.sId == id.value).first;
+    if (SingletonFunctionController.building.listOfNearbyLandmarksToLocalize !=
+        null) {
+      PinedLandmark = SingletonFunctionController
+          .building.listOfNearbyLandmarksToLocalize!
+          .where((landmark) => landmark.sId == id.value)
+          .first;
     }
-    print("Updated NearbyLandmark with ID: ${nearbyLandmarks[id]!.markerId.value}  now the list is $nearbyLandmarks");
+    print(
+        "Updated NearbyLandmark with ID: ${nearbyLandmarks[id]!.markerId.value}  now the list is $nearbyLandmarks");
   }
 
-
-
-  ClosestPointResult shortestPoint(LatLng userLatLng, LatLng targetLatLng, IntPoint targetintPoint, List<LatLng> latLngPoints, List<IntPoint> intPoints) {
-
-    addDebugMarkers(targetLatLng,hue:BitmapDescriptor.hueMagenta);
+  ClosestPointResult shortestPoint(
+      LatLng userLatLng,
+      LatLng targetLatLng,
+      IntPoint targetintPoint,
+      List<LatLng> latLngPoints,
+      List<IntPoint> intPoints) {
+    addDebugMarkers(targetLatLng, hue: BitmapDescriptor.hueMagenta);
     double distanceBetweenLatLng(LatLng a, LatLng b) {
-      return sqrt(pow(a.latitude - b.latitude, 2) + pow(a.longitude - b.longitude, 2));
+      return sqrt(
+          pow(a.latitude - b.latitude, 2) + pow(a.longitude - b.longitude, 2));
     }
 
     LatLng? projectLatLngIfWithinSegment(
@@ -1605,11 +1633,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
       // Check if the projection lies within the segment
       if (t < 0 || t > 1) {
-        print("projection null");
         return null; // Outside the segment
       }
 
-      print("latlng projected are ${start.latitude + t * bx},${start.longitude + t * by}");
+      print(
+          "latlng projected are ${start.latitude + t * bx},${start.longitude + t * by}");
       return LatLng(start.latitude + t * bx, start.longitude + t * by);
     }
 
@@ -1621,10 +1649,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
     for (int i = 0; i < latLngPoints.length; i++) {
       LatLng latLngPoint = latLngPoints[i];
-      LatLng? projectedLatLng = projectLatLngIfWithinSegment(userLatLng, targetLatLng, latLngPoint);
+      LatLng? projectedLatLng =
+      projectLatLngIfWithinSegment(userLatLng, targetLatLng, latLngPoint);
+      print("projectedLatLng $projectedLatLng $latLngPoint");
+      addDebugMarkers(latLngPoint, hue: BitmapDescriptor.hueOrange);
 
       if (projectedLatLng != null) {
-        addDebugMarkers(latLngPoint,hue:BitmapDescriptor.hueOrange);
+        // addDebugMarkers(latLngPoint,hue:BitmapDescriptor.hueOrange);
         double distance = distanceBetweenLatLng(userLatLng, projectedLatLng);
         if (distance < minDistanceLatLng) {
           minDistanceLatLng = distance;
@@ -1636,28 +1667,42 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
 
     // Check if the direct distance to the target is shorter
-    double distanceToTargetLatLng = distanceBetweenLatLng(userLatLng, targetLatLng);
+    double distanceToTargetLatLng =
+    distanceBetweenLatLng(userLatLng, targetLatLng);
     if (distanceToTargetLatLng < minDistanceLatLng) {
-      return ClosestPointResult(targetLatLng, targetintPoint!, tools.calculateAerialDist(userLatLng.latitude, userLatLng.longitude, targetLatLng.latitude, targetLatLng.longitude)); // Return target for both formats
+      return ClosestPointResult(
+          targetLatLng,
+          targetintPoint!,
+          tools.calculateAerialDist(
+              userLatLng.latitude,
+              userLatLng.longitude,
+              targetLatLng.latitude,
+              targetLatLng.longitude)); // Return target for both formats
     }
 
-    if(closestLatLngPoint != null && xPoint!= null && yPoint != null){
-
+    if (closestLatLngPoint != null && xPoint != null && yPoint != null) {
       IntPoint xintegerpoint = tools.findCoordinatesOfWaypoint(xPoint);
       IntPoint yintegerpoint = tools.findCoordinatesOfWaypoint(yPoint);
-      navPoints X = navPoints(xPoint.latitude,xPoint.longitude,xintegerpoint.x,xintegerpoint.y);
-      navPoints Y = navPoints(yPoint.latitude,yPoint.longitude,yintegerpoint.x,yintegerpoint.y);
-      navPoints Z = navPoints(closestLatLngPoint.latitude,closestLatLngPoint.longitude,0,0);
+      navPoints X = navPoints(
+          xPoint.latitude, xPoint.longitude, xintegerpoint.x, xintegerpoint.y);
+      navPoints Y = navPoints(
+          yPoint.latitude, yPoint.longitude, yintegerpoint.x, yintegerpoint.y);
+      navPoints Z = navPoints(
+          closestLatLngPoint.latitude, closestLatLngPoint.longitude, 0, 0);
       closestIntPoint = tools.findCartesianCoordinates(X, Y, Z);
-
     }
 
-
-    return ClosestPointResult(closestLatLngPoint ?? targetLatLng, closestIntPoint!=null?IntPoint(closestIntPoint.x, closestIntPoint.y):targetintPoint,
-        tools.calculateAerialDist(userLatLng.latitude, userLatLng.longitude, (closestLatLngPoint ?? targetLatLng).latitude, (closestLatLngPoint ?? targetLatLng).longitude)
-    );
+    return ClosestPointResult(
+        closestLatLngPoint ?? targetLatLng,
+        closestIntPoint != null
+            ? IntPoint(closestIntPoint.x, closestIntPoint.y)
+            : targetintPoint,
+        tools.calculateAerialDist(
+            userLatLng.latitude,
+            userLatLng.longitude,
+            (closestLatLngPoint ?? targetLatLng).latitude,
+            (closestLatLngPoint ?? targetLatLng).longitude));
   }
-
 
   double currentHeading = 10.0; // Example current heading
   double referenceHeading = 0.0; // Example reference heading (North)
@@ -1687,7 +1732,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
     return false; // No calibration needed
   }
-
 
   double calculateMagneticFieldStrength(double x, double y, double z) {
     return sqrt(x * x + y * y + z * z);
@@ -1726,7 +1770,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               magneticFieldStrength > upperThreshold) {
             accuracyNotifier.value = true;
           } else {
-            Future.delayed(Duration(seconds: 3)).then((onValue){
+            Future.delayed(Duration(seconds: 3)).then((onValue) {
               _magnetometerSubscription.cancel();
               accuracyNotifier.value = false;
             });
@@ -1745,24 +1789,26 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         });
   }
 
-  void paintUser(
-      String? nearestBeacon,
-      String? polyID,
-      LatLng? gpsCoordinates,
-      {bool speakTTS = true, bool render = true, bool providePinSelection = false}
-      ) async {
-    print("paintuser $nearestBeacon $polyID $gpsCoordinates");
-    print(widget.directsourceID);
-    // Handle direct source ID case
-    if (widget.directsourceID.length > 2){
+  void paintUser(String? nearestBeacon, String? polyID,
+      {bool speakTTS = true,
+        bool render = true,
+        bool providePinSelection = false}) async {
 
+    print(widget.directsourceID);
+    setState(() {
+      showClassB=false;
+    });
+    print("paintuser $nearestBeacon $polyID $showClassB");
+    // Handle direct source ID case
+    if (widget.directsourceID.length > 2) {
       nearestBeacon = null;
       polyID = widget.directsourceID;
       widget.directsourceID = '';
     }
     // If nearestBeacon is provided, localize the user to it
-    if (nearestBeacon != null && nearestBeacon.isNotEmpty){
-      await _handleBeaconLocalization(nearestBeacon!, speakTTS, render,providePinSelection);
+    if (nearestBeacon != null && nearestBeacon.isNotEmpty) {
+      await _handleBeaconLocalization(
+          nearestBeacon!, speakTTS, render, providePinSelection);
     }
     // If polyID is provided, localize the user to the polygon
     else if (polyID != null && polyID.isNotEmpty) {
@@ -1770,42 +1816,46 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
     // Fallback to global coordinates if neither nearestBeacon nor polyID is available
     else {
-      await _handleGlobalCoordinatesLocalization(speakTTS, render,providePinSelection);
+      await _handleGlobalCoordinatesLocalization(
+          speakTTS, render, providePinSelection);
     }
-
     // Reset direct source ID and Land ID
     widget.directLandID = '';
     widget.directsourceID = '';
-    _recenterMap();
+    recenterMap();
+    Homepage.homePageKey.currentState?.hideLoading();
     setState(() {
       isLocalized = false;
+      showClassB=true;
     });
+    print("paintuser:${showClassB}");
   }
 
-  Future<void> _handleBeaconLocalization(
-      String nearestBeacon, bool speakTTS, bool render, bool providePinSelection) async {
+  Future<void> _handleBeaconLocalization(String nearestBeacon, bool speakTTS,
+      bool render, bool providePinSelection) async {
     List<Future<void>> apiCalls = [];
-    buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
-      apiCalls.add(landmarkApi().fetchLandmarkData(id: key).then((value) {}));
-    });
     // Wait for all API calls to complete
+    SingletonFunctionController.localizedBeacon = nearestBeacon;
     await Future.wait(apiCalls);
     try {
       print("got into beacon localization");
       wsocket.message["AppInitialization"]["localizedOn"] = nearestBeacon;
-      final beaconData = SingletonFunctionController.apibeaconmap[nearestBeacon];
-      if (beaconData == null){
+      // networkManager.ws.updateInitialization(localizedOn: nearestBeacon);
+      final beaconData =
+      SingletonFunctionController.apibeaconmap[nearestBeacon];
+      if (beaconData == null) {
         print("_handleBeaconLocalization: Beacon data not found");
         if (speakTTS) unableToFindLocation();
         return;
       }
-      print("Beacon debug: $beaconData");
+      print("Beacon debug:$beaconData");
       print("pinselectionStatus:: ${providePinSelection}");
-      final landmarkData = await SingletonFunctionController.building.landmarkdata;
+      final landmarkData =
+      await SingletonFunctionController.building.landmarkdata;
       Map<String, Landmarks>? landmarksMapAll = {};
       buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
         print("getStoredAllBuildingID $key");
-        await landmarkApi().fetchLandmarkData(id: key).then((value) {
+        await RepositoryManager().getLandmarkDataNew(key).then((value) {
           print("key $key $value");
           landmarksMapAll!.addAll(value.landmarksMap!);
         });
@@ -1813,26 +1863,27 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       print("landmarkdata $landmarksMapAll");
       if (landmarkData?.landmarksMap == null) {
         print("_handleBeaconLocalization: Landmark data not available");
-        unableToFindLocation();
+        if (speakTTS) unableToFindLocation();
         return;
       }
       if (providePinSelection) {
         print("in pinselectionStatus$providePinSelection");
-        SingletonFunctionController.building.listOfNearbyLandmarksToLocalize = tools.findListOfNearbyLandmark(beaconData, landmarkData!.landmarksMap!);
+        Pinselectionlocationmodel pinLocation = Pinselectionlocationmodel(floor: beaconData.floor!, bid: beaconData.buildingID!, lat: double.parse(beaconData.properties!.latitude!), lng: double.parse(beaconData.properties!.longitude!), coordX: beaconData.coordinateX, coordY: beaconData.coordinateY);
+        SingletonFunctionController.building.listOfNearbyLandmarksToLocalize = tools.findListOfNearbyLandmarkBLE(pinLocation, landmarkData!.landmarksMap!);
         print("list of nearby landmarks::${SingletonFunctionController.building.listOfNearbyLandmarksToLocalize} ${beaconData} ${landmarkData!.landmarksMap!}");
         if (SingletonFunctionController.building.listOfNearbyLandmarksToLocalize != null){
           detected = false;
           print("got inside this");
 
           if(SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!.where((test)=>test.properties!.isWaypoint == false).length>1){
-            showListOfNearbyLandmarks(SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!,beaconData.floor!);
+            showListOfNearbyLandmarks(SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!);
           }else{
             final userSetLocation = tools.localizefindNearbyLandmark(beaconData, landmarkData!.landmarksMap!);
             print("usersetlocation::${userSetLocation}");
             if (userSetLocation != null){
-              initializeUser(userSetLocation, beaconData, speakTTS: speakTTS, render: render);
+              initializeUser(userSetLocation, speakTTS: speakTTS, render: render);
             }else{
-              unableToFindLocation();
+              if (speakTTS) unableToFindLocation();
             }
           }
           return;
@@ -1840,20 +1891,22 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           final userSetLocation = tools.localizefindNearbyLandmark(beaconData, landmarkData!.landmarksMap!);
           print("usersetlocation::${userSetLocation}");
           if (userSetLocation != null){
-            initializeUser(userSetLocation, beaconData, speakTTS: speakTTS, render: render);
+            initializeUser(userSetLocation, speakTTS: speakTTS, render: render);
           }else{
             showToast("not in the list $nearestBeacon");
-            unableToFindLocation();
+            if (speakTTS) unableToFindLocation();
           }
           return;
         }
-      }else{
-        final userSetLocation = tools.localizefindNearbyLandmark(beaconData, landmarkData!.landmarksMap!);
-        if (userSetLocation != null) {
-          initializeUser(userSetLocation, beaconData, speakTTS: speakTTS, render: render);
-        } else {
-          unableToFindLocation();
-        }
+      }
+      final userSetLocation = tools.localizefindNearbyLandmark(
+          beaconData, landmarkData!.landmarksMap!);
+
+      if (userSetLocation != null) {
+        initializeUser(userSetLocation, speakTTS: speakTTS, render: render)
+            .then((_) {});
+      } else {
+        if (speakTTS) unableToFindLocation();
       }
     } catch (e, stackTrace) {
       print("Error during beacon localization: $e\n$stackTrace");
@@ -1861,21 +1914,17 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
   }
 
-
-
   Future<void> _handlePolygonLocalization(
-      String polyID,
-      bool speakTTS,
-      bool render
-      ) async {
+      String polyID, bool speakTTS, bool render) async {
     try {
-      final landmarkData = await SingletonFunctionController.building.landmarkdata;
-      final userSetLocation = landmarkData?.landmarksMap?[polyID];
+      land? snapshot = await SingletonFunctionController.building.landmarkdata;
+      // Collect all API call futures
+      final userSetLocation = snapshot?.landmarksMap?[polyID];
       print("polygonlocalization called");
-      if (userSetLocation != null){
-        initializeUser(userSetLocation,null, speakTTS: speakTTS, render: render);
-      }else{
-        unableToFindLocation();
+      if (userSetLocation != null) {
+        initializeUser(userSetLocation, speakTTS: speakTTS, render: render);
+      } else {
+        if (speakTTS) unableToFindLocation();
       }
     } catch (e) {
       print("Error during polygon localization: $e");
@@ -1883,109 +1932,170 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
   }
 
-
+  StreamSubscription? gpsSubscription;
 
   Future<void> _handleGlobalCoordinatesLocalization(
-      bool speakTTS,
-      bool render,
-      bool providePinSelection
-      ) async {
-    print("got into GPS localization");
-    KalmanFilter _kalmanFilter = KalmanFilter();
-    try{
-      StreamSubscription<Location>? _gpsSubscription;
-      _gpsSubscription = GPSService.locationStream.listen((Location location) {
-        _kalmanFilter.applyFilter(location.latitude, location.longitude);
-      }, onError: (error) {
-        print("Error receiving GPS data: $error");
-      });
-
-      await Future.delayed(const Duration(seconds: 9));
-      _gpsSubscription?.cancel();
-      _gpsSubscription = null;
-    }catch(e){
-      unableToFindLocation();
+      bool speakTTS, bool render, bool providePinSelection) async {
+    print("got into GPS localization $speakTTS $render $providePinSelection");
+    if (kIsWeb) {
+      if (speakTTS) unableToFindLocation();
       return;
     }
-
-    if(_kalmanFilter.latitudeEstimate != null && _kalmanFilter.longitudeEstimate != null) {
-      UserState.geoLat = _kalmanFilter.latitudeEstimate;
-      UserState.geoLng = _kalmanFilter.longitudeEstimate;
+    List<double>? location;
+    gpsBuffer.Print();
+    try {
+      location = gpsBuffer.getRobustPosition();
+    } catch (e) {
+      if (widget.directLandID.length <= 2) {
+        if (speakTTS) unableToFindLocation();
+      }
+      return;
+    }
+    if (location != null && location.isNotEmpty) {
+      UserState.geoLat = location[0];
+      UserState.geoLng = location[1];
       print("globalcoord ${UserState.geoLat},${UserState.geoLng}");
-      final userSetLocation = await getGlobalCoords(
-          LatLng(UserState.geoLat!, UserState.geoLng!)
-      );
+      final userSetLocation =
+      await getGlobalCoords(LatLng(UserState.geoLat!, UserState.geoLng!));
 
       if (userSetLocation != null) {
         String polyID = userSetLocation.properties!.polyId!;
-        initializeUser(userSetLocation,null, speakTTS: speakTTS, render: render);
+        initializeUser(userSetLocation, speakTTS: speakTTS, render: render);
       } else {
-        unableToFindLocation();
+        if (speakTTS) unableToFindLocation();
       }
-    }else{
-      showToast("gps stream is not started");
-      unableToFindLocation();
+    } else {
+      kDebugMode ? showToast("gps stream is not started") : ();
+      if (speakTTS) unableToFindLocation();
     }
   }
+
   void unableToFindLocation(){
-    speak("Unable to find your location. Scan nearby QR to know your location",
-        _currentLocale);
-    showLocationDialog(context);
-    SingletonFunctionController.building.qrOpened = true;
+    if(!Platform.isAndroid){
+      if(_currentState==AvailabilityState.poweredOn){
+        final stackTrace = StackTrace.current;
+        print("unableToFindLocation Stack: \n$stackTrace");
+        speak("Unable to find your location. Search nearby landmark to find your location",
+            _currentLocale);
+        showClassB=true;
+        showLocationDialog(context);
+        SingletonFunctionController.building.qrOpened = true;
+      }else{
+        _showBluetoothDialog();
+      }
+    }else{
+      final stackTrace = StackTrace.current;
+      print("unableToFindLocation Stack: \n$stackTrace");
+      speak("Unable to find your location. Search nearby landmark to find your location",
+          _currentLocale);
+      showClassB=true;
+      showLocationDialog(context);
+      SingletonFunctionController.building.qrOpened = true;
+    }
+
+
+    setState(() {});
   }
 
-  Future<void> showListOfNearbyLandmarks(List<Landmarks> landmarks,int beaconFloor) async {
-    SingletonFunctionController.building.floor[landmarks.first.buildingID!] = beaconFloor;
-    await createRooms(SingletonFunctionController.building.polylinedatamap[landmarks.first.buildingID]!, beaconFloor);
+  void _showBluetoothDialog() {
+    // _dialogShown = true;
+    showDialog(
+      context: context,
+      barrierDismissible: true, // user cannot dismiss by tapping outside
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Bluetooth is turned off"),
+          content: const Text(
+            "Please restart Bluetooth in your device settings to continue.",
+            style: TextStyle(fontWeight: FontWeight.w500),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                AppSettings.openAppSettings();
+                //try{
+                //BLEManager();
+                //}catch(e){
+                // OpenSettingsPlusIOS().settings();
+                // }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.cyan,
+              ),
+              child:  Text("Open Settings",style: TextStyle(color: Colors.white),),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
+
+  Future<void> showListOfNearbyLandmarks(List<Landmarks> landmarks) async {
+    SingletonFunctionController.building.floor[landmarks.first.buildingID!] = landmarks.first.floor??0;
+    await createRooms(SingletonFunctionController.building.polylinedatamap[landmarks.first.buildingID]!, landmarks.first.floor??0);
     await Future.delayed(Duration(milliseconds: 1000));
     speak(convertTolng("Confirm Your Location Amongst Below Given List", _currentLocale, ''), _currentLocale);
     focusOnPinLandmark(LatLng(double.parse(landmarks.first.properties!.latitude!), double.parse(landmarks.first.properties!.longitude!)));
     for (var landmark in landmarks){
-      addNearbyLandmarkMarkers(LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!)),landmark.sId??"", landmark.name??"", !landmark.properties!.isWaypoint);
+      addNearbyLandmarkMarkers(LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!)),landmark.sId??"", (landmark.renderDetail?.name ?? landmark.name ?? landmark.element!.subType!??""), !landmark.properties!.isWaypoint, road: landmark.roadName);
     }
   }
-  void localizeOnPinedLandmark(){
-    if(PinedLandmark != null){
-      initializeUser(PinedLandmark!, null);
-    }else{
+
+  void _announceDirection(String instruction) {
+    print("_announceDirection:${instruction}");
+    final announcement = "${instruction}";
+    SemanticsService.announce(announcement, TextDirection.ltr);
+  }
+
+  void localizeOnPinedLandmark() {
+    if (PinedLandmark != null) {
+      print("PinedLandmark:${PinedLandmark!.name}");
+      initializeUser(PinedLandmark!);
+    } else {
       unableToFindLocation();
     }
     PinLandmarkPannel.hidePanel();
     setState(() {
       nearbyLandmarks.clear();
-      SingletonFunctionController.building.listOfNearbyLandmarksToLocalize = null;
-      PinedLandmark = null;
+      SingletonFunctionController.building.listOfNearbyLandmarksToLocalize =
+      null;
     });
   }
 
-  void closePinnedLandmarkPannel(){
+  void closePinnedLandmarkPannel() {
     //unableToFindLocation();
     PinLandmarkPannel.hidePanel();
     setState(() {
       nearbyLandmarks.clear();
-      SingletonFunctionController.building.listOfNearbyLandmarksToLocalize = null;
+      SingletonFunctionController.building.listOfNearbyLandmarksToLocalize =
+      null;
       PinedLandmark = null;
     });
   }
-
-  void initializeUser(Landmarks userSetLocation,beacon? localizedBeacon,{bool speakTTS = true, bool render = true})async{
+  bool showClassB = false;
+  Future<void> initializeUser(Landmarks userSetLocation,
+      {bool speakTTS = true, bool render = true}) async {
+    gpsSubscription?.cancel(); // <-- This triggers native onCancel()
+    gpsSubscription = null;
+    print("from direction header:${isFromLocalize}");
+    Homepage.homePageKey.currentState?.locationDetected(userSetLocation);
     tools.setBuildingAngle(SingletonFunctionController.building
         .patchData[userSetLocation.buildingID]!.patchData!.buildingAngle!);
-
     setState(() {
       buildingAllApi.selectedID = userSetLocation!.buildingID!;
       buildingAllApi.selectedBuildingID = userSetLocation!.buildingID!;
     });
-
     List<int> localBeconCord = [];
     localBeconCord.add(userSetLocation.coordinateX!);
     localBeconCord.add(userSetLocation.coordinateY!);
-
     pathState().beaconCords = localBeconCord;
-
+    // beacon? nearestPoint;
     List<double> values = [];
 
+    // if(SingletonFunctionController.apibeaconmap.containsKey(bleManager.finalName)){
+    //  nearestPoint=null;
+    // }
     //floor alignment
     await SingletonFunctionController.building.landmarkdata!.then((land) {
       if (userSetLocation.floor != 0) {
@@ -2003,11 +2113,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 .polylinedatamap[userSetLocation.buildingID!]!
                 .polyline!
                 .floors!);
-        for (int i = 0; i < prevFloorLifts.length; i++) {}
-
-        for (int i = 0; i < currFloorLifts.length; i++) {}
         List<int> dvalue = findCommonLift(prevFloorLifts, currFloorLifts);
-
         UserState.xdiff = dvalue[0];
         UserState.ydiff = dvalue[1];
         values = tools.localtoglobal(
@@ -2025,18 +2131,24 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 .building.patchData[userSetLocation.buildingID!]);
       }
     });
-
     mapState.target = LatLng(values[0], values[1]);
-
     user.bid = userSetLocation.buildingID!;
     print("setting userbid ${user.bid}");
-    user.locationName = userSetLocation.name;
-
-    //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.latitude!);
-
-    //double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.longitude!);
-
-    //did this change over here UDIT...
+    user.locationName = userSetLocation!.renderDetail?.name??userSetLocation!.name ?? userSetLocation!.element!.subType;
+    // double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.latitude!);
+    // double.parse(SingletonFunctionController.apibeaconmap[nearestBeacon]!.properties!.longitude!);
+    // did this change over here UDIT...
+    double dist = double.infinity;
+    // try {
+    //   final beacon = SingletonFunctionController.apibeaconmap[bleManager.finalName];
+    //   dist = tools.calculateDistance([
+    //     nearestPoint!.coordinateX!,
+    //     nearestPoint!.coordinateY!
+    //   ], [beacon!.coordinateX!, beacon!.coordinateY!]);
+    //   print("distance between points :${dist}");
+    // }catch(e){
+    //   print("nearest beacon is not in the list");
+    // }
     user.coordX = userSetLocation.coordinateX!;
     user.coordY = userSetLocation.coordinateY!;
     List<double> ls = tools.localtoglobal(
@@ -2044,10 +2156,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         user.coordY,
         SingletonFunctionController
             .building.patchData[userSetLocation.buildingID]);
-    user.lat = ls[0];
-    user.lng = ls[1];
+    user.lat = userSetLocation.properties?.doorLat != null ? double.parse(userSetLocation.properties!.doorLat!):ls[0];
+    user.lng = userSetLocation.properties?.doorLng != null ? double.parse(userSetLocation.properties!.doorLng!):ls[1];
     if (userSetLocation!.doorX != null) {
-      print("usercoord fetched ${user.coordX},${user.coordY}       ${userSetLocation!.doorX!} ${userSetLocation!.doorY!}");
+      print(
+          "usercoord fetched ${user.coordX},${user.coordY}   ${userSetLocation!.doorX!} ${userSetLocation!.doorY!}");
       user.coordX = userSetLocation!.doorX!;
       user.coordY = userSetLocation!.doorY!;
       List<double> latlng = tools.localtoglobal(
@@ -2055,28 +2168,40 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           userSetLocation!.doorY!,
           SingletonFunctionController
               .building.patchData[userSetLocation!.buildingID]);
-
-      user.lat = latlng[0];
-      user.lng = latlng[1];
-      user.locationName = userSetLocation!.name ??
-          userSetLocation!.element!.subType;
-
+      user.lat = userSetLocation.properties?.doorLat != null ? double.parse(userSetLocation.properties!.doorLat!):latlng[0];
+      user.lng = userSetLocation.properties?.doorLng != null ? double.parse(userSetLocation.properties!.doorLng!):latlng[1];
+      user.locationName =
+          userSetLocation!.renderDetail?.name??userSetLocation!.name ?? userSetLocation!.element!.subType;
     } else if (userSetLocation!.doorX == null) {
       user.coordX = userSetLocation!.coordinateX!;
       user.coordY = userSetLocation!.coordinateY!;
-      List<double> latlng = tools.localtoglobal(
-          userSetLocation!.coordinateX!,
-          userSetLocation!.coordinateY!,
-          SingletonFunctionController
-              .building.patchData[userSetLocation!.buildingID]);
-
-      user.lat = latlng[0];
-      user.lng = latlng[1];
-      user.locationName = userSetLocation!.name ??
-          userSetLocation!.element!.subType;
+      List<double> latlng = [
+        double.parse(userSetLocation.properties!.latitude!),
+        double.parse(userSetLocation.properties!.longitude!)
+      ];
+      user.lat = userSetLocation.properties?.doorLat != null ? double.parse(userSetLocation.properties!.doorLat!):latlng[0];
+      user.lng = userSetLocation.properties?.doorLng != null ? double.parse(userSetLocation.properties!.doorLng!):latlng[1];
+      user.locationName =
+          userSetLocation!.renderDetail?.name??userSetLocation!.name ?? userSetLocation!.element!.subType;
     }
     user.showcoordX = user.coordX;
     user.showcoordY = user.coordY;
+    // if(dist<8){
+    //   if(nearestPoint!=null){
+    //     user.showcoordX=nearestPoint.coordinateX!;
+    //     user.showcoordY=nearestPoint.coordinateY!;
+    //     List<double> latlng = tools.localtoglobal(
+    //         nearestPoint.coordinateX!,
+    //         nearestPoint.coordinateY!,
+    //         SingletonFunctionController
+    //             .building.patchData[userSetLocation!.buildingID]);
+    //     user.coordX=nearestPoint.coordinateX!;
+    //     user.coordY=nearestPoint.coordinateY!;
+    //     user.lat=latlng[0];
+    //     user.lng=latlng[1];
+    //   }
+    print("usercoords :${user.coordX} ${user.coordY}");
+    // }
     UserState.cols = SingletonFunctionController.building.floorDimenssion[
     userSetLocation.buildingID]![userSetLocation.floor]![0];
     UserState.rows = SingletonFunctionController.building.floorDimenssion[
@@ -2089,8 +2214,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     UserState.speak = speak;
     UserState.paintMarker = paintMarker;
     UserState.createCircle = updateCircle;
+    UserState.autoRecenter = recenterMap;
     UserState.addDebugMarkers = addDebugMarkers;
     UserState.renderHere = renderHere;
+    UserState.recenterMap = recenterMap;
     List<int> userCords = [];
     userCords.add(user.coordX);
     userCords.add(user.coordY);
@@ -2106,29 +2233,36 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       vsync: this,
       duration: const Duration(seconds: 3),
     )..repeat(reverse: true);
-
+    Future.delayed(Duration(seconds: 2)).then((_){
+      _announceDirection(
+          'You are near ${user.locationName}, ${LocaleData.floor.getString(
+              context)} ${user.floor}');
+    });
     // Create the animation
-
+    await initializeMarkers();
     setState(() {
       markers.clear();
+      circles.clear();
       //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
       if (render) {
         print("entered here");
         markers.putIfAbsent(user.bid, () => []);
-        markers[user.bid]?.add(Marker(
-          markerId: MarkerId("UserLocation"),
-          position: LatLng(user.lat, user.lng),
-          icon: BitmapDescriptor.fromBytes(userloc),
-          anchor: Offset(0.5, 0.829),
-        ));
-        if (kDebugMode) {
-          markers[user.bid]?.add(Marker(
-            markerId: MarkerId("debug"),
-            position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userlocdebug),
-            anchor: Offset(0.5, 0.829),
-          ));
-        }
+        updateMarkerPosition(LatLng(user.lat, user.lng), user.bid, userloc);
+        // markers[user.bid]?.add(Marker(
+        //   markerId: MarkerId("UserLocation"),
+        //   position: LatLng(user.lat, user.lng),
+        //   icon: BitmapDescriptor.fromBytes(userloc),
+        //   anchor: Offset(0.5, 0.829),
+        //   ehfikr
+        // ));
+        // if (!kIsWeb && kDebugMode) {
+        //   markers[user.bid]?.add(Marker(
+        //     markerId: MarkerId("debug"),
+        //     position: LatLng(user.lat, user.lng),
+        //     icon: BitmapDescriptor.fromBytes(userlocdebug),
+        //     anchor: Offset(0.5, 0.829),
+        //   ));
+        // }
         circles.add(
           Circle(
               circleId: CircleId("circle"),
@@ -2137,50 +2271,60 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               strokeWidth: 1,
               strokeColor: Colors.blue,
               fillColor: Colors.lightBlue.withOpacity(0.2),
-              zIndex: 2
-          ),
+              zIndex: 2),
         );
       } else {
         user.moveToFloor(userSetLocation.floor!);
       }
-
-      if (widget.directLandID.length < 2 && speakTTS) {
-        SingletonFunctionController.building.floor[userSetLocation.buildingID!] = userSetLocation.floor!;
-        createRooms(SingletonFunctionController.building.polyLineData!, userSetLocation.floor!);
+      if (widget.directLandID.length < 2 && speakTTS && isFromLocalize) {
+        SingletonFunctionController.building
+            .floor[userSetLocation.buildingID!] = userSetLocation.floor!;
+        createRooms(
+            SingletonFunctionController
+                .building.polylinedatamap[userSetLocation.buildingID]!,
+            userSetLocation.floor!);
       }
-
-      SingletonFunctionController.building.landmarkdata!.then((value) {
-        createMarkers(value, userSetLocation!.floor!, bid: user.bid);
-      });
+      if (isFromLocalize) {
+        SingletonFunctionController.building.landmarkdata!.then((value) {
+          print("userSetLocation!.floor! ${userSetLocation.floor!}");
+          createMarkers(value, userSetLocation!.floor!, user.bid);
+        });
+      }
     });
-    _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
-      ..addListener(() {
-        _updateCircle(user.lat, user.lng);
-      });
-    List<nearestLandInfo> getallnearbylandmark=[];
-    if(localizedBeacon!=null){
-      await SingletonFunctionController.building.landmarkdata!.then((value) {
-        getallnearbylandmark = tools.localizefindAllNearbyLandmark(
-            localizedBeacon!, value.landmarksMap!);
-      });
-    }
-
-
-
+    // _animation = Tween<double>(begin: 2, end: 5).animate(_controller)
+    //   ..addListener(() {
+    //     _updateCircle(user.lat, user.lng);
+    //   });
+    List<nearestLandInfo> getallnearbylandmark = [];
+    // if(localizedBeacon!=null){
+    //   await SingletonFunctionController.building.landmarkdata!.then((value) {
+    //     getallnearbylandmark = tools.localizefindAllNearbyLandmark(
+    //         localizedBeacon!, value.landmarksMap!);
+    //   });
+    // }
     double value = 0;
     double value2 = 0;
-    if (userSetLocation != null) {
-      value = tools.calculateAngle2(
-          [user.coordX, user.coordY],
-          newUserCord,
-          [
-            userSetLocation!.coordinateX!,
-            userSetLocation!.coordinateY!
-          ]);
+    print("value is 1 $value");
+
+    if (user.coordX != userSetLocation!.coordinateX! &&
+        user.coordY != userSetLocation!.coordinateY!) {
+      value = tools.calculateAngle2([user.coordX, user.coordY], newUserCord,
+          [userSetLocation!.coordinateX!, userSetLocation!.coordinateY!]);
     }
-    double distBetweenLandmarks=0.0;
-    if(getallnearbylandmark.length>2){
-      distBetweenLandmarks=tools.calculateDistance([user.coordX,user.coordY], [getallnearbylandmark[1].coordinateX!,getallnearbylandmark[1].coordinateY!]);
+
+    print("value is 2 $value ${[user.coordX, user.coordY]} $newUserCord ${[
+      userSetLocation!.coordinateX!,
+      userSetLocation!.coordinateY!
+    ]}");
+    double distBetweenLandmarks = 0.0;
+    if (getallnearbylandmark.length > 2) {
+      distBetweenLandmarks = tools.calculateDistance([
+        user.coordX,
+        user.coordY
+      ], [
+        getallnearbylandmark[1].coordinateX!,
+        getallnearbylandmark[1].coordinateY!
+      ]);
       value2 = tools.calculateAngle2(
           [user.coordX, user.coordY],
           newUserCord,
@@ -2189,14 +2333,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             getallnearbylandmark[1].coordinateY!
           ]);
     }
+    print("value is 3 $value");
     mapState.zoom = 22;
-    if (value < 45) {
+    if (value != 0 && value < 45) {
       value = value + 45;
     }
 
-    if(value2<45){
-      value2=value2+45;
+    if (value2 < 45) {
+      value2 = value2 + 45;
     }
+
+    print("value is 4 $value");
+
     String? finalvalue = value == 0
         ? null
         : tools.angleToClocksForNearestLandmarkToBeacon(value, context);
@@ -2205,12 +2353,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         ? null
         : tools.angleToClocksForNearestLandmarkToBeacon(value2, context);
 
-    // double value =
-    //     tools.calculateAngleSecond(newUserCord,userCords,landCords);
-    //
-    // String finalvalue = tools.angleToClocksForNearestLandmarkToBeacon(value);
-    //
-    //
     if (user.isnavigating == false && speakTTS) {
       detected = true;
       if (!_isExploreModePannelOpen && speakTTS) {
@@ -2218,89 +2360,55 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       }
       nearestLandmarkNameForPannel = nearestLandmarkToBeacon;
     }
-    String name = userSetLocation!.name!;
-    if (userSetLocation == null) {
-      //updating user pointer
-      SingletonFunctionController
-          .building.floor[buildingAllApi.getStoredString()] = user.floor;
-      createRooms(
-          SingletonFunctionController.building.polyLineData!,
-          SingletonFunctionController
-              .building.floor[buildingAllApi.getStoredString()]!);
-      if (pathMarkers[user.bid] != null &&
-          pathMarkers[user.bid]![user.floor] != null) {
-        setCameraPosition(pathMarkers[user.bid]![user.floor]!);
-      }
-      if (markers.length > 0)
-        markers[user.bid]?[0] =
-            customMarker.rotate(0, markers[user.bid]![0]);
-      if (user.initialallyLocalised) {
-        mapState.interaction = !mapState.interaction;
-      }
-      fitPolygonInScreen(patch.first);
-      if (speakTTS) {
-        if (finalvalue == null) {
+    setState(() {
+      showClassB=true;
+    });
+    if (speakTTS && isFromLocalize && render) {
+      if (finalvalue == null) {
+        speak(
+            convertTolng(
+                "You are on ${tools.numericalToAlphabetical(user.floor)} floor, near ${user.locationName}",
+                _currentLocale,
+                ''),
+            _currentLocale);
+      } else {
+        if (getallnearbylandmark.length > 2 &&
+            distBetweenLandmarks <= 20 &&
+            finalvalue2 != null) {
           speak(
-              convertTolng(
-                  "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}",
-                  _currentLocale,
-                  ''),
+              "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)} and ${getallnearbylandmark[1].name} is on your ${LocaleData.properties5[finalvalue2]?.getString(context)}",
               _currentLocale);
         } else {
-          if(getallnearbylandmark.length>2 && distBetweenLandmarks<=20 && finalvalue2!=null){
-            speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)} and ${getallnearbylandmark[1].name} is on your ${LocaleData.properties5[finalvalue2]?.getString(context)}",
-                _currentLocale);
-          }else{
-            speak(
-                convertTolng(
-                    "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
-                    _currentLocale,
-                    finalvalue),
-                _currentLocale);
-          }
-
-        }
-      }
-    } else {
-      if (speakTTS) {
-        if (finalvalue == null) {
           speak(
               convertTolng(
-                  "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName}",
+                  "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
                   _currentLocale,
-                  ''),
+                  finalvalue),
               _currentLocale);
-        } else {
-          if(getallnearbylandmark.length>2 && distBetweenLandmarks<=20 && finalvalue2!=null){
-            speak(
-                "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)} and ${getallnearbylandmark[1].name} is on your ${LocaleData.properties5[finalvalue2]?.getString(context)}",
-                _currentLocale);
-          }else{
-            speak(
-                convertTolng(
-                    "You are on ${tools.numericalToAlphabetical(user.floor)} floor,${user.locationName} is on your ${LocaleData.properties5[finalvalue]?.getString(context)}",
-                    _currentLocale,
-                    finalvalue),
-                _currentLocale);
-          }
         }
       }
     }
 
     if (speakTTS) {
       List<double> lvalue = tools.localtoglobal(
-          (userSetLocation.doorX??userSetLocation.coordinateX!).toInt(),
-          (userSetLocation.doorY??userSetLocation.coordinateY!).toInt(),
-          SingletonFunctionController.building.patchData[user.bid]
-      );
+          (userSetLocation.doorX ?? userSetLocation.coordinateX!).toInt(),
+          (userSetLocation.doorY ?? userSetLocation.coordinateY!).toInt(),
+          SingletonFunctionController.building.patchData[user.bid]);
 
-      if(SingletonFunctionController.apibeaconmap[lastBeaconValue] != null){
+      if(userSetLocation.properties?.doorLng != null){
+        lvalue = [double.parse(userSetLocation.properties!.doorLat!), double.parse(userSetLocation.properties!.doorLng!)];
+      }
+
+      if (SingletonFunctionController.apibeaconmap[lastBeaconValue] != null &&
+          isFromLocalize) {
         List<double> uvalue = tools.localtoglobal(
-            SingletonFunctionController.apibeaconmap[lastBeaconValue]!.coordinateX!.toInt(),
-            SingletonFunctionController.apibeaconmap[lastBeaconValue]!.coordinateY!.toInt(),
-            SingletonFunctionController.building.patchData[user.bid]
-        );
+            SingletonFunctionController
+                .apibeaconmap[lastBeaconValue]!.coordinateX!
+                .toInt(),
+            SingletonFunctionController
+                .apibeaconmap[lastBeaconValue]!.coordinateY!
+                .toInt(),
+            SingletonFunctionController.building.patchData[user.bid]);
 
         LatLng currentMarkerPosition = LatLng(lvalue[0], lvalue[1]);
         LatLng newMarkerPosition = LatLng(uvalue[0], uvalue[1]);
@@ -2324,33 +2432,65 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           });
         });
       }
+
       mapState.zoom = 22.0;
       _googleMapController.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
             target: LatLng(lvalue[0], lvalue[1]), // Use the last known target
-            zoom: 22,     // Use the last known zoom
-            bearing: user.theta,               // Update the bearing
+            zoom: 22, // Use the last known zoom
+            bearing: user.theta, // Update the bearing
           ),
         ),
       );
-
     }
-    Future.delayed(Duration(milliseconds: 5000)).then((value){
-      if(isCalibrationNeeded(magneticValues) && UserState.lowCompassAccuracy==false){
-        UserState.lowCompassAccuracy=true;
-        speak(
-            "low accuracy found.Please calibrate your device",
-            _currentLocale);
-        showLowAccuracyDialog();
-      }
-    });
+
+    // Future.delayed(Duration(milliseconds: 5000)).then((value){
+    //   if(!kIsWeb && isCalibrationNeeded(magneticValues) && UserState.lowCompassAccuracy==false){
+    //     UserState.lowCompassAccuracy=true;
+    //     speak("low accuracy found.Please calibrate your device", _currentLocale);
+    //     showLowAccuracyDialog();
+    //   }
+    // });
+    //nearestPoint=null;
+  }
+
+  void updateMarkerPosition(LatLng newPosition, String bid, Uint8List userloc) {
+    if (_oldPosition == null) {
+      _oldPosition = newPosition;
+      markers[bid]?.add(Marker(
+        markerId: MarkerId("UserLocation"),
+        position: newPosition,
+        icon: BitmapDescriptor.fromBytes(userloc),
+        anchor: Offset(0.5, 0.829),
+      ));
+      setState(() {});
+      return;
+    }
+    _newPosition = newPosition;
+    final tween = LatLngTween(begin: _oldPosition!, end: _newPosition!);
+    _moveAnimation = tween.animate(CurvedAnimation(
+      parent: _moveController,
+      curve: Curves.easeInOut,
+    ))
+      ..addListener(() {
+        setState(() {
+          markers[bid]?.add(Marker(
+            markerId: MarkerId("UserLocation"),
+            position: _moveAnimation.value,
+            icon: BitmapDescriptor.fromBytes(userloc),
+            anchor: Offset(0.5, 0.829),
+          ));
+        });
+      });
+    _moveController.forward(from: 0);
+    _oldPosition = _newPosition;
   }
 
   bool _isExpanded = false;
   String? qrText;
 
-  void showDestinationDialog(BuildContext context,String text){
+  void showDestinationDialog(BuildContext context, String text) {
     double screenWidth = MediaQuery.of(context).size.width;
 
     showDialog(
@@ -2378,12 +2518,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 2),
-
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    child:
-                    Text('Close', style: TextStyle(color: Colors.black)),
+                    child: Text('Close', style: TextStyle(color: Colors.black)),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
@@ -2454,14 +2592,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                               builder: (context) => NewSearchPage(
                                 hintText: 'Source location',
                                 voiceInputEnabled: false,
-                                userLocalized: user.key,
+                                user: user,
                               ),
                             ),
                           ).then((value) {
                             setState(() {
                               if (value != null) {
                                 Navigator.of(context).pop();
-                                paintUser(null, value, null);
+                                paintUser(null, value);
                               } else {}
                             });
                           });
@@ -2486,77 +2624,79 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
-                  Text(
-                    "Or",
-                    style: const TextStyle(
-                      fontFamily: "Roboto",
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xffa0a0a0),
-                      height: 20 / 14,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    "Scan the Nearby QR Code",
-                    style: const TextStyle(
-                      fontFamily: "Roboto",
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xff18181b),
-                      height: 25 / 16,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 10),
-                  Center(
-                    child: Semantics(
-                      label: "Open Qr Scanner to know your location",
-                      child: GestureDetector(
-                        onTap: () async {
-                          setState(() {
-                            _isExpanded = !_isExpanded;
-                          });
-                          // Navigator.of(context).pop();
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => QRViewExample(frmMainPage: false,)),
-                          ).then((value) {
-                            setState(() {
-                              isLoading = false;
-                              isBlueToothLoading = false;
-                            });
-                            paintUser(null, value, null);
-                          });
-                          //Navigator.of(context).pop();
-                          // if (result != null) {
-                          //   setState(() {
-                          //     qrText = result;
-                          //   });
-                          //
-                          //   // Handle the scanned QR code text
-                          // }else{
-                          //
-                          // }
-                        },
-                        child: AnimatedContainer(
-                          duration: Duration(seconds: 3),
-                          width: _isExpanded ? 120 : 80,
-                          height: _isExpanded ? 120 : 80,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.teal),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(Icons.qr_code_scanner,
-                              size: 50, color: Colors.teal),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 18),
+                  // SizedBox(height: 20),
+                  // Text(
+                  //   "Or",
+                  //   style: const TextStyle(
+                  //     fontFamily: "Roboto",
+                  //     fontSize: 14,
+                  //     fontWeight: FontWeight.w400,
+                  //     color: Color(0xffa0a0a0),
+                  //     height: 20 / 14,
+                  //   ),
+                  //   textAlign: TextAlign.center,
+                  // ),
+                  // SizedBox(height: 16),
+                  // Text(
+                  //   "Scan the Nearby QR Code",
+                  //   style: const TextStyle(
+                  //     fontFamily: "Roboto",
+                  //     fontSize: 16,
+                  //     fontWeight: FontWeight.w400,
+                  //     color: Color(0xff18181b),
+                  //     height: 25 / 16,
+                  //   ),
+                  //   textAlign: TextAlign.center,
+                  // ),
+                  // SizedBox(height: 10),
+                  // Center(
+                  //   child: Semantics(
+                  //     label: "Open Qr Scanner to know your location",
+                  //     child: GestureDetector(
+                  //       onTap: () async {
+                  //         setState(() {
+                  //           _isExpanded = !_isExpanded;
+                  //         });
+                  //         Navigator.of(context).pop();
+                  //         await Navigator.push(
+                  //           context,
+                  //           MaterialPageRoute(
+                  //               builder: (context) => QRViewExample(
+                  //                     frmMainPage: false,
+                  //                   )),
+                  //         ).then((value) {
+                  //           setState(() {
+                  //             isLoading = false;
+                  //             isBlueToothLoading = false;
+                  //           });
+                  //           paintUser(null, value);
+                  //         });
+                  //         //Navigator.of(context).pop();
+                  //         // if (result != null) {
+                  //         //   setState(() {
+                  //         //     qrText = result;
+                  //         //   });
+                  //         //
+                  //         //   // Handle the scanned QR code text
+                  //         // }else{
+                  //         //
+                  //         // }
+                  //       },
+                  //       child: AnimatedContainer(
+                  //         duration: Duration(seconds: 3),
+                  //         width: _isExpanded ? 120 : 80,
+                  //         height: _isExpanded ? 120 : 80,
+                  //         decoration: BoxDecoration(
+                  //           border: Border.all(color: Colors.teal),
+                  //           borderRadius: BorderRadius.circular(10),
+                  //         ),
+                  //         child: Icon(Icons.qr_code_scanner,
+                  //             size: 50, color: Colors.teal),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
+                  // SizedBox(height: 18),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
@@ -2674,16 +2814,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   // }
 
   void moveUser() async {
-    LatLng userlocation = LatLng(user.lat, user.lng);
-    mapState.target = LatLng(user.lat, user.lng);
+    List<double> lvalue = [user.lat, user.lng];
+    LatLng userlocation = LatLng(lvalue[0], lvalue[1]);
+    mapState.target = LatLng(userlocation.latitude, userlocation.longitude);
     mapState.zoom = 21.0;
     _googleMapController.animateCamera(
       CameraUpdate.newLatLngZoom(
-        LatLng(user.lat, user.lng),
+        userlocation,
         20, // Specify your custom zoom level here
       ),
     );
-
     setState(() {
       markers.clear();
       markers.putIfAbsent(user.bid, () => []);
@@ -2693,7 +2833,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         icon: BitmapDescriptor.fromBytes(userloc),
         anchor: Offset(0.5, 0.829),
       ));
-      if (kDebugMode) {
+      if (!kIsWeb && kDebugMode) {
         markers[user.bid]?.add(Marker(
           markerId: MarkerId("debug"),
           position: userlocation,
@@ -2702,9 +2842,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         ));
       }
     });
-
-    Future.delayed(Duration(seconds: 1)).then((onValue){
-      _recenterMap();
+    updateCircle(lvalue[0], lvalue[1]);
+    Future.delayed(Duration(seconds: 1)).then((onValue) {
+      recenterMap();
     });
   }
 
@@ -2723,14 +2863,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         PathState.clear();
         PathState.sourceX = user.coordX;
         PathState.sourceY = user.coordY;
+        PathState.sourceLat = user.lat;
+        PathState.sourceLng = user.lng;
         PathState.sourceBid = user.bid;
         user.showcoordX = user.coordX;
         user.showcoordY = user.coordY;
         PathState.sourceFloor = user.floor;
+
         PathState.sourceName = "Your current location";
 
         SingletonFunctionController.building.landmarkdata!.then((value) async {
-          await calculateroute(value.landmarksMap!,accessibleby: acc??PathState.accessiblePath, autoStart: true).then((value) {
+          await calculateroute(value.landmarksMap!,
+              accessibleby: acc ?? PathState.accessiblePath,
+              autoStart: true)
+              .then((value) {
             print("autoreroute ${PathState.path}");
             if (PathState.path.isNotEmpty) {
               user.pathobj = PathState;
@@ -2813,7 +2959,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   void reroute({String? acc}) {
     final stackTrace = StackTrace.current;
     print("reroute Stack: \n$stackTrace");
-    StopPDR();
     _isnavigationPannelOpen = false;
     _isRoutePanelOpen = false;
     _isLandmarkPanelOpen = false;
@@ -2825,8 +2970,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     user.showcoordY = user.coordY;
     incrementRerouteCount();
     setState(() {
-      onStart=false;
-      startingNavigation=false;
+      onStart = false;
+      startingNavigation = false;
       if (markers.length > 0) {
         List<double> dvalue = tools.localtoglobal(
             user.coordX.toInt(),
@@ -2836,13 +2981,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             LatLng(dvalue[0], dvalue[1]), markers[user.bid]![0]);
       }
     });
-    FlutterBeep.beep();
-    if(acc!= null){
-      speak("${LocaleData.changingaccessiblepath.getString(context)}", _currentLocale);
-    }else{
+    if (acc != null) {
+      speak("${LocaleData.changingaccessiblepath.getString(context)}",
+          _currentLocale);
+    } else {
       speak("${LocaleData.reroute.getString(context)}", _currentLocale);
     }
-    if(acc != null){
+    if (acc != null) {
       PathState.accessiblePath = acc;
       PathState.clearforaccessiblepath();
     }
@@ -2850,21 +2995,37 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
   Future<void> requestBluetoothConnectPermission() async {
-    final PermissionStatus permissionStatus = await Permission.bluetoothScan.request();
-
+    final PermissionStatus permissionStatus =
+    await Permission.bluetoothScan.request();
     if (permissionStatus.isGranted) {
-      wsocket.message["deviceInfo"]["permissions"]["BLE"] = true;
       wsocket.message["deviceInfo"]["sensors"]["BLE"] = true;
+      wsocket.message["deviceInfo"]["permissions"]["BLE"] = true;
+      // networkManager.ws.updateSensorStatus(ble: true);
+      // networkManager.ws.updatePermissions(ble: true);
+      //widget.bluetoothGranted = true;
+      // Permission granted, you can now perform Bluetooth operations
     } else {
-      wsocket.message["deviceInfo"]["permissions"]["BLE"] = false;
       wsocket.message["deviceInfo"]["sensors"]["BLE"] = false;
+      wsocket.message["deviceInfo"]["permissions"]["BLE"] = false;
+      // networkManager.ws.updateSensorStatus(ble: false);
+      // networkManager.ws.updatePermissions(ble: false);
+      // Permission denied, handle accordingly
     }
   }
 
   Future<void> requestLocationPermission() async {
     final status = await Permission.locationWhenInUse.request();
-    wsocket.message["deviceInfo"]["permissions"]["location"] = true;
-    wsocket.message["deviceInfo"]["sensors"]["location"] = true;
+    if (status.isGranted) {
+      wsocket.message["deviceInfo"]["sensors"]["location"] = true;
+      wsocket.message["deviceInfo"]["permissions"]["location"] = true;
+      // networkManager.ws.updateSensorStatus(location: true);
+      // networkManager.ws.updatePermissions(location: true);
+    } else {
+      wsocket.message["deviceInfo"]["sensors"]["location"] = false;
+      wsocket.message["deviceInfo"]["permissions"]["location"] = false;
+      // networkManager.ws.updateSensorStatus(location: false);
+      // networkManager.ws.updatePermissions(location: false);
+    }
   }
 
   List<FilterInfoModel> landmarkListForFilter = [];
@@ -2926,143 +3087,378 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   SingletonFunctionController controller = SingletonFunctionController();
   void apiCalls(context) async {
+    var exhibitors = await eventsState.fetchExhibitors();
+    var categories = await eventsState.fetchCategory();
+    var sessions = await eventsState.fetchSession();
+    var subEvents = await eventsState.fetchSubEvents();
     List<String> itterated = [];
-    NavigationAPIController apiController = NavigationAPIController(createPatch: createPatch, findCentroid: findCentroid, createotherPatch: createotherPatch, createRooms: createRooms, createARPatch: createARPatch, createotherARPatch: createotherARPatch, createMarkers: createMarkers);
-    try{
-      await DataVersionApi()
-          .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
-    }catch(e){
-      print(" APICALLS DataVersionApi API TRY-CATCH");
-    }
+    NavigationAPIController apiController = NavigationAPIController(
+        createPatch: createPatch,
+        findCentroid: findCentroid,
+        createotherPatch: createotherPatch,
+        createRooms: createRooms,
+        createARPatch: createARPatch,
+        createotherARPatch: createotherARPatch,
+        createMarkers: createMarkers);
+
+    // try{
+    //   await DataVersionApi().fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
+    // }catch(e){
+    //   Navigator.pushReplacement(context, MaterialPageRoute(
+    //       builder: (context) => const SomethingWentWrongPage(
+    //         errorMessage: 'We couldn\'t load the data. Please check your internet connection.',
+    //       )));
+    // }
 
     _updateProgress();
-
-
-    (SingletonFunctionController.btadapter.isScanningOn() == false &&
-        isBinEmpty() == true)
-        ? controller.executeFunction(buildingAllApi.allBuildingID)
-        : null;
-
     setState(() {
       resBeacons = SingletonFunctionController.apibeaconmap;
     });
-    print("buildingAllApi.selectedBuildingID ${buildingAllApi.selectedBuildingID}");
-    await apiController.patchAPIController(buildingAllApi.selectedBuildingID, true);
-    await apiController.polylineAPIController(buildingAllApi.selectedBuildingID, true);
-    await apiController.landmarkAPIController(buildingAllApi.selectedBuildingID, true);
-    itterated.add(buildingAllApi.selectedBuildingID);
 
+    buildingAllApi.globalBuildingIDS.forEach((id, location) async {
+      itterated.add(id);
+      // try {
+      // var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(id);
+      var globalData = await RepositoryManager().getGlobalAnnotationDataNew(id);
+      print("globalData ${globalData.runtimeType}");
+
+      GlobalAnnotationController controller = GlobalAnnotationController(
+          data: globalData,
+          polygonTap: polygonTap,
+          apiController: apiController);
+
+      await apiController.patchAPIController(id, true);
+
+      polylinedata? polyline = controller.wrapPolyline();
+      if (polyline != null) {
+        await apiController.polylineAPIController(id, false,
+            polylineData: polyline);
+      }
+
+      List<Landmarks>? landmarks =
+      await controller.wrapLandmarks(polyline: polyline);
+      if (landmarks != null && landmarks.isNotEmpty) {
+        var obj = {
+          "landmarkExist": true,
+          "landmarks": landmarks.map((e) => e.toJson()).toList()
+        };
+        await apiController.landmarkAPIController(id, false,
+            landmarkData: land.fromJson(obj), exhibitors: exhibitors, categories: categories, sessions: sessions, subEvents: subEvents);
+      }
+      return;
+      // }catch(e){
+      //
+      // }
+    });
+
+    if (!buildingAllApi.globalBuildingIDS.keys
+        .contains(buildingAllApi.selectedBuildingID)) {
+      print(
+          "buildingAllApi.selectedBuildingID ${buildingAllApi.selectedBuildingID}");
+      await apiController.patchAPIController(
+          buildingAllApi.selectedBuildingID, true);
+      await apiController.polylineAPIController(
+          buildingAllApi.selectedBuildingID, true);
+      await apiController.landmarkAPIController(
+          buildingAllApi.selectedBuildingID, true,
+          exhibitors: exhibitors, categories: categories, sessions: sessions, subEvents: subEvents);
+      itterated.add(buildingAllApi.selectedBuildingID);
+    }
 
     List<String> ids = buildingAllApi.getStoredAllBuildingID().keys.toList();
+    print("ids $ids");
     try {
       var outBuildingData = await outBuilding().outbuilding(ids);
+      // var outBuildingData = await RepositoryManager().getCampusData(ids);
       buildingAllApi.outBuildingData = outBuildingData;
       if (outBuildingData != null) {
+        print(
+            "outBuildingData:${outBuildingData.data!.campusId} ${buildingAllApi.outBuildingData!.data!.globalAnnotation!}");
         buildingAllApi.outdoorID = outBuildingData.data!.campusId!;
-        buildingAllApi.allBuildingID[outBuildingData.data!.campusId!] = LatLng(0.0, 0.0);
+        buildingAllApi.allBuildingID[outBuildingData.data!.campusId!] =
+            LatLng(0.0, 0.0);
       }
-    } catch (_) {}
+    } catch (e) {
+      print("outdoor building catch ${e}");
+    }
 
-    print("buildingAllApi.getStoredAllBuildingID() ${buildingAllApi.getStoredAllBuildingID().length} ${buildingAllApi.getStoredAllBuildingID().keys}");
-    Future<void> allBuildingCalls = Future.wait(buildingAllApi.getStoredAllBuildingID().entries.map((entry) async {
-      var key = entry.key;
+    print(
+        "buildingAllApi.getStoredAllBuildingID() ${buildingAllApi.getStoredAllBuildingID().length} ${buildingAllApi.getStoredAllBuildingID().keys}");
+    Future<void> allBuildingCalls = Future.wait(
+        buildingAllApi.getStoredAllBuildingID().entries.map((entry) async {
+          var key = entry.key;
 
-      // try{
-      if(key == buildingAllApi.outdoorID && buildingAllApi.outBuildingData != null && buildingAllApi.outBuildingData!.data!.globalAnnotation! ){
-        var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(key);
-        Building.GlobalAnnotation = globalData;
-        GlobalAnnotationController controller = GlobalAnnotationController(data: globalData, polygonTap: polygonTap, apiController: apiController);
+          // try{
+          if (key == buildingAllApi.outdoorID &&
+              buildingAllApi.outBuildingData != null &&
+              buildingAllApi.outBuildingData!.data!.globalAnnotation!) {
+            print("Globalannotationcheck${key}");
+            // try {
+            //   var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(key);
+            var globalData = await RepositoryManager().getGlobalAnnotationDataNew(key);
+            print("globalData ${globalData.runtimeType}");
+            Building.GlobalAnnotation = globalData;
+            GlobalAnnotationController controller = GlobalAnnotationController(
+                data: globalData,
+                polygonTap: polygonTap,
+                apiController: apiController);
+            controller.wrapPatch();
 
-        controller.wrapPatch();
+            polylinedata? polyline = controller.wrapPolyline();
+            if (polyline != null) {
+              await apiController.polylineAPIController(key, false,
+                  polylineData: polyline);
+            }
 
-        //closing for a while
-        List<Landmarks>? landmarks = await controller.wrapLandmarks();
-        if(landmarks != null && landmarks.isNotEmpty){
-          var otherLandmarkdata = await SingletonFunctionController.building.landmarkdata;
-          otherLandmarkdata?.mergeLandmarks(landmarks);
-          SingletonFunctionController.building.landmarkdata = Future.value(otherLandmarkdata);
-        }
+            //closing for a while
+            List<Landmarks>? landmarks = await controller.wrapLandmarks(polyline: polyline);
 
-        polylinedata? polyline = controller.wrapPolyline();
-        if(polyline != null){
-          SingletonFunctionController.building.polylinedatamap[polyline.polyline!.buildingID!] = polyline;
-        }
+            if (landmarks != null && landmarks.isNotEmpty) {
+              var obj = {
+                "landmarkExist": true,
+                "landmarks": landmarks.map((e) => e.toJson()).toList()
+              };
+              await apiController.landmarkAPIController(key, false, landmarkData: land.fromJson(obj), exhibitors: exhibitors, categories: categories, sessions: sessions, subEvents: subEvents);
+              createMarkers(land.fromJson(obj), 0, key);
+            }
 
-        List<PathModel>? waypoints = controller.wrapWayPoint();
-        if(waypoints != null){
-          Building.waypoint[buildingAllApi.outdoorID] = waypoints;
-        }
+            List<PathModel>? waypoints = controller.wrapWayPoint();
+            if (waypoints != null) {
+              Building.waypoint[buildingAllApi.outdoorID] = waypoints;
+            }
 
-        Set<Polygon>? campusRender = await controller.renderCampus();
-        if(campusRender != null){
-          setState(() {
-            globalCampus = campusRender;
-          });
-        }
-
-        return;
-      }
-
-      try {
-        var waypointData = await waypointapi().fetchwaypoint(key, outdoor: key == buildingAllApi.outdoorID);
-        Building.waypoint[key] = waypointData;
-      } catch (_) {}
-      print("buildingAllApi.selectedBuildingID ${buildingAllApi.selectedBuildingID}");
-      if (!itterated.contains(key)) {
-        itterated.add(key);
-        print("forKeys $key");
-
-        try {
-          await DataVersionApi().fetchDataVersionApiData(key);
-        } catch (e) {}
-
-        await apiController.patchAPIController(key, false);
-        await apiController.polylineAPIController(key, false);
-        await apiController.landmarkAPIController(key, false);
-      }
-    }));
-
-
-
-    print("widget.directLandID.length ${widget.directLandID}");
+            Set<Polygon>? campusRender = await controller.renderCampus();
+            if(campusRender != null){
+              blockLayer(campusRender);
+            }
+            print("outDoorGlobalBlock ${outDoorGlobalBlock.length}");
+            return;
+            // } catch (e) {}
+          }
+          try {
+            // var waypointData = await waypointapi().fetchwaypoint(key, outdoor: key == buildingAllApi.outdoorID);
+            var waypointData = await RepositoryManager()
+                .getWaypointNew(key, key == buildingAllApi.outdoorID);
+            Building.waypoint[key] = waypointData.cast<PathModel>();
+          } catch (_) {}
+          // print("buildingAllApi.selectedBuildingID ${buildingAllApi.selectedBuildingID}");
+          if (!itterated.contains(key)) {
+            itterated.add(key);
+            print("forKeys $key");
+            // try {
+            //   await DataVersionApi().fetchDataVersionApiData(key);
+            // } catch (e) {}
+            await apiController.patchAPIController(key, false);
+            await apiController.polylineAPIController(key, false);
+            await apiController.landmarkAPIController(key, false,
+                exhibitors: exhibitors, categories: categories, sessions: sessions, subEvents: subEvents);
+            SingletonFunctionController.building.buildingsLoaded = true;
+          }
+        }));
+    print(
+        "widget.directLandID.length ${widget.directLandID.length} ${widget.directLandID}");
     print("Checking timer: ${SingletonFunctionController.timer}");
     var time = DateTime.now();
-    if (SingletonFunctionController.timer != null) {
-      print("Waiting for timer and allBuildingCalls...");
-      await Future.wait([Future.delayed(Duration(seconds: 10)), SingletonFunctionController.timer!, allBuildingCalls]);
-    }else{
-      print("SingletonFunctionController.timer == null");
-    }
+
+    var landmarkID = widget.directLandID;
+
+    await Future.wait([
+      Future.wait([allBuildingCalls]).then((_){
+        if(landmarkID.length > 2){
+          onLandmarkVenueClicked(landmarkID,
+              DirectlyStartNavigation: false);
+        }
+      }),
+      Future.wait([Future.delayed(Duration(seconds:5))]).then((_){
+        if (landmarkID.length < 2) {
+          print(
+              "localize 3 delay ${SingletonFunctionController.SC_LOCALIZED_BEACON}");
+          localizeUser(pinSelectionMarker: true);
+        } else {
+          //got here using a destination qr
+          print("localize 4");
+          localizeUser(speakTTS: false, pinSelectionMarker: false);
+          SingletonFunctionController.building.destinationQr = true;
+        }
+      })
+    ]);
     print("localize user got called..");
-    if (widget.directLandID.length < 2) {
-      print("localize 3 called after ${time.difference(DateTime.now()).inSeconds} seconds ${SingletonFunctionController.SC_LOCALIZED_BEACON}");
-      Future.delayed(Duration(seconds: 1));
-      print("localize 3 delay ${SingletonFunctionController.SC_LOCALIZED_BEACON}");
-      localizeUser(pinSelectionMarker: true);
-    }
-    else{
-      //got here using a destination qr
-      print("localize 4");
-      onLandmarkVenueClicked(widget.directLandID, DirectlyStartNavigation: false);
-      localizeUser(speakTTS: false,pinSelectionMarker: false);
-      SingletonFunctionController.building.destinationQr = true;
-    }
-
-
-
 
     buildingAllApi.setStoredString(buildingAllApi.getSelectedBuildingID());
-    if(mounted){
+    if (mounted) {
       setState(() {
         isLoading = false;
         isBlueToothLoading = false;
       });
     }
-    Future.delayed(Duration(seconds: 5));
-    SingletonFunctionController.building.buildingsLoaded = true;
+    // Future.delayed(Duration(seconds: 5));
+    try {
+      mapClustering.createBitmapMarker();
+    } catch (e) {
+      print("catch mapClustering $e");
+    }
+    await renderCampusPatchTransition(
+      buildingAllApi.allBuildingID.keys.toList(),
+      outdoorID: buildingAllApi.outdoorID,
+    );
+    // print("blurpath.length${blurPatch.length}");
+    // print("blurPatchMarker.length${blurPatchMarker.length}");
+
+    // _produceNameMarker();
   }
-  var versionBox = Hive.box('VersionData');
-  final DataVersionLocalModelBox = DataVersionLocalModelBOX.getData();
+
+  Future<void> blockLayer(Set<Polygon> campusRender) async {
+    // globalBlock
+    for (var currentPolygon in campusRender) {
+      final idValue = currentPolygon
+          .polygonId.value; // this gives "Demo Layer - block layer"
+
+      if (idValue.contains("block layer")) {
+        print("campus render block layer ${idValue}");
+        RegExp regex = RegExp(r"block layer \+(.*?)\s+imageFile \+(.*?)\s+sId \+(.*)");
+        Match? match = regex.firstMatch(idValue);
+
+        if (match != null) {
+          String part1 = match.group(1)!.trim(); // "A - Block"
+          String part2 = match.group(2)!.trim(); // whole filename with GMT+0000
+          String part3 = match.group(3)!.trim(); // "12345"
+          print("Part1: $part1");
+          print("Part2: $part2");
+          print("Part2: $part3");
+          print("Part 4 ${"${AppConfig.baseUrl}/uploads/$part2"}");
+
+          try {
+            MarkerIconWithAnchor markerName = await HelperClass()
+                .bitmapDescriptorFromTextAndImageUpdatedWithAnchorInternetNew(
+                part1, "${AppConfig.baseUrl}/uploads/$part2");
+            globalBlock.add(currentPolygon);
+            List<LatLng> latLngPoints = currentPolygon.points;
+            polygonCalculation.landmarkWithPolygonPoints[part3] =
+                latLngPoints;
+            print("latLngPoints ${polygonCalculation
+                .landmarkWithPolygonPoints[part3]}");
+            List<LatLng>? calculatedPoints =
+            polygonCalculation.getPolygonMajorAxisLatLng(latLngPoints);
+            int leftMost = LeftMost().leftMostPoint(
+                PointForCenter(calculatedPoints[0].latitude,
+                    calculatedPoints[0].longitude, "name"),
+                PointForCenter(calculatedPoints[1].latitude,
+                    calculatedPoints[1].longitude, "name"),
+                mapState.bearing);
+            double rotation;
+            if (leftMost == -1) {
+              rotation = polygonCalculation.calculateBearing(
+                  calculatedPoints[0], calculatedPoints[1]);
+            } else {
+              rotation = polygonCalculation.calculateBearing(
+                  calculatedPoints[1], calculatedPoints[0]);
+            }
+            LatLng positionPoint = polygonCalculation.midpoint(
+                calculatedPoints[0], calculatedPoints[1]);
+
+            // print("Centroid: lat=${center.lat}, lng=${center.lng}");
+            blockMarker.add(
+                Marker(
+                    markerId: MarkerId("Indoor Block Layer ${currentPolygon.polygonId.toString()}"),
+                    anchor: markerName.anchor,
+                    position: positionPoint,
+                    icon: markerName.icon,
+                    onTap: (){
+                      _googleMapController.animateCamera(
+                        CameraUpdate.newCameraPosition(
+                          CameraPosition(
+                            target: LatLng(positionPoint.latitude, positionPoint.longitude), // Use the last known target
+                            zoom: 18, // Use the last known zoom
+                            bearing: user.theta, // Update the bearing
+                          ),
+                        ),
+                      );
+                    }
+                )
+            );
+          }catch(e){
+            print("Unhandled ${e}");
+          }
+
+          setState(() {});
+          print("blockMarker Check ${blockMarker.length}");
+        } else {}
+
+        // print("campus render block layer ${idValue.toString().split("+")[1]}");
+      } else if (idValue.contains("Outdoor Block Layer")) {
+        final idValue = currentPolygon
+            .polygonId.value; // this gives "Demo Layer - block layer"
+
+        print("campus render Outdoor Block Layer ${idValue}");
+
+        RegExp regex = RegExp(r"Outdoor Block Layer \+(.*?)\s+imageFile \+(.*?)\s+sId \+(.*)");
+        Match? match = regex.firstMatch(idValue);
+
+        if (match != null) {
+          String part1 = match.group(1)!.trim(); // Parking
+          String part2 = match.group(2)!.trim(); // null
+          String part3 =
+          match.group(3)!.trim(); // 68cbf43dacf5cc87e680be0d
+
+          print("Part1: $part1");
+          print("Part2: $part2");
+          print("Part3: $part3");
+          MarkerIconWithAnchor markerName = await HelperClass()
+              .bitmapDescriptorFromTextAndImageUpdatedWithAnchorInternetNew(
+              part1, "${AppConfig.baseUrl}/uploads/$part2",
+              imageSize: const Size(100, 100));
+          // MarkerIconWithAnchor markerName =
+          //     await HelperClass().bitmapDescriptorFromCenteredText(part1);
+          outDoorGlobalBlock.add(currentPolygon);
+          List<LatLng> latLngPoints = currentPolygon.points;
+          polygonCalculation.landmarkWithPolygonPoints[part3] =
+              latLngPoints;
+          List<LatLng>? calculatedPoints =
+          polygonCalculation.getPolygonMajorAxisLatLng(latLngPoints);
+          int leftMost = LeftMost().leftMostPoint(
+              PointForCenter(calculatedPoints[0].latitude,
+                  calculatedPoints[0].longitude, "name"),
+              PointForCenter(calculatedPoints[1].latitude,
+                  calculatedPoints[1].longitude, "name"),
+              mapState.bearing);
+          double rotation;
+          if (leftMost == -1) {
+            rotation = polygonCalculation.calculateBearing(
+                calculatedPoints[0], calculatedPoints[1]);
+          } else {
+            rotation = polygonCalculation.calculateBearing(
+                calculatedPoints[1], calculatedPoints[0]);
+          }
+          LatLng positionPoint = polygonCalculation.midpoint(
+              calculatedPoints[0], calculatedPoints[1]);
+
+
+          outdoorBlockMarker.add(Marker(
+              markerId: MarkerId("Outdoor Block Layer ${currentPolygon.polygonId.toString()}"),
+              anchor: markerName.anchor,
+              position: positionPoint,
+              icon: markerName.icon,
+              onTap: (){
+                _googleMapController.animateCamera(
+                  CameraUpdate.newCameraPosition(
+                    CameraPosition(
+                      target: LatLng(positionPoint.latitude, positionPoint.longitude), // Use the last known target
+                      zoom: 18, // Use the last known zoom
+                      bearing: user.theta, // Update the bearing
+                    ),
+                  ),
+                );
+              }
+          ),);
+          setState(() {});
+        }
+      } else {
+        // globalCampus.add(currentPolygon);
+      }
+    }
+
+  }
+
   void findCentroid(List<Coordinates> vertices, String bid) {
     double xSum = 0;
     double ySum = 0;
@@ -3079,9 +3475,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   void _updateCircle(double lat, double lng) {
     // Create a new Tween with the provided begin and end values
     // Optionally update UI or logic with animation value
-
     if (!mounted || disposed) return;
-
 
     final Circle updatedCircle = Circle(
         circleId: CircleId("circle"),
@@ -3090,8 +3484,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         strokeWidth: 0,
         strokeColor: Colors.blue,
         fillColor: Colors.lightBlue.withOpacity(0.2),
-        zIndex: 2
-    );
+        zIndex: 2);
     if (mounted) {
       setState(() {
         circles.removeWhere((circle) => circle.circleId == CircleId("circle"));
@@ -3115,14 +3508,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             strokeWidth: 1,
             strokeColor: Colors.blue,
             fillColor: Colors.lightBlue.withOpacity(0.2),
-            zIndex: 2
-        );
-
-        setState(() {
-          circles
-              .removeWhere((circle) => circle.circleId == CircleId("circle"));
-          circles.add(updatedCircle);
-        });
+            zIndex: 2);
+        if (mounted || !disposed) {
+          setState(() {
+            circles
+                .removeWhere((circle) => circle.circleId == CircleId("circle"));
+            circles.add(updatedCircle);
+          });
+        }
       });
     // Start the animation
     _controller.forward(from: 0.0);
@@ -3141,20 +3534,22 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             sin(dLon / 2);
     double c = 2 * atan2(sqrt(a), sqrt(1 - a));
     double distance = earthRadius * c; // Distance in kilometers
-
     return distance;
   }
+
   double degreesToRadians(double degrees) {
     return degrees * pi / 180;
   }
+
   String getRandomString(List<String> stringList) {
     Random random = Random();
     int randomIndex = random.nextInt(stringList.length);
     return stringList[randomIndex];
   }
+
   String nearestLandmarkToBeacon = "";
   String nearestLandmarkToMacid = "";
-  Future<void> localizeUserInCallback({bool speakTTS = true})async{
+  Future<void> localizeUserInCallback({bool speakTTS = true}) async {
     double highestweight = 0;
     String nearestBeacon = "";
     nearestBeacon = SingletonFunctionController.SC_LOCALIZED_BEACON;
@@ -3180,69 +3575,94 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     // nearestLandmarkToMacid = highestweight.toString();
     // sumMap = SingletonFunctionController.btadapter.calculateAverage();
     if (nearestBeacon != "" && Building.apibeaconmap[nearestBeacon] != null) {
-      SingletonFunctionController.currentBeacon = nearestBeacon;
+      SingletonFunctionController.currentBeacon =
+          SingletonFunctionController.SC_LOCALIZED_BEACON;
+      print("nearesbeacon:${SingletonFunctionController.currentBeacon}");
     }
   }
-  Future<void> localizeUser({bool speakTTS = true,bool pinSelectionMarker=false}) async {
-    //----------
-    speak("${LocaleData.searchingyourlocation.getString(context)}", _currentLocale);
-    // setState(() {
-    //   isBlueToothLoading = true;
-    // });
-    // String nearestBeacon = "";
-    // nearestBeacon = beacon;
-    // print("nearestBeacon");
-    // print(nearestBeacon);
-    // setState(() {
-    //   testBIn = SingletonFunctionController.btadapter.BIN;
-    //   testBIn.forEach((key, value) {
-    //     currentBinSIze.add(value.length);
-    //   });
-    // });
-    //------------
-    double highestweight = 0;
-    String nearestBeacon = "";
 
-    if (await FlutterBluePlus.isOn) {
-      nearestBeacon = findMaxWeightKey(SingletonFunctionController.btadapter.latesILMap);
-      print("ILnearestBeacon $nearestBeacon");
+  String? parseString(String input) {
+    final regex = RegExp(r'Optional\("(.+?)"\)\s+(\d+\.\d+)');
+    final match = regex.firstMatch(input);
 
-
-      // for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
-      //
-      //   if (SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty) {
-      //     print("BIN[$i] - ${SingletonFunctionController.btadapter.BIN[i]}");
-      //     SingletonFunctionController.btadapter.BIN[i]!.forEach((key, value) {
-      //       if (value < 0) {
-      //         value = value * -1;
-      //       }
-      //       if (value > highestweight) {
-      //         highestweight = value;
-      //         nearestBeacon = key;
-      //       }
-      //     });
-      //     break;
-      //   }
-      // }
+    if (match != null) {
+      final device = match.group(1); // Extracts "IW622"
+      return device;
+    } else {
+      print("No match found!");
+      return null;
     }
+  }
+  String? parseStringT(String input) {
+    final regex = RegExp(r'Optional\("(.+?)"\)\s+(\d+\.\d+)');
+    final match = regex.firstMatch(input);
+
+    if (match != null) {
+      final value = double.tryParse(match.group(2) ?? '0'); // Extracts 6.0 as a double
+      return value.toString();
+    } else {
+      print("No match found!");
+      return null;
+    }
+  }
+
+  Future<void> localizeUser(
+      {bool speakTTS = true, bool pinSelectionMarker = false}) async {
+    speak("${LocaleData.searchingyourlocation.getString(context)}",
+        _currentLocale);
+    print("localizeuser StackTrace.current ${StackTrace.current}");
+    if(Platform.isIOS){
+      BluetoothScanIOSClass.stopScan();
+    }
+    double beaconWeight = double.infinity;
+    String nearestBeacon = "";
+    // nearestBeacon = findMaxWeightKey(SingletonFunctionController.btadapter.latesILMap);
+    print("singleto nearestBeacon $nearestBeacon ${SingletonFunctionController.currentBeacon}");
+    if(Platform.isIOS){
+      String receivedStringFromIOS = await BluetoothScanIOSClass.getBestDevice();
+      nearestBeacon = parseString(receivedStringFromIOS) ?? "";
+      beaconWeight = double.parse(parseStringT(receivedStringFromIOS)??"100.0");
+    }else{
+      if (await FlutterBluePlus.isOn) {
+        if (bleManager.finalName.isNotEmpty) {
+          nearestBeacon = bleManager.finalName;
+          beaconWeight = bleManager.finalweight;
+        } else {
+          nearestBeacon = SingletonFunctionController.currentBeacon;
+          beaconWeight = SingletonFunctionController.currentRssi;
+        }
+      } else {
+        SingletonFunctionController.currentBeacon = "";
+      }
+    }
+
+    print("beACONWEIGHT:${beaconWeight}");
+
+    // if(beaconWeight.abs() > 95){
+    //   nearestBeacon = "";
+    //   beaconWeight = double.infinity;
+    // }
 
     setState(() {
       //lastBeaconValue = nearestBeacon;
     });
-
     // nearestLandmarkToBeacon = nearestBeacon;
     // nearestLandmarkToMacid = highestweight.toString();
-
     setState(() {
       testBIn = SingletonFunctionController.btadapter.BIN;
       testBIn.forEach((key, value) {
         currentBinSIze.add(value.length);
       });
     });
-    SingletonFunctionController.btadapter.stopScanning();
-
-
-    if (nearestBeacon != "" && Building.apibeaconmap[nearestBeacon] != null){
+    print(
+        "nearestBeacon:${nearestBeacon} ${SingletonFunctionController.apibeaconmap[nearestBeacon]}");
+    wsocket.message["AppInitialization"]["BID"] =
+        buildingAllApi.selectedBuildingID;
+    wsocket.message["AppInitialization"]["buildingName"] =
+    "Research and Innovation Park";
+    if (nearestBeacon != "" && Building.apibeaconmap[nearestBeacon] != null) {
+      print("indside localizeuser ${isLocalized}");
+      SingletonFunctionController.currentBeacon = nearestBeacon;
       buildingAllApi
           .setStoredString(Building.apibeaconmap[nearestBeacon]!.buildingID!);
       buildingAllApi.selectedID =
@@ -3250,8 +3670,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       buildingAllApi.selectedBuildingID =
       Building.apibeaconmap[nearestBeacon]!.buildingID!;
     }
-    paintUser(nearestBeacon,null,null, speakTTS: speakTTS, providePinSelection: pinSelectionMarker);
-    Future.delayed(Duration(milliseconds: 1500)).then((value) =>{
+    // await findNearestPoint();
+    initialInAppLoading = false;
+
+    paintUser(nearestBeacon, null,
+        speakTTS: speakTTS, providePinSelection: pinSelectionMarker);
+    Future.delayed(Duration(milliseconds: 1500)).then((value) => {
       _controller.stop(),
     });
     //emptying the bin manually
@@ -3264,23 +3688,22 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       }
     }
     SingletonFunctionController.btadapter.BIN.clear();
+    setState(() {});
   }
+
   String findMaxWeightKey(Map<String, List<int>> data) {
     print("findMaxWeightKey $data");
     Map<String, double> makingAVGofdata = {};
     String maxKey = '';
     double maxAvgWeight = double.negativeInfinity;
-
     for (var entry in data.entries) {
       String key = entry.key;
       List<int> values = entry.value;
-
       // Calculate the average weight for this key
-      double totalWeight = values.map((v) => getWeight(v.abs())).reduce((a, b) => a + b);
+      double totalWeight =
+      values.map((v) => getWeight(v.abs())).reduce((a, b) => a + b);
       double avgWeight = totalWeight / values.length;
-
       makingAVGofdata[key] = avgWeight;
-
       // Update if this key has a greater average weight
       if (avgWeight > maxAvgWeight) {
         maxAvgWeight = avgWeight;
@@ -3302,15 +3725,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     return 0.0;
   }
 
-  void callbackFunc(){
+  void callbackFunc() {
     print("callback");
-    SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID).then((_){
-      SingletonFunctionController.timer?.whenComplete((){
+    SingletonFunctionController()
+        .executeFunction(buildingAllApi.allBuildingID)
+        .then((_) {
+      SingletonFunctionController.timer?.whenComplete(() {
         localizeUserInCallback();
         SingletonFunctionController.timer = null;
       });
     });
   }
+
   String nearbeacon = 'null';
   String weight = "null";
   HashMap<int, HashMap<String, double>> testBIn = HashMap();
@@ -3367,27 +3793,34 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   land EM_buildingLandmark = land();
   Future<void> initializeScanAndLandmarkData() async {
     print("initializeScanAndLandmarkData");
-    EM_buildingLandmark = await SingletonFunctionController.building.landmarkdata!;
-
+    EM_buildingLandmark =
+    await SingletonFunctionController.building.landmarkdata!;
   }
+
   String firstValue = "";
   LatLng lastExplorePosition = LatLng(0.0, 0.0);
 
-  Future<void> realTimeReLocalizeUser(HashMap<String, beacon> apibeaconmap) async {
+  Future<void> realTimeReLocalizeUser(
+      HashMap<String, beacon> apibeaconmap) async {
     sumMap.clear();
     setState(() {
       sumMap = SingletonFunctionController.btadapter.calculateAverage();
     });
-    final Uint8List iconMarker = await getImagesFromMarker('assets/dot.png', 30);
+    final Uint8List iconMarker =
+    await getImagesFromMarker('assets/dot.png', 30);
     sumMap.forEach((key, value) {
       List<double> position = [];
-      if(SingletonFunctionController.apibeaconmap[key]! != null ) {
-        if (SingletonFunctionController.apibeaconmap[key]!.coordinateX! != null) {
+      if (SingletonFunctionController.apibeaconmap[key]! != null) {
+        if (SingletonFunctionController.apibeaconmap[key]!.coordinateX! !=
+            null) {
           position = tools.localtoglobal(
-              SingletonFunctionController.apibeaconmap[key]!.coordinateX!, SingletonFunctionController.apibeaconmap[key]!.coordinateY!,
-              SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[key]!.sId! ??
+              SingletonFunctionController.apibeaconmap[key]!.coordinateX!,
+              SingletonFunctionController.apibeaconmap[key]!.coordinateY!,
+              SingletonFunctionController.building.patchData[
+              SingletonFunctionController.apibeaconmap[key]!.sId! ??
                   buildingAllApi.getStoredString()]);
-          if(lastExplorePosition.latitude != position[0] && lastExplorePosition.longitude != position[1]) {
+          if (lastExplorePosition.latitude != position[0] &&
+              lastExplorePosition.longitude != position[1]) {
             // _exploreModeDebugBeaconMarker.add(
             //   Marker(
             //     markerId: MarkerId(
@@ -3398,7 +3831,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             //     onTap: () {},
             //   ),
             // );
-            lastExplorePosition = LatLng(position[0], position[1]) ;
+            lastExplorePosition = LatLng(position[0], position[1]);
             setState(() {});
           }
         }
@@ -3406,20 +3839,27 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     });
     setState(() {});
     firstValue = "";
-    if (sumMap.isNotEmpty){
+    if (sumMap.isNotEmpty) {
       Map<String, double> sortedsumMap = sortMapByValue(sumMap);
       firstValue = sortedsumMap.entries.first.key;
       print("wilsonsortedsumMap $sortedsumMap");
-      final Uint8List iconMarker = await getImagesFromMarker('assets/EM_CurrentLocationMarker.png', 85);
-      if (lastBeaconValue != firstValue && sortedsumMap.entries.first.value >= 0.4){
+      final Uint8List iconMarker =
+      await getImagesFromMarker('assets/EM_CurrentLocationMarker.png', 85);
+      if (lastBeaconValue != firstValue &&
+          sortedsumMap.entries.first.value >= 0.4) {
         SingletonFunctionController.btadapter.stopScanning();
         _exploreModeMarker.clear();
-        await SingletonFunctionController.building.landmarkdata!.then((value){
-          getallnearestInfo = tools.localizefindAllNearbyLandmark(apibeaconmap[firstValue]!, value.landmarksMap!);
+        await SingletonFunctionController.building.landmarkdata!.then((value) {
+          getallnearestInfo = tools.localizefindAllNearbyLandmark(
+              apibeaconmap[firstValue]!, value.landmarksMap!);
           getallnearestInfo.forEach((landmark) {
             List<double> value = [];
-            if(landmark.coordinateX != null) {
-              value = tools.localtoglobal(landmark.coordinateX!, landmark.coordinateY!, SingletonFunctionController.building.patchData[landmark.buildingID ?? buildingAllApi.getStoredString()]);
+            if (landmark.coordinateX != null) {
+              value = tools.localtoglobal(
+                  landmark.coordinateX!,
+                  landmark.coordinateY!,
+                  SingletonFunctionController.building.patchData[
+                  landmark.buildingID ?? buildingAllApi.getStoredString()]);
             }
             print("wilsonvalues $value");
             _exploreModeMarker.add(
@@ -3438,11 +3878,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         finalDirections = calcDirectionsExploreMode([
           apibeaconmap[firstValue]!.coordinateX!,
           apibeaconmap[firstValue]!.coordinateY!
-        ],[
+        ], [
           apibeaconmap[firstValue]!.coordinateX! + tv[0],
           apibeaconmap[firstValue]!.coordinateY! + tv[1]
-        ],getallnearestInfo);
-        paintUser(firstValue,null,null);
+        ], getallnearestInfo);
+        paintUser(firstValue, null);
         ExploreModePannelController.open();
         setState(() {
           lastBeaconValue = firstValue;
@@ -3451,6 +3891,44 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       } else {
         //HelperClass.showToast("Beacon Already scanned");
       }
+    }
+  }
+
+  void relocalizeUser() {
+    print("relocalizeUser");
+    SingletonFunctionController.btadapter.emptyBin();
+    if (!user.isnavigating && !isLocalized) {
+      SingletonFunctionController.btadapter.stopScanning();
+      if (Platform.isAndroid) {
+        bluetoothScanAndroidClass
+            .listenToScanInitialLocalization(Building.apibeaconmap)
+            .then((value) {
+          setState(() {
+            isLocalized = false;
+          });
+          localizeUser();
+        });
+      } else {
+        //SingletonFunctionController.btadapter.startScanningIOS(SingletonFunctionController.apibeaconmap);
+        BluetoothScanIOSClass.getInitialLocalizedDevice().then((value) {
+          print("localized--");
+          print(value);
+          if (value != null) {
+            localizeUser();
+          }
+        });
+      }
+      setState(() {
+        isLocalized = true;
+        resBeacons = SingletonFunctionController.apibeaconmap;
+      });
+      late Timer _timer;
+      _timer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
+        //localizeUser();
+        _timer.cancel();
+      });
+    } else {
+      recenterMap();
     }
   }
 
@@ -3502,8 +3980,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                         lngcenterofmap)));
       }
 
-      SingletonFunctionController.building
-          .ARCoordinates[buildingAllApi.selectedBuildingID] = coordinates;
+      if (!SingletonFunctionController.building.ARCoordinates
+          .containsKey(buildingAllApi.selectedBuildingID)) {
+        SingletonFunctionController.building
+            .ARCoordinates[buildingAllApi.selectedBuildingID] = coordinates;
+        print(
+            "patchmade for${SingletonFunctionController.building.ARCoordinates.keys} ${StackTrace.current}");
+      }
 
       setState(() {
         patch.add(
@@ -3515,7 +3998,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               fillColor: Color(0xffffffff),
               geodesic: false,
               consumeTapEvents: true,
-              zIndex:-1),
+              zIndex: -1),
         );
         cachedPolygon.clear();
       });
@@ -3543,7 +4026,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
   void createotherPatch(String key, patchDataModel value) async {
-
     if (value.patchData!.coordinates!.isNotEmpty) {
       List<LatLng> polygonPoints = [];
       double latcenterofmap = 0.0;
@@ -3585,8 +4067,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                         value.patchData!.coordinates![i].globalRef!.lng!) -
                         lngcenterofmap)));
       }
-      SingletonFunctionController.building.ARCoordinates[key] = coordinates;
 
+      if (!SingletonFunctionController.building.ARCoordinates
+          .containsKey(key)) {
+        SingletonFunctionController.building.ARCoordinates[key] = coordinates;
+        print("patchmade for${SingletonFunctionController.building.ARCoordinates.keys} ${StackTrace.current}");
+      }
       setState(() {
         otherpatch.add(
           Polygon(
@@ -3623,7 +4109,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     textPainter.text = TextSpan(
       text: text,
       style: TextStyle(
-        fontSize: 36.0, // Increased font size
+        fontSize: 40.0, // Increased font size
         color: Colors.black,
         fontFamily: "Roboto",
         fontWeight: FontWeight.w500,
@@ -3669,112 +4155,210 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     return BitmapDescriptor.fromBytes(pngBytes!);
   }
 
-  renderCampusPatchTransition(List<String> IDS, {String? outdoorID}){
-    print("renderCampusPatchTransition");
-    if(blurPatch.length != IDS.length-(outdoorID == null?0:1)){
-      blurPatch.clear();
-      restBuildingMarker.clear();
-      Map<int, LatLng> currentCoordinated = {};
+  // Set<Marker> blurPatchMarker = Set();
+  Set<Marker> blurPatchCampusMarker = Set();
+  Set<Polygon> blurPatchCampus = Set();
 
-      SingletonFunctionController.building.ARCoordinates.forEach((key, innerMap) {
-        if(IDS.contains(key) && key != outdoorID){
-          currentCoordinated = innerMap;
-          if (currentCoordinated.isNotEmpty) {
-            List<LatLng> points = [];
-            List<MapEntry<int, LatLng>> entryList = currentCoordinated.entries.toList();
-            entryList.sort((a, b) => a.key.compareTo(b.key));
-            LinkedHashMap<int, LatLng> sortedCoordinates = LinkedHashMap.fromEntries(entryList);
-            sortedCoordinates.forEach((key, value) {
-              points.add(value);
-            });
-            setState(() {
-              blurPatch.add(
-                Polygon(
-                  polygonId: PolygonId('patch${points}'),
-                  points: points,
-                  strokeWidth: 1,
-                  strokeColor: Colors.black,
-                  fillColor: Color(0xffE5F9FF),
-                  geodesic: false,
-                  consumeTapEvents: true,
-                  zIndex: 5,
 
-                ),
-              );
-              cachedPolygon.clear();
-            });
-          }
-          Building.allBuildingID.forEach((Key,Value) async {
-            if(IDS.contains(Key) && Key != outdoorID) {
-              String? showBuildingName ="";
-              Building.buildingData?.forEach((currKey,currValue){
-                if(currKey == Key){
-                  showBuildingName = currValue;
-                }
-              });
-              restBuildingMarker.add(
-                Marker(
-                  markerId: MarkerId(Key + Value.toString()),
-                  position: Value,
-                  icon: await bitmapDescriptorFromTextAndImageForPatchTransition(
-                      showBuildingName??"", 'assets/cleanenergy.png',imageSize: const Size(100, 100)),
-                ),
-              );
-            }
+  renderCampusPatchTransition(List<String> IDS, {String? outdoorID}) async {
+    Map<int, LatLng> currentCoordinated = {};
+    print("key${SingletonFunctionController.building.ARCoordinates.keys}");
+
+    SingletonFunctionController.building.ARCoordinates.forEach((key, innerMap) {
+      print("key $key");
+      // if (key != outdoorID && IDS.contains(key)) {
+      //   currentCoordinated = innerMap;
+      //   print("innerMap ${key} ${currentCoordinated}");
+      //   if (currentCoordinated.isNotEmpty) {
+      //     List<LatLng> points = [];
+      //     List<MapEntry<int, LatLng>> entryList =
+      //         currentCoordinated.entries.toList();
+      //     entryList.sort((a, b) => a.key.compareTo(b.key));
+      //     LinkedHashMap<int, LatLng> sortedCoordinates =
+      //         LinkedHashMap.fromEntries(entryList);
+      //     sortedCoordinates.forEach((key, value) {
+      //       points.add(value);
+      //     });
+      //
+      //     setState(() {
+      //       blurPatch.add(
+      //         Polygon(
+      //           polygonId: PolygonId('patch${points}'),
+      //           points: points,
+      //           strokeWidth: 1,
+      //           strokeColor: Colors.black.withOpacity(0.5),
+      //           fillColor: Color(0xfff0e6d1).withOpacity(1.0),
+      //           geodesic: false,
+      //           consumeTapEvents: false,
+      //           zIndex: 5,
+      //         ),
+      //       );
+      //       cachedPolygon.clear();
+      //     });
+      //   }
+      //
+      //   Building.allBuildingID.forEach((Key, Value) async {
+      //     if (IDS.contains(Key) && Key != outdoorID) {
+      //       String? showBuildingName = "";
+      //
+      //       Building.buildingData?.forEach((currKey, currValue) {
+      //         if (currKey == Key) {
+      //           showBuildingName = currValue;
+      //         }
+      //       });
+      //       final result = await HelperClass()
+      //           .bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
+      //               showBuildingName?.trim() ?? "Zone",
+      //               'assets/buildingIconESG.png',
+      //               imageSize: const Size(100, 100));
+      //       final iconMarker = result.icon;
+      //       final anchor = result.anchor;
+      //       blurPatchMarker.add(
+      //         Marker(
+      //           markerId: MarkerId(showBuildingName! + Key + Value.toString()),
+      //           position: Value,
+      //           icon: iconMarker,
+      //           anchor: anchor,
+      //         ),
+      //       );
+      //     }
+      //   });
+      // }
+      // else
+      if(key == outdoorID){
+        print("key == outdoorID");
+        currentCoordinated = innerMap;
+        print("innerMap ${key} ${currentCoordinated}");
+        if (currentCoordinated.isNotEmpty) {
+          List<LatLng> points = [];
+          List<MapEntry<int, LatLng>> entryList =
+          currentCoordinated.entries.toList();
+          entryList.sort((a, b) => a.key.compareTo(b.key));
+          LinkedHashMap<int, LatLng> sortedCoordinates =
+          LinkedHashMap.fromEntries(entryList);
+          sortedCoordinates.forEach((key, value) {
+            points.add(value);
           });
 
+          setState(() {
+            blurPatchCampus.add(
+              Polygon(
+                polygonId: PolygonId('patch${points}'),
+                points: points,
+                strokeWidth: 1,
+                strokeColor: Colors.black.withOpacity(0.5),
+                fillColor: Color(0xfff0e6d1).withOpacity(1.0),
+                geodesic: false,
+                consumeTapEvents: false,
+                zIndex: 5,
+              ),
+            );
+            cachedPolygon.clear();
+          });
         }
-      });
-    }
-  }
 
-  Set<Marker> restBuildingMarker = Set();
-  void patchTransition(String skipID){
-    Map<int, LatLng> currentCoordinated = {};
-    blurPatch.clear();
-    cachedPolygon.clear();
-    SingletonFunctionController.building.ARCoordinates.forEach((key, innerMap) {
-      //print("ARCoordinateskeys ${key}");
+        Building.allBuildingID.forEach((Key, Value) async {
+          if (IDS.contains(Key) && Key == outdoorID) {
+            String? showBuildingName = "";
 
-      if(key != buildingAllApi.outdoorID) {
-        if (PathState.sourceBid != "" && PathState.destinationBid == "") {
-          if (key != skipID && key != PathState.sourceBid) {
-            currentCoordinated = innerMap;
-            patchGeneration(currentCoordinated);
-            patchGenerationMarker([skipID, PathState.sourceBid,buildingAllApi.outdoorID]);
+            Building.buildingData?.forEach((currKey, currValue) {
+              if (currKey == Key) {
+                showBuildingName = currValue;
+              }
+            });
+            final result = await HelperClass()
+                .bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
+                showBuildingName?.trim() ?? "Zone",
+                'assets/campusPurpleFestMapIcon.png',
+                imageSize: const Size(100, 100));
+            final iconMarker = result.icon;
+            final anchor = result.anchor;
+            blurPatchCampusMarker.add(
+              Marker(
+                  markerId: MarkerId(showBuildingName! + Key + Value.toString()),
+                  position: Value,
+                  icon: iconMarker,
+                  anchor: anchor,
+                  onTap: (){
+                    _googleMapController.animateCamera(
+                      CameraUpdate.newCameraPosition(
+                        CameraPosition(
+                          target: LatLng(Value.latitude, Value.longitude), // Use the last known target
+                          zoom: 18.5, // Use the last known zoom
+                          bearing: user.theta, // Update the bearing
+                        ),
+                      ),
+                    );
+                  }
+              ),
+            );
           }
-        } else
-        if (PathState.destinationBid != "" && PathState.sourceBid == "") {
-          if (key != skipID && key != PathState.destinationBid) {
-            currentCoordinated = innerMap;
-            patchGeneration(currentCoordinated);
-            patchGenerationMarker([skipID, PathState.destinationBid,buildingAllApi.outdoorID]);
-          }
-        } else
-        if (PathState.destinationBid != "" && PathState.sourceBid != "") {
-          if (key != skipID && key != PathState.destinationBid &&
-              key != PathState.sourceBid) {
-            currentCoordinated = innerMap;
-            patchGeneration(currentCoordinated);
-
-
-            patchGenerationMarker(
-                [skipID, PathState.destinationBid, PathState.sourceBid,buildingAllApi.outdoorID]);
-          }
-        } else {
-          if (key != skipID) {
-            currentCoordinated = innerMap;
-            patchGeneration(currentCoordinated);
-            patchGenerationMarker([skipID,buildingAllApi.outdoorID]);
-          }
-        }
+        });
+        // }
+        // if(key == outdoorID){
+        //   currentCoordinated = innerMap;
+        //   print("innerMap ${key} ${currentCoordinated}");
+        //   if (currentCoordinated.isNotEmpty) {
+        //     List<LatLng> points = [];
+        //     List<MapEntry<int, LatLng>> entryList =
+        //     currentCoordinated.entries.toList();
+        //     entryList.sort((a, b) => a.key.compareTo(b.key));
+        //     LinkedHashMap<int, LatLng> sortedCoordinates =
+        //     LinkedHashMap.fromEntries(entryList);
+        //     sortedCoordinates.forEach((key, value) {
+        //       points.add(value);
+        //     });
+        //
+        //     setState(() {
+        //       blurPatchCampus.add(
+        //         Polygon(
+        //           polygonId: PolygonId('patch${points}'),
+        //           points: points,
+        //           strokeWidth: 1,
+        //           strokeColor: Colors.black.withOpacity(0.5),
+        //           fillColor: Color(0xfff0e6d1).withOpacity(1.0),
+        //           geodesic: false,
+        //           consumeTapEvents: false,
+        //           zIndex: 5,
+        //         ),
+        //       );
+        //       cachedPolygon.clear();
+        //     });
+        //   }
+        //
+        //   Building.allBuildingID.forEach((Key, Value) async {
+        //     if (IDS.contains(Key) && Key != outdoorID) {
+        //       String? showBuildingName = "";
+        //
+        //       Building.buildingData?.forEach((currKey, currValue) {
+        //         if (currKey == Key) {
+        //           showBuildingName = currValue;
+        //         }
+        //       });
+        //       final result = await HelperClass()
+        //           .bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
+        //           showBuildingName?.trim() ?? "Zone",
+        //           'assets/buildingMarker.png',
+        //           imageSize: const Size(100, 100));
+        //       final iconMarker = result.icon;
+        //       final anchor = result.anchor;
+        //       blurPatchCampusMarker.add(
+        //         Marker(
+        //           markerId: MarkerId(showBuildingName! + Key + Value.toString()),
+        //           position: Value,
+        //           icon: iconMarker,
+        //           anchor: anchor,
+        //         ),
+        //       );
+        //     }
+        //   });
+        //
+        // }
       }
     });
   }
 
-
-
-  void patchGeneration(Map<int, LatLng> currentCoordinated){
+  void patchGeneration(Map<int, LatLng> currentCoordinated) {
     // print("patchGeneration");
     // if (currentCoordinated.isNotEmpty) {
     //   List<LatLng> points = [];
@@ -3804,31 +4388,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     // }
   }
 
-
-  void patchGenerationMarker(List<String> skipIDs) {
-    restBuildingMarker.clear();
-    Building.allBuildingID.forEach((Key, Value) async {
-      if (!skipIDs.contains(Key)) {
-        String? showBuildingName = "";
-        Building.buildingData?.forEach((currKey, currValue) {
-          if (currKey == Key) {
-            showBuildingName = currValue;
-          }
-        });
-        restBuildingMarker.add(
-          Marker(
-            markerId: MarkerId(Key + Value.toString()),
-            position: Value,
-            icon: await bitmapDescriptorFromTextAndImageForPatchTransition(
-                showBuildingName ?? "", 'assets/cleanenergy.png',
-                imageSize: const Size(100, 100)),
-          ),
-        );
-      }
-    });
-  }
-
   void createARPatch(Map<int, LatLng> coordinates) async {
+    print("createARPatch ${StackTrace.current}");
     if (coordinates.isNotEmpty) {
       List<LatLng> points = [];
       List<MapEntry<int, LatLng>> entryList = coordinates.entries.toList();
@@ -3842,8 +4403,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
       // Print the sorted map
       sortedCoordinates.forEach((key, value) {
+        print("checkingpoint${key}");
         points.add(value);
       });
+      SingletonFunctionController
+          .building.ARCoordinates[buildingAllApi.selectedID] = coordinates;
+      print("patchmade main for ${SingletonFunctionController.building.ARCoordinates.keys}");
+
       setState(() {
         patch.clear();
         patch.add(
@@ -3859,14 +4425,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         );
         cachedPolygon.clear();
       });
+    } else {
+      print("checkingpoint coordinate empty");
     }
   }
 
   void createotherARPatch(Map<int, LatLng> coordinates, String bid) async {
-
-
-    if(!mounted || disposed)return;
-
+    print("createotherARPatch bid ${bid} ${StackTrace.current}");
+    if (!mounted || disposed) return;
     if (coordinates.isNotEmpty) {
       List<LatLng> points = [];
       List<MapEntry<int, LatLng>> entryList = coordinates.entries.toList();
@@ -3882,9 +4448,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       sortedCoordinates.forEach((key, value) {
         points.add(value);
       });
-      if (SingletonFunctionController.building.ARCoordinates.containsKey(bid)) {
-        SingletonFunctionController.building.ARCoordinates[bid] = coordinates;
-      }
+      SingletonFunctionController.building.ARCoordinates[bid] = coordinates;
+      print(
+          "patchmade other for $bid ${SingletonFunctionController.building.ARCoordinates.keys} ${StackTrace.current}");
 
       setState(() {
         otherpatch
@@ -3894,8 +4460,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               polygonId: PolygonId('otherpatch $bid'),
               points: points,
               strokeWidth: 1,
-              strokeColor: Color(0xffC0C0C0),
-              fillColor: Color(0xffffffff),
+              strokeColor: bid == buildingAllApi.selectedID?Colors.white:Color(0xfff6f6f6),
+              fillColor: bid == buildingAllApi.selectedID?Colors.white:Color(0xfff6f6f6),
               geodesic: false,
               consumeTapEvents: true,
               zIndex: -1),
@@ -3907,149 +4473,169 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   Set<Polygon> _polygon = Set();
   PolygonId matchPolygonId = PolygonId("");
+  List<LatLng> matchPolygonPoints = [];
   AnimationController? _controller12;
   Animation<double>? _sizeAnimation;
   late Animation<double> _zoomAnimation;
   late Animation<LatLng> _latLngAnimation;
-  Future<void> moveCameraSmoothly({
-    required GoogleMapController controller,
-    required CameraPosition targetPosition,
-    required LatLng currTarget,
-    Duration duration = const Duration(milliseconds:100),
-    int steps = 50,
-  }) async {
-    _googleMapController.animateCamera(
-      CameraUpdate.newLatLngZoom(
-        targetPosition.target,
-        22,
-      ),
-    );
-  }
 
-
-  Future<void> addselectedRoomMarker(List<LatLng> polygonPoints,String assetPath ,{Color? color}) async {
+  Future<void> addselectedRoomMarker(
+      List<LatLng> polygonPoints, String assetPath,
+      {Color? color}) async {
     // Cancel any ongoing animation
     _controller12?.stop();
     _controller12?.dispose();
     _controller12 = null;
-    selectedroomMarker.clear(); // Clear existing markers
+    selectedroomMarker.clear();
+    _markers.clear();
+
     matchPolygonId = PolygonId("$polygonPoints");
+    matchPolygonPoints = polygonPoints;
     _polygon.clear();
     _polygon.add(Polygon(
       polygonId: PolygonId("$polygonPoints"),
       points: polygonPoints,
-      fillColor: color != null
-          ? color.withOpacity(0.4)
-          : Colors.lightBlueAccent.withOpacity(0.4),
+      fillColor:
+      color?.withOpacity(0.4) ?? Colors.lightBlueAccent.withOpacity(0.4),
       strokeColor: color ?? Colors.blue,
       strokeWidth: 2,
     ));
     cachedPolygon.clear();
-    List<geo.LatLng> points = [];
-    for (var e in polygonPoints) {
-      points.add(geo.LatLng(e.latitude, e.longitude));
-    }
 
+    List<geo.LatLng> points =
+    polygonPoints.map((e) => geo.LatLng(e.latitude, e.longitude)).toList();
     Uint8List baseIcon = await getImagesFromMarker(assetPath, 140);
 
-    // Initialize a new animation controller
     _controller12 = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 900),
+      duration: Duration(milliseconds: 200),
     );
 
     _sizeAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(
       CurvedAnimation(parent: _controller12!, curve: Curves.easeInOut),
     );
-
-    void updateMarkerSize() async {
+    _controller12?.addListener(() async {
       double scale = _sizeAnimation?.value ?? 1.0;
       Uint8List resizedIcon =
       await getImagesFromMarker(assetPath, (140 * scale).toInt());
 
       setState(() {
-        if (selectedroomMarker.containsKey(buildingAllApi.getStoredString())) {
-          selectedroomMarker[buildingAllApi.getStoredString()]?.add(
-            Marker(
-              markerId: MarkerId('selectedRoomMarker'),
-              position: calculateRoomCenter(polygonPoints),
-              icon: BitmapDescriptor.fromBytes(resizedIcon),
-              onTap: () {},
-            ),
-          );
-        } else {
-          selectedroomMarker[buildingAllApi.getStoredString()] = Set<Marker>();
-          selectedroomMarker[buildingAllApi.getStoredString()]?.add(
-            Marker(
-              markerId: MarkerId('selectedRoomMarker'),
-              position: calculateRoomCenter(polygonPoints),
-              icon: BitmapDescriptor.fromBytes(resizedIcon),
-              onTap: () {},
-            ),
-          );
-        }
-      });
-    }
-
-    // Start the animation
-    _controller12?.addListener(updateMarkerSize);
-    _controller12?.repeat(reverse: true);
-
-    // Stop animation after 5 seconds
-    Timer(Duration(seconds: 5), () {
-      _controller12?.stop();
-      _controller12?.dispose();
-      _controller12 = null;
-
-      setState(() {
-        selectedroomMarker[buildingAllApi.getStoredString()]?.add(
+        final key = buildingAllApi.getStoredString();
+        selectedroomMarker[key] = {
           Marker(
             markerId: MarkerId('selectedRoomMarker'),
             position: calculateRoomCenter(polygonPoints),
-            icon: BitmapDescriptor.fromBytes(baseIcon),
+            icon: BitmapDescriptor.fromBytes(resizedIcon),
+            infoWindow: InfoWindow(title: "Title"),
             onTap: () {},
-          ),
-        );
+          )
+        };
       });
     });
 
-    // polygonPoints=[];
+    _controller12?.addStatusListener((status) async {
+      if (status == AnimationStatus.completed) {
+        _controller12?.dispose();
+        _controller12 = null;
+
+        setState(() {
+          final key = buildingAllApi.getStoredString();
+          selectedroomMarker[key] = {
+            Marker(
+              markerId: MarkerId('selectedRoomMarker'),
+              position: calculateRoomCenter(polygonPoints),
+              icon: BitmapDescriptor.fromBytes(baseIcon),
+              onTap: () {},
+            )
+          };
+        });
+      }
+    });
+
+    _controller12?.forward();
   }
 
-  Future<void> addselectedMarker(LatLng point) async {
+  Future<void> addselectedMarker(LatLng point,{String? path}) async {
     selectedroomMarker.clear(); // Clear existing markers
     print("addSelectedMarker $point");
-
+    Uint8List? resizedIcon;
     String buildingKey = buildingAllApi.getStoredString();
+    if(path != null){
+      resizedIcon = await getImagesFromMarker(path,150);
+    }
+
 
     setState(() {
       selectedroomMarker[buildingKey] = {
         Marker(
           markerId: const MarkerId('selectedroomMarker'),
           position: point,
-          icon: BitmapDescriptor.defaultMarker,
+          icon: resizedIcon != null?BitmapDescriptor.fromBytes(resizedIcon) : BitmapDescriptor.defaultMarker,
         ),
       };
     });
   }
 
+  double earthRadius = 6371000; // Earth radius in meters
 
   LatLng calculateRoomCenter(List<LatLng> polygonPoints) {
-    double lat = 0.0;
-    double long = 0.0;
-    if (polygonPoints.length <= 4) {
-      for (int i = 0; i < polygonPoints.length; i++) {
-        lat = lat + polygonPoints[i].latitude;
-        long = long + polygonPoints[i].longitude;
-      }
-      return LatLng(lat / polygonPoints.length, long / polygonPoints.length);
-    } else {
-      for (int i = 0; i < 4; i++) {
-        lat = lat + polygonPoints[i].latitude;
-        long = long + polygonPoints[i].longitude;
-      }
-      return LatLng(lat / 4, long / 4);
+    if (polygonPoints.isEmpty) {
+      throw ArgumentError('Polygon points cannot be empty');
     }
+
+    // Choose the first point as reference
+    double lat0 = polygonPoints[0].latitude * pi / 180;
+    double lng0 = polygonPoints[0].longitude * pi / 180;
+
+    // Convert LatLng to local Cartesian (x, y) in meters
+    List<Point<double>> points = polygonPoints.map((point) {
+      double latRad = point.latitude * pi / 180;
+      double lngRad = point.longitude * pi / 180;
+
+      double x = (lngRad - lng0) * cos(lat0) * earthRadius;
+      double y = (latRad - lat0) * earthRadius;
+
+      return Point<double>(x, y);
+    }).toList();
+
+    // Compute centroid in local coordinates
+    double signedArea = 0.0;
+    double centroidX = 0.0;
+    double centroidY = 0.0;
+    int n = points.length;
+
+    for (int i = 0; i < n; i++) {
+      Point<double> current = points[i];
+      Point<double> next = points[(i + 1) % n];
+
+      double cross = (current.x * next.y) - (next.x * current.y);
+      signedArea += cross;
+      centroidX += (current.x + next.x) * cross;
+      centroidY += (current.y + next.y) * cross;
+    }
+
+    signedArea *= 0.5;
+
+    if (signedArea == 0) {
+      // Fallback: Average lat/lng if polygon is degenerate
+      double avgLat = 0.0;
+      double avgLng = 0.0;
+      for (var pt in polygonPoints) {
+        avgLat += pt.latitude;
+        avgLng += pt.longitude;
+      }
+      return LatLng(avgLat / n, avgLng / n);
+    }
+
+    centroidX /= (6 * signedArea);
+    centroidY /= (6 * signedArea);
+
+    // Convert centroid back to LatLng
+    double centroidLat = (centroidY / earthRadius + lat0) * 180 / pi;
+    double centroidLng =
+        (centroidX / (earthRadius * cos(lat0)) + lng0) * 180 / pi;
+
+    return LatLng(centroidLat, centroidLng);
   }
 
   void fitPolygonInScreen(Polygon polygon) {
@@ -4208,15 +4794,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       );
     }
   }
+
   bool _isCameraAnimating = false;
   Future<void> setCameraPositionusingCoords(
       List<LatLng> selectedRoomMarker1, {
         List<LatLng>? selectedRoomMarker2,
       }) async {
-    if (_isCameraAnimating || _googleMapController == null){
+    if (_isCameraAnimating || _googleMapController == null) {
       return; // If already animating or controller is null, exit
     }
-    setState((){
+    setState(() {
       _isCameraAnimating = true;
     });
     try {
@@ -4230,7 +4817,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       double minLng = double.infinity;
       double maxLat = double.negativeInfinity;
       double maxLng = double.negativeInfinity;
-      for(LatLng marker in allMarkers){
+      for (LatLng marker in allMarkers) {
         double lat = marker.latitude;
         double lng = marker.longitude;
         minLat = math.min(minLat, lat);
@@ -4246,7 +4833,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       final double paddingFactor = 0.1; // Adjust as per your UI layout
       bounds = _adjustBoundsForPanels(bounds, paddingFactor);
       // Calculate zoom level dynamically
-      final double distance = _calculateDistance(bounds.southwest, bounds.northeast);
+      final double distance =
+      _calculateDistance(bounds.southwest, bounds.northeast);
       final double targetZoom = _calculateZoomLevel(bounds, distance);
       // Animate camera movement
       const int steps = 60;
@@ -4258,8 +4846,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       );
       for (int i = 0; i <= steps; i++) {
         final t = i / steps; // Progress from 0 to 1
-        final interpolatedLat = _lerp(center.latitude, bounds.northeast.latitude, t);
-        final interpolatedLng = _lerp(center.longitude, bounds.northeast.longitude, t);
+        final interpolatedLat =
+        _lerp(center.latitude, bounds.northeast.latitude, t);
+        final interpolatedLng =
+        _lerp(center.longitude, bounds.northeast.longitude, t);
         final interpolatedZoom = _lerp(currentZoom, targetZoom, t);
         await _googleMapController.moveCamera(
           CameraUpdate.newCameraPosition(
@@ -4272,16 +4862,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         // Delay for smooth animation
         await Future.delayed(stepDuration);
       }
-    }finally{
+    } finally {
       setState(() {
         _isCameraAnimating = false;
       });
     }
   }
 
-  LatLngBounds _adjustBoundsForPanels(LatLngBounds bounds, double paddingFactor) {
-    final double latDiff = bounds.northeast.latitude - bounds.southwest.latitude;
-    final double lngDiff = bounds.northeast.longitude - bounds.southwest.longitude;
+  LatLngBounds _adjustBoundsForPanels(
+      LatLngBounds bounds, double paddingFactor) {
+    final double latDiff =
+        bounds.northeast.latitude - bounds.southwest.latitude;
+    final double lngDiff =
+        bounds.northeast.longitude - bounds.southwest.longitude;
     return LatLngBounds(
       southwest: LatLng(
         bounds.southwest.latitude + (latDiff * paddingFactor),
@@ -4293,16 +4886,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       ),
     );
   }
+
 // Calculate zoom level dynamically
-  double _calculateZoomLevel(LatLngBounds bounds, double distance){
-    if (distance < 0.05){
+  double _calculateZoomLevel(LatLngBounds bounds, double distance) {
+    if (distance < 0.05) {
       return 20.0; // High zoom for very close points
-    }else if (distance < 0.5){
+    } else if (distance < 0.5) {
       return 19.0; // Moderate zoom for nearby points
-    }else{
+    } else {
       return 18.0; // Default zoom for larger distances
     }
   }
+
 // Calculate distance between two LatLng points
   double _calculateDistance(LatLng point1, LatLng point2) {
     const double earthRadius = 6371.0; // Radius of Earth in kilometers
@@ -4312,17 +4907,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     final double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
         math.cos(_toRadians(point1.latitude)) *
             math.cos(_toRadians(point2.latitude)) *
-            math.sin(dLng / 2) * math.sin(dLng / 2);
+            math.sin(dLng / 2) *
+            math.sin(dLng / 2);
 
     final double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
     return earthRadius * c; // Distance in kilometers
   }
+
 // Helper to convert degrees to radians
   double _toRadians(double degree) {
     return degree * math.pi / 180.0;
   }
+
 // Linear interpolation helper
-  double _lerp(double start, double end, double t){
+  double _lerp(double start, double end, double t) {
     return start + (end - start) * t;
   }
   // Future<void> setCameraPositionusingCoords(List<LatLng> selectedroomMarker1,
@@ -4489,7 +5087,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     floorData.forEach((Element) {
       if (Element.floor == floor) {
         Element.polyArray!.forEach((element) {
-          if (element.name!.toLowerCase().contains("lift")) {
+          if ((element.name ?? "").toLowerCase().contains("lift")) {
             lifts.add(element);
           }
         });
@@ -4538,90 +5136,104 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   Future<bool> LandmarkPresent(String id) async {
     print("LandmarkPresent got id ${id}");
-    var otherLandmarkdata = await SingletonFunctionController.building.landmarkdata;
+    var otherLandmarkdata =
+    await SingletonFunctionController.building.landmarkdata;
     for (var element in otherLandmarkdata!.landmarks!) {
-      if(element.properties!.polyId == id){
+      if (element.properties!.polyId == id) {
         return true;
       }
     }
     return false;
   }
 
+  int currentToggleFloor = 0;
+  String selectedMarkerId = "";
+  List<RoadInfo> roadPointMarkerList = [];
+  Future<void> polygonTap(
+      List<LatLng>? coordinates, String id, String path) async {
+    print("polygonTap stacktarce:${StackTrace.current}\n");
+    selectedMarkerId = id;
+    landmarkMarkers.forEach((currMarker) {
+      if (currMarker.markerId.toString().contains(id)) {
+        print("foundone");
+        currMarker.visible = false;
+      } else {
+        currMarker.visible = true;
+      }
+    });
 
-  Future<void> polygonTap(List<LatLng>? coordinates, String id) async {
-    print("called polygonTap $id");
     land? singletonData = await SingletonFunctionController.building.landmarkdata;
+    print("called polygonTap $id ${path} ${singletonData!.landmarksMap![id]?.renderDetail?.boothType}");
+    path = HelperClass().getCategoryAsset(singletonData!.landmarksMap![id]?.renderDetail?.boothType,path);
     Landmarks? landmark;
-    if(singletonData!.landmarksMap![id] == null){
+    if (singletonData!.landmarksMap![id] == null) {
       return;
-    }else{
+    } else {
       landmark = singletonData!.landmarksMap![id];
     }
-    if(coordinates != null){
+    if (coordinates != null) {
       _googleMapController.animateCamera(
         CameraUpdate.newLatLngZoom(
-          tools.calculateRoomCenterinLatLng(coordinates),
+          calculateRoomCenter(coordinates),
           22,
         ),
       );
-    }else{
+    } else {
       print("called polygonTap animating to landmark");
       _googleMapController.animateCamera(
         CameraUpdate.newLatLngZoom(
-          LatLng(double.parse(landmark!.properties!.latitude!), double.parse(landmark.properties!.longitude!)),
+          LatLng(double.parse(landmark!.properties!.latitude!),
+              double.parse(landmark.properties!.longitude!)),
           22,
         ),
       );
     }
     setState(() {
-      if (SingletonFunctionController.building.selectedLandmarkID != id && !user.isnavigating && !_isRoutePanelOpen) {
+      if (SingletonFunctionController.building.selectedLandmarkID != id &&
+          !user.isnavigating &&
+          !_isRoutePanelOpen) {
         user.reset();
-        PathState = pathState.withValues(
-            -1,
-            -1,
-            -1,
-            -1,
-            -1,
-            -1,
-            null,
-            0);
+        PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
         pathMarkers.clear();
         PathState.path.clear();
         PathState.sourcePolyID = "";
         PathState.destinationPolyID = "";
-        singleroute.clear(); pathCovered.clear();
+        singleroute.clear();
+        pathCovered.clear();
 
         user.isnavigating = false;
         _isnavigationPannelOpen = false;
-        SingletonFunctionController.building
-            .selectedLandmarkID = id;
-        SingletonFunctionController.building.ignoredMarker
-            .clear();
-        SingletonFunctionController.building.ignoredMarker
-            .add(id);
+        SingletonFunctionController.building.selectedLandmarkID = id;
+        SingletonFunctionController.building.ignoredMarker.clear();
+        SingletonFunctionController.building.ignoredMarker.add(id);
         _isBuildingPannelOpen = false;
         _isRoutePanelOpen = false;
-        singleroute.clear(); pathCovered.clear();
+        singleroute.clear();
+        pathCovered.clear();
         _isLandmarkPanelOpen = true;
         PathState.directions = [];
         interBuildingPath.clear();
-        if(coordinates != null){
+        if (coordinates != null) {
           print("called polygonTap end first");
-          addselectedRoomMarker(coordinates, 'assets/Generic Marker.png');
-        }else{
+          addselectedRoomMarker(coordinates, path);
+        } else {
           print("called polygonTap end second");
-          addselectedMarker(LatLng(double.parse(landmark!.properties!.latitude!), double.parse(landmark.properties!.longitude!)));
+          addselectedMarker(LatLng(
+              double.parse(landmark!.properties!.latitude!),
+              double.parse(landmark.properties!.longitude!)),path: path);
         }
-
       }
     });
   }
+
   List<LatLng> tappedPolygonCoordinates = [];
+  List<LatLng> landmarkFocus = [];
+  PolygonCalculations polygonCalculation = PolygonCalculations();
+
   Future<void> createRooms(polylinedata value, int floor) async {
     final stackTrace = StackTrace.current;
-    print("reroute Stack: \n$stackTrace");
-    print("createRooms-- ${value.polyline!.buildingID!} ${floor}");
-
+    print(
+        "createRooms Stack: ${value.polyline!.buildingID!} $floor \n$stackTrace");
     if (closedpolygons[buildingAllApi.getStoredString()] == null) {
       closedpolygons[buildingAllApi.getStoredString()] = Set();
     }
@@ -4634,8 +5246,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       SingletonFunctionController.building.selectedLandmarkID = null;
     }
     polylines[value.polyline!.buildingID!]?.clear();
+    dottedPath[value.polyline!.buildingID!]?.clear();
 
-    if (floor != 0 && value.polyline?.buildingID != buildingAllApi.outdoorID) {
+    if (floor != 0) {
       List<PolyArray> prevFloorLifts =
       findLift(tools.numericalToAlphabetical(0), value.polyline!.floors!);
       List<PolyArray> currFloorLifts = findLift(
@@ -4661,20 +5274,16 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           if (polyArray.visibilityType == "visible" &&
               polyArray.polygonType != "Waypoints") {
             List<LatLng> coordinates = [];
-
             for (Nodes node in polyArray.nodes!) {
-              //coordinates.add(LatLng(node.lat!,node.lon!));
-              coordinates.add(LatLng(
-                  tools.localtoglobal(
-                      node.coordx!,
-                      node.coordy!,
-                      SingletonFunctionController
-                          .building.patchData[value.polyline!.buildingID])[0],
-                  tools.localtoglobal(
-                      node.coordx!,
-                      node.coordy!,
-                      SingletonFunctionController
-                          .building.patchData[value.polyline!.buildingID])[1]));
+              coordinates.add(LatLng(node.lat!, node.lon!));
+              // coordinates.add(LatLng(
+              //     tools.localtoglobal(
+              //         node.coordx!,
+              //         node.coordy!,
+              //         SingletonFunctionController.building.patchData[value.polyline!.buildingID])[0],
+              //     tools.localtoglobal(
+              //         node.coordx!,
+              //         node.coordy!, SingletonFunctionController.building.patchData[value.polyline!.buildingID])[1]));
             }
             if (!closedpolygons.containsKey(value.polyline!.buildingID!)) {
               closedpolygons.putIfAbsent(
@@ -4684,7 +5293,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               polylines.putIfAbsent(
                   value.polyline!.buildingID!, () => Set<gmap.Polyline>());
             }
-
             if (polyArray.polygonType == 'Wall' ||
                 polyArray.polygonType == 'undefined') {
               if (coordinates.length >= 2) {
@@ -4700,167 +5308,189 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                     width: 1,
                     onTap: () {}));
               }
-            } else if (polyArray.polygonType == 'Room' ) {
-              print("polyArray.name");
-              print(polyArray.name);
+            } else if (polyArray.polygonType?.toLowerCase() == 'room') {
+              // print("coordinatespolyArray.name ${polyArray.name} ${polyArray.polygonType}");
 
-              if(polyArray.name!.toLowerCase().contains('lr') || polyArray.name!.toLowerCase().contains('lab') || polyArray.name!.toLowerCase().contains('office') || polyArray.name!.toLowerCase().contains('pantry') || polyArray.name!.toLowerCase().contains('reception')) {
-                print("COntaining LA");
+              if (polyArray.name!.toLowerCase().contains('lr') ||
+                  polyArray.name!.toLowerCase().contains('lab') ||
+                  polyArray.name!.toLowerCase().contains('office') ||
+                  polyArray.name!.toLowerCase().contains('pantry') ||
+                  polyArray.name!.toLowerCase().contains('reception')) {
+                // listOfCoordinates[polyArray.name!] = coordinates;
+
+                // print("coordinatespolyArray.name 1 ${polyArray.name} ${polyArray.polygonType}");
+
+                List<LatLng> breadthCenterPoints =
+                polygonCalculation.calculateRectangleData(coordinates);
+
+                if (polyArray.id != null) {
+                  polygonCalculation.landmarkWithPolygonPoints[polyArray.id!] = coordinates;
+                  polygonCalculation.landmarkWithLatLng[polyArray.id!] =
+                      breadthCenterPoints;
+                  print(
+                      "checking polyid ${polyArray.id!} ${polygonCalculation.landmarkWithLatLng[polyArray.id!]}");
+                }
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
-                  closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
+                  // Determine the asset based on the room type
+                  String assetPath =
+                  polyArray.name!.toLowerCase().contains('office')
+                      ? 'assets/Office.png'
+                      : 'assets/Generic Marker.png';
+                  print("coordinates1 $coordinates");
+
+                  closedpolygons[value.polyline!.buildingID!]!.add(
+                    Polygon(
                       polygonId: PolygonId(
-                          "${value.polyline!.buildingID!} Room ${polyArray
-                              .id!}"),
+                          "${value.polyline!.buildingID!} Room ${polyArray.id!}"),
                       points: coordinates,
                       strokeWidth: 1,
-                      // Modify the color and opacity based on the selectedRoomId
                       strokeColor: Color(0xffA38F9F),
-                      fillColor: Color(0xffE8E3E7),
+                      fillColor: polyArray.cubicleColor != null &&
+                          polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xffE8E3E7),
                       consumeTapEvents: true,
                       onTap: () {
-                        polygonTap(coordinates, polyArray.id!);
-                      }));
+                        polygonTap(coordinates, polyArray.id!, assetPath);
+                      },
+                    ),
+                  );
                 }
-              }else if(polyArray.name!.toLowerCase().contains('atm') || polyArray.name!.toLowerCase().contains('health')) {
-                print("COntaining LA");
+              } else if (polyArray.name!.toLowerCase().contains('board')) {
+                // print("coordinatespolyArray.name 2 ${polyArray.name} ${polyArray.polygonType} ${coordinates.length}");
+                List<LatLng> breadthCenterPoints =
+                polygonCalculation.calculateRectangleData(coordinates);
+                if (polyArray.id != null) {
+                  polygonCalculation.landmarkWithPolygonPoints[polyArray.id!] =
+                      coordinates;
+                  polygonCalculation.landmarkWithLatLng[polyArray.id!] =
+                      breadthCenterPoints;
+                }
+                if (coordinates.length > 2) {
+                  coordinates.add(coordinates.first);
+                  // Determine the asset based on the room type
+                  String assetPath =
+                  polyArray.name!.toLowerCase().contains('office')
+                      ? 'assets/Office.png'
+                      : 'assets/Generic Marker.png';
+                  print("coordinates1 $coordinates");
+
+                  closedpolygons[value.polyline!.buildingID!]!.add(
+                    Polygon(
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Room ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      strokeColor: Color(0xffA38F9F),
+                      fillColor: polyArray.cubicleColor != null &&
+                          polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xffE8E3E7),
+                      consumeTapEvents: true,
+                      onTap: () {
+                        polygonTap(coordinates, polyArray.id!, assetPath);
+                      },
+                    ),
+                  );
+                }
+              } else if (polyArray.name!.toLowerCase().contains('atm') ||
+                  polyArray.name!.toLowerCase().contains('health')) {
+                // print("coordinatespolyArray.name 3 ${polyArray.name} ${polyArray.polygonType}");
+                List<LatLng> breadthCenterPoints =
+                polygonCalculation.calculateRectangleData(coordinates);
+                if (polyArray.id != null) {
+                  polygonCalculation.landmarkWithPolygonPoints[polyArray.id!] =
+                      coordinates;
+                  polygonCalculation.landmarkWithLatLng[polyArray.id!] =
+                      breadthCenterPoints;
+                }
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
                       polygonId: PolygonId(
-                          "${value.polyline!.buildingID!} Room ${polyArray
-                              .id!}"),
+                          "${value.polyline!.buildingID!} Room ${polyArray.id!}"),
                       points: coordinates,
                       strokeWidth: 1,
-                      // Modify the color and opacity based on the selectedRoomId
-
                       strokeColor: Color(0xffE99696),
-                      fillColor: Color(0xffFBEAEA),
+                      fillColor: polyArray.cubicleColor != null &&
+                          polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xffFBEAEA),
                       consumeTapEvents: true,
                       onTap: () {
-                        _googleMapController.moveCamera(
-                          CameraUpdate.newLatLngZoom(
-                            tools.calculateRoomCenterinLatLng(coordinates),
-                            22,
-                          ),
-                        );
-                        setState(() {
-                          tappedPolygonCoordinates=coordinates;
-                        });
-
-                        // smoothZoomAndPan(coordinates,22);
-                        setState(() {
-                          if (SingletonFunctionController.building
-                              .selectedLandmarkID != polyArray.id &&
-                              !user.isnavigating &&
-                              !_isRoutePanelOpen) {
-                            user.reset();
-                            PathState = pathState.withValues(
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                null,
-                                0);
-                            pathMarkers.clear();
-                            PathState.path.clear();
-                            PathState.sourcePolyID = "";
-                            PathState.destinationPolyID = "";
-                            singleroute.clear(); pathCovered.clear();
-
-                            user.isnavigating = false;
-                            _isnavigationPannelOpen = false;
-                            SingletonFunctionController.building
-                                .selectedLandmarkID = polyArray.id;
-                            SingletonFunctionController.building.ignoredMarker
-                                .clear();
-                            SingletonFunctionController.building.ignoredMarker
-                                .add(polyArray.id!);
-                            _isBuildingPannelOpen = false;
-                            _isRoutePanelOpen = false;
-                            singleroute.clear(); pathCovered.clear();
-                            _isLandmarkPanelOpen = true;
-                            PathState.directions = [];
-                            interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates,'assets/ATM.png');
-                          }
-                        });
+                        polygonTap(
+                            coordinates, polyArray.id!, "assets/ATM.png");
                       }));
                 }
-              } else{
+              } else {
+                // print("coordinatespolyArray.name 4 ${polyArray.name} ${polyArray.polygonType}");
+
                 if (coordinates.length > 2) {
+                  // print("polyArray.name${polyArray.name} ${polyArray.id}");
+                  List<LatLng> breadthCenterPoints = polygonCalculation.calculateRectangleData(coordinates);
+                  if (polyArray.id != null) {
+                    polygonCalculation.landmarkWithPolygonPoints[polyArray.id!] = coordinates;
+                    polygonCalculation.landmarkWithLatLng[polyArray.id!] = breadthCenterPoints;
+                    print(
+                        "coordinatespolyArray.name 4.1 ${polyArray.id}--$coordinates---${polygonCalculation.landmarkWithLatLng[polyArray.id!]}");
+                  }
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
-                      polygonId: PolygonId(
-                          "${value.polyline!.buildingID!} Room ${polyArray
-                              .id!}"),
+                      polygonId: PolygonId("${value.polyline!.buildingID!} Room ${polyArray.id!}"),
                       points: coordinates,
                       strokeWidth: 1,
-                      // Modify the color and opacity based on the selectedRoomId
-
                       strokeColor: Color(0xffA38F9F),
-                      fillColor: Color(0xffE8E3E7),
+                      fillColor: polyArray.cubicleColor != null &&
+                          polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xffE8E3E7),
                       consumeTapEvents: true,
-                      onTap: () {
-                        // _googleMapController.moveCamera(
-                        //   CameraUpdate.newLatLngZoom(
-                        //     tools.calculateRoomCenterinLatLng(coordinates),
-                        //     22,
-                        //   ),
-                        // );
-                        setState(() {
-                          tappedPolygonCoordinates=coordinates;
-                        });
-
-                        moveCameraSmoothly(controller: _googleMapController, targetPosition:  CameraPosition(
-                            target: tools.calculateRoomCenterinLatLng(coordinates),zoom:22), currTarget: LatLng(user.lat,user.lng));
-                        //  smoothZoomAndPan(coordinates,22);
-                        setState(() {
-                          if (SingletonFunctionController.building
-                              .selectedLandmarkID != polyArray.id &&
-                              !user.isnavigating &&
-                              !_isRoutePanelOpen) {
-                            user.reset();
-                            PathState = pathState.withValues(
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                -1,
-                                null,
-                                0);
-                            pathMarkers.clear();
-                            PathState.path.clear();
-                            PathState.sourcePolyID = "";
-                            PathState.destinationPolyID = "";
-                            singleroute.clear(); pathCovered.clear();
-
-                            user.isnavigating = false;
-                            _isnavigationPannelOpen = false;
-                            SingletonFunctionController.building
-                                .selectedLandmarkID = polyArray.id;
-                            SingletonFunctionController.building.ignoredMarker
-                                .clear();
-                            SingletonFunctionController.building.ignoredMarker
-                                .add(polyArray.id!);
-                            _isBuildingPannelOpen = false;
-                            _isRoutePanelOpen = false;
-                            singleroute.clear(); pathCovered.clear();
-                            _isLandmarkPanelOpen = true;
-                            PathState.directions = [];
-                            interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates,'assets/Generic Marker.png');
-                          }
-                        });
+                      onTap: () async {
+                        String path = 'assets/Generic Marker.png';
+                        Landmarks? matchedLandmark;
+                        final landmarkData = await SingletonFunctionController
+                            .building.landmarkdata;
+                        try {
+                          matchedLandmark = landmarkData?.landmarks!.firstWhere(
+                                (landmark) =>
+                            landmark.name != null &&
+                                landmark.name!.toLowerCase().contains(
+                                    polyArray.name.toString().toLowerCase()),
+                          );
+                        } catch (e) {
+                          matchedLandmark = null; // Not found
+                        }
+                        if (matchedLandmark != null &&
+                            matchedLandmark!.element!.subType == 'Cafeteria') {
+                          path = 'assets/cutlery.png';
+                        }
+                        polygonTap(coordinates, polyArray.id!, path);
                       }));
                 }
               }
             } else if (polyArray.polygonType == 'Cubicle') {
               if (polyArray.cubicleName == "Green Area" ||
-                  polyArray.cubicleName == "Green Area | Pots" || polyArray.name!.toLowerCase().contains('auditorium') || polyArray.name!.toLowerCase().contains('basketball') || polyArray.name!.toLowerCase().contains('cricket') || polyArray.name!.toLowerCase().contains('football') || polyArray.name!.toLowerCase().contains('gym') || polyArray.name!.toLowerCase().contains('swimming') || polyArray.name!.toLowerCase().contains('tennis')) {
+                  polyArray.cubicleName == "Green Area | Pots" ||
+                  (polyArray.name ?? "").toLowerCase().contains('auditorium') ||
+                  (polyArray.name ?? "").toLowerCase().contains('basketball') ||
+                  (polyArray.name ?? "").toLowerCase().contains('cricket') ||
+                  (polyArray.name ?? "").toLowerCase().contains('football') ||
+                  (polyArray.name ?? "").toLowerCase().contains('gym') ||
+                  (polyArray.name ?? "").toLowerCase().contains('swimming') ||
+                  (polyArray.name ?? "").toLowerCase().contains('tennis')) {
+                List<LatLng> breadthCenterPoints =
+                polygonCalculation.calculateRectangleData(coordinates);
+                if (polyArray.id != null) {
+                  polygonCalculation.landmarkWithPolygonPoints[polyArray.id!] =
+                      coordinates;
+                  polygonCalculation.landmarkWithLatLng[polyArray.id!] =
+                      breadthCenterPoints;
+                }
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
@@ -4869,16 +5499,25 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       points: coordinates,
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
-
                       strokeColor: Color(0xffADFA9E),
-                      fillColor: Color(0xffE7FEE9),
-                      onTap: () {
-
-                      }));
+                      fillColor: polyArray.cubicleColor != null &&
+                          polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xffE7FEE9),
+                      onTap: () {}));
                 }
               } else if (polyArray.cubicleName!
                   .toLowerCase()
                   .contains("lift")) {
+                List<LatLng> breadthCenterPoints =
+                polygonCalculation.calculateRectangleData(coordinates);
+                if (polyArray.id != null) {
+                  polygonCalculation.landmarkWithPolygonPoints[polyArray.id!] =
+                      coordinates;
+                  polygonCalculation.landmarkWithLatLng[polyArray.id!] =
+                      breadthCenterPoints;
+                }
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
@@ -4889,55 +5528,25 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       // Modify the color and opacity based on the selectedRoomId
                       strokeColor: Color(0xffB5CCE3),
                       consumeTapEvents: true,
-                      fillColor: Color(0xffDAE6F1),
+                      fillColor: polyArray.cubicleColor != null &&
+                          polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xffDAE6F1),
                       onTap: () {
-                        _googleMapController.moveCamera(
-                          CameraUpdate.newLatLngZoom(
-                            tools.calculateRoomCenterinLatLng(coordinates),
-                            22,
-                          ),
-                        );
-                        setState(() {
-                          tappedPolygonCoordinates=coordinates;
-                        });
-
-                        // smoothZoomAndPan(coordinates,22);
-                        setState(() {
-                          if (SingletonFunctionController
-                              .building.selectedLandmarkID !=
-                              polyArray.id &&
-                              !user.isnavigating &&
-                              !_isRoutePanelOpen) {
-                            user.reset();
-                            PathState = pathState.withValues(
-                                -1, -1, -1, -1, -1, -1, null, 0);
-                            pathMarkers.clear();
-                            PathState.path.clear();
-                            PathState.sourcePolyID = "";
-                            PathState.destinationPolyID = "";
-                            singleroute.clear(); pathCovered.clear();
-
-                            user.isnavigating = false;
-                            _isnavigationPannelOpen = false;
-                            SingletonFunctionController
-                                .building.selectedLandmarkID = polyArray.id;
-                            SingletonFunctionController.building.ignoredMarker
-                                .clear();
-                            SingletonFunctionController.building.ignoredMarker
-                                .add(polyArray.id!);
-                            _isBuildingPannelOpen = false;
-                            _isRoutePanelOpen = false;
-                            singleroute.clear(); pathCovered.clear();
-                            _isLandmarkPanelOpen = true;
-                            PathState.directions = [];
-                            interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates,'assets/entry.png',
-                                color: Colors.greenAccent);
-                          }
-                        });
+                        polygonTap(
+                            coordinates, polyArray.id!, 'assets/MapLift.png');
                       }));
                 }
               } else if (polyArray.cubicleName == "Male Washroom") {
+                List<LatLng> breadthCenterPoints =
+                polygonCalculation.calculateRectangleData(coordinates);
+                if (polyArray.id != null) {
+                  polygonCalculation.landmarkWithPolygonPoints[polyArray.id!] =
+                      coordinates;
+                  polygonCalculation.landmarkWithLatLng[polyArray.id!] =
+                      breadthCenterPoints;
+                }
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
@@ -4948,57 +5557,25 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       // Modify the color and opacity based on the selectedRoomId
                       consumeTapEvents: true,
                       strokeColor: Color(0xff6EBCF7),
-                      fillColor: Color(0xFFE7F4FE),
+                      fillColor: polyArray.cubicleColor != null &&
+                          polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xFFE7F4FE),
                       onTap: () {
-                        // _googleMapController.moveCamera(
-                        //   CameraUpdate.newLatLngZoom(
-                        //     tools.calculateRoomCenterinLatLng(coordinates),
-                        //     22,
-                        //   ),
-                        // );
-                        setState(() {
-                          tappedPolygonCoordinates=coordinates;
-                        });
-
-                        moveCameraSmoothly(controller: _googleMapController, targetPosition:  CameraPosition(
-                            target: tools.calculateRoomCenterinLatLng(coordinates),zoom:22), currTarget: LatLng(user.lat,user.lng));
-                        // smoothZoomAndPan(coordinates,22);
-                        setState(() {
-                          if (SingletonFunctionController
-                              .building.selectedLandmarkID !=
-                              polyArray.id &&
-                              !user.isnavigating &&
-                              !_isRoutePanelOpen) {
-                            user.reset();
-                            PathState = pathState.withValues(
-                                -1, -1, -1, -1, -1, -1, null, 0);
-                            pathMarkers.clear();
-                            PathState.path.clear();
-                            PathState.sourcePolyID = "";
-                            PathState.destinationPolyID = "";
-                            singleroute.clear(); pathCovered.clear();
-
-                            user.isnavigating = false;
-                            _isnavigationPannelOpen = false;
-                            SingletonFunctionController
-                                .building.selectedLandmarkID = polyArray.id;
-                            SingletonFunctionController.building.ignoredMarker
-                                .clear();
-                            SingletonFunctionController.building.ignoredMarker
-                                .add(polyArray.id!);
-                            _isBuildingPannelOpen = false;
-                            _isRoutePanelOpen = false;
-                            singleroute.clear(); pathCovered.clear();
-                            _isLandmarkPanelOpen = true;
-                            PathState.directions = [];
-                            interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates,'assets/Generic Marker.png',
-                                color: Colors.white);
-                          }
-                        });
+                        polygonTap(coordinates, polyArray.id!,
+                            "assets/MapMaleWashroom.png");
                       }));
                 }
               } else if (polyArray.cubicleName == "Female Washroom") {
+                List<LatLng> breadthCenterPoints =
+                polygonCalculation.calculateRectangleData(coordinates);
+                if (polyArray.id != null) {
+                  polygonCalculation.landmarkWithPolygonPoints[polyArray.id!] =
+                      coordinates;
+                  polygonCalculation.landmarkWithLatLng[polyArray.id!] =
+                      breadthCenterPoints;
+                }
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
@@ -5009,60 +5586,92 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       // Modify the color and opacity based on the selectedRoomId
                       consumeTapEvents: true,
                       strokeColor: Color(0xff6EBCF7),
-                      fillColor: Color(0xFFE7F4FE),
+                      fillColor: polyArray.cubicleColor != null &&
+                          polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xFFE7F4FE),
                       onTap: () {
-                        // _googleMapController.moveCamera(
-                        //   CameraUpdate.newLatLngZoom(
-                        //     tools.calculateRoomCenterinLatLng(coordinates),
-                        //     22,
-                        //   ),
-                        // );
-                        setState(() {
-                          tappedPolygonCoordinates=coordinates;
-                        });
-
-
-                        moveCameraSmoothly(controller: _googleMapController, targetPosition:  CameraPosition(
-                            target: tools.calculateRoomCenterinLatLng(coordinates),zoom:22), currTarget: LatLng(user.lat,user.lng));
-                        // smoothZoomAndPan(coordinates,22);
-                        setState(() {
-                          if (SingletonFunctionController
-                              .building.selectedLandmarkID !=
-                              polyArray.id &&
-                              !user.isnavigating &&
-                              !_isRoutePanelOpen) {
-                            user.reset();
-                            PathState = pathState.withValues(
-                                -1, -1, -1, -1, -1, -1, null, 0);
-                            pathMarkers.clear();
-                            PathState.path.clear();
-                            PathState.sourcePolyID = "";
-                            PathState.destinationPolyID = "";
-                            singleroute.clear(); pathCovered.clear();
-
-                            user.isnavigating = false;
-                            _isnavigationPannelOpen = false;
-                            SingletonFunctionController
-                                .building.selectedLandmarkID = polyArray.id;
-                            SingletonFunctionController.building.ignoredMarker
-                                .clear();
-                            SingletonFunctionController.building.ignoredMarker
-                                .add(polyArray.id!);
-                            _isBuildingPannelOpen = false;
-                            _isRoutePanelOpen = false;
-                            singleroute.clear(); pathCovered.clear();
-                            _isLandmarkPanelOpen = true;
-                            PathState.directions = [];
-                            interBuildingPath.clear();
-                            addselectedRoomMarker(coordinates,'assets/Generic Marker.png',
-                                color: Colors.white);
-                          }
-                        });
+                        polygonTap(coordinates, polyArray.id!,
+                            "assets/MapFemaleWashroom.png");
+                      }));
+                }
+              } else if (polyArray.cubicleName?.toLowerCase() == "booth") {
+                List<LatLng> breadthCenterPoints =
+                polygonCalculation.calculateRectangleData(coordinates);
+                if (polyArray.id != null) {
+                  polygonCalculation.landmarkWithPolygonPoints[polyArray.id!] =
+                      coordinates;
+                  polygonCalculation.landmarkWithLatLng[polyArray.id!] =
+                      breadthCenterPoints;
+                }
+                if (coordinates.length > 2) {
+                  coordinates.add(coordinates.first);
+                  String assetPath =
+                  polyArray.name!.toLowerCase().contains('office')
+                      ? 'assets/Office.png'
+                      : 'assets/Generic Marker.png';
+                  closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
+                      consumeTapEvents: true,
+                      strokeColor: Color(0xffA38F9F),
+                      fillColor: polyArray.cubicleColor != null &&
+                          polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xffE8E3E7),
+                      onTap: () {
+                        polygonTap(coordinates, polyArray.id!, assetPath);
+                      }));
+                }
+              } else if (polyArray.cubicleName?.toLowerCase() ==
+                  "Registration Counter") {
+                List<LatLng> breadthCenterPoints =
+                polygonCalculation.calculateRectangleData(coordinates);
+                if (polyArray.id != null) {
+                  polygonCalculation.landmarkWithPolygonPoints[polyArray.id!] =
+                      coordinates;
+                  polygonCalculation.landmarkWithLatLng[polyArray.id!] =
+                      breadthCenterPoints;
+                }
+                if (coordinates.length > 2) {
+                  coordinates.add(coordinates.first);
+                  String assetPath =
+                  polyArray.name!.toLowerCase().contains('office')
+                      ? 'assets/Office.png'
+                      : 'assets/Generic Marker.png';
+                  closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
+                      polygonId: PolygonId(
+                          "${value.polyline!.buildingID!} Cubicle ${polyArray.id!}"),
+                      points: coordinates,
+                      strokeWidth: 1,
+                      // Modify the color and opacity based on the selectedRoomId
+                      consumeTapEvents: true,
+                      strokeColor: Color(0xffA38F9F),
+                      fillColor: polyArray.cubicleColor != null &&
+                          polyArray.cubicleColor != "undefined"
+                          ? Color(int.parse(
+                          '0xFF${(polyArray.cubicleColor)!.replaceAll('#', '')}'))
+                          : Color(0xffE8E3E7),
+                      onTap: () {
+                        polygonTap(coordinates, polyArray.id!, assetPath);
                       }));
                 }
               } else if (polyArray.cubicleName!
                   .toLowerCase()
                   .contains("fire")) {
+                List<LatLng> breadthCenterPoints =
+                polygonCalculation.calculateRectangleData(coordinates);
+                if (polyArray.id != null) {
+                  polygonCalculation.landmarkWithPolygonPoints[polyArray.id!] =
+                      coordinates;
+                  polygonCalculation.landmarkWithLatLng[polyArray.id!] =
+                      breadthCenterPoints;
+                }
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
@@ -5083,6 +5692,14 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               } else if (polyArray.cubicleName!
                   .toLowerCase()
                   .contains("water")) {
+                List<LatLng> breadthCenterPoints =
+                polygonCalculation.calculateRectangleData(coordinates);
+                if (polyArray.id != null) {
+                  polygonCalculation.landmarkWithPolygonPoints[polyArray.id!] =
+                      coordinates;
+                  polygonCalculation.landmarkWithLatLng[polyArray.id!] =
+                      breadthCenterPoints;
+                }
                 if (coordinates.length > 2) {
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
@@ -5111,7 +5728,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       points: coordinates,
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
-
                       strokeColor: Color(0xffC0C0C0),
                       fillColor: polyArray.cubicleColor != null &&
                           polyArray.cubicleColor != "undefined"
@@ -5147,7 +5763,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       points: coordinates,
                       strokeWidth: 1,
                       // Modify the color and opacity based on the selectedRoomId
-
                       strokeColor: Color(0xffcccccc),
                       fillColor: polyArray.cubicleColor != null &&
                           polyArray.cubicleColor != "undefined"
@@ -5158,6 +5773,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 }
               } else {
                 if (coordinates.length > 2) {
+                  String assetPath =
+                  polyArray.name!.toLowerCase().contains('office')
+                      ? 'assets/MapStage.png'
+                      : 'assets/Generic Marker.png';
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
                     polygonId: PolygonId(
@@ -5165,7 +5784,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                     points: coordinates,
                     strokeWidth: 1,
                     strokeColor: Color(0xffD3D3D3),
-                    onTap: () {},
+                    onTap: () {
+                      polygonTap(coordinates, polyArray.id!, assetPath);
+                    },
                     fillColor: polyArray.cubicleColor != null &&
                         polyArray.cubicleColor != "undefined"
                         ? Color(int.parse(
@@ -5204,8 +5825,46 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                   width: 1,
                   onTap: () {}));
             }
+          } else if (polyArray.visibilityType == "visible" &&
+              polyArray.polygonType == "Waypoints") {
+            dottedPath.putIfAbsent(value.polyline!.buildingID!, () => Set());
+            List<LatLng> coordinates = [];
+            for (Nodes node in polyArray.nodes!) {
+              coordinates.add(LatLng(node.lat!, node.lon!));
+              // coordinates.add(LatLng(
+              //     tools.localtoglobal(
+              //         node.coordx!,
+              //         node.coordy!,
+              //         SingletonFunctionController
+              //             .building.patchData[value.polyline!.buildingID])[0],
+              //     tools.localtoglobal(
+              //         node.coordx!,
+              //         node.coordy!,
+              //         SingletonFunctionController
+              //             .building.patchData[value.polyline!.buildingID])[1]));
+            }
+            dottedPath[value.polyline!.buildingID!]!.add(gmap.Polyline(
+                polylineId: PolylineId(
+                    "${value.polyline!.buildingID!} Line ${polyArray.id!}"),
+                points: coordinates,
+                color: Color(0xfffa9b9c9),
+                width: 1,
+                patterns: [
+                  gmap.PatternItem.dash(
+                      Platform.isIOS ? 2 : 10), // length of each dash
+                  gmap.PatternItem.gap(
+                      Platform.isIOS ? 1 : 6), // gap between dashes
+                ]));
+            // double distanceInMeter = tools.calculateAerialDist(coordinates.first.latitude, coordinates.first.longitude, coordinates.last.latitude, coordinates.last.longitude);
+            // if(distanceInMeter>5 && polyArray.name != null && polyArray.name != "undefined") {
+            //   roadPointMarkerList.add(RoadInfo(positionFirst: coordinates.first,
+            //       positionSecond: coordinates.last,
+            //       roadName: polyArray.name!)
+            //   );
+            // }
           }
         }
+        // addRoadMarker();
       }
     });
 
@@ -5213,20 +5872,102 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     return;
   }
 
+  // void addRoadMarker(){
+  //   print("roadPointMarkerList${roadPointMarkerList.length}");
+  //   roadPointMarkerList.forEach((element) async {
+  //     LatLng first = element.positionFirst;
+  //     LatLng last = element.positionSecond;
+  //
+  //     double distanceInMeter = tools.calculateAerialDist(first.latitude, first.longitude, last.latitude, last.longitude);
+  //     if(distanceInMeter>30) {
+  //       LatLng midpoint = LatLng(
+  //         (first.latitude + last.latitude) / 2,
+  //         (first.longitude + last.longitude) / 2,
+  //       );
+  //
+  //       var result = await HelperClass().bitmapDescriptorFromOutDoorRoads(element.roadName??"", null,fontSizee: 40);
+  //       double rotation = getRotationFromLatLng(first, last);
+  //
+  //       MGMarkers.add(
+  //           Marker(
+  //               markerId: MarkerId("test${midpoint}"),
+  //               position: midpoint,
+  //               icon: result.icon,
+  //               anchor: result.anchor,
+  //               flat: true,
+  //               rotation: rotation-270,
+  //               infoWindow: InfoWindow(
+  //                   title: midpoint.toString(),
+  //                   // snippet: '${landmarks[i].properties!.polyId}',
+  //                   // Replace with additional information
+  //                   onTap: () {}
+  //               )
+  //           )
+  //       );
+  //     }
+  //   });
+  // }
+  Set<Marker> MGMarkers = Set();
+  void addRoadMarker() {
+    // print("roadPointMarkerList${roadPointMarkerList.length}");
+    // roadPointMarkerList.forEach((element) async {
+    //   LatLng first = element.positionFirst;
+    //   LatLng last = element.positionSecond;
+    //
+    //   double distanceInMeter = tools.calculateAerialDist(first.latitude, first.longitude, last.latitude, last.longitude);
+    //   if(distanceInMeter>30) {
+    //     LatLng midpoint = LatLng(
+    //       (first.latitude + last.latitude) / 2,
+    //       (first.longitude + last.longitude) / 2,
+    //     );
+    //
+    //     var result = await HelperClass().bitmapDescriptorFromOutDoorRoads(element.roadName??"", null,fontSizee: 40);
+    //     double rotation = getRotationFromLatLng(first, last);
+    //
+    //     MGMarkers.add(
+    //         Marker(
+    //             markerId: MarkerId("test${midpoint}"),
+    //             position: midpoint,
+    //             icon: result.icon,
+    //             anchor: result.anchor,
+    //             flat: true,
+    //             rotation: rotation-270,
+    //             infoWindow: InfoWindow(
+    //                 title: midpoint.toString(),
+    //                 // snippet: '${landmarks[i].properties!.polyId}',
+    //                 // Replace with additional information
+    //                 onTap: () {}
+    //             )
+    //         )
+    //     );
+    //   }
+    // });
+  }
+  double getRotationFromLatLng(LatLng start, LatLng end) {
+    return Geolocator.bearingBetween(
+      start.latitude,
+      start.longitude,
+      end.latitude,
+      end.longitude,
+    );
+  }
 
   Future<Uint8List> getImagesFromMarker(String path, int width) async {
-    ByteData data = await rootBundle.load(path);
-    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
-        targetHeight: width);
-    ui.FrameInfo frameInfo = await codec.getNextFrame();
-    return (await frameInfo.image.toByteData(format: ui.ImageByteFormat.png))!
-        .buffer
-        .asUint8List();
+    if (kIsWeb) {
+      width = 45;
+    }
+    final data = await rootBundle.load(path);
+    final image = img.decodeImage(data.buffer.asUint8List());
+    final resized = img.copyResize(image!, width: width);
+    return Uint8List.fromList(img.encodePng(resized));
   }
 
   Future<BitmapDescriptor> bitmapDescriptorFromTextAndImage(
       String text, String? imagePath,
       {Size imageSize = const Size(50, 50), Color? color}) async {
+    if (kIsWeb) {
+      imageSize = Size(45, 45);
+    }
     // Set the text style and layout
     final TextPainter textPainter = TextPainter(
       textDirection: TextDirection.ltr,
@@ -5235,8 +5976,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       text: text,
       style: TextStyle(
         fontWeight: FontWeight.w600,
-        fontSize: 30.0, // Increased font size
-        color: color??Color(0xff000000),
+        fontSize: kIsWeb ? 12.0 : 30.0, // Increased font size
+        color: color ?? Color(0xff000000),
       ),
     );
     textPainter.layout(
@@ -5249,8 +5990,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     final double textHeight = textPainter.height;
 
     // Variables for canvas size, depending on whether the image is used
-    double canvasWidth = textWidth > imageSize.width ? textWidth : imageSize.width;
-    double canvasHeight = textHeight + (imagePath != null ? imageSize.height + 20.0 : 0.0); // Increased padding if image is present
+    double canvasWidth =
+    textWidth > imageSize.width ? textWidth : imageSize.width;
+    double canvasHeight = textHeight +
+        (imagePath != null
+            ? imageSize.height + 20.0
+            : 0.0); // Increased padding if image is present
 
     final PictureRecorder pictureRecorder = PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
@@ -5268,7 +6013,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           baseImageBytes.buffer.asUint8List(),
           targetWidth: imageSize.width.toInt(),
           targetHeight: imageSize.height.toInt());
-      final ui.FrameInfo markerImageFrame = await markerImageCodec.getNextFrame();
+      final ui.FrameInfo markerImageFrame =
+      await markerImageCodec.getNextFrame();
       final ui.Image markerImage = markerImageFrame.image;
 
       // Draw the base marker image below the text
@@ -5290,675 +6036,326 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     return BitmapDescriptor.fromBytes(pngBytes!);
   }
 
+  Set<Marker> outDoorMarkers = {};
+  List<Landmarks> _landmarks = [];
+  double _lastZoom = 14;
+  Set<Marker> doorMarkers = {};
 
-  void createMarkers(land _landData, int floor, {String? bid}) async {
+  Set<Marker> roomNameMarkers = {};
+  Map<String, List<LatLng>> listOfCoordinates = Map();
+
+  void createMarkers(land _landData, int floor, String bid,{bool forced = false}) async {
+    print("runcreateMarkers ${floor} ${_landData.landmarks?.length} ${bid} ${StackTrace.current}");
+    // if (clustringOFF) {
+    //   print("clustring is off");
+    //   return;
+    // }
+    doorMarkers.clear();
     _markers.clear();
-    _markerLocationsMap.clear();
-    _markerLocationsMapLanName.clear();
-    Markers.removeWhere((marker) => marker.markerId.value
-        .contains(bid ?? buildingAllApi.selectedBuildingID));
+
+    print("first");
+    print("_landmarks ${_landmarks.length}");
+    print("landmarkMarkers ${landmarkMarkers.length}");
+
     List<Landmarks> landmarks = _landData.landmarks!;
-    try {
-      for (int i = 0; i < landmarks.length; i++) {
-        if (landmarks[i].floor == floor &&
-            landmarks[i].buildingID ==
-                (bid ?? buildingAllApi.selectedBuildingID)) {
-          if (landmarks[i].element!.type == "Rooms" &&
-              landmarks[i].element!.subType == "Classroom" &&
-              landmarks[i].coordinateX != null &&
-              !landmarks[i].wasPolyIdNull!) {
-            BitmapDescriptor textMarker;
-            if(landmarks[i].priority! >1){
-              String markerText;
-              List<String> parts = landmarks[i].name!.split('-');
-              markerText = parts.isNotEmpty ? parts[0].trim() : '';
-              textMarker = await bitmapDescriptorFromTextAndImage(
-                  markerText, 'assets/Classroom.png',imageSize: const Size(95, 95),color: Color(0xff544551));
-            }else{
-              final Uint8List iconMarker =
-              await getImagesFromMarker('assets/Classroom.png', 85);
-              textMarker = BitmapDescriptor.fromBytes(iconMarker);
-            }
-
-            List<double> value = tools.localtoglobal(
-                landmarks[i].coordinateX!,
-                landmarks[i].coordinateY!,
-                SingletonFunctionController.building
-                    .patchData[bid ?? buildingAllApi.getStoredString()]);
-
-            Markers.add(Marker(
-                markerId: MarkerId(
-                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
-                position: LatLng(value[0], value[1]),
-                icon: textMarker,
-                anchor: Offset(0.5, 1.0),
-                visible: false,
-                onTap: () {},
-                infoWindow: InfoWindow(
-                    title: landmarks[i].name,
-                    // snippet: '${landmarks[i].properties!.polyId}',
-                    // Replace with additional information
-                    onTap: () {})));
-          }else if (landmarks[i].element!.type == "Rooms" &&
-              landmarks[i].element!.subType == "Cafeteria" &&
-              landmarks[i].coordinateX != null &&
-              !landmarks[i].wasPolyIdNull!) {
-            BitmapDescriptor textMarker;
-            if(landmarks[i].priority! >1){
-              String markerText;
-              List<String> parts = landmarks[i].name!.split('-');
-              markerText = parts.isNotEmpty ? parts[0].trim() : '';
-              textMarker = await bitmapDescriptorFromTextAndImage(
-                  markerText, 'assets/cutlery.png',imageSize: const Size(95, 95),color: Color(0xfffb8c00));
-            }else{
-              final Uint8List iconMarker =
-              await getImagesFromMarker('assets/cutlery.png', 85);
-              textMarker = BitmapDescriptor.fromBytes(iconMarker);
-            }
-
-            List<double> value = tools.localtoglobal(
-                landmarks[i].coordinateX!,
-                landmarks[i].coordinateY!,
-                SingletonFunctionController.building
-                    .patchData[bid ?? buildingAllApi.getStoredString()]);
-
-            Markers.add(Marker(
-                markerId: MarkerId(
-                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
-                position: LatLng(value[0], value[1]),
-                icon: textMarker,
-                anchor: Offset(0.5, 1.0),
-                visible: false,
-                onTap: () {},
-                infoWindow: InfoWindow(
-                    title: landmarks[i].name,
-                    // snippet: '${landmarks[i].properties!.polyId}',
-                    // Replace with additional information
-                    onTap: () {})));
-          }else if (landmarks[i].element!.type == "Rooms" &&
-              landmarks[i].element!.subType == "Point of Interest" &&
-              landmarks[i].coordinateX != null &&
-              !landmarks[i].wasPolyIdNull!) {
-            // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            //   ImageConfiguration(size: Size(44, 44)),
-            //   getImagesFromMarker('assets/location_on.png',50),
-            // );
-
-            BitmapDescriptor textMarker;
-            String markerText;
-            markerText = landmarks[i].name??"";
-            textMarker = await bitmapDescriptorFromTextAndImage(
-                markerText,null,imageSize: const Size(85, 85));
-
-
-            List<double> value = tools.localtoglobal(
-                landmarks[i].coordinateX!,
-                landmarks[i].coordinateY!,
-                SingletonFunctionController.building
-                    .patchData[bid ?? buildingAllApi.getStoredString()]);
-
-
-            Markers.add(Marker(
-                markerId: MarkerId(
-                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID}"),
-                position: LatLng(value[0], value[1]),
-                icon: textMarker,
-                anchor: Offset(0.5, 1.0),
-                visible: false,
-                onTap: () {},
-                infoWindow: InfoWindow(
-                    title: landmarks[i].name,
-                    // snippet: '${landmarks[i].properties!.polyId}',
-                    // Replace with additional information
-                    onTap: () {})));
-          }else if (landmarks[i].element!.type == "Rooms" &&
-              landmarks[i].element!.subType == "Counter" &&
-              landmarks[i].coordinateX != null &&
-              !landmarks[i].wasPolyIdNull!) {
-            // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            //   ImageConfiguration(size: Size(44, 44)),
-            //   getImagesFromMarker('assets/location_on.png',50),
-            // );
-
-            BitmapDescriptor textMarker;
-            String markerText;
-            markerText = landmarks[i].name??"";
-            textMarker = await bitmapDescriptorFromTextAndImage(
-                markerText,null,imageSize: const Size(85, 85));
-
-
-            List<double> value = tools.localtoglobal(
-                landmarks[i].coordinateX!,
-                landmarks[i].coordinateY!,
-                SingletonFunctionController.building
-                    .patchData[bid ?? buildingAllApi.getStoredString()]);
-
-
-            Markers.add(Marker(
-                markerId: MarkerId(
-                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID}"),
-                position: LatLng(value[0], value[1]),
-                icon: textMarker,
-                anchor: Offset(0.5, 1.0),
-                visible: false,
-                onTap: () {},
-                infoWindow: InfoWindow(
-                    title: landmarks[i].name,
-                    // snippet: '${landmarks[i].properties!.polyId}',
-                    // Replace with additional information
-                    onTap: () {})));
-          }else if (landmarks[i].element!.type == "Rooms" &&
-              landmarks[i].element!.subType == "Point of Interest" &&
-              landmarks[i].coordinateX != null &&
-              !landmarks[i].wasPolyIdNull!) {
-            // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            //   ImageConfiguration(size: Size(44, 44)),
-            //   getImagesFromMarker('assets/location_on.png',50),
-            // );
-
-            BitmapDescriptor textMarker;
-            String markerText;
-            markerText = landmarks[i].name??"";
-            textMarker = await bitmapDescriptorFromTextAndImage(
-                markerText,null,imageSize: const Size(85, 85));
-
-
-            List<double> value = tools.localtoglobal(
-                landmarks[i].coordinateX!,
-                landmarks[i].coordinateY!,
-                SingletonFunctionController.building
-                    .patchData[bid ?? buildingAllApi.getStoredString()]);
-
-
-            Markers.add(Marker(
-                markerId: MarkerId(
-                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID}"),
-                position: LatLng(value[0], value[1]),
-                icon: textMarker,
-                anchor: Offset(0.5, 1.0),
-                visible: false,
-                onTap: () {},
-                infoWindow: InfoWindow(
-                    title: landmarks[i].name,
-                    // snippet: '${landmarks[i].properties!.polyId}',
-                    // Replace with additional information
-                    onTap: () {})));
-          }else if (landmarks[i].element!.type == "Rooms" &&
-              landmarks[i].element!.subType == "ATM" &&
-              landmarks[i].coordinateX != null &&
-              !landmarks[i].wasPolyIdNull!) {
-            // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            //   ImageConfiguration(size: Size(44, 44)),
-            //   getImagesFromMarker('assets/location_on.png',50),
-            // );
-
-            BitmapDescriptor textMarker;
-            if(landmarks[i].priority! >1){
-              String markerText;
-              List<String> parts = landmarks[i].name!.split('-');
-              markerText = parts.isNotEmpty ? parts[0].trim() : '';
-              textMarker = await bitmapDescriptorFromTextAndImage(
-                  markerText, 'assets/ATM.png',imageSize: const Size(100, 100),color: Color(0xffd32f2f));
-            }else{
-              final Uint8List iconMarker =
-              await getImagesFromMarker('assets/ATM.png', 100);
-              textMarker = BitmapDescriptor.fromBytes(iconMarker);
-            }
-
-            List<double> value = tools.localtoglobal(
-                landmarks[i].coordinateX!,
-                landmarks[i].coordinateY!,
-                SingletonFunctionController.building
-                    .patchData[bid ?? buildingAllApi.getStoredString()]);
-
-
-            Markers.add(Marker(
-                markerId: MarkerId(
-                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
-                position: LatLng(value[0], value[1]),
-                icon: textMarker,
-                anchor: Offset(0.5, 1.0),
-                visible: false,
-                onTap: () {},
-                infoWindow: InfoWindow(
-                    title: landmarks[i].name,
-                    // snippet: '${landmarks[i].properties!.polyId}',
-                    // Replace with additional information
-                    onTap: () {})));
-          }else if (landmarks[i].element!.type == "Rooms" &&
-              landmarks[i].element!.subType == "Consultation Room" &&
-              landmarks[i].coordinateX != null &&
-              !landmarks[i].wasPolyIdNull!) {
-            // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            //   ImageConfiguration(size: Size(44, 44)),
-            //   getImagesFromMarker('assets/location_on.png',50),
-            // );
-
-            BitmapDescriptor textMarker;
-            if(landmarks[i].priority! >1){
-              String markerText;
-              List<String> parts = landmarks[i].name!.split('-');
-              markerText = parts.isNotEmpty ? parts[0].trim() : '';
-              textMarker = await bitmapDescriptorFromTextAndImage(
-                  markerText, 'assets/Consultation Room.png',imageSize: const Size(85, 85),color: Color(0xff544551));
-            }else{
-              final Uint8List iconMarker =
-              await getImagesFromMarker('assets/Consultation Room.png', 85);
-              textMarker = BitmapDescriptor.fromBytes(iconMarker);
-            }
-
-            List<double> value = tools.localtoglobal(
-                landmarks[i].coordinateX!,
-                landmarks[i].coordinateY!,
-                SingletonFunctionController.building
-                    .patchData[bid ?? buildingAllApi.getStoredString()]);
-
-
-            Markers.add(Marker(
-                markerId: MarkerId(
-                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
-                position: LatLng(value[0], value[1]),
-                icon: textMarker,
-                anchor: Offset(0.5, 1.0),
-                visible: false,
-                onTap: () {},
-                infoWindow: InfoWindow(
-                    title: landmarks[i].name,
-                    // snippet: '${landmarks[i].properties!.polyId}',
-                    // Replace with additional information
-                    onTap: () {})));
-          }else if (landmarks[i].element!.type == "Rooms" &&
-              landmarks[i].element!.subType == "Office" &&
-              landmarks[i].coordinateX != null &&
-              !landmarks[i].wasPolyIdNull!) {
-            // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            //   ImageConfiguration(size: Size(44, 44)),
-            //   getImagesFromMarker('assets/location_on.png',50),
-            // );
-
-            BitmapDescriptor textMarker;
-            if(landmarks[i].priority! >1){
-              String markerText;
-              List<String> parts = landmarks[i].name!.split('-');
-              markerText = parts.isNotEmpty ? parts[0].trim() : '';
-              textMarker = await bitmapDescriptorFromTextAndImage(
-                  markerText, 'assets/Office.png',imageSize: const Size(85, 85),color: Color(0xff544551));
-            }else{
-              final Uint8List iconMarker =
-              await getImagesFromMarker('assets/Office.png', 85);
-              textMarker = BitmapDescriptor.fromBytes(iconMarker);
-            }
-
-            List<double> value = tools.localtoglobal(
-                landmarks[i].coordinateX!,
-                landmarks[i].coordinateY!,
-                SingletonFunctionController.building
-                    .patchData[bid ?? buildingAllApi.getStoredString()]);
-
-            Markers.add(Marker(
-                markerId: MarkerId(
-                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
-                position: LatLng(value[0], value[1]),
-                icon: textMarker,
-                anchor: Offset(0.5, 1.0),
-                visible: false,
-                onTap: () {},
-                infoWindow: InfoWindow(
-                    title: landmarks[i].name,
-                    // snippet: '${landmarks[i].properties!.polyId}',
-                    // Replace with additional information
-                    onTap: () {})));
-          } else if (landmarks[i].element!.type == "Rooms" &&
-              landmarks[i].element!.subType != "main entry" &&
-              landmarks[i].coordinateX != null &&
-              !landmarks[i].wasPolyIdNull!) {
-            // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            //   ImageConfiguration(size: Size(44, 44)),
-            //   getImagesFromMarker('assets/location_on.png',50),
-            // );
-
-            BitmapDescriptor textMarker;
-            if(landmarks[i].priority! >1){
-              String markerText;
-              List<String> parts = landmarks[i].name!.split('-');
-              markerText = parts.isNotEmpty ? parts[0].trim() : '';
-              textMarker = await bitmapDescriptorFromTextAndImage(
-                  markerText, 'assets/Generic Marker.png',imageSize: const Size(85, 85));
-            }else{
-              final Uint8List iconMarker =
-              await getImagesFromMarker('assets/Generic Marker.png', 85);
-              textMarker = BitmapDescriptor.fromBytes(iconMarker);
-            }
-
-            List<double> value = tools.localtoglobal(
-                landmarks[i].coordinateX!,
-                landmarks[i].coordinateY!,
-                SingletonFunctionController.building
-                    .patchData[bid ?? buildingAllApi.getStoredString()]);
-
-            Markers.add(Marker(
-                markerId: MarkerId(
-                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID} " + (landmarks[i].priority! > 1 ? "toppriority" : "")),
-                position: LatLng(value[0], value[1]),
-                icon: textMarker,
-                anchor: Offset(0.5, 1.0),
-                visible: false,
-                onTap: () {},
-                infoWindow: InfoWindow(
-                    title: landmarks[i].name,
-                    // snippet: '${landmarks[i].properties!.polyId}',
-                    // Replace with additional information
-                    onTap: () {})));
-          } else if (landmarks[i].element!.subType != null &&
-              landmarks[i].element!.subType == "room door" &&
-              landmarks[i].doorX != null) {
-            final Uint8List iconMarker =
-            await getImagesFromMarker('assets/dooricon.png', 45);
-            setState(() {
-              List<double> value = tools.localtoglobal(
-                  landmarks[i].coordinateX!,
-                  landmarks[i].coordinateY!,
-                  SingletonFunctionController.building
-                      .patchData[bid ?? buildingAllApi.getStoredString()]);
-              Markers.add(Marker(
-                  markerId: MarkerId(
-                      "Door ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID}"),
-                  position: LatLng(value[0], value[1]),
-                  icon: BitmapDescriptor.fromBytes(iconMarker),
-                  visible: false,
-                  infoWindow: InfoWindow(
-                    title: landmarks[i].name,
-                    // snippet: 'Additional Information',
-                    // Replace with additional information
-                    onTap: () {
-                      if (SingletonFunctionController
-                          .building.selectedLandmarkID !=
-                          landmarks[i].properties!.polyId) {
-                        SingletonFunctionController
-                            .building.selectedLandmarkID =
-                            landmarks[i].properties!.polyId;
-                        _isRoutePanelOpen = false;
-                        singleroute.clear(); pathCovered.clear();
-                        //realWorldPath.clear();
-                        _isLandmarkPanelOpen = true;
-                        addselectedMarker(LatLng(value[0], value[1]));
-                      }
-                    },
-                  )));
-            });
-          } else if (landmarks[i].name != null &&
-              landmarks[i].element!.type == ("FloorConnection") &&
-              landmarks[i].element!.subType == "lift") {
-            final Uint8List iconMarker =
-            await getImagesFromMarker('assets/entry.png', 75);
-
-            setState(() {
-              List<double> value = tools.localtoglobal(
-                  landmarks[i].coordinateX!,
-                  landmarks[i].coordinateY!,
-                  SingletonFunctionController.building
-                      .patchData[bid ?? buildingAllApi.getStoredString()]);
-
-              // _markerLocations[LatLng(value[0], value[1])] = '1';
-              mapMarkerLocationMapAndName.add(InitMarkerModel(
-                  'Lift',
-                  landmarks[i].name!,
-                  LatLng(value[0], value[1]),
-                  landmarks[i].buildingID!));
-              _markerLocationsMap[LatLng(value[0], value[1])] = 'Lift';
-              _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-              landmarks[i].name!;
-              _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] =
-              landmarks[i].buildingID!;
-            });
-          } else if (landmarks[i].name != null &&
-              landmarks[i].name!.toLowerCase().contains("pharmacy")) {
-            setState(() {
-              List<double> value = tools.localtoglobal(
-                  landmarks[i].coordinateX!,
-                  landmarks[i].coordinateY!,
-                  SingletonFunctionController.building
-                      .patchData[bid ?? buildingAllApi.getStoredString()]);
-              mapMarkerLocationMapAndName.add(InitMarkerModel(
-                  'Pharmacy',
-                  landmarks[i].name!,
-                  LatLng(value[0], value[1]),
-                  landmarks[i].buildingID!));
-
-              _markerLocationsMap[LatLng(value[0], value[1])] = 'Pharmacy';
-              _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-              landmarks[i].name!;
-              _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] =
-              landmarks[i].buildingID!;
-            });
-          }
-          // else if (landmarks[i].name != null &&
-          //     landmarks[i].name!.toLowerCase().contains("kitchen")) {
-          //
-          //   setState(() {
-          //     List<double> value = tools.localtoglobal(
-          //         landmarks[i].coordinateX!, landmarks[i].coordinateY!,
-          //         SingletonFunctionController.building.patchData[bid ?? buildingAllApi.getStoredString()]);
-          //     _markerLocationsMap[LatLng(value[0], value[1])] = 'Kitchen';
-          //     _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-          //     landmarks[i].name!;
-          //   });
-          // }
-          else if (landmarks[i].properties!.washroomType != null &&
-              landmarks[i].properties!.washroomType == "Male") {
-            final Uint8List iconMarker =
-            await getImagesFromMarker('assets/6.png', 65);
-            setState(() {
-              List<double> value = tools.localtoglobal(
-                  landmarks[i].coordinateX!,
-                  landmarks[i].coordinateY!,
-                  SingletonFunctionController.building
-                      .patchData[bid ?? buildingAllApi.getStoredString()]);
-              mapMarkerLocationMapAndName.add(InitMarkerModel(
-                  'Male',
-                  landmarks[i].name!,
-                  LatLng(value[0], value[1]),
-                  landmarks[i].buildingID!));
-
-              _markerLocationsMap[LatLng(value[0], value[1])] = 'Male';
-              _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-              landmarks[i].name!;
-              _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] =
-              landmarks[i].buildingID!;
-
-              // Markers.add(Marker(
-              //     markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
-              //     position: LatLng(value[0], value[1]),
-              //     icon: BitmapDescriptor.fromBytes(iconMarker),
-              //     visible: false,
-              //     infoWindow: InfoWindow(
-              //       title: landmarks[i].name,
-              //       snippet: 'Additional Information',
-              //       // Replace with additional information
-              //       onTap: () {
-              //         if (SingletonFunctionController.building.selectedLandmarkID !=
-              //             landmarks[i].properties!.polyId) {
-              //           SingletonFunctionController.building.selectedLandmarkID =
-              //               landmarks[i].properties!.polyId;
-              //           _isRoutePanelOpen = false;
-              //           singleroute.clear();
-              //           _isLandmarkPanelOpen = true;
-              //           addselectedMarker(LatLng(value[0], value[1]));
-              //         }
-              //       },
-              //     )));
-            });
-          } else if (landmarks[i].properties!.washroomType != null &&
-              landmarks[i].properties!.washroomType == "Female") {
-            final Uint8List iconMarker =
-            await getImagesFromMarker('assets/4.png', 65);
-
-            setState(() {
-              List<double> value = tools.localtoglobal(
-                  landmarks[i].coordinateX!,
-                  landmarks[i].coordinateY!,
-                  SingletonFunctionController.building
-                      .patchData[bid ?? buildingAllApi.getStoredString()]);
-              mapMarkerLocationMapAndName.add(InitMarkerModel(
-                  'Female',
-                  landmarks[i].name!,
-                  LatLng(value[0], value[1]),
-                  landmarks[i].buildingID!));
-
-              _markerLocationsMap[LatLng(value[0], value[1])] = 'Female';
-              _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-              landmarks[i].name!;
-              _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] =
-              landmarks[i].buildingID!;
-
-              // Markers.add(Marker(
-              //     markerId: MarkerId("Rest ${landmarks[i].properties!.polyId}"),
-              //     position: LatLng(value[0], value[1]),
-              //     icon: BitmapDescriptor.fromBytes(iconMarker),
-              //     visible: false,
-              //     infoWindow: InfoWindow(
-              //       title: landmarks[i].name,
-              //       snippet: 'Additional Information',
-              //       // Replace with additional information
-              //       onTap: () {
-              //         if (SingletonFunctionController.building.selectedLandmarkID !=
-              //             landmarks[i].properties!.polyId) {
-              //           SingletonFunctionController.building.selectedLandmarkID =
-              //               landmarks[i].properties!.polyId;
-              //           _isRoutePanelOpen = false;
-              //           singleroute.clear();
-              //           _isLandmarkPanelOpen = true;
-              //           addselectedMarker(LatLng(value[0], value[1]));
-              //         }
-              //       },
-              //     )));
-            });
-          } else if (landmarks[i].element!.subType != null &&
-              landmarks[i].element!.subType == "main entry") {
-            final Uint8List iconMarker =
-            await getImagesFromMarker('assets/1.png', 90);
-
-            setState(() {
-              List<double> value = tools.localtoglobal(
-                  landmarks[i].coordinateX!,
-                  landmarks[i].coordinateY!,
-                  SingletonFunctionController.building
-                      .patchData[bid ?? buildingAllApi.getStoredString()]);
-              // _markerLocations[LatLng(value[0], value[1])] = '1';
-              mapMarkerLocationMapAndName.add(InitMarkerModel(
-                  landmarks[i].buildingID == buildingAllApi.outdoorID
-                      ? "Campus Entry"
-                      : 'Entry',
-                  landmarks[i].name!,
-                  LatLng(value[0], value[1]),
-                  landmarks[i].buildingID!));
-
-              _markerLocationsMap[LatLng(value[0], value[1])] =
-              landmarks[i].buildingID == buildingAllApi.outdoorID
-                  ? "Campus Entry"
-                  : 'Entry';
-              _markerLocationsMapLanName[LatLng(value[0], value[1])] =
-              landmarks[i].name!;
-              _markerLocationsMapLanNameBID[LatLng(value[0], value[1])] =
-              landmarks[i].buildingID!;
-
-              // _markers!.add(Marker(
-              //   markerId: MarkerId("Entry ${landmarks[i].properties!.polyId}"),
-              //   position: LatLng(value[0], value[1]),
-              //   icon: BitmapDescriptor.fromBytes(iconMarker),
-              // ));
-
-              // Markers.add(Marker(
-              //     markerId: MarkerId("Entry ${landmarks[i].properties!.polyId}"),
-              //     position: LatLng(value[0], value[1]),
-              //     icon: BitmapDescriptor.fromBytes(iconMarker),
-              //     visible: true,
-              //     infoWindow: InfoWindow(
-              //       title: landmarks[i].name,
-              //       snippet: 'Additional Information',
-              //       // Replace with additional information
-              //       onTap: () {
-              //         if (SingletonFunctionController.building.selectedLandmarkID !=
-              //             landmarks[i].properties!.polyId) {
-              //           SingletonFunctionController.building.selectedLandmarkID =
-              //               landmarks[i].properties!.polyId;
-              //           _isRoutePanelOpen = false;
-              //           singleroute.clear();
-              //           _isLandmarkPanelOpen = true;
-              //           addselectedMarker(LatLng(value[0], value[1]));
-              //         }
-              //       },
-              //     ),
-              //     onTap: () {
-              //       if (SingletonFunctionController.building.selectedLandmarkID !=
-              //           landmarks[i].properties!.polyId) {
-              //         SingletonFunctionController.building.selectedLandmarkID =
-              //             landmarks[i].properties!.polyId;
-              //         _isRoutePanelOpen = false;
-              //         singleroute.clear();
-              //         _isLandmarkPanelOpen = true;
-              //         addselectedMarker(LatLng(value[0], value[1]));
-              //       }
-              //     }));
-            });
-          } else if (landmarks[i].element!.type == "Services" &&
-              landmarks[i].element!.subType == "kiosk" &&
-              landmarks[i].coordinateX != null) {
-            // BitmapDescriptor customMarker = await BitmapDescriptor.fromAssetImage(
-            //   ImageConfiguration(size: Size(44, 44)),
-            //   getImagesFromMarker('assets/location_on.png',50),
-            // );
-            final Uint8List iconMarker =
-            await getImagesFromMarker('assets/pin.png', 50);
-            List<double> value = tools.localtoglobal(
-                landmarks[i].coordinateX!,
-                landmarks[i].coordinateY!,
-                SingletonFunctionController.building
-                    .patchData[bid ?? buildingAllApi.getStoredString()]);
-            //_markerLocations.add(LatLng(value[0],value[1]));
-            BitmapDescriptor textMarker;
-            String markerText;
-            try {
-              if (landmarks[i].name != "kiosk") {
-                List<String> parts = landmarks[i].name!.split(' ');
-                markerText = parts.isNotEmpty ? parts[1].trim() : '';
-              } else {
-                markerText = "Kiosk";
-              }
-            } catch (e) {
-              markerText = "Kiosk";
-            }
-
-            textMarker = await bitmapDescriptorFromTextAndImage(
-                markerText, 'assets/check-in.png');
-
-            Markers.add(Marker(
-                markerId: MarkerId(
-                    "Room ${landmarks[i].properties!.polyId} ${landmarks[i].buildingID}"),
-                position: LatLng(value[0], value[1]),
-                icon: textMarker,
-                anchor: Offset(0.5, 0.5),
-                visible: false,
-                onTap: () {},
-                infoWindow: InfoWindow(
-                    title: landmarks[i].name,
-                    // snippet: '${landmarks[i].properties!.polyId}',
-                    // Replace with additional information
-                    onTap: () {})));
-          } else {}
+    if(forced){
+      landmarks.forEach((value){
+        if (value.element?.type != "FloorConnection" &&
+            value.element?.subType != "restRoom" &&
+            value.element?.subType != "AR" &&
+            value.element?.subType != "Alert" &&
+            value.element?.subType != "BP" &&
+            value.floor == 0 &&
+            value.coordinateX != null &&
+            value.coordinateY != null) {
+          _landmarks.add(value);
         }
-      }
-    } catch (e) {}
-    setState(() {
-      // Markers.add(Marker(
-      //   markerId: MarkerId("Building marker"),
-      //   position: _initialCameraPosition.target,
-      //   icon: BitmapDescriptor.defaultMarker,
-      //   visible: false,
-      // ));
-    });
+      });
+      mapClustering.landmarks = _landmarks;
+      print("create markers ended ${mapClustering.landmarks.length}");
+      landmarkMarkers = mapClustering.recalculateClusters(_lastZoom, mapState.bearing);
+      setState(() {});
+      return;
+    }
 
-    _initMarkers();
+    if(forced == false) _landmarks.removeWhere((element) => element.buildingID == bid && element.floor != floor);
+    // landmarkMarkers.removeWhere((marker) => marker.markerId.value.contains(bid));
+    print("exhistinglandmarks${_landmarks.length}");
+
+    // final result = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor("", 'assets/MapDoorDot.png', imageSize: const Size(20, 20));
+    // final iconMarker = result.icon;
+    // final anchor = result.anchor;
+    //
+    // for (int i = 0; i < landmarks.length; i++) {
+    //   print("landmarks[i].name");
+    //   print("Landmarktype - ${landmarks[i].element!.type} ${landmarks[i].element!.subType}");
+    //   print(landmarks[i].name);
+    //   if(landmarks[i].floor == floor) {
+    //     if (landmarks[i].element!.type == "Rooms" &&
+    //         landmarks[i].element!.subType == "room door") {
+    //       if (landmarks[i].doorX != null && landmarks[i].doorY != null) {
+    //         print("insidecondition");
+    //         List<double> value = tools.localtoglobal(
+    //             landmarks[i].doorX!,
+    //             landmarks[i].doorY!,
+    //             SingletonFunctionController.building.patchData[bid ??
+    //                 buildingAllApi.getStoredString()]);
+    //         doorMarkers.add(
+    //             Marker(
+    //               markerId: MarkerId("${landmarks[i].sId}"),
+    //               position: LatLng(value[0], value[1]),
+    //               icon: iconMarker,
+    //               anchor: anchor,
+    //               flat: true,
+    //               onTap: () {},
+    //             )
+    //         );
+    //       }
+    //     }
+    //   }
+    // }
+    for (int i = 0; i < landmarks.length; i++) {
+      if (landmarks[i].floor == floor && landmarks[i].buildingID ==
+          (bid ?? buildingAllApi.selectedBuildingID)) {
+        if (landmarks[i].element?.type == "Global") {
+          // CHECK FRO MAKING NEW MARKER
+
+          //FOR GLOBAL LANDMARKS (IIT DELHI - LHC,CAMPUS)
+          if (landmarks[i].element?.subType == "Male Washroom") {
+            List<double> value = tools.localtoglobal(
+                landmarks[i].coordinateX!,
+                landmarks[i].coordinateY!,
+                SingletonFunctionController.building
+                    .patchData[bid ?? buildingAllApi.getStoredString()]);
+            _landmarks.add(landmarks[i]);
+          } else if (landmarks[i].element?.subType == "Female Washroom") {
+            List<double> value = tools.localtoglobal(
+                landmarks[i].coordinateX!,
+                landmarks[i].coordinateY!,
+                SingletonFunctionController.building
+                    .patchData[bid ?? buildingAllApi.getStoredString()]);
+            _landmarks.add(landmarks[i]);
+          } else if (landmarks[i].element?.subType == "room") {
+            List<double> value = tools.localtoglobal(
+                landmarks[i].coordinateX!,
+                landmarks[i].coordinateY!,
+                SingletonFunctionController.building
+                    .patchData[bid ?? buildingAllApi.getStoredString()]);
+            _landmarks.add(landmarks[i]);
+          } else if (landmarks[i].element?.subType?.toLowerCase() == "booth") {
+            _landmarks.add(landmarks[i]);
+          } else if (landmarks[i].element?.subType == "Lift") {
+            List<double> value = tools.localtoglobal(
+                landmarks[i].coordinateX!,
+                landmarks[i].coordinateY!,
+                SingletonFunctionController.building
+                    .patchData[bid ?? buildingAllApi.getStoredString()]);
+            _landmarks.add(landmarks[i]);
+          } else if (landmarks[i].element?.subType == "Stairs") {
+            List<double> value = tools.localtoglobal(
+                landmarks[i].coordinateX!,
+                landmarks[i].coordinateY!,
+                SingletonFunctionController.building
+                    .patchData[bid ?? buildingAllApi.getStoredString()]);
+            _landmarks.add(landmarks[i]);
+          }else{
+            _landmarks.add(landmarks[i]);
+          }
+        } else if (landmarks[i].element!.type == "Rooms" &&
+            landmarks[i].element!.subType == "Classroom" &&
+            landmarks[i].coordinateX != null &&
+            !landmarks[i].wasPolyIdNull!) {
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController
+                  .building.patchData[bid ?? buildingAllApi.getStoredString()]);
+          _landmarks.add(landmarks[i]);
+        } else if (landmarks[i].element!.type == "Rooms" &&
+            landmarks[i].element!.subType == "office") {
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController
+                  .building.patchData[bid ?? buildingAllApi.getStoredString()]);
+          _landmarks.add(landmarks[i]);
+        } else if (landmarks[i].element!.type == "Rooms" &&
+            landmarks[i].element!.subType == "Cafeteria" &&
+            landmarks[i].coordinateX != null &&
+            !landmarks[i].wasPolyIdNull!) {
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController
+                  .building.patchData[bid ?? buildingAllApi.getStoredString()]);
+
+          _landmarks.add(landmarks[i]);
+        } else if (landmarks[i].name != null &&
+            landmarks[i].name!.toLowerCase().contains("pharmacy")) {
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController
+                  .building.patchData[bid ?? buildingAllApi.getStoredString()]);
+          _landmarks.add(landmarks[i]);
+        } else if (landmarks[i].element!.type == "Rooms" &&
+            landmarks[i].element!.subType == "Point of Interest" &&
+            landmarks[i].coordinateX != null &&
+            !landmarks[i].wasPolyIdNull!) {
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController
+                  .building.patchData[bid ?? buildingAllApi.getStoredString()]);
+
+          _landmarks.add(landmarks[i]);
+        } else if (landmarks[i].element!.type == "Rooms" &&
+            landmarks[i].element!.subType == "Counter" &&
+            landmarks[i].coordinateX != null) {
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController
+                  .building.patchData[bid ?? buildingAllApi.getStoredString()]);
+
+          _landmarks.add(landmarks[i]);
+        } else if (landmarks[i].element!.type == "Rooms" &&
+            landmarks[i].element!.subType == "ATM" &&
+            landmarks[i].coordinateX != null &&
+            !landmarks[i].wasPolyIdNull!) {
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController
+                  .building.patchData[bid ?? buildingAllApi.getStoredString()]);
+
+          _landmarks.add(landmarks[i]);
+        } else if (landmarks[i].element!.type == "Rooms" &&
+            landmarks[i].element!.subType == "Consultation Room" &&
+            landmarks[i].coordinateX != null &&
+            !landmarks[i].wasPolyIdNull!) {
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController
+                  .building.patchData[bid ?? buildingAllApi.getStoredString()]);
+
+          _landmarks.add(landmarks[i]);
+        } else if (landmarks[i].element!.type == "Rooms" &&
+            landmarks[i].element!.subType == "Office" &&
+            landmarks[i].coordinateX != null &&
+            !landmarks[i].wasPolyIdNull!) {
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController
+                  .building.patchData[bid ?? buildingAllApi.getStoredString()]);
+          _landmarks.add(landmarks[i]);
+        } else if (landmarks[i].element!.type == "Rooms" &&
+            landmarks[i].element!.subType == "Entrance Only" &&
+            landmarks[i].coordinateX != null) {
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController
+                  .building.patchData[bid ?? buildingAllApi.getStoredString()]);
+          _landmarks.add(landmarks[i]);
+        } else if (landmarks[i].element!.type == "Rooms" &&
+            landmarks[i].element!.subType != "main entry" &&
+            landmarks[i].element!.subType != "Entrance Only" &&
+            landmarks[i].coordinateX != null) {
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController
+                  .building.patchData[bid ?? buildingAllApi.getStoredString()]);
+
+          print("MarkerLandmarkInformation in Room");
+          try {
+            _landmarks.add(landmarks[i]);
+          } catch (e) {
+            print("MarkerLandmarkInformation error ${e}");
+          }
+        } else if (landmarks[i].element != null &&
+            landmarks[i].element!.subType != null &&
+            landmarks[i].element!.subType == "room door" &&
+            landmarks[i].doorX != null) {
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController
+                  .building.patchData[bid ?? buildingAllApi.getStoredString()]);
+          _landmarks.add(landmarks[i]);
+        } else if (landmarks[i].name != null &&
+            landmarks[i].element!.type == ("FloorConnection") &&
+            landmarks[i].element!.subType == "lift") {
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController
+                  .building.patchData[bid ?? buildingAllApi.getStoredString()]);
+
+          _landmarks.add(landmarks[i]);
+        } else if (landmarks[i].name != null &&
+            landmarks[i].element!.type == ("FloorConnection") &&
+            landmarks[i].element!.subType == "stairs") {
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController
+                  .building.patchData[bid ?? buildingAllApi.getStoredString()]);
+
+          _landmarks.add(landmarks[i]);
+        } else if (landmarks[i].properties!.washroomType != null &&
+            landmarks[i].properties!.washroomType == "Male") {
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController
+                  .building.patchData[bid ?? buildingAllApi.getStoredString()]);
+
+          _landmarks.add(landmarks[i]);
+        } else if (landmarks[i].properties!.washroomType != null &&
+            landmarks[i].properties!.washroomType == "Female") {
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController
+                  .building.patchData[bid ?? buildingAllApi.getStoredString()]);
+
+          _landmarks.add(landmarks[i]);
+        } else if (landmarks[i].element!.subType != null &&
+            landmarks[i].element!.subType == "main entry") {
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController
+                  .building.patchData[bid ?? buildingAllApi.getStoredString()]);
+
+          _landmarks.add(landmarks[i]);
+        } else if (landmarks[i].element!.type == "Services" &&
+            landmarks[i].element!.subType == "kiosk" &&
+            landmarks[i].coordinateX != null) {
+          List<double> value = tools.localtoglobal(
+              landmarks[i].coordinateX!,
+              landmarks[i].coordinateY!,
+              SingletonFunctionController
+                  .building.patchData[bid ?? buildingAllApi.getStoredString()]);
+
+          _landmarks.add(landmarks[i]);
+        } else {
+          // print("landmarks entered in else ${landmarks[i].name}");
+        }
+        // print("_markerLocationsMapLanName ${_markerLocationsMapLanName}");
+      }
+    }
+    print("After adding${_landmarks.length}");
+    // List<Landmarks> nowLandmarks = mapClustering.landmarks;
+    // nowLandmarks.addAll(_landmarks);
+    mapClustering.landmarks = _landmarks;
+    print("create markers ended ${mapClustering.landmarks.length}");
+    landmarkMarkers = mapClustering.recalculateClusters(_lastZoom, mapState.bearing);
+    setState(() {});
   }
 
   void toggleLandmarkPanel() {
@@ -5974,8 +6371,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   bool calculatingPath = false;
   double aerialDist = 0.0;
   Timer? _timerCompass;
+  bool hasPressedButton = false;
+  bool clustringOFF = false;
+  bool entryClustring = false;
   Widget landmarkdetailpannel(
       BuildContext context, AsyncSnapshot<land> snapshot) {
+
+    // print("landmarkdetailpannel stacktrace ${StackTrace.current}");
     pathMarkers.clear();
     // if(user.isnavigating==false){
     //   clearPathVariables();
@@ -5987,7 +6389,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         snapshot.data!.landmarksMap![
         SingletonFunctionController.building.selectedLandmarkID] ==
             null) {
-      print("landmark pannel got id ${SingletonFunctionController.building.selectedLandmarkID}");
+
       //
       // If the data is not available, return an empty container
       _isLandmarkPanelOpen = false;
@@ -5997,6 +6399,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       SingletonFunctionController.building.selectedLandmarkID = null;
       return Container();
     }
+
+    // print(
+    //     "landmark pannel got id ${SingletonFunctionController.building.selectedLandmarkID} ${snapshot
+    //         .data!
+    //         .landmarksMap![SingletonFunctionController
+    //         .building.selectedLandmarkID]!
+    //         .name}---${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.venueName}");
 
     if (user.initialallyLocalised) {
       double val1 = double.parse(snapshot
@@ -6013,14 +6422,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           .longitude!);
       aerialDist = tools.calculateAerialDist(user.lat, user.lng, val1, val2);
     }
-
     bool microService = false;
-
     bool startTime = snapshot
         .data!
         .landmarksMap![
-    SingletonFunctionController
-        .building.selectedLandmarkID]!
+    SingletonFunctionController.building.selectedLandmarkID]!
         .properties!
         .startTime !=
         null;
@@ -6031,39 +6437,57 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         .building.selectedLandmarkID]!
         .properties!
         .contactNo !=
-        null && snapshot
-        .data!
-        .landmarksMap![SingletonFunctionController
-        .building.selectedLandmarkID]!
-        .properties!
-        .contactNo !=
-        "") || (snapshot
-        .data!
-        .landmarksMap![SingletonFunctionController
-        .building.selectedLandmarkID]!
-        .properties!
-        .email !=
-        "" &&
+        null &&
         snapshot
             .data!
             .landmarksMap![SingletonFunctionController
             .building.selectedLandmarkID]!
             .properties!
-            .email !=
-            null) || (snapshot
-        .data!
-        .landmarksMap![SingletonFunctionController
-        .building.selectedLandmarkID]!
-        .properties!
-        .url !=
-        "" &&
-        snapshot
-            .data!
-            .landmarksMap![SingletonFunctionController
-            .building.selectedLandmarkID]!
-            .properties!
-            .url !=
-            null));
+            .contactNo !=
+            "") ||
+        (snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.email != "" &&
+            snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.email !=
+                null) ||
+        (snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.url !=
+            "" &&
+            snapshot
+                .data!
+                .landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!
+                .properties!
+                .url !=
+                null));
+
+    var landmark = snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID];
+    var inputFormat = intl.DateFormat("yyyy-MM-ddTHH:mm");
+    List<Widget> events = [];
+    // print("eventsState.groupedDataByVenue![SingletonFunctionController.building.selectedLandmarkID] ${SingletonFunctionController.building.selectedLandmarkID} ${landmark?.sId} ${eventsState.groupedDataByVenue![landmark?.sId]}");
+    if (eventsState.groupedDataByVenue != null &&
+        eventsState.groupedDataByVenue![landmark?.sId] != null) {
+      var venueEvents =
+      eventsState.groupedDataByVenue![landmark?.sId]!.where((cardData) {
+        var status = getEventStatus(
+            startDate: cardData.startDate!,
+            endDate: cardData.endDate!,
+            startTime: cardData.startTime!,
+            endTime: cardData.endTime!,
+            weekdays: cardData.weekDays);
+        return (status != EventStatus.notToday);
+      }).toList();
+
+      // sort by startTime
+      venueEvents.sort((a, b) {
+        final aTime = inputFormat.parse(a.startTime!);
+        final bTime = inputFormat.parse(b.startTime!);
+        return aTime.compareTo(bTime);
+      });
+      events = venueEvents
+          .map((cardData) => Padding(
+        padding: const EdgeInsets.only(left: 12, right: 12),
+        child: card(cardData,
+            openInDialoge: true, hideDirectionButton: true),
+      ))
+          .toList();
+    }
 
     return Stack(
       children: [
@@ -6071,8 +6495,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           left: 16,
           top: 16,
           right: 16,
-          child: Semantics(
-            header: true,
+          child: ExcludeSemantics(
             child: Container(
                 width: screenWidth - 32,
                 height: 48,
@@ -6101,8 +6524,30 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                       child: Center(
                         child: IconButton(
                           onPressed: () {
+                            SingletonFunctionController.building.landmarkdata!.then((value) async {
+                              print("SingletonFunctionController landmarks ${value.landmarks!.length}");
+                              List<Landmarks> createLandmarks = [];
+                              value.landmarks!.forEach((value){
+                                if(value.floor == SingletonFunctionController.building.floor[value.buildingID]){
+                                  createLandmarks.add(value);
+                                }
+                              });
+                              land current = land();
+                              landmarkMarkers.clear();
+                              current.landmarks = createLandmarks;
+                              createMarkers(current, 0, buildingAllApi.selectedBuildingID,forced: true);
+                            });
+                            landmarkMarkers.forEach((value) {
+                              if (value.markerId
+                                  .toString()
+                                  .contains(selectedMarkerId)) {
+                                value.visible = true;
+                              }
+                            });
+                            selectedMarkerId = "";
                             _polygon.clear();
                             cachedPolygon.clear();
+                            calculatingPath = false;
                             //  circles.clear();
                             showMarkers();
                             toggleLandmarkPanel();
@@ -6170,487 +6615,572 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 )),
           ),
         ),
-        SlidingUpPanel(
-          controller: _landmarkPannelController,
-          borderRadius: BorderRadius.all(Radius.circular(24.0)),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 20.0,
-              color: Colors.grey,
-            ),
-          ],
-          minHeight:  startTime? 220:185,
-          maxHeight: contactDetail&&microService?0.73:(contactDetail
-              ? (screenHeight * 0.45)
-              : (microService
-              ? (screenHeight * 0.28)
-              : (startTime
-              ? 220
-              : 185)))
-          ,
-          snapPoint: 0.6,
-          panel: () {
-            _isRoutePanelOpen = false;
-            switch (snapshot.connectionState) {
-              case ConnectionState.none:
-                return Text('Press button to start.');
-              case ConnectionState.active:
-              case ConnectionState.waiting:
-                return landmarkPannelShimmer();
-              case ConnectionState.done:
-                if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-                return Semantics(
-                  header: true,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(16.0)),
-                      color: Colors.white,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        contactDetail?Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 38,
-                              height: 6,
-                              margin: EdgeInsets.only(top: 8),
-                              decoration: BoxDecoration(
-                                color: Color(0xffd9d9d9),
-                                borderRadius: BorderRadius.circular(5.0),
+        SafeArea(
+          child: SlidingUpPanel(
+            controller: _landmarkPannelController,
+            borderRadius: BorderRadius.all(Radius.circular(24.0)),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 20.0,
+                color: Colors.grey,
+              ),
+            ],
+            minHeight: startTime ? 220 : 185,
+            maxHeight: events.isNotEmpty
+                ? screenHeight
+                : (contactDetail && microService
+                ? 0.73
+                : (contactDetail
+                ? (screenHeight * 0.45)
+                : (microService
+                ? (screenHeight * 0.28)
+                : (startTime ? 220 : 185)))),
+            snapPoint: 0.6,
+            panel: () {
+              _isRoutePanelOpen = false;
+              switch (snapshot.connectionState) {
+                case ConnectionState.none:
+                  return Text('Press button to start.');
+                case ConnectionState.active:
+                case ConnectionState.waiting:
+                  return landmarkPannelShimmer();
+                case ConnectionState.done:
+                  if (snapshot.hasError)
+                    return Text('Error: ${snapshot.error}');
+                  return Semantics(
+                    header: true,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                        color: Colors.white,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          contactDetail
+                              ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 38,
+                                height: 6,
+                                margin: EdgeInsets.only(top: 8),
+                                decoration: BoxDecoration(
+                                  color: Color(0xffd9d9d9),
+                                  borderRadius:
+                                  BorderRadius.circular(5.0),
+                                ),
                               ),
-                            ),
-                          ],
-                        ):Container(),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.only(
-                                      left: 17, top: 12, bottom: 4),
-                                  child: Focus(
-                                    autofocus: true,
-                                    child: Semantics(
-                                      child: Text(
-                                        snapshot
-                                            .data!
-                                            .landmarksMap![
-                                        SingletonFunctionController
-                                            .building
-                                            .selectedLandmarkID]!
-                                            .name ??
+                            ],
+                          )
+                              : Container(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.only(
+                                        left: 17, top: 12, bottom: 4),
+                                    child: Focus(
+                                      autofocus: true,
+                                      child: Semantics(
+                                        child: Builder(
+                                          builder: (context) {
+                                            final landmark =
+                                            snapshot.data!.landmarksMap![
+                                            SingletonFunctionController
+                                                .building
+                                                .selectedLandmarkID]!;
+                                            final text =
+                                                landmark.renderDetail?.name ??
+                                                    landmark.name ??
+                                                    landmark.element!.subType!;
+                                            final words = text.split(" ");
+                                            final displayText = text.length > 25
+                                                ? words.take(3).join(" ") +
+                                                ((words.length > 3) ? "\n" : "") +
+                                                words.skip(3).join(" ")
+                                                : text;
+                                            return Text(
+                                              displayText,
+                                              style: const TextStyle(
+                                                fontFamily: "Roboto",
+                                                fontSize: 22,
+                                                fontWeight: FontWeight.w500,
+                                                color: Color(0xff000000),
+                                                height: 28 / 22,
+                                              ),
+                                              textAlign: TextAlign.left,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding:
+                                    EdgeInsets.only(left: 17, bottom: 4),
+                                    child: Text(
+                                      "${LocaleData.floor.getString(context)} ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.floor}${(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName == snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.venueName) ? ("") : (", ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName}")}",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff777777),
+                                        height: 24 / 16,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding:
+                                    EdgeInsets.only(left: 17, bottom: 4),
+                                    child: Text(
+                                      "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.venueName}",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xff777777),
+                                        height: 20 / 14,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+                                  snapshot
+                                      .data!
+                                      .landmarksMap![
+                                  SingletonFunctionController
+                                      .building
+                                      .selectedLandmarkID]!
+                                      .properties!
+                                      .startTime !=
+                                      null
+                                      ? Container(
+                                    padding: EdgeInsets.only(
+                                        left: 17, bottom: 4),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.startTime} AM- ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.endTime} PM  ",
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xff777777),
+                                            height: 20 / 14,
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        ),
+                                        tools.isNowBetween(
                                             snapshot
                                                 .data!
                                                 .landmarksMap![
                                             SingletonFunctionController
                                                 .building
                                                 .selectedLandmarkID]!
-                                                .element!
-                                                .subType!,
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.w500,
-                                          color: Color(0xff000000),
-                                          height: 28 / 22,
-                                        ),
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  padding: EdgeInsets.only(left: 17, bottom: 4),
-                                  child: Text(
-                                    "${LocaleData.floor.getString(context)} ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.floor}, ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.buildingName},",
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
-                                      color: Color(0xff777777),
-                                      height: 24 / 16,
-                                    ),
-                                    textAlign: TextAlign.left,
-                                  ),
-                                ),
-                                Container(
-                                  padding: EdgeInsets.only(left: 17, bottom: 4),
-                                  child: Text(
-                                    "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.venueName}",
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
-                                      color: Color(0xff777777),
-                                      height: 20 / 14,
-                                    ),
-                                    textAlign: TextAlign.left,
-                                  ),
-                                ),
-                                snapshot
-                                    .data!
-                                    .landmarksMap![
-                                SingletonFunctionController
-                                    .building.selectedLandmarkID]!
-                                    .properties!
-                                    .startTime !=
-                                    null
-                                    ? Container(
-                                  padding:
-                                  EdgeInsets.only(left: 17, bottom: 4),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.startTime} AM- ${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.endTime} PM  ",
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xff777777),
-                                          height: 20 / 14,
-                                        ),
-                                        textAlign: TextAlign.left,
-                                      ),
-                                      tools.isNowBetween(
-                                          snapshot
-                                              .data!
-                                              .landmarksMap![
-                                          SingletonFunctionController
-                                              .building
-                                              .selectedLandmarkID]!
-                                              .properties!
-                                              .startTime!,
-                                          snapshot
-                                              .data!
-                                              .landmarksMap![
-                                          SingletonFunctionController
-                                              .building
-                                              .selectedLandmarkID]!
-                                              .properties!
-                                              .endTime!)
-                                          ? Text(
-                                        "Open Now",
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xff4CAF50),
-                                          height: 20 / 14,
-                                        ),
-                                        textAlign: TextAlign.left,
-                                      )
-                                          : Text(
-                                        "Closed",
-                                        style: const TextStyle(
-                                          fontFamily: "Roboto",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.redAccent,
-                                          height: 20 / 14,
-                                        ),
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    ],
-                                  ),
-                                )
-                                    : Container(),
-
-                                // (user.initialallyLocalised &&
-                                //         user.floor ==
-                                //             snapshot
-                                //                 .data!
-                                //                 .landmarksMap![
-                                //                     SingletonFunctionController
-                                //                         .building
-                                //                         .selectedLandmarkID]!
-                                //                 .floor!)
-                                //     ? Container(
-                                //         padding: EdgeInsets.only(
-                                //           left: 17,
-                                //         ),
-                                //         child: Text(
-                                //           "${aerialDist.toStringAsFixed(2)} m",
-                                //           style: const TextStyle(
-                                //             fontFamily: "Roboto",
-                                //             fontSize: 10,
-                                //             fontWeight: FontWeight.w400,
-                                //             color: Color(0xff8d8c8c),
-                                //             height: 25 / 16,
-                                //           ),
-                                //           textAlign: TextAlign.left,
-                                //         ),
-                                //       )
-                                //     : SizedBox(),
-                              ],
-                            ),
-                            Semantics(
-                              excludeSemantics: true,
-                              child: Container(
-                                  margin: EdgeInsets.only(top: 8, right: 16),
-                                  child: IconButton(
-                                      onPressed: () {
-                                        HelperClass.shareContent(
-                                            "https://maps.iwayplus.in/#/iway-apps/${CONSTANTS().prefix}/landmark?bid=${buildingAllApi.getStoredString()}&landmark=${SingletonFunctionController.building.selectedLandmarkID!}&appStore=${CONSTANTS().appStore}&playStore=${CONSTANTS().playStore}");
-                                      },
-                                      icon: Semantics(
-                                          label: "Share route information",
-                                          child: Icon(Icons.share)))),
-                            )
-                          ],
-                        ),
-                        SizedBox(
-                          height: 16,
-                        ),
-                        contactDetail?Semantics(
-                          label: "Contact Details",
-                          excludeSemantics: true,
-                          child: Container(
-                            margin: EdgeInsets.only(left: 17, top: 20),
-                            child: Text(
-                              "Contact Details",
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xff000000),
-                                height: 21 / 18,
-                              ),
-                              textAlign: TextAlign.left,
-                            ),
-                          ),
-                        ):Container(),
-                        snapshot
-                            .data!
-                            .landmarksMap![SingletonFunctionController
-                            .building.selectedLandmarkID]!
-                            .properties!
-                            .contactNo !=
-                            null
-                            ? InkWell(
-                          onTap:(){
-                            HelperClass.makePhoneCall(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.contactNo!);
-                          },
-                          child: Container(
-                            margin: EdgeInsets.only(left: 16, right: 16),
-                            padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                    margin: EdgeInsets.only(right: 12),
-                                    width: 24,
-                                    height: 24,
-                                    child: Semantics(
-                                      excludeSemantics: true,
-                                      child:
-                                      SvgPicture.asset("assets/call.svg"),
-                                    )),
-                                Column(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Phone",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                        color: Color(0xff777777),
-                                        height: 16 / 12,
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    ),
-                                    SizedBox(
-                                      height: 4,
-                                    ),
-                                    Container(
-                                      width: screenWidth - 100,
-                                      child: RichText(
-                                        text: TextSpan(
+                                                .properties!
+                                                .startTime!,
+                                            snapshot
+                                                .data!
+                                                .landmarksMap![
+                                            SingletonFunctionController
+                                                .building
+                                                .selectedLandmarkID]!
+                                                .properties!
+                                                .endTime!)
+                                            ? Text(
+                                          "Open Now",
                                           style: const TextStyle(
                                             fontFamily: "Roboto",
                                             fontSize: 16,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color(0xff055aa5),
-                                            height: 24 / 16,
+                                            fontWeight:
+                                            FontWeight.w400,
+                                            color:
+                                            Color(0xff4CAF50),
+                                            height: 20 / 14,
                                           ),
-                                          children: [
-                                            TextSpan(
-                                              text:
-                                              "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.contactNo!}",
-                                            ),
-                                          ],
+                                          textAlign: TextAlign.left,
+                                        )
+                                            : Text(
+                                          "Closed",
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 16,
+                                            fontWeight:
+                                            FontWeight.w400,
+                                            color: Colors.redAccent,
+                                            height: 20 / 14,
+                                          ),
+                                          textAlign: TextAlign.left,
                                         ),
-                                      ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                                  )
+                                      : Container(),
+
+                                  // (user.initialallyLocalised &&
+                                  //         user.floor ==
+                                  //             snapshot
+                                  //                 .data!
+                                  //                 .landmarksMap![
+                                  //                     SingletonFunctionController
+                                  //                         .building
+                                  //                         .selectedLandmarkID]!
+                                  //                 .floor!)
+                                  //     ? Container(
+                                  //         padding: EdgeInsets.only(
+                                  //           left: 17,
+                                  //         ),
+                                  //         child: Text(
+                                  //           "${aerialDist.toStringAsFixed(2)} m",
+                                  //           style: const TextStyle(
+                                  //             fontFamily: "Roboto",
+                                  //             fontSize: 10,
+                                  //             fontWeight: FontWeight.w400,
+                                  //             color: Color(0xff8d8c8c),
+                                  //             height: 25 / 16,
+                                  //           ),
+                                  //           textAlign: TextAlign.left,
+                                  //         ),
+                                  //       )
+                                  //     : SizedBox(),
+                                ],
+                              ),
+                              Semantics(
+                                excludeSemantics: true,
+                                child: Container(
+                                    margin: EdgeInsets.only(top: 8, right: 16),
+                                    child: IconButton(
+                                        onPressed: () {
+                                          HelperClass.shareContent(
+                                              "${AppConfig.baseUrl}/#/landmarkId/${SingletonFunctionController.building.selectedLandmarkID!}",
+                                              snapshot
+                                                  .data!
+                                                  .landmarksMap![
+                                              SingletonFunctionController
+                                                  .building
+                                                  .selectedLandmarkID]!
+                                                  .name ??
+                                                  "landmark");
+                                        },
+                                        icon: Semantics(
+                                            label: "Share route information",
+                                            child: Icon(Icons.share)))),
+                              )
+                            ],
                           ),
-                        )
-                            : Container(),
-                        snapshot
-                            .data!
-                            .landmarksMap![SingletonFunctionController
-                            .building.selectedLandmarkID]!
-                            .properties!
-                            .email !=
-                            "" &&
-                            snapshot
-                                .data!
-                                .landmarksMap![SingletonFunctionController
-                                .building.selectedLandmarkID]!
-                                .properties!
-                                .email !=
-                                null
-                            ? InkWell(
-                          onTap:(){
-                            HelperClass.sendMailto(email:snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.email!);
-                          }             ,child: Container(
-                          margin: EdgeInsets.only(left: 16, right: 16),
-                          padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                  margin: EdgeInsets.only(right: 12),
-                                  width: 24,
-                                  height: 24,
-                                  child:
-                                  SvgPicture.asset("assets/email.svg")),
-                              Column(
+                          SizedBox(
+                            height: 16,
+                          ),
+                          contactDetail
+                              ? Semantics(
+                            label: "Contact Details",
+                            excludeSemantics: true,
+                            child: Container(
+                              margin: EdgeInsets.only(left: 17, top: 20),
+                              child: Text(
+                                "Contact Details",
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xff000000),
+                                  height: 21 / 18,
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                          )
+                              : Container(),
+                          snapshot
+                              .data!
+                              .landmarksMap![SingletonFunctionController
+                              .building.selectedLandmarkID]!
+                              .properties!
+                              .contactNo !=
+                              null
+                              ? InkWell(
+                            onTap: () {
+                              HelperClass.makePhoneCall(snapshot
+                                  .data!
+                                  .landmarksMap![
+                              SingletonFunctionController
+                                  .building.selectedLandmarkID]!
+                                  .properties!
+                                  .contactNo!);
+                            },
+                            child: Container(
+                              margin:
+                              EdgeInsets.only(left: 16, right: 16),
+                              padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
+                              child: Row(
                                 crossAxisAlignment:
                                 CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    "Email",
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xff777777),
-                                      height: 16 / 12,
-                                    ),
-                                    textAlign: TextAlign.left,
-                                  ),
-                                  SizedBox(
-                                    height: 4,
-                                  ),
                                   Container(
-                                    width: screenWidth - 100,
-                                    child: RichText(
-                                      text: TextSpan(
+                                      margin: EdgeInsets.only(right: 12),
+                                      width: 24,
+                                      height: 24,
+                                      child: Semantics(
+                                        excludeSemantics: true,
+                                        child: SvgPicture.asset(
+                                            "assets/call.svg"),
+                                      )),
+                                  Column(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Phone",
                                         style: const TextStyle(
                                           fontFamily: "Roboto",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xff055aa5),
-                                          height: 24 / 16,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(0xff777777),
+                                          height: 16 / 12,
                                         ),
-                                        children: [
-                                          TextSpan(
-                                            text:
-                                            "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.email!}",
-                                          ),
-                                        ],
+                                        textAlign: TextAlign.left,
                                       ),
-                                    ),
+                                      SizedBox(
+                                        height: 4,
+                                      ),
+                                      Container(
+                                        width: screenWidth - 100,
+                                        child: RichText(
+                                          text: TextSpan(
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff055aa5),
+                                              height: 24 / 16,
+                                            ),
+                                            children: [
+                                              TextSpan(
+                                                text:
+                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.contactNo!}",
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ),
-                        )
-                            : Container(),
-                        snapshot
-                            .data!
-                            .landmarksMap![SingletonFunctionController
-                            .building.selectedLandmarkID]!
-                            .properties!
-                            .url !=
-                            "" &&
-                            snapshot
-                                .data!
-                                .landmarksMap![SingletonFunctionController
-                                .building.selectedLandmarkID]!
-                                .properties!
-                                .url !=
-                                null
-                            ? InkWell(
-                          onTap: (){
-                            HelperClass.launchURL(snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.url!);
-                          },
-                          child: Container(
-                            margin: EdgeInsets.only(left: 16, right: 16),
-                            padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                    margin: EdgeInsets.only(right: 12),
-                                    width: 24,
-                                    height: 24,
-                                    child: SvgPicture.asset(
-                                        "assets/website.svg")),
-                                Column(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Website",
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                        color: Color(0xff777777),
-                                        height: 16 / 12,
+                            ),
+                          )
+                              : Container(),
+                          snapshot
+                              .data!
+                              .landmarksMap![
+                          SingletonFunctionController
+                              .building.selectedLandmarkID]!
+                              .properties!
+                              .email !=
+                              "" &&
+                              snapshot
+                                  .data!
+                                  .landmarksMap![
+                              SingletonFunctionController
+                                  .building.selectedLandmarkID]!
+                                  .properties!
+                                  .email !=
+                                  null
+                              ? InkWell(
+                            onTap: () {
+                              HelperClass.sendMailto(
+                                  email: snapshot
+                                      .data!
+                                      .landmarksMap![
+                                  SingletonFunctionController
+                                      .building
+                                      .selectedLandmarkID]!
+                                      .properties!
+                                      .email!);
+                            },
+                            child: Container(
+                              margin:
+                              EdgeInsets.only(left: 16, right: 16),
+                              padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
+                              child: Row(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                      margin: EdgeInsets.only(right: 12),
+                                      width: 24,
+                                      height: 24,
+                                      child: SvgPicture.asset(
+                                          "assets/email.svg")),
+                                  Column(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Email",
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(0xff777777),
+                                          height: 16 / 12,
+                                        ),
+                                        textAlign: TextAlign.left,
                                       ),
-                                      textAlign: TextAlign.left,
-                                    ),
-                                    SizedBox(
-                                      height: 4,
-                                    ),
-                                    Container(
-                                      width: screenWidth - 100,
-                                      child: RichText(
-                                        text: TextSpan(
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color(0xff055aa5),
-                                            height: 24 / 16,
-                                          ),
-                                          children: [
-                                            TextSpan(
-                                              text:
-                                              "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.url!}",
+                                      SizedBox(
+                                        height: 4,
+                                      ),
+                                      Container(
+                                        width: screenWidth - 100,
+                                        child: RichText(
+                                          text: TextSpan(
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff055aa5),
+                                              height: 24 / 16,
                                             ),
-                                          ],
+                                            children: [
+                                              TextSpan(
+                                                text:
+                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.email!}",
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        )
-                            : Container(),
-                      ],
+                          )
+                              : Container(),
+                          snapshot
+                              .data!
+                              .landmarksMap![
+                          SingletonFunctionController
+                              .building.selectedLandmarkID]!
+                              .properties!
+                              .url !=
+                              "" &&
+                              snapshot
+                                  .data!
+                                  .landmarksMap![
+                              SingletonFunctionController
+                                  .building.selectedLandmarkID]!
+                                  .properties!
+                                  .url !=
+                                  null
+                              ? InkWell(
+                            onTap: () {
+                              HelperClass.launchURL(snapshot
+                                  .data!
+                                  .landmarksMap![
+                              SingletonFunctionController
+                                  .building.selectedLandmarkID]!
+                                  .properties!
+                                  .url!);
+                            },
+                            child: Container(
+                              margin:
+                              EdgeInsets.only(left: 16, right: 16),
+                              padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
+                              child: Row(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                      margin: EdgeInsets.only(right: 12),
+                                      width: 24,
+                                      height: 24,
+                                      child: SvgPicture.asset(
+                                          "assets/website.svg")),
+                                  Column(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Website",
+                                        style: const TextStyle(
+                                          fontFamily: "Roboto",
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(0xff777777),
+                                          height: 16 / 12,
+                                        ),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                      SizedBox(
+                                        height: 4,
+                                      ),
+                                      Container(
+                                        width: screenWidth - 100,
+                                        child: RichText(
+                                          text: TextSpan(
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff055aa5),
+                                              height: 24 / 16,
+                                            ),
+                                            children: [
+                                              TextSpan(
+                                                text:
+                                                "${snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID]!.properties!.url!}",
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                              : Container(),
+                          events.isNotEmpty
+                              ? ExcludeSemantics(
+                            child: Container(
+                              margin: EdgeInsets.only(left: 17, top: 20),
+                              child: Text(
+                                "Event Happening Here",
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xff000000),
+                                  height: 21 / 18,
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                          )
+                              : Container(),
+                          Semantics(
+                              excludeSemantics: true,
+                              child: Container(
+                                  height: screenHeight - 280,
+                                  child: SingleChildScrollView(
+                                      child: Column(
+                                        children: events,
+                                      ))))
+                        ],
+                      ),
                     ),
-                  ),
-                );
-            }
-          }(),
+                  );
+              }
+            }(),
+          ),
         ),
         Positioned(
           bottom: 0,
@@ -6661,14 +7191,17 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 width: screenWidth,
                 decoration: BoxDecoration(
                   color: Colors.white, // Set the background color
-                  boxShadow: (contactDetail || microService)?[
+                  boxShadow: (contactDetail || microService)
+                      ? [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1), // Shadow color
+                      color:
+                      Colors.black.withOpacity(0.1), // Shadow color
                       offset: Offset(0, -3), // Shadow offset (top shadow)
                       blurRadius: 6, // Blur radius
                       spreadRadius: 1, // Spread radius
                     )
-                  ]:null,
+                  ]
+                      : null,
                 ),
                 child: Center(
                   // Center the button vertically
@@ -6683,141 +7216,144 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                           borderRadius: BorderRadius.circular(27.0),
                         ),
                       ),
-                      onPressed: () async {
-                        if(tappedPolygonCoordinates.isNotEmpty){
-                          // First move to an intermediate zoom level for a smooth effect
-                          await _googleMapController.animateCamera(CameraUpdate.zoomOut());
-                          await Future.delayed(Duration(milliseconds: 500));
-                          _googleMapController.animateCamera(
-                            CameraUpdate.newLatLngZoom(
-                              LatLng(user.lat, user.lng),
-                              20, // Specify your custom zoom level here
-                            ),
-                          );
+                      onPressed: calculatingPath
+                          ? null
+                          : () async {
+                        hasPressedButton = true;
+                        // landmarkMarkers.forEach((it) {
+                        //   it.visible = false;
+                        // });
+                        // _landmarks.clear();
+                        _directionFocus.requestFocus();
+                        // landmarkMarkers.clear();
+                        // clustringOFF = true;
+                        setState(() {});
+                        print("clustring turned ${clustringOFF}");
+
+                        print("landmarkMarkers.clear() ${landmarkMarkers.length}");
+                        Future<void> initFuture = Future.value();
+                        if (SingletonFunctionController.apibeaconmap[
+                        SingletonFunctionController
+                            .currentBeacon] !=
+                            null) {
+                          _localizeTimer?.cancel();
+                          final landmarkData =
+                          await SingletonFunctionController
+                              .building.landmarkdata;
+                          final userSetLocation =
+                          tools.localizefindNearbyLandmark(
+                              SingletonFunctionController
+                                  .apibeaconmap[
+                              SingletonFunctionController
+                                  .currentBeacon]!,
+                              landmarkData!.landmarksMap!);
+                          // print("usersetlocation::${userSetLocation!.name}");
+                          if (userSetLocation != null) {
+                            // Get pinned landmark
+                            final pinnedX =
+                                PinedLandmark?.coordinateX ?? 0;
+                            final pinnedY =
+                                PinedLandmark?.coordinateY ?? 0;
+                            final userX = userSetLocation.coordinateX;
+                            final userY = userSetLocation.coordinateY;
+                            final distance = sqrt(
+                                pow(userX! - pinnedX, 2) +
+                                    pow(userY! - pinnedY, 2));
+                            print(
+                                "Skipping initializeUser due to short distance ${pinnedX} ${pinnedY} ${userX} ${userY} ($distance)");
+                            if (distance < 40) {
+                              initFuture = Future.value(); // dummy future
+                            } else {
+                              initFuture = initializeUser(userSetLocation,
+                                  speakTTS: false, render: false);
+                            }
+                          }
                         }
-                        _polygon.clear();
-                        cachedPolygon.clear();
-                        // circles.clear();
-                        Markers.clear();
-
-                        if (user.coordY != 0 && user.coordX != 0) {
-                          PathState.sourceX = user.coordX;
-                          PathState.sourceY = user.coordY;
-                          PathState.sourceFloor = user.floor;
-
-                          PathState.sourcePolyID = user.key;
-
-                          PathState.sourceName = "Your current location";
-                          PathState.destinationPolyID =
-                          SingletonFunctionController
-                              .building.selectedLandmarkID!;
-                          PathState.destinationName = snapshot
-                              .data!
-                              .landmarksMap![SingletonFunctionController
-                              .building.selectedLandmarkID]!
-                              .name ??
-                              snapshot
-                                  .data!
-                                  .landmarksMap![SingletonFunctionController
-                                  .building.selectedLandmarkID]!
-                                  .element!
-                                  .subType!;
-                          PathState.destinationFloor = snapshot
-                              .data!
-                              .landmarksMap![SingletonFunctionController
-                              .building.selectedLandmarkID]!
-                              .floor!;
-                          print("userbid in landmarkdetailpannel is ${user.bid} ${PathState.sourceFloor}");
-                          PathState.sourceBid = user.bid;
-
-                          PathState.destinationBid = snapshot
-                              .data!
-                              .landmarksMap![SingletonFunctionController
-                              .building.selectedLandmarkID]!
-                              .buildingID!;
-
+                        PinedLandmark = null;
+                        // Always run this regardless of distance
+                        initFuture.then((onValue) {
                           setState(() {
                             calculatingPath = true;
+                            isFromLocalize = true;
                           });
-                          // bool calibrate = isCalibrationNeeded(magneticValues);
-                          // print("calibrate1");
-                          // print(calibrate);
-                          // if (calibrate == true) {
-                          //   setState(() {
-                          //     accuracy = true;
-                          //   });
-                          //   speak(
-                          //       "low accuracy found.Please calibrate your device",
-                          //       _currentLocale);
-                          //   showLowAccuracyDialog();
-                          //   magneticValues.clear();
-                          //   listenToMagnetometer();
-                          //   _timerCompass =
-                          //       Timer.periodic(Duration(seconds: 1), (timer) {
-                          //         calibrate = isCalibrationNeeded(magneticValues);
-                          //         print("calibrate2");
-                          //         print(calibrate);
-                          //         if (calibrate == false) {
-                          //           setState(() {
-                          //             accuracy = false;
-                          //           });
-                          //           magneticValues.clear();
-                          //           _timerCompass?.cancel();
-                          //         } else {
-                          //           listenToMagnetometeronCalibration();
-                          //           _timerCompass?.cancel();
-                          //         }
-                          //       });
-                          // }
-
-                          Future.delayed(Duration(seconds: 3), () {
-                            calculateroute(snapshot.data!.landmarksMap!)
-                                .then((value) {
-                              calculatingPath = false;
-
-                              _isLandmarkPanelOpen = false;
-                              _isRoutePanelOpen = true;
-                            });
-                          });
-                        } else {
-                          PathState.sourceName = "Choose Starting Point";
-                          PathState.destinationPolyID =
-                          SingletonFunctionController
-                              .building.selectedLandmarkID!;
-                          PathState.destinationName = snapshot
-                              .data!
-                              .landmarksMap![SingletonFunctionController
-                              .building.selectedLandmarkID]!
-                              .name ??
-                              snapshot
-                                  .data!
-                                  .landmarksMap![SingletonFunctionController
-                                  .building.selectedLandmarkID]!
-                                  .element!
-                                  .subType!;
-                          PathState.destinationFloor = snapshot
-                              .data!
-                              .landmarksMap![SingletonFunctionController
-                              .building.selectedLandmarkID]!
-                              .floor!;
-                          SingletonFunctionController
-                              .building.selectedLandmarkID = "";
-                          Navigator.push(
+                          SingletonFunctionController.currentBeacon = "";
+                          SingletonFunctionController().dispose();
+                          bleManager.stopScanning();
+                          _polygon.clear();
+                          cachedPolygon.clear();
+                          Markers.clear();
+                          setState(() {});
+                          if (user.coordY != 0 && user.coordX != 0) {
+                            PathState.sourceX = user.coordX;
+                            PathState.sourceY = user.coordY;
+                            PathState.sourceLat = user.lat;
+                            PathState.sourceLng = user.lng;
+                            PathState.sourceFloor = user.floor;
+                            PathState.sourcePolyID = user.key;
+                            PathState.sourceName =
+                            "Your current location";
+                            PathState.destinationPolyID =
+                            SingletonFunctionController
+                                .building.selectedLandmarkID!;
+                            PathState.destinationName =
+                                snapshot.data!.landmarksMap![PathState.destinationPolyID]!.renderDetail?.name ??
+                                    snapshot.data!.landmarksMap![PathState.destinationPolyID]!.name ??
+                                    snapshot.data!.landmarksMap![PathState.destinationPolyID]!.element!.subType!;
+                            PathState.destinationFloor = snapshot
+                                .data!
+                                .landmarksMap![
+                            PathState.destinationPolyID]!
+                                .floor!;
+                            PathState.sourceBid = user.bid;
+                            PathState.destinationBid = snapshot
+                                .data!
+                                .landmarksMap![
+                            PathState.destinationPolyID]!
+                                .buildingID!;
+                            Future.delayed(Duration(milliseconds: 400),
+                                    () {
+                                  calculateroute(snapshot.data!.landmarksMap!)
+                                      .then((value) {
+                                    calculatingPath = false;
+                                    _isLandmarkPanelOpen = false;
+                                    _isRoutePanelOpen = true;
+                                  });
+                                });
+                          } else {
+                            PathState.sourceName =
+                            "Choose Starting Point";
+                            PathState.destinationPolyID =
+                            SingletonFunctionController
+                                .building.selectedLandmarkID!;
+                            PathState.destinationName = snapshot.data!.landmarksMap![PathState.destinationPolyID]!.renderDetail?.name ??
+                                snapshot.data!.landmarksMap![PathState.destinationPolyID]!.name ??
+                                snapshot.data!.landmarksMap![PathState.destinationPolyID]!.element!.subType!;
+                            PathState.destinationFloor = snapshot
+                                .data!
+                                .landmarksMap![
+                            PathState.destinationPolyID]!
+                                .floor!;
+                            SingletonFunctionController
+                                .building.selectedLandmarkID = "";
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => SourceAndDestinationPage(
-                                    DestinationID:
-                                    PathState.destinationPolyID,
-                                    user: user,
-                                  ))).then((value) {
-                            if (value != null) {
-                              fromSourceAndDestinationPage(value);
-                            }
-                          });
-                        }
+                                builder: (context) =>
+                                    SourceAndDestinationPage(
+                                      DestinationID:
+                                      PathState.destinationPolyID,
+                                      user: user,
+                                    ),
+                              ),
+                            ).then((value) {
+                              if (value != null) {
+                                fromSourceAndDestinationPage(value);
+                              }
+                            });
+                          }
+                        });
                       },
-                      child: (!calculatingPath)
-                          ? Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
@@ -6832,13 +7368,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                             ),
                           )
                         ],
-                      )
-                          : Container(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                        ),
                       ),
                     ),
                   ),
@@ -6856,7 +7385,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   List<CommonConnection> findCommonLifts(
       Landmarks landmark1, Landmarks landmark2, String accessibleby) {
     List<CommonConnection> commonLifts = [];
-
+    final stackTrace = StackTrace.current;
+    print("findCommonLifts Stack: \n$stackTrace");
+    print("landmark1.lifts! ${landmark1.lifts!}");
+    print("landmark2.lifts! ${landmark2.lifts!}");
     if (accessibleby == "Lifts") {
       for (var lift1 in landmark1.lifts!) {
         for (var lift2 in landmark2.lifts!) {
@@ -6932,17 +7464,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
     // Sort the commonLifts based on distance
     commonLifts.sort((a, b) {
-      if (a.d1 == 0) return -1; // Ensure the single element with d1 == 0 is first
-      if (b.d1 == 0) return 1;  // Ensure others are placed after it
+      if (a.d1 == 0)
+        return -1; // Ensure the single element with d1 == 0 is first
+      if (b.d1 == 0) return 1; // Ensure others are placed after it
 
       final aSum = (a.d1 ?? 0) + (a.d2 ?? 0);
       final bSum = (b.d1 ?? 0) + (b.d2 ?? 0);
 
       return aSum.compareTo(bSum);
     });
-
-
-
 
     return commonLifts;
   }
@@ -6956,7 +7486,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       params.destinationX,
       params.destinationY,
       params.floor,
-      bid: params.bid,
       liftName: params.liftName,
       renderSource: params.renderSource,
       renderDestination: params.renderDestination,
@@ -6974,12 +7503,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     compute(runFuturesSequentially, fetchrouteFutures);
   }
 
-  Future<Landmarks?> findCampusEntry(land land, Landmarks entry, {String? destinationBid}) async {
+  Future<Landmarks?> findCampusEntry(land land, Landmarks entry) async {
     try {
       return await land.landmarks!.firstWhere(
             (element) =>
         element.name == entry.name &&
-            element.buildingID == (buildingAllApi.outdoorID),
+            element.buildingID == buildingAllApi.outdoorID,
         orElse: () => throw Exception('No matching landmark found'),
       );
     } catch (e) {
@@ -6988,41 +7517,36 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
     return null;
   }
-
-  void setBuildingFloors(List<String> bids){
+  void setBuildingFloors(List<String> bids, {int? floor}) {
     for (var bid in bids) {
-      if(bid != buildingAllApi.outdoorID){
-        if(bid != PathState.sourceBid){
-          SingletonFunctionController.building.floor[bid] =
-          0;
+      if (bid != buildingAllApi.outdoorID) {
+        SingletonFunctionController.building.floor[bid] = floor??PathState.sourceFloor;
+        if (Building.numberOfFloorsDelhi[bid]!
+            .contains(floor??PathState.sourceFloor)) {
           createRooms(
-              SingletonFunctionController
-                  .building.polylinedatamap[bid]!,
-              0);
-        }else{
-          SingletonFunctionController.building.floor[PathState.sourceBid] =
-              PathState.sourceFloor;
-          createRooms(
-              SingletonFunctionController
-                  .building.polylinedatamap[PathState.sourceBid]!,
-              PathState.sourceFloor);
+            SingletonFunctionController.building.polylinedatamap[bid]!,
+            floor??PathState.sourceFloor,
+          );
         }
-      }else{
-        SingletonFunctionController.building.floor[bid] = 0;
+      } else {
+        SingletonFunctionController.building.floor[bid] = floor??PathState.sourceFloor;
       }
     }
   }
 
-  void fitToPath(List<dynamic> result)async{
+  void fitToPath(List<dynamic> result) async {
     Map<String, dynamic> dataCurrent = await result.first;
     Map<String, dynamic> dataLast = await result.last;
-    if(PathState.sourceBid == PathState.destinationBid){
+    if (PathState.sourceBid == PathState.destinationBid) {
       List<LatLng> points = [
         LatLng(dataLast["svalue"][0], dataLast["svalue"][1]),
         LatLng(dataLast["dvalue"][0], dataLast["dvalue"][1])
       ];
+      print("source latlngs:${dataLast["svalue"][0]}");
+      print("destination latlngs:${dataLast["dvalue"][0]}");
       fitTwoPoints(points);
-    }else{
+    } else {
+      print("calling outdoor fittopath");
       print("calling outdoor fittopath");
       List<LatLng> points = [
         LatLng(dataCurrent["dvalue"][0], dataCurrent["dvalue"][1]),
@@ -7038,89 +7562,99 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     LatLngBounds bounds = LatLngBounds(
       southwest: LatLng(
         point1.latitude < point2.latitude ? point1.latitude : point2.latitude,
-        point1.longitude < point2.longitude ? point1.longitude : point2.longitude,
+        point1.longitude < point2.longitude
+            ? point1.longitude
+            : point2.longitude,
       ),
       northeast: LatLng(
         point1.latitude > point2.latitude ? point1.latitude : point2.latitude,
-        point1.longitude > point2.longitude ? point1.longitude : point2.longitude,
+        point1.longitude > point2.longitude
+            ? point1.longitude
+            : point2.longitude,
       ),
     );
-    CameraUpdate cameraUpdate = CameraUpdate.newLatLngBounds(bounds,MediaQuery.of(context).size.height*0.0872093023255814);
-
+    CameraUpdate cameraUpdate = CameraUpdate.newLatLngBounds(
+        bounds, MediaQuery.of(context).size.height * 0.0872093023255814);
     // First move to an intermediate zoom level for a smooth effect
     await _googleMapController.animateCamera(CameraUpdate.zoomOut());
     await Future.delayed(Duration(milliseconds: 500));
     _googleMapController.animateCamera(cameraUpdate);
   }
-
-  Future<void> runPaths(List<dynamic Function()> fetchrouteFutures, {bool autoStart = false}) async {
+  Future<void> runPaths(List<dynamic Function()> fetchrouteFutures,
+      {bool autoStart = false}) async {
     //try {
     if (fetchrouteFutures.isNotEmpty) {
       //await createRooms(SingletonFunctionController.building.polylinedatamap[PathState.sourceBid]!, PathState.sourceFloor);
       print("starting calc");
-      List<dynamic> result = fetchrouteFutures.map((func) => func()).toList();
-      fitToPath(result);
-      for (int i = 0; i < result.length - 1; i++) {
-        Map<String, dynamic> dataCurrent = await result[i];
-        Map<String, dynamic> dataNext = await result[i + 1];
-
-        singleroute.putIfAbsent("${buildingAllApi.outdoorID}", () => Map());
-        singleroute["${buildingAllApi.outdoorID}"]!.putIfAbsent(0, () => Set());
-
-        singleroute["${buildingAllApi.outdoorID}"]![0]?.add(gmap.Polyline(
-          polylineId: PolylineId("${buildingAllApi.outdoorID} misc$i"),
-          points: [
-            LatLng(dataCurrent["svalue"][0], dataCurrent["svalue"][1]),
-            LatLng(dataNext["dvalue"][0], dataNext["dvalue"][1])
-          ],
-          color: Colors.blueAccent,
-          width: 8,
-        ));
+      List<Future<List<Map<String, dynamic>>>> resolvedFutures =
+      fetchrouteFutures.map((func) async {
+        final list = await func(); // This is List<dynamic>
+        return List<Map<String, dynamic>>.from(list); // Safely cast
+      }).toList();
+      List<List<Map<String, dynamic>>> resolved =
+      await Future.wait(resolvedFutures);
+      List<Map<String, dynamic>> result = resolved.expand((e) => e).toList();
+      if (Building.GlobalAnnotation?.pathNetwork?.masterGraph != null) {
+        result = result.reversed.toList();
       }
+
+      fitToPath(result);
 
       List<direction?> lifts = [];
       for (var res in result) {
         Map<String, dynamic> data = await res;
         List<Cell> cellList = data["CellPath"];
         List<String> intermediatesBids = tools.findIntermediateBuildings(cellList);
-        SingletonFunctionController.building.floorDimenssion.forEach((bid,map){
-          map.forEach((floor,dimmensions){
+        SingletonFunctionController.building.floorDimenssion
+            .forEach((bid, map) {
+          map.forEach((floor, dimmensions) {
             PathState.numCols ??= {};
-            PathState.numCols!.putIfAbsent(bid, ()=>{});
-            PathState.numCols![bid]!.putIfAbsent(floor, ()=>dimmensions[0]);
+            PathState.numCols!.putIfAbsent(bid, () => {});
+            PathState.numCols![bid]!.putIfAbsent(floor, () => dimmensions[0]);
             PathState.numCols![bid]![floor] = dimmensions[0];
           });
         });
 
         setBuildingFloors(intermediatesBids);
-        List<int> integerPath =cellList.map<int>((cell) => cell.node).toList();
+        List<int> integerPath = cellList.map<int>((cell) => cell.node).toList();
         PathState.singleListPath.insertAll(0, integerPath);
         PathState.singleCellListPath.insertAll(0, data["CellPath"]);
         lifts.add(data["lift"]);
-        print("PathState.singleCellListPath ${PathState.singleCellListPath.length}");
+        print(
+            "PathState.singleCellListPath ${PathState.singleCellListPath.length}");
       }
-      // setCameraPositionusingCoords(
-      //     [LatLng(svalue[0], svalue[1]), LatLng(dvalue[0], dvalue[1])]);
-      createMarkersAndDirections(PathState.singleCellListPath,lifts);
 
-      double time = 0;
-      double distance = 0;
-      DateTime currentTime = DateTime.now();
+      PathState.directions =
+      await createMarkersAndDirections(PathState.singleCellListPath, lifts);
+
       if (PathState.singleCellListPath.isNotEmpty) {
-        distance = tools.PathDistance(PathState.singleCellListPath);
-        time = distance / 120;
-        time = time.ceil().toDouble();
-        distance = distance * 0.3048;
-        distance = double.parse(distance.toStringAsFixed(1));
-
         setState(() {
           _focusNodeA.unfocus();
           _focusNodeA.requestFocus();
-          semanticsLabel="Start button double tap to navigate";
-          startingNavigation=true;
+          semanticsLabel = "Start button double tap to navigate";
+          startingNavigation = true;
         });
 
-        if(autoStart){
+        int? distance = 0;
+        PathState.directionInstructionViewModel = DirectionInstructionViewModel(
+            PathState.directions,
+            PathState.sourceBid,
+            PathState.sourceName,
+            PathState.sourceFloor,
+            PathState.destinationBid,
+            PathState.destinationName,
+            PathState.destinationFloor,
+            Building.buildingData,
+            context);
+        final distances = {
+          PathState.directionInstructionViewModel?.totalSourceDistance,
+          PathState.directionInstructionViewModel?.totalOutdoorDistance,
+          PathState.directionInstructionViewModel?.totalDestinationDistance,
+        };
+        print("distances $distances");
+        distance = distances.reduce((a, b) => a! + b!);
+
+        if (autoStart) {
           startNavigation();
           setState(() {
             _isreroutePannelOpen = false;
@@ -7130,19 +7664,30 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
         if (PathState.destinationName ==
             "${LocaleData.yourcurrentloc.getString(context)}") {
-          speak(
-              " ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
-              _currentLocale);
+          if(canNavigate()){
+            speak(
+                "${LocaleData.yourcurrentloc.getString(context)} ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
+                _currentLocale);
+          }else{
+            speak(
+                "${LocaleData.yourcurrentloc.getString(context)} ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. Click Steps for route preview",
+                _currentLocale);
+          }
         } else {
-          speak(
-              "${PathState.destinationName} ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
-              _currentLocale);
+          if(canNavigate()){
+            speak(
+                "${PathState.destinationName} ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. ${LocaleData.clickstarttonavigate.getString(context)}",
+                _currentLocale);
+          }else{
+            speak(
+                "${PathState.destinationName} ${LocaleData.issss.getString(context)} $distance ${LocaleData.meteraway.getString(context)}. Click Steps for route preview",
+                _currentLocale);
+          }
         }
       }
     } else {
       print("starting calc not happening");
     }
-
 
     // } catch (e) {
     //   setState(() {
@@ -7152,14 +7697,49 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     // }
   }
 
+  String getBestConnection(List<String> available, String preferred) {
+    const priority = ["Lifts", "Escalators", "Ramps", "Stairs"];
+    if (available.contains(preferred)) return preferred;
+
+    // Fallback to best available option based on priority
+    for (final mode in priority) {
+      if (available.contains(mode)) return mode;
+    }
+    // No valid connection (shouldn't happen if at least one connection exists)
+    return "Unavailable";
+  }
+
+  List<String> getAvailableConnections(Landmarks landmark) {
+    final List<String> available = [];
+
+    if (landmark.lifts != null && landmark.lifts!.isNotEmpty) {
+      available.add("Lifts");
+    }
+    if (landmark.stairs != null && landmark.stairs!.isNotEmpty) {
+      available.add("Stairs");
+    }
+    if (landmark.escalators != null && landmark.escalators!.isNotEmpty) {
+      available.add("Escalators");
+    }
+    if (landmark.ramps != null && landmark.ramps!.isNotEmpty) {
+      available.add("Ramps");
+    }
+
+    print("getAvailableConnections $available");
+
+    return available;
+  }
+
   Future<void> calculateroute(Map<String, Landmarks> landmarksMap,
       {String? accessibleby, bool autoStart = false}) async {
+    String? accessiblebySource = accessibleby;
+    String? accessiblebyDestination = accessibleby;
     List<Function()> fetchrouteFutures = [];
     PathState.singleCellListPath.clear();
     setState(() {
       _focusNodeA.requestFocus();
-      startingNavigation=false;
-      semanticsLabel="Please wait calculating the path";
+      startingNavigation = false;
+      semanticsLabel = "Please wait calculating the path";
     });
 
     if (PathState.sourcePolyID == "") {
@@ -7191,16 +7771,59 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       }
     } catch (e) {}
 
-    if(accessibleby == null){
-      if(landmarksMap[PathState.sourcePolyID]!.escalators != null && landmarksMap[PathState.sourcePolyID]!.escalators!.any((escalator)=>(escalator.distance??100) <=45)){
-        print("acccccccheck $accessibleby");
-        accessibleby = "Escalators";
-        PathState.accessiblePath = "Escalators";
-      }else{
-        accessibleby = "Lifts";
-        PathState.accessiblePath = "Lifts";
+    List<String> availableConnections1 = []; // from building
+    if (PathState.sourceFloor != 0) {
+      availableConnections1 = getAvailableConnections(
+          landmarksMap[PathState.sourcePolyID]!); // from building
+    }
+    List<String> availableConnections2 = []; // from building
+    if (PathState.destinationFloor != 0) {
+      availableConnections2 = getAvailableConnections(
+          landmarksMap[PathState.destinationPolyID]!); // from building
+    }
+
+    if (PathState.sourceBid == buildingAllApi.outdoorID) {
+      availableConnections1 = [];
+    }
+    if (PathState.destinationBid == buildingAllApi.outdoorID) {
+      availableConnections2 = [];
+    }
+
+    var availableConnectionsUnion =
+    {...availableConnections1, ...availableConnections2}.toList();
+
+    if (availableConnections1.isNotEmpty && availableConnections2.isNotEmpty) {
+      if (availableConnections1
+          .toSet()
+          .intersection(availableConnections2.toSet())
+          .isEmpty) {
+        availableConnectionsUnion = [];
       }
     }
+
+    if (Building.GlobalAnnotation?.pathNetwork?.masterGraph != null) {
+      availableConnectionsUnion =
+          PathState.getAvailableConnectionsUnion(Building.GlobalAnnotation!);
+    }
+
+    PathState.filteredOptions = PathState.allOptions
+        .where((option) =>
+        availableConnectionsUnion.contains(option["accessibleBy"]))
+        .toList();
+
+    if (accessibleby == null &&
+        PathState.sourceFloor != PathState.destinationFloor &&
+        (PathState.filteredOptions ?? []).isNotEmpty) {
+      print("filteredOptions ${PathState.filteredOptions}");
+      PathState.accessiblePath =
+      PathState.getHighestPriorityConnection(PathState.filteredOptions!)!;
+      accessibleby = PathState.accessiblePath;
+    }
+    accessiblebySource =
+        getBestConnection(availableConnections1, accessibleby ?? "");
+    accessiblebyDestination =
+        getBestConnection(availableConnections2, accessibleby ?? "");
+    print("accessibleby $accessibleby");
 
     // circles.clear();
 
@@ -7208,44 +7831,65 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     //
     //
     //
-
+    playPreviewManager?.clearPreview();
     PathState.noPathFound = false;
-    singleroute.clear(); pathCovered.clear();
+    singleroute.clear();
+    pathCovered.clear();
     pathMarkers.clear();
-    Markers.clear();
-
-    PathState.destinationX =
-    landmarksMap[PathState.destinationPolyID]!.coordinateX!;
-    PathState.destinationY =
-    landmarksMap[PathState.destinationPolyID]!.coordinateY!;
-    if (landmarksMap[PathState.destinationPolyID]!.doorX != null) {
+    // Markers.clear();
+    print(
+        "landmarksMap[PathState.destinationPolyID] ${landmarksMap[PathState.destinationPolyID]!.name}");
+    if (PathState.destinationX != user.coordX ||
+        PathState.destinationY != user.coordY) {
       PathState.destinationX =
-      landmarksMap[PathState.destinationPolyID]!.doorX!;
+      landmarksMap[PathState.destinationPolyID]!.coordinateX!;
       PathState.destinationY =
-      landmarksMap[PathState.destinationPolyID]!.doorY!;
+      landmarksMap[PathState.destinationPolyID]!.coordinateY!;
+      if (landmarksMap[PathState.destinationPolyID]!.doorX != null) {
+        PathState.destinationX =
+        landmarksMap[PathState.destinationPolyID]!.doorX!;
+        PathState.destinationY =
+        landmarksMap[PathState.destinationPolyID]!.doorY!;
+      }
     }
-
-    if(Building.GlobalAnnotation?.pathNetwork?.masterGraph != null){
-
+    print(
+        "calculateroutesource ${PathState.sourceX},${PathState.sourceY} <> ${PathState.sourceBid},${PathState.sourceFloor}");
+    print(
+        "calculateroutedestination ${PathState.destinationX},${PathState.destinationY} <> ${PathState.destinationBid},${PathState.destinationFloor}, ${PathState.destinationPolyID}");
+    if (Building.GlobalAnnotation?.pathNetwork?.masterGraph != null) {
       fetchrouteFutures.add(() => fetchroute(
           PathState.sourceX,
           PathState.sourceY,
           PathState.destinationX,
           PathState.destinationY,
           PathState.destinationFloor,
-          bid: PathState.destinationBid));
-      runPaths(fetchrouteFutures,autoStart: autoStart);
-
-    }else if (PathState.sourceBid == PathState.destinationBid) {
+          Bid: PathState.destinationBid,
+          renderDestination: true,
+          renderSource: true));
+      runPaths(fetchrouteFutures, autoStart: autoStart);
+    } else if (PathState.sourceBid == PathState.destinationBid) {
       if (PathState.sourceFloor == PathState.destinationFloor) {
-
+        List<double> svalue = [];
+        List<double> dvalue = [];
+        svalue = tools.localtoglobal(
+            PathState.sourceX,
+            PathState.sourceY,
+            SingletonFunctionController
+                .building.patchData[PathState.sourceBid]);
+        dvalue = tools.localtoglobal(
+            PathState.destinationX,
+            PathState.destinationY,
+            SingletonFunctionController
+                .building.patchData[PathState.destinationBid]);
+        // setCameraPositionusingCoords(
+        //     [LatLng(svalue[0], svalue[1]), LatLng(dvalue[0], dvalue[1])]);
         fetchrouteFutures.add(() => fetchroute(
             PathState.sourceX,
             PathState.sourceY,
             PathState.destinationX,
             PathState.destinationY,
             PathState.destinationFloor,
-            bid: PathState.destinationBid));
+            Bid: PathState.destinationBid));
         SingletonFunctionController
             .building.floor[buildingAllApi.getStoredString()] = user.floor;
 
@@ -7256,11 +7900,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         }
         mapState.zoom = 21;
       } else if (PathState.sourceFloor != PathState.destinationFloor) {
-        print("accccccc $accessibleby");
         List<CommonConnection> commonlifts = findCommonLifts(
             landmarksMap[PathState.sourcePolyID]!,
             landmarksMap[PathState.destinationPolyID]!,
-            accessibleby??"Lifts");
+            accessibleby ?? "Lifts");
         if (commonlifts.isEmpty) {
           setState(() {
             PathState.noPathFound = true;
@@ -7275,9 +7918,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             PathState.destinationX,
             PathState.destinationY,
             PathState.destinationFloor,
-            bid: PathState.destinationBid,
+            Bid: PathState.destinationBid,
             liftName: commonlifts[0].name,
-            nextFloor:PathState.sourceFloor ));
+            nextFloor: PathState.sourceFloor));
 
         fetchrouteFutures.add(() => fetchroute(
           PathState.sourceX,
@@ -7285,9 +7928,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           commonlifts[0].x1!,
           commonlifts[0].y1!,
           PathState.sourceFloor,
-          bid: PathState.destinationBid,
+          Bid: PathState.destinationBid,
           liftName: commonlifts[0].name,
-          nextFloor: PathState.destinationFloor,));
+          renderDestination: false,
+          nextFloor: PathState.destinationFloor,
+        ));
 
         PathState.connections[PathState.destinationBid] = {
           PathState.sourceFloor: calculateindex(
@@ -7322,7 +7967,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         Landmarks? CampusEntry = await findCampusEntry(land, buildingEntry);
         print("pathcchec 2 ${CampusEntry!.name}");
 
-
         if (PathState.destinationBid == buildingAllApi.outdoorID) {
           fetchrouteFutures.add(() => fetchroute(
               CampusEntry!.coordinateX!,
@@ -7330,7 +7974,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               PathState.destinationX,
               PathState.destinationY,
               CampusEntry.floor!,
-              bid: CampusEntry.buildingID));
+              Bid: CampusEntry.buildingID));
           if (PathState.sourceFloor == buildingEntry!.floor) {
             fetchrouteFutures.add(() => fetchroute(
                 PathState.sourceX,
@@ -7338,14 +7982,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 buildingEntry!.coordinateX!,
                 buildingEntry!.coordinateY!,
                 buildingEntry!.floor!,
-                bid: PathState.sourceBid,
+                Bid: PathState.sourceBid,
                 renderDestination: false));
-          }
-          else if (PathState.sourceFloor != buildingEntry!.floor) {
+          } else if (PathState.sourceFloor != buildingEntry!.floor) {
             List<dynamic> commonlifts = findCommonLifts(
                 landmarksMap[PathState.sourcePolyID]!,
                 buildingEntry!,
-                accessibleby??"Lifts");
+                accessiblebySource ?? "Lifts");
             if (commonlifts.isEmpty) {
               setState(() {
                 PathState.noPathFound = true;
@@ -7361,7 +8004,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 buildingEntry!.coordinateX!,
                 buildingEntry!.coordinateY!,
                 buildingEntry!.floor!,
-                bid: PathState.sourceBid,
+                Bid: PathState.sourceBid,
                 renderDestination: false,
                 nextFloor: PathState.sourceFloor));
             fetchrouteFutures.add(() => fetchroute(
@@ -7370,9 +8013,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 commonlifts[0].x1!,
                 commonlifts[0].y1!,
                 PathState.sourceFloor,
-                bid: PathState.sourceBid,
-                nextFloor: buildingEntry!.floor!
-            ));
+                Bid: PathState.sourceBid,
+                renderDestination: false,
+                nextFloor: buildingEntry!.floor!));
 
             PathState.connections[PathState.sourceBid] = {
               PathState.sourceFloor: calculateindex(
@@ -7395,14 +8038,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               PathState.destinationX,
               PathState.destinationY,
               PathState.destinationFloor,
-              bid: buildingEntry.buildingID,
+              Bid: buildingEntry.buildingID,
             ));
-          }
-          else if (PathState.destinationFloor != buildingEntry!.floor) {
+          } else if (PathState.destinationFloor != buildingEntry!.floor) {
             List<dynamic> commonlifts = findCommonLifts(
                 landmarksMap[PathState.destinationPolyID]!,
                 buildingEntry!,
-                accessibleby??"Lifts");
+                accessiblebyDestination ?? "Lifts");
             if (commonlifts.isEmpty) {
               setState(() {
                 PathState.noPathFound = true;
@@ -7418,7 +8060,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               PathState.destinationX,
               PathState.destinationY,
               PathState.destinationFloor,
-              bid: PathState.destinationBid,
+              Bid: PathState.destinationBid,
               nextFloor: buildingEntry!.floor!,
             ));
 
@@ -7428,7 +8070,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 commonlifts[0].x2!,
                 commonlifts[0].y2!,
                 buildingEntry!.floor!,
-                bid: PathState.destinationBid,
+                Bid: PathState.destinationBid,
                 renderDestination: false,
                 nextFloor: PathState.destinationFloor));
 
@@ -7451,7 +8093,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               CampusEntry!.coordinateX!,
               CampusEntry!.coordinateY!,
               PathState.sourceFloor,
-              bid: CampusEntry.buildingID,renderDestination: false));
+              Bid: CampusEntry.buildingID,
+              renderDestination: false));
         }
         runPaths(fetchrouteFutures, autoStart: autoStart);
       });
@@ -7471,10 +8114,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
         /// destinationEntryINCAMPUS
         Landmarks? CampusDestinationEntry =
-        await findCampusEntry(land, destinationEntry, destinationBid: PathState.sourceBid);
+        await findCampusEntry(land, destinationEntry);
 
         /// sourceEntryINCAMPUS
-        Landmarks? CampusSourceEntry = await findCampusEntry(land, sourceEntry, destinationBid: PathState.destinationBid);
+        Landmarks? CampusSourceEntry = await findCampusEntry(land, sourceEntry);
 
         print(
             "CampusSourceEntry is ${CampusSourceEntry?.name} [${CampusSourceEntry?.coordinateX},${CampusSourceEntry?.coordinateY}]");
@@ -7490,11 +8133,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               PathState.destinationX,
               PathState.destinationY,
               PathState.destinationFloor,
-              bid: PathState.destinationBid,
+              Bid: PathState.destinationBid,
               renderSource: false));
         } else if (destinationEntry.floor != PathState.destinationFloor) {
-          List<dynamic> commonlifts = findCommonLifts(destinationEntry,
-              landmarksMap[PathState.destinationPolyID]!, accessibleby??"Lifts");
+          List<dynamic> commonlifts = findCommonLifts(
+              destinationEntry,
+              landmarksMap[PathState.destinationPolyID]!,
+              accessiblebyDestination ?? "Lifts");
           if (commonlifts.isEmpty) {
             setState(() {
               PathState.noPathFound = true;
@@ -7510,7 +8155,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               PathState.destinationX,
               PathState.destinationY,
               PathState.destinationFloor,
-              bid: PathState.destinationBid,
+              Bid: PathState.destinationBid,
               nextFloor: destinationEntry.floor!));
           fetchrouteFutures.add(() => fetchroute(
             destinationEntry.coordinateX!,
@@ -7518,9 +8163,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             commonlifts[0].x1!,
             commonlifts[0].y1!,
             destinationEntry.floor!,
-            bid: PathState.destinationBid,
+            Bid: PathState.destinationBid,
+            liftName: commonlifts[0].name,
             renderSource: false,
-            nextFloor: PathState.destinationFloor,));
+            nextFloor: PathState.destinationFloor,
+          ));
 
           PathState.connections[PathState.destinationBid] = {
             destinationEntry.floor!: calculateindex(
@@ -7560,11 +8207,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 CampusDestinationEntry!.coordinateX!,
                 CampusDestinationEntry.coordinateY!,
                 CampusSourceEntry.floor!,
-                bid: CampusSourceEntry.buildingID,
+                Bid: CampusSourceEntry.buildingID,
                 renderDestination: false,
-                renderSource: false,
-                sourceNodeId: sourceEntry.properties!.nodeId,
-                destinationNodeId: destinationEntry.properties!.nodeId));
+                renderSource: false));
           } catch (e) {
             print("calculateroute pathfinding error $e");
             CampusPathAPIAlgorithm(sourceEntry, destinationEntry);
@@ -7582,11 +8227,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               sourceEntry.coordinateX!,
               sourceEntry.coordinateY!,
               sourceEntry.floor!,
-              bid: PathState.sourceBid,
+              Bid: PathState.sourceBid,
               renderDestination: false));
         } else if (PathState.sourceFloor != sourceEntry.floor) {
           List<dynamic> commonlifts = findCommonLifts(
-              landmarksMap[PathState.sourcePolyID]!, sourceEntry, accessibleby??"Lifts");
+              landmarksMap[PathState.sourcePolyID]!,
+              sourceEntry,
+              accessiblebySource ?? "Lifts");
           if (commonlifts.isEmpty) {
             setState(() {
               PathState.noPathFound = true;
@@ -7602,16 +8249,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               sourceEntry.coordinateX!,
               sourceEntry.coordinateY!,
               sourceEntry.floor!,
-              bid: PathState.sourceBid,
+              Bid: PathState.sourceBid,
               renderDestination: false,
-              nextFloor:PathState.sourceFloor));
+              nextFloor: PathState.sourceFloor));
           fetchrouteFutures.add(() => fetchroute(
             PathState.sourceX,
             PathState.sourceY,
             commonlifts[0].x1!,
             commonlifts[0].y1!,
             PathState.sourceFloor,
-            bid: PathState.sourceBid,
+            Bid: PathState.sourceBid,
+            liftName: commonlifts[0].name,
+            renderDestination: false,
             nextFloor: sourceEntry.floor!,
           ));
 
@@ -7637,6 +8286,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       SingletonFunctionController.building
           .floor[buildingAllApi.selectedBuildingID] = PathState.sourceFloor;
     });
+
+    // print("path:${pathState.}");
     return;
   }
 
@@ -7737,371 +8388,444 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   late LatLng destinationPosition;
   late BitmapDescriptor sourceIcon;
   late BitmapDescriptor destinationIcon;
-  List<int> pathList=[];
-  int currentFloor=0;
-  String currentBid="";
-  int currentCols=0;
-  Future<Map<String, dynamic>> fetchroute(
+  List<int> pathList = [];
+  int currentFloor = 0;
+  String currentBid = "";
+  int currentCols = 0;
+  Future<List<dynamic>> fetchroute(
       int sourceX, int sourceY, int destinationX, int destinationY, int floor,
-      {String? bid,
+      {String? Bid,
         int? nextFloor,
         String? liftName,
-        bool renderSource = true,
-        bool renderDestination = true,
-        String? sourceNodeId, String? destinationNodeId}) async {
+        bool renderSource = false,
+        bool renderDestination = false}) async {
     print(
-        "checks for campus $bid ${SingletonFunctionController.building.floorDimenssion[bid]} $sourceNodeId, $destinationNodeId");
-    print("pathcchec fetchingroute between $sourceX, $sourceY   $destinationX, $destinationY  $bid ");
-    int numRows = SingletonFunctionController
-        .building.floorDimenssion[bid]![floor]![1]; //floor breadth
-    int numCols = SingletonFunctionController.building.floorDimenssion[bid]![floor]![0]; //floor length
-    int sourceIndex = calculateindex(sourceX, sourceY, numCols);
-    int destinationIndex = calculateindex(destinationX, destinationY, numCols);
-    PathState.numCols ??= {};
-    PathState.numCols![bid!] = PathState.numCols![bid] ?? {};
-    PathState.numCols![bid]![floor] = numCols;
-    direction? liftDirection;
-    List<String> path = [];
+        "checks for campus $Bid ${SingletonFunctionController.building.floorDimenssion[Bid]}");
+    print(
+        "pathcchec fetchingroute between $sourceX, $sourceY   $destinationX, $destinationY  $Bid ");
+
+    List<MapEntry<String, Map<int, List<int>>>> path = [];
+    List<MapEntry<String, Map<int, List<List<double>>>>> renderPath = [];
     bool mastergraph = false;
 
-    try {
-      Map<String, List<dynamic>> adjList = {};
+    // try {
+    Map<String, List<dynamic>> adjList = {};
+    print("Bid $Bid");
 
-      PathModel model = Building.waypoint[bid]!.firstWhere((element) => element.floor == floor);
-      print("model.pathNetwork $bid $model ${model.pathNetwork}");
-      adjList = model.pathNetwork??{};
-
-      if(Building.GlobalAnnotation?.pathNetwork?.masterGraph != null){
-        mastergraph = true;
-        adjList = Building.GlobalAnnotation!.pathNetwork!.masterGraph!;
-        print("adjList $adjList");
-        path = await masterFindShortestPath(
-            adjList,
-            sourceX,
-            sourceY,
-            PathState.sourceBid,
-            PathState.sourceFloor,
-            destinationX,
-            destinationY,
-            PathState.destinationBid,
-            PathState.destinationFloor,
-            SingletonFunctionController.building.nonWalkable[bid]?[floor],
-            numCols,
-            numRows,
-            isoutdoorPath: bid == buildingAllApi.outdoorID);
-      }else{
-        mastergraph = false;
-        path = await findShortestPath(
-            adjList,
-            sourceX,
-            sourceY,
-            destinationX,
-            destinationY,
-            SingletonFunctionController.building.nonWalkable[bid]?[floor],
-            numCols,
-            numRows,
-            bid,
-            floor,
-            isoutdoorPath: bid == buildingAllApi.outdoorID);
-      }
-
-    } catch (e) {
-      print("error in path finding $e");
-      mastergraph = false;
-      if (bid != buildingAllApi.outdoorID) {
-        List<int> AStarPath = await findPath(
-          numRows,
-          numCols,
-          SingletonFunctionController.building.nonWalkable[bid]![floor]!,
-          sourceIndex,
-          destinationIndex,
-        );
-        List<int> optimizedAStarpath = getFinalOptimizedPath(
-            AStarPath,
-            SingletonFunctionController.building.nonWalkable[bid]![floor]!,
-            numCols,
-            sourceX,
-            sourceY,
-            destinationX,
-            destinationY);
-        path = tools.convertToFourPointerPath(optimizedAStarpath, bid, floor);
-      }
-    }
-    if (path.isEmpty) {
-      wsocket.message["path"]["didPathForm"] = false;
+    if (Building.GlobalAnnotation?.pathNetwork?.masterGraph != null) {
+      PathModel model = Building.waypoint[Bid]!
+          .firstWhere((element) => element.floor == element.floor);
+      print("model.pathNetwork $Bid $model ${model.pathNetwork}");
+      mastergraph = true;
+      print("adjList ${Building.GlobalAnnotation!.pathNetwork!.masterGraph!}");
+      var paths = await masterFindShortestPath(
+          Building.GlobalAnnotation!,
+          sourceX,
+          sourceY,
+          PathState.sourceLat,
+          PathState.sourceLng,
+          PathState.sourceBid,
+          PathState.sourceFloor,
+          destinationX,
+          destinationY,
+          PathState.destinationBid,
+          PathState.destinationFloor,
+          SingletonFunctionController.building.nonWalkable[Bid]?[floor],
+          SingletonFunctionController.building.floorDimenssion,
+          PathState.floorConnector,
+          isoutdoorPath: Bid == buildingAllApi.outdoorID);
+      path = paths.localPath;
+      renderPath = paths.globalPath;
+      print("path from mastergraph $path");
+      print("path from mastergraph $renderPath");
     } else {
-      wsocket.message["path"]["didPathForm"] =
-          path[0] == sourceIndex && path[path.length - 1] == destinationIndex;
+      PathModel model = Building.waypoint[Bid]!
+          .firstWhere((element) => element.floor == floor);
+      print("model.pathNetwork $Bid $model ${model.pathNetwork}");
+      adjList = model.pathNetwork ?? {};
+      mastergraph = false;
+      path = await findShortestPath(
+          adjList,
+          sourceX,
+          sourceY,
+          destinationX,
+          destinationY,
+          SingletonFunctionController.building.nonWalkable[Bid]?[floor],
+          SingletonFunctionController.building.floorDimenssion[Bid]![floor]![0],
+          SingletonFunctionController.building.floorDimenssion[Bid]![floor]![1],
+          Bid!,
+          floor,
+          isoutdoorPath: Bid == buildingAllApi.outdoorID);
+    }
+    // } catch (e) {
+    //   // print("error in path finding $e");
+    //   // if (Bid != buildingAllApi.outdoorID) {
+    //   //   path = await findPath(
+    //   //     numRows,
+    //   //     numCols,
+    //   //     SingletonFunctionController.building.nonWalkable[Bid]![floor]!,
+    //   //     sourceIndex,
+    //   //     destinationIndex,
+    //   //   );
+    //   //   path = getFinalOptimizedPath(
+    //   //       path,
+    //   //       SingletonFunctionController.building.nonWalkable[Bid]![floor]!,
+    //   //       numCols,
+    //   //       sourceX,
+    //   //       sourceY,
+    //   //       destinationX,
+    //   //       destinationY);
+    //   // }
+    // }
+
+    List<Map<String, dynamic>> result = [];
+
+    for (var step in path) {
+      String buildingID = step.key;
+      print("buildingfloors ${step.value.keys}");
+      for (var fl in step.value.keys) {
+        int floor = fl;
+        List<int>? pathPoints = step.value[floor];
+        if (pathPoints == null) continue;
+        List<List<double>>? render = renderPath
+            .where((mapEntry) => (mapEntry.key == buildingID && mapEntry.value[fl]!.length == pathPoints.length))
+            .first
+            .value[fl];
+        PathState.numCols ??= {};
+        PathState.numCols![buildingID] = PathState.numCols![buildingID] ?? {};
+        PathState.numCols![buildingID]![floor] = SingletonFunctionController
+            .building.floorDimenssion[buildingID]![floor]![0];
+        print("buildingID path $buildingID");
+        // print("Building.GlobalAnnotation!.liftNodes ${Building.GlobalAnnotation!.liftNodes}");
+        var lift;
+        if (Building.GlobalAnnotation?.liftNodes != null &&
+            PathState.sourceFloor != PathState.destinationFloor) {
+          lift = getFirstMatchedLiftName(
+              liftNodes: Building.GlobalAnnotation!.getNodesForOption(PathState.floorConnector),
+              path: pathPoints,
+              numCol: PathState.numCols![buildingID]![floor]!,
+              buildingId: buildingID,
+              floor: floor);
+          if (lift != null) {
+            PathState.connections.putIfAbsent(buildingID, () => {});
+            PathState.connections[buildingID]!.putIfAbsent(
+                floor,
+                    () =>
+                (lift.y! * PathState.numCols![buildingID]![floor]!) +
+                    lift.x!);
+            liftName = lift.name;
+          }
+          int currentFloorIndex =
+          step.value.keys.toList().indexWhere((floor) => floor == fl);
+          if (currentFloorIndex != step.value.keys.length - 1) {
+            nextFloor = step.value.keys.toList()[currentFloorIndex + 1];
+          }
+          print("liftName $liftName");
+        }
+        Map<String, dynamic> value = await processPathRendering(
+            pathPoints,
+            render,
+            buildingID,
+            floor,
+            sourceX,
+            sourceY,
+            destinationX,
+            destinationY,
+            lift,
+            nextFloor,
+            (buildingID == path.first.key &&
+                floor == PathState.sourceFloor &&
+                renderSource),
+            (buildingID == path.last.key &&
+                floor == PathState.destinationFloor &&
+                renderDestination),
+            mastergraph);
+
+        result.add(value);
+      }
     }
 
-    if(bid == buildingAllApi.outdoorID){
-      for (var turn in path) {
-        var point = tools.extractCoordinates(turn);
-        print("getpoints list ${point[0]}, ${point[1]}");
-        getPoints.add([point[0], point[1]]);
+    return result;
+  }
+
+  landmark.Lifts? getFirstMatchedLiftName({
+    required List<dynamic> liftNodes,
+    required List<int> path,
+    required int numCol,
+    required String buildingId,
+    required int floor,
+  }) {
+    // Convert path into coordinate pairs
+    final pathCoords =
+    path.map((val) => [val % numCol, val ~/ numCol]).toList();
+
+    print("pathCoords $liftNodes ${pathCoords.first} ${pathCoords.last}");
+
+    for (final node in liftNodes) {
+      final parts = node.split(',');
+      if (parts.length != 7) continue;
+
+      final nodeBuildingId = parts[0];
+      final x = int.tryParse(parts[1]);
+      final y = int.tryParse(parts[2]);
+      final lat = double.tryParse(parts[5]);
+      final lng = double.tryParse(parts[4]);
+      final nodeFloor = int.tryParse(parts[3]);
+      final name = parts[6];
+
+      if (nodeBuildingId != buildingId ||
+          nodeFloor != floor ||
+          x == null ||
+          y == null) {
+        continue;
       }
-    }else{
-      List<String> turns = tools.getTurnPointsFromString(path);
-      getPoints.add([sourceX % numCols, sourceY ~/ numCols]);
+
+      for (final coord in pathCoords) {
+        if (coord[0] == x && coord[1] == y) {
+          print("name found $name");
+          return landmark.Lifts()
+            ..x = x
+            ..y = y
+            ..lat = lat
+            ..lng = lng
+            ..name = name;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  Future<Map<String, dynamic>> processPathRendering(
+      List<int> path,
+      List<List<double>>? render,
+      String Bid,
+      int floor,
+      int sourceX,
+      int sourceY,
+      int destinationX,
+      int destinationY,
+      landmark.Lifts? lift,
+      int? nextFloor,
+      bool renderSource,
+      bool renderDestination,
+      bool masterGraph) async {
+    print("polyline for $Bid $floor");
+    direction? liftDirection;
+    List<List<int>> getPoints = [];
+
+    if (Bid == buildingAllApi.outdoorID || masterGraph) {
+      for (var turn in path) {
+        getPoints.add([
+          turn % PathState.numCols![Bid]![floor]!,
+          turn ~/ PathState.numCols![Bid]![floor]!
+        ]);
+      }
+    } else {
+      List<int> turns =
+      tools.getTurnpoints(path, PathState.numCols![Bid]![floor]!);
+      getPoints.add([
+        sourceX % PathState.numCols![Bid]![floor]!,
+        sourceY ~/ PathState.numCols![Bid]![floor]!
+      ]);
       for (var turn in turns) {
-        print("getpoints inside}");
-        var point = tools.extractCoordinates(turn);
-        getPoints.add([point[0], point[1]]);
+        getPoints.add([
+          turn % PathState.numCols![Bid]![floor]!,
+          turn ~/ PathState.numCols![Bid]![floor]!
+        ]);
       }
       getPoints.add([destinationX, destinationY]);
     }
 
-    Set<Marker> innerMarker = Set();
-
-
-
-    //PathState.path[floor] = path;
+    Set<Marker> innerMarker = {};
+    PathState.path[floor] = path;
 
     List<Cell> Cellpath = findCorridorSegments(
         path,
-        SingletonFunctionController.building.nonWalkable,
-        SingletonFunctionController.building.patchData);
-
+        render,
+        SingletonFunctionController.building.nonWalkable[Bid]![floor] ?? [],
+        PathState.numCols![Bid]![floor]!,
+        Bid,
+        floor,
+        SingletonFunctionController.building.patchData,
+        masterGraph);
     PathState.Cellpath[floor] = Cellpath;
 
-    List<double> svalue = [Cellpath.first.lat,Cellpath.first.lng];
-    List<double> dvalue = [Cellpath.last.lat, Cellpath.last.lng];
-
-    if(mastergraph){
-      List<LatLng> points = [
-        LatLng(svalue[0], svalue[1]),
-        LatLng(dvalue[0], dvalue[1])
-      ];
-      fitTwoPoints(points);
-    }
-
+    List<double> svalue = [];
+    List<double> dvalue = [];
 
     if (path.isNotEmpty) {
-      SingletonFunctionController.building.floor[bid] = floor;
+      if (SingletonFunctionController.building.floor[Bid] != floor) {
+        setState(() {
+          SingletonFunctionController.building.floor[Bid] = floor;
+        });
+      }
 
-      List<LatLng> coordinates1 = [];
-      Map<String, int> globalFloor = {};
-      Map<String, Map<int, List<LatLng>>> tempPolylineData = {};
-      String? prevBid;
+      if (floor != 0) {
+        List<PolyArray> prevFloorLifts = findLift(
+          tools.numericalToAlphabetical(0),
+          SingletonFunctionController
+              .building.polylinedatamap[Bid]!.polyline!.floors!,
+        );
+        List<PolyArray> currFloorLifts = findLift(
+          tools.numericalToAlphabetical(floor),
+          SingletonFunctionController
+              .building.polylinedatamap[Bid]!.polyline!.floors!,
+        );
+        List<int> diff = findCommonLift(prevFloorLifts, currFloorLifts);
+        UserState.xdiff = diff[0];
+        UserState.ydiff = diff[1];
+      } else {
+        UserState.xdiff = 0;
+        UserState.ydiff = 0;
+      }
 
-      for (var node in path) {
-        List<int> point = tools.extractCoordinates(node);
-        String buildingId = tools.extractBid(node);
-        int floor = point[2];
-        globalFloor.putIfAbsent(buildingId, () => 0);
+      svalue = tools.localtoglobal(sourceX, sourceY,
+          SingletonFunctionController.building.patchData[Bid]);
+      dvalue = tools.localtoglobal(destinationX, destinationY,
+          SingletonFunctionController.building.patchData[Bid]);
 
-        if (globalFloor[buildingId] != floor && buildingId != buildingAllApi.outdoorID) {
-          if (floor != 0) {
-            print("Changing floor of $buildingId to $floor");
-            List<PolyArray> previousFloorLifts = findLift(
-                tools.numericalToAlphabetical(0),
-                SingletonFunctionController.building.polylinedatamap[buildingId]!.polyline!.floors!);
-            List<PolyArray> currentFloorLifts = findLift(
-                tools.numericalToAlphabetical(floor),
-                SingletonFunctionController.building.polylinedatamap[buildingId]!.polyline!.floors!);
-            List<int> dvalue = findCommonLift(previousFloorLifts, currentFloorLifts);
-            UserState.xdiff = dvalue[0];
-            UserState.ydiff = dvalue[1];
-          } else {
-            UserState.xdiff = 0;
-            UserState.ydiff = 0;
-          }
-          globalFloor[buildingId] = floor;
+      List<LatLng> coordinates = [];
+      if (render != null) {
+        for (var node in render) {
+          print("lat ${node[0]} lng ${node[1]}");
+          coordinates.add(LatLng(node[0], node[1]));
+          await Future.delayed(Duration(microseconds: 0));
         }
-
-        int row = point[0];
-        int col = point[1];
-        List<double> globalCoords = tools.localtoglobal(
-            row, col, SingletonFunctionController.building.patchData[buildingId]);
-
-        if (PathState.sourceBid == buildingId && floor == PathState.sourceFloor && buildingId != buildingAllApi.outdoorID) {
-          coordinates1.add(LatLng(globalCoords[0], globalCoords[1]));
-          singleroute.putIfAbsent(buildingId, () => {});
-          singleroute[buildingId]!.putIfAbsent(floor, () => {});
-
-          setState(() {
-            print("adding path for3 $buildingId $floor");
-            gmap.Polyline updatedPolyline = gmap.Polyline(
-              polylineId: PolylineId(buildingId),
-              points: coordinates1,
-              color: Colors.blueAccent,
-              width: 8,
-              zIndex: 10
-            );
-            singleroute[buildingId]![floor]!..clear()..add(updatedPolyline);
-          });
-          await Future.delayed(const Duration(microseconds: 1500));
-        } else {
-          tempPolylineData.putIfAbsent(buildingId, () => {});
-          tempPolylineData[buildingId]!.putIfAbsent(floor, () => []);
-          tempPolylineData[buildingId]![floor]!.add(LatLng(globalCoords[0], globalCoords[1]));
-          if(prevBid != buildingId){
-            prevBid = buildingId;
-            setState(() {
-              tempPolylineData.forEach((buildingId, floorMap) {
-                floorMap.forEach((floor, coordinates) {
-                  singleroute.putIfAbsent(buildingId, () => {});
-                  singleroute[buildingId]!.putIfAbsent(floor, () => {});
-                  singleroute[buildingId]![floor]!.add(gmap.Polyline(
-                    polylineId: PolylineId("$buildingId ${DateTime.now()}"),
-                    points: coordinates,
-                    color: Colors.blueAccent,
-                    width: 8,
-                      zIndex: 10
-                  ));
-                });
-              });
-              tempPolylineData.clear();
-            });
-          }
+      } else {
+        for (var node in path) {
+          int row = (node %
+              PathState.numCols![Bid]![floor]!); //divide by floor length
+          int col = (node ~/
+              PathState.numCols![Bid]![floor]!); //divide by floor length
+          print("row $row col $col");
+          List<double> value = tools.localtoglobal(
+              row, col, SingletonFunctionController.building.patchData[Bid]);
+          coordinates.add(LatLng(value[0], value[1]));
+          await Future.delayed(Duration(microseconds: 0));
         }
       }
 
+      singleroute.putIfAbsent(Bid, () => Map());
+      singleroute[Bid]!.putIfAbsent(floor, () => Set());
+      gmap.Polyline updatedPolyline = gmap.Polyline(
+        polylineId: PolylineId("$Bid $floor ${DateTime.now().toString()}"),
+        points: coordinates,
+        color: Colors.blueAccent,
+        width: 8,
+      );
       setState(() {
-        tempPolylineData.forEach((buildingId, floorMap) {
-          floorMap.forEach((floor, coordinates) {
-            singleroute.putIfAbsent(buildingId, () => {});
-            singleroute[buildingId]!.putIfAbsent(floor, () => {});
-            print("adding path for2 $buildingId $floor");
-            singleroute[buildingId]![floor]!.add(gmap.Polyline(
-              polylineId: PolylineId("$buildingId ${DateTime.now()}"),
-              points: coordinates,
-              color: Colors.blueAccent,
-              width: 8,
-                zIndex: 10
-            ));
-          });
-        });
+        singleroute[Bid]![floor]!.add(updatedPolyline);
       });
 
+      print("singleroute ${singleroute}");
+
+      // final highlighter = TurnHighlighter(
+      //   path: coordinates,
+      //   highlightRadiusMeters: Bid == buildingAllApi.outdoorID ? 5 : (5 * 0.342),
+      // );
+      // final whitePolylines = highlighter.getTurnPolylines();
+      //
+      // setState(() {
+      //   singleroute[Bid]![floor]?.addAll(whitePolylines);
+      // });
 
       final Uint8List tealtorch =
       await getImagesFromMarker('assets/tealtorch.png', 35);
-
-      if(mastergraph){
-        Map<Landmarks,List<int>> floorTransitions = await tools.findFloorTransitionPoints(path);
-        if(floorTransitions.isNotEmpty){
-          floorTransitions.forEach((lift,transition){
-            PathState.connections[lift.buildingID!] = {
-              transition[0]: calculateindex(
-                  lift.doorX??lift.coordinateX!,
-                  lift.doorY??lift.coordinateY!,
-                  SingletonFunctionController.building.floorDimenssion[
-                  lift.buildingID!]![transition[0]]![0]),
-              transition[1]: calculateindex(
-                  lift.doorX??lift.coordinateX!,
-                  lift.doorY??lift.coordinateY!,
-                  SingletonFunctionController.building.floorDimenssion[
-                  lift.buildingID!]![transition[1]]![0])
-            };
-            liftDirection = direction(
-                -1,
-                "Take ${lift.name} and Go to ${transition[1]} Floor",
-                null,
-                null,
-                Cellpath.first.floor.toDouble(),
-                null,
-                null,
-                lift.floor,
-                lift.buildingID ?? "");
-          });
-        }
-      } else if (liftName != null) {
+      print("liftfound ${lift?.toJson()}");
+      if (lift?.name != null) {
         liftDirection = direction(
-            -1,
-            "Take ${liftName} and Go to ${nextFloor} Floor",
-            null,
-            null,
-            Cellpath.first.floor.toDouble(),
-            null,
-            null,
-            Cellpath.first.floor,
-            Cellpath.first.bid ?? "",
-            liftDestinationFloor: nextFloor);
-
-        try{innerMarker.add(Marker(
-          markerId: MarkerId("lift${bid}"),
-          position: sourceX == PathState.sourceX
-              ? LatLng(dvalue[0], dvalue[1])
-              : LatLng(svalue[0], svalue[1]),
-          icon: await CustomMarker(
-              text:
-              "To Floor ${nextFloor ?? floor}",
-              dirIcon:(PathState.accessiblePath=='Lifts')?
-
-              Icons.elevator_outlined:(PathState.accessiblePath=='Stairs')?Icons.escalator:(PathState.accessiblePath=='Ramps')?Icons.accessible:Icons.escalator_warning)
-              .toBitmapDescriptor(
-              logicalSize: const Size(150, 150),
-              imageSize: const Size(300, 400)),
-          anchor: Offset(0.0, 1.0),
-          onTap: () {
-            if (!user.isnavigating) {
-              _polygon.clear();
-              cachedPolygon.clear();
-              circles.clear();
-              SingletonFunctionController
-                  .building.floor[buildingAllApi.getStoredString()] = nextFloor ?? floor;
-              createRooms(
-                SingletonFunctionController.building
-                    .polylinedatamap[buildingAllApi.getStoredString()]!,
-                SingletonFunctionController
-                    .building.floor[buildingAllApi.getStoredString()]!,
-              );
-              SingletonFunctionController.building.landmarkdata!.then((value) {
-                createMarkers(
-                    value,
-                    SingletonFunctionController
-                        .building.floor[buildingAllApi.getStoredString()]!,
-                    bid: buildingAllApi.getStoredString());
-              });
-            }else{
-              showRouteSelector(context,PathState.accessiblePath);
-
-            }
-          },
-        ));}catch(e){
-
+          -1,
+          "Take ${lift?.name} and Go to ${tools.numericalToAlphabetical(nextFloor??0)} Floor",
+          null,
+          null,
+          Cellpath.first.floor.toDouble(),
+          null,
+          null,
+          Cellpath.first.floor,
+          Cellpath.first.bid ?? "",
+          liftDestinationFloor: nextFloor,
+        );
+        if(lift?.lat != null && lift?.lng != null){
+          final Uint8List greyDot = await getImagesFromMarker('assets/button.png', 35);
+          innerMarker.add(
+            Marker(
+                markerId: MarkerId('lift${lift!.lat}'),
+                position: LatLng(lift!.lat!, lift!.lng!),
+                icon: BitmapDescriptor.fromBytes(greyDot),
+                anchor: Offset(0.5, 0.5)
+            ),
+          );
         }
       }
 
-
+      BitmapDescriptor textMarker = await bitmapDescriptorFromTextAndImage(
+        PathState.destinationName,
+        'assets/pyramids.png',
+        imageSize: const Size(95, 95),
+        color: Colors.black,
+      );
 
       setState(() {
-        if (renderDestination && liftName == null) {
-          innerMarker.add(
-            Marker(
-              markerId: MarkerId('destination${bid}'),
-              position: LatLng(dvalue[0], dvalue[1]),
-              icon: BitmapDescriptor.defaultMarker,
-            ),
-          );
+        if (renderDestination) {
+          if(render != null){
+            innerMarker.add(
+              Marker(
+                markerId: MarkerId('destination$Bid'),
+                position: LatLng(render.last[0], render.last[1]),
+                icon: textMarker,
+              ),
+            );
+          }else{
+            innerMarker.add(
+              Marker(
+                markerId: MarkerId('destination$Bid'),
+                position: LatLng(dvalue[0], dvalue[1]),
+                icon: textMarker,
+              ),
+            );
+          }
         }
-        if (renderSource && liftName == null) {
-          innerMarker.add(
-            Marker(
-              markerId: MarkerId('source${bid}'),
-              position: LatLng(svalue[0], svalue[1]),
-              icon: BitmapDescriptor.fromBytes(tealtorch),
-              anchor: Offset(0.5, 0.5),
-            ),
-          );
+
+        if (!kIsWeb && renderSource) {
+          if(render != null){
+            innerMarker.add(
+              Marker(
+                markerId: MarkerId('source$Bid'),
+                position: LatLng(render.first[0], render.first[1]),
+                icon: BitmapDescriptor.fromBytes(tealtorch),
+                anchor: Offset(0.5, 0.5),
+              ),
+            );
+          }else{
+            innerMarker.add(
+              Marker(
+                markerId: MarkerId('source$Bid'),
+                position: LatLng(svalue[0], svalue[1]),
+                icon: BitmapDescriptor.fromBytes(tealtorch),
+                anchor: Offset(0.5, 0.5),
+              ),
+            );
+          }
         }
         PathState.innerMarker[floor] = innerMarker;
-        pathMarkers.putIfAbsent(bid, () => Map());
-        pathMarkers[bid]![floor] = innerMarker;
+        pathMarkers.putIfAbsent(Bid, () => {});
+        pathMarkers[Bid]![floor] = innerMarker;
       });
     }
-    print("returning dvalue for $bid $svalue and $dvalue");
+
+    print("returning dvalue for $Bid $svalue and $dvalue");
     return {
       "path": path,
       "CellPath": Cellpath,
-      "liftName": liftName,
+      "liftName": lift?.name,
       "svalue": svalue,
       "dvalue": dvalue,
       "lift": liftDirection
     };
   }
-  void showRouteSelector(BuildContext context,String acc) {
+
+  void showRouteSelector(BuildContext context, String acc) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -8111,7 +8835,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           child: RouteSelector(
             onRouteSelected: (String selectedRoute) {
               // Print the selected route ID
-            }, acc: acc,
+            },
+            acc: acc,
           ),
         );
       },
@@ -8122,23 +8847,25 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     });
   }
 
-  void modifyPathCovered(String bid, int floor, LatLng point){
-    pathCovered.putIfAbsent(bid, () => {floor:Set()});
-    pathCovered[bid]!.putIfAbsent(floor, ()=> Set());
+  void modifyPathCovered(String bid, int floor, LatLng point) {
+    pathCovered.putIfAbsent(bid, () => {floor: Set()});
+    pathCovered[bid]!.putIfAbsent(floor, () => Set());
     List<LatLng> coordinates = [];
-    if(pathCovered[bid]![floor] != null && pathCovered[bid]![floor]!.isNotEmpty){
+    if (pathCovered[bid]![floor] != null &&
+        pathCovered[bid]![floor]!.isNotEmpty) {
       coordinates.addAll(pathCovered[bid]![floor]!.first.points);
     }
     coordinates.add(point);
     setState(() {
-      if(pathCovered[bid]![floor] == null || pathCovered[bid]![floor]!.isEmpty){
+      if (pathCovered[bid]![floor] == null ||
+          pathCovered[bid]![floor]!.isEmpty) {
         pathCovered[bid]![floor]!.add(gmap.Polyline(
           polylineId: const PolylineId("path covered"),
           points: coordinates,
           color: const Color(0xffb5b5c9),
           width: 10,
         ));
-      }else {
+      } else {
         gmap.Polyline polyline = customMarker.extendPolyline(
             pathCovered[bid]![floor]!.first, coordinates);
         pathCovered[bid]![floor]!.clear();
@@ -8147,41 +8874,61 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     });
     print("pathCovered $pathCovered");
   }
-  Future<void> createMarkersAndDirections(List<Cell> path,List<direction?> lifts,
-      {String? liftName}) async {
-    await SingletonFunctionController.building.landmarkdata!.then((value) {
-      List<Landmarks> nearbyLandmarks =
-      tools.findNearbyLandmark(path, value.landmarksMap!, 5);
-      pathState.nearbyLandmarks = nearbyLandmarks;
-      tools
-          .associateTurnWithLandmark(path, nearbyLandmarks)
-          .then((value) async {
-        PathState.associateTurnWithLandmark = value;
-        PathState.associateTurnWithLandmark.removeWhere((key, value) =>
-        value.properties!.polyId == PathState.destinationPolyID);
-        // PathState.associateTurnWithLandmark.forEach((key, value) {
-        //
-        // });
-        destiPoly = PathState.destinationPolyID;
-        List<direction> directions = [];
-        if (liftName != null) {
-          directions.add(direction(
-              -1,
-              "Take ${liftName} and Go to ${PathState.destinationFloor} Floor",
-              null,
-              null,
-              path.first.floor.toDouble(),
-              null,
-              null,
-              path.first.floor,
-              path.first.bid ?? "",
-              liftDestinationFloor: PathState.destinationFloor));
-        }
-        directions.addAll(tools.getDirections(path, value, PathState, lifts, context));
-        directions.addAll(PathState.directions);
-        PathState.directions = directions;
-      });
+
+  Future<List<direction>> createMarkersAndDirections(
+      List<Cell> path,
+      List<direction?> lifts, {
+        String? liftName,
+      }) async {
+    final value = await SingletonFunctionController.building.landmarkdata!;
+    List<Landmarks> nearbyLandmarks =
+    tools.findNearbyLandmark(path, value.landmarksMap!, 5);
+    pathState.nearbyLandmarks = nearbyLandmarks;
+    print("pathState.nearbyLandmarks:${nearbyLandmarks}");
+    final associatedTurns =
+    await tools.associateTurnWithLandmark(path, nearbyLandmarks);
+    PathState.associateTurnWithLandmark = associatedTurns;
+    PathState.associateTurnWithLandmark.removeWhere((key, value) =>
+    value.properties!.polyId == PathState.destinationPolyID);
+    try {
+      for (var landmark in associatedTurns.values) {
+        // Do something with each landmark
+        print(landmark.name); // assuming Landmarks has a 'name' property
+      }
+    } catch (e) {}
+    destiPoly = PathState.destinationPolyID;
+
+    List<direction> directions = [];
+
+    // if (liftName != null) {
+    //   directions.add(
+    //     direction(
+    //       -1,
+    //       "Take $liftName and Go to ${PathState.destinationFloor} Floor",
+    //       null,
+    //       null,
+    //       path.first.floor.toDouble(),
+    //       null,
+    //       null,
+    //       path.first.floor,
+    //       path.first.bid ?? "",
+    //       liftDestinationFloor: PathState.destinationFloor,
+    //     ),
+    //   );
+    // }
+
+    directions.addAll(
+      tools.getDirections(path, associatedTurns, PathState, lifts, context),
+    );
+
+    print("directionsonpath:    ${PathState.directions}");
+
+    directions.addAll(PathState.directions);
+    directions.forEach((action) {
+      print("directionsonpath:${action.turnDirection}");
     });
+
+    return directions;
   }
 
   void _initializePolylineAndMarker() {
@@ -8292,7 +9039,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                               value,
                               SingletonFunctionController.building
                                   .floor[buildingAllApi.getStoredString()]!,
-                              bid: buildingAllApi.getStoredString());
+                              buildingAllApi.getStoredString());
                         });
                       },
                       child: CircleAvatar(
@@ -8325,33 +9072,35 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     );
   }
 
-  void addDirectionsWidget(){
-
-  }
-  bool _isPlaying=false;
+  void addDirectionsWidget() {}
+  bool _isPlaying = false;
   Future<void> callPreviewAnimation() async {
     print("singleRoute ${singleroute}");
-    List<LatLng> currentCoordinates=[];
-    Set<Marker> innerMarker=Set();
-    await SingletonFunctionController.building.landmarkdata!.then((value) async {
-      List<Landmarks> nearbyLandmarks = tools.findNearbyLandmark(user.cellPath, value.landmarksMap!, 5);
-      List<int> turnPoints=tools.getTurnpoints(pathList, currentCols);
-      for (int i = 0; i<pathList.length-2;i++){
+    List<LatLng> currentCoordinates = [];
+    Set<Marker> innerMarker = Set();
+    await SingletonFunctionController.building.landmarkdata!
+        .then((value) async {
+      List<Landmarks> nearbyLandmarks =
+      tools.findNearbyLandmark(user.cellPath, value.landmarksMap!, 5);
+      List<int> turnPoints = tools.getTurnpoints(pathList, currentCols);
+      for (int i = 0; i < pathList.length - 2; i++) {
         int node = pathList[i];
-        int node1=pathList[i+2];
+        int node1 = pathList[i + 2];
         int row1 = (node1 % currentCols); //divide by floor length
         int col1 = (node1 ~/ currentCols);
         int row = (node % currentCols); //divide by floor length
         int col = (node ~/ currentCols); //divide by floor length
-        List<double> value = tools.localtoglobal(
-            row, col, SingletonFunctionController.building.patchData[currentBid]);
-        List<double> value1 = tools.localtoglobal(row1, col1, SingletonFunctionController.building.patchData[currentBid]);
+        List<double> value = tools.localtoglobal(row, col,
+            SingletonFunctionController.building.patchData[currentBid]);
+        List<double> value1 = tools.localtoglobal(row1, col1,
+            SingletonFunctionController.building.patchData[currentBid]);
         currentCoordinates.add(LatLng(value[0], value[1]));
         if (singleroute[currentBid] == null) {
           singleroute.putIfAbsent(currentBid, () => Map());
         }
         if (singleroute[currentBid]![currentFloor] != null) {
-          gmap.Polyline oldPolyline = singleroute[currentBid]![currentFloor]!.firstWhere(
+          gmap.Polyline oldPolyline =
+          singleroute[currentBid]![currentFloor]!.firstWhere(
                 (polyline) => polyline.polylineId.value == currentBid,
           );
           gmap.Polyline updatedPolyline = gmap.Polyline(
@@ -8360,18 +9109,22 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             color: oldPolyline.color,
             width: oldPolyline.width,
           );
-          setState((){
-            if(i<nearbyLandmarks.length-1){
-              try{
-                List<double> value1 = tools.localtoglobal(nearbyLandmarks[i].coordinateX!, nearbyLandmarks[i].coordinateY!, SingletonFunctionController.building.patchData[currentBid]);
+          setState(() {
+            if (i < nearbyLandmarks.length - 1) {
+              try {
+                List<double> value1 = tools.localtoglobal(
+                    nearbyLandmarks[i].coordinateX!,
+                    nearbyLandmarks[i].coordinateY!,
+                    SingletonFunctionController.building.patchData[currentBid]);
                 innerMarker.add(
                   Marker(
-                    markerId: MarkerId('previewMarker${nearbyLandmarks[i].sId}'),
-                    position: LatLng(value1[0],value[1]),
+                    markerId:
+                    MarkerId('previewMarker${nearbyLandmarks[i].sId}'),
+                    position: LatLng(value1[0], value[1]),
                     icon: BitmapDescriptor.defaultMarker,
                   ),
                 );
-              }catch(e){
+              } catch (e) {
                 print("error in preview markers ${e}");
               }
             }
@@ -8380,7 +9133,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             singleroute[currentBid]![currentFloor]!.add(updatedPolyline);
           });
         } else {
-          setState((){
+          setState(() {
             singleroute[currentBid]!.putIfAbsent(currentFloor, () => Set());
             singleroute[currentBid]![currentFloor]?.add(gmap.Polyline(
               polylineId: PolylineId("$currentBid"),
@@ -8390,12 +9143,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             ));
           });
         }
-        if(turnPoints.contains(node))
-        {
+        if (turnPoints.contains(node)) {
           print("rendering path");
-          await alignMapToPath([value[0],value[1]], [value1[0],value1[1]],isTurn:true);
-        }else{
-          await alignMapToPath([value[0],value[1]], [value1[0],value1[1]]);
+          await alignMapToPath([value[0], value[1]], [value1[0], value1[1]],
+              isTurn: true);
+        } else {
+          await alignMapToPath([value[0], value[1]], [value1[0], value1[1]]);
         }
         await Future.delayed(Duration(microseconds: 2500));
         currentCoordinates.add(LatLng(value[0], value[1]));
@@ -8404,12 +9157,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     PathState.innerMarker[currentFloor] = innerMarker;
     pathMarkers.putIfAbsent(currentBid, () => Map());
     pathMarkers[currentBid]![currentFloor] = innerMarker;
-
-
   }
 
-  final FocusNode _directionFocus=FocusNode();
-  final FocusNode _startbuttonFocus=FocusNode();
+  final FocusNode _directionFocus = FocusNode();
+  final FocusNode _startbuttonFocus = FocusNode();
 
   PanelController _routeDetailPannelController = new PanelController();
   bool startingNavigation = false;
@@ -8461,756 +9212,622 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     //   }
     // }
     double time = 0;
-    double distance = 0;
+    int? distance = 0;
     DateTime currentTime = DateTime.now();
     if (PathState.singleCellListPath.isNotEmpty) {
-      distance = tools.PathDistance(PathState.singleCellListPath);
-      time = distance / 120;
+      final distances = {
+        PathState.directionInstructionViewModel?.totalSourceDistance,
+        PathState.directionInstructionViewModel?.totalOutdoorDistance,
+        PathState.directionInstructionViewModel?.totalDestinationDistance,
+      };
+      distance = distances.reduce((a, b) => a! + b!);
+      time = (distance! * 3.28084) / 120;
       time = time.ceil().toDouble();
-
-      distance = (distance * 0.3048).ceil().toDouble();
     }
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
-
     return Visibility(
       visible: _isRoutePanelOpen,
       child: Stack(
         children: [
-          Container(
-            height:
-            PathState.sourceFloor != PathState.destinationFloor ? 170 : 130,
-            width: screenWidth,
-            margin: EdgeInsets.only(left:8, right:8),
-            padding: EdgeInsets.only(top: 15, right: 8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(16.0),
-                bottomRight: Radius.circular(16.0),
-                topLeft: Radius.circular(16.0),
-                topRight: Radius.circular(16.0),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 1,
-                  blurRadius: 5,
-                  offset: Offset(0, 3), // changes the position of the shadow
+          ExcludeSemantics(
+            child: Container(
+              height:
+              PathState.sourceFloor != PathState.destinationFloor ? 170 : 130,
+              width: screenWidth,
+              margin: EdgeInsets.only(left: 8, right: 8),
+              padding: EdgeInsets.only(top: 15, right: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(16.0),
+                  bottomRight: Radius.circular(16.0),
+                  topLeft: Radius.circular(16.0),
+                  topRight: Radius.circular(16.0),
                 ),
-              ],
-              color: Colors.white,
-            ),
-            child: Semantics(
-
-              child: Column(
-                children: [
-                  SizedBox(height: 7,),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        child: IconButton(
-                            onPressed: () {
-                              showMarkers();
-                              List<double> mvalues = tools.localtoglobal(
-                                  PathState.destinationX,
-                                  PathState.destinationY,
-                                  SingletonFunctionController.building
-                                      .patchData[PathState.destinationBid]);
-                              _googleMapController.animateCamera(
-                                CameraUpdate.newLatLngZoom(
-                                  LatLng(mvalues[0], mvalues[1]),
-                                  20, // Specify your custom zoom level here
-                                ),
-                              );
-                              _isRoutePanelOpen = false;
-                              _isLandmarkPanelOpen = true;
-                              PathState = pathState.withValues(
-                                  -1, -1, -1, -1, -1, -1, null, 0);
-                              PathState.path.clear();
-                              PathState.sourcePolyID = "";
-                              PathState.destinationPolyID = "";
-                              singleroute.clear(); pathCovered.clear();
-                              //realWorldPath.clear();
-                              _isBuildingPannelOpen = true;
-                              if (user.isnavigating == false) {
-                                clearPathVariables();
-                              }
-                              setState(() {
-                                Marker? temp = selectedroomMarker[
-                                buildingAllApi.getStoredString()]
-                                    ?.first;
-
-                                selectedroomMarker.clear();
-                                selectedroomMarker[
-                                buildingAllApi.getStoredString()]
-                                    ?.add(temp!);
-                                pathMarkers.clear();
-                              });
-                            },
-                            icon: Semantics(
-                              label: "Back",
-                              onDidGainAccessibilityFocus: closeRoutePannel,
-                              child: Icon(
-                                Icons.arrow_back_ios_new,
-                                size: 24,
-                              ),
-                            )),
-                      ),
-                      Column(
-                        children: [
-                          Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Container(
-                                margin: EdgeInsets.only(top: 12, right: 5),
-                                width: 15.0,
-                                height: 15.0,
-                                decoration: BoxDecoration(
-                                  color: Colors.green,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(top: 12, right: 5),
-                                width: 5.0,
-                                height: 5.0,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Container(
-                              margin: EdgeInsets.only(top: 28, right: 5),
-                              child: Icon(
-                                Icons.location_on_rounded,
-                                color: Colors.red,
-                                size: 22,
-                              ))
-                        ],
-                      ),
-                      Expanded(
-                        child: Semantics(
-                          excludeSemantics: true,
-                          child: Column(
-                            children: [
-                              Semantics(
-                                label: 'Source Name',
-                                header: true,
-                                child: InkWell(
-                                  child: Container(
-                                    height: 40,
-                                    width: double.infinity,
-                                    margin: EdgeInsets.only(bottom: 8),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      border: Border.all(color: Color(0xffE2E2E2)),
-                                    ),
-                                    padding:
-                                    EdgeInsets.only(left: 8, top: 7, bottom: 8),
-                                    child: Text(
-                                      PathState.sourceName,
-                                      style: const TextStyle(
-                                        fontFamily: "Roboto",
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color(0xff24b9b0),
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: Offset(0, 3), // changes the position of the shadow
+                  ),
+                ],
+                color: Colors.white,
+              ),
+              child: Semantics(
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 7,
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          child: IconButton(
+                              onPressed: () {
+                                SingletonFunctionController.building.landmarkdata!.then((value) async {
+                                  print("SingletonFunctionController landmarks ${value.landmarks!.length}");
+                                  List<Landmarks> createLandmarks = [];
+                                  value.landmarks!.forEach((value){
+                                    if(value.floor == SingletonFunctionController.building.floor[value.buildingID]){
+                                      createLandmarks.add(value);
+                                    }
+                                  });
+                                  land current = land();
+                                  landmarkMarkers.clear();
+                                  current.landmarks = createLandmarks;
+                                  createMarkers(current, 0, buildingAllApi.selectedBuildingID,forced: true);
+                                });
+                                playPreviewManager?.clearPreview();
+                                showMarkers();
+                                List<double> mvalues = tools.localtoglobal(
+                                    PathState.destinationX,
+                                    PathState.destinationY,
+                                    SingletonFunctionController.building
+                                        .patchData[PathState.destinationBid]);
+                                _googleMapController.animateCamera(
+                                  CameraUpdate.newLatLngZoom(
+                                    LatLng(mvalues[0], mvalues[1]),
+                                    20, // Specify your custom zoom level here
                                   ),
-                                  onTap: () async {
-                                    setState(() {
-                                      startingNavigation = false;
-                                    });
-                                    await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                GlobalSearchPage(
-                                                  hintText: 'Source location',
-                                                  voiceInputEnabled: false,
-                                                  userLocalized: user.key,
-                                                  fromNavigation: true,
-                                                )))
-                                        .then((value) async {
-                                      // onLandmarkVenueClicked(value,DirectlyStartNavigation: true);
-                                      onSourceVenueClicked(value);
-                                    });
-                                  },
+                                );
+                                _isRoutePanelOpen = false;
+                                _isLandmarkPanelOpen = true;
+                                PathState = pathState.withValues(
+                                    -1, -1, -1, -1, -1, -1, null, 0);
+                                PathState.path.clear();
+                                PathState.sourcePolyID = "";
+                                PathState.destinationPolyID = "";
+                                singleroute.clear();
+                                pathCovered.clear();
+                                //realWorldPath.clear();
+                                _isBuildingPannelOpen = true;
+                                if (user.isnavigating == false) {
+                                  clearPathVariables();
+                                }
+                                setState(() {
+                                  Marker? temp = selectedroomMarker[
+                                  buildingAllApi.getStoredString()]
+                                      ?.first;
+                                  selectedroomMarker.clear();
+                                  selectedroomMarker[
+                                  buildingAllApi.getStoredString()]
+                                      ?.add(temp!);
+                                  pathMarkers.clear();
+                                });
+                              },
+                              icon: Semantics(
+                                label: "Back",
+                                onDidGainAccessibilityFocus: closeRoutePannel,
+                                child: Icon(
+                                  Icons.arrow_back_ios_new,
+                                  size: 24,
                                 ),
-                              ),
-                              Semantics(
-                                label:"destination name",
-                                header: true,
-                                child: InkWell(
-                                  child: Container(
-                                    height: 40,
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      border: Border.all(color: Color(0xffE2E2E2)),
-                                    ),
-                                    padding:
-                                    EdgeInsets.only(left: 8, top: 7, bottom: 8),
-                                    child: Semantics(
-                                      onDidGainAccessibilityFocus: closeRoutePannel,
+                              )),
+                        ),
+                        Column(
+                          children: [
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.only(top: 12, right: 5),
+                                  width: 15.0,
+                                  height: 15.0,
+                                  decoration: BoxDecoration(
+                                    color: Colors.green,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                Container(
+                                  margin: EdgeInsets.only(top: 12, right: 5),
+                                  width: 5.0,
+                                  height: 5.0,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Container(
+                                margin: EdgeInsets.only(top: 28, right: 5),
+                                child: Icon(
+                                  Icons.location_on_rounded,
+                                  color: Colors.red,
+                                  size: 22,
+                                ))
+                          ],
+                        ),
+                        Expanded(
+                          child: Semantics(
+                            excludeSemantics: true,
+                            child: Column(
+                              children: [
+                                Semantics(
+                                  label: 'Source Name',
+                                  header: true,
+                                  child: InkWell(
+                                    child: Container(
+                                      height: 40,
+                                      width: double.infinity,
+                                      margin: EdgeInsets.only(bottom: 8),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10.0),
+                                        border:
+                                        Border.all(color: Color(0xffE2E2E2)),
+                                      ),
+                                      padding: EdgeInsets.only(
+                                          left: 8, top: 7, bottom: 8),
                                       child: Text(
-                                        PathState.destinationName,
+                                        PathState.sourceName,
                                         style: const TextStyle(
                                           fontFamily: "Roboto",
                                           fontSize: 16,
                                           fontWeight: FontWeight.w400,
-                                          color: Color(0xff282828),
+                                          color: Color(0xff24b9b0),
                                         ),
                                         textAlign: TextAlign.left,
                                       ),
                                     ),
+                                    onTap: () async {
+                                      setState(() {
+                                        startingNavigation = false;
+                                      });
+                                      await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  GlobalSearchPage(
+                                                    hintText: 'Source location',
+                                                    voiceInputEnabled: false,
+                                                    user: user,
+                                                  ))).then((value) async {
+                                        // onLandmarkVenueClicked(value,DirectlyStartNavigation: true);
+                                        onSourceVenueClicked(value);
+                                      });
+                                    },
                                   ),
-                                  onTap: () {
-                                    setState(() {
-                                      startingNavigation = false;
-                                    });
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                GlobalSearchPage(
-                                                  fromNavigation:true,
-                                                  hintText: 'Destination location',
-                                                  voiceInputEnabled: false,
-                                                )))
-                                        .then((value) {
-                                      _isBuildingPannelOpen = false;
-
-                                      onDestinationVenueClicked(value);
-                                    });
-                                  },
                                 ),
-                              ),
-                            ],
+                                Semantics(
+                                  label: "destination name",
+                                  header: true,
+                                  child: InkWell(
+                                    child: Container(
+                                      height: 40,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10.0),
+                                        border:
+                                        Border.all(color: Color(0xffE2E2E2)),
+                                      ),
+                                      padding: EdgeInsets.only(
+                                          left: 8, top: 7, bottom: 8),
+                                      child: Semantics(
+                                        onDidGainAccessibilityFocus:
+                                        closeRoutePannel,
+                                        child: Text(
+                                          PathState.destinationName,
+                                          style: const TextStyle(
+                                            fontFamily: "Roboto",
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xff282828),
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        ),
+                                      ),
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        startingNavigation = false;
+                                      });
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  GlobalSearchPage(
+                                                    hintText:
+                                                    'Destination location',
+                                                    voiceInputEnabled: false,
+                                                    user: user,
+                                                  ))).then((value) {
+                                        _isBuildingPannelOpen = false;
+                                        onDestinationVenueClicked(value);
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Container(
+                          child: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  playPreviewManager?.clearPreview();
+                                  PathState.swap();
+                                  PathState.path.clear();
+                                  pathMarkers.clear();
+                                  PathState.directions.clear();
+                                  if (user.isnavigating == false) {
+                                    clearPathVariables();
+                                  }
+                                  SingletonFunctionController
+                                      .building.landmarkdata!
+                                      .then((value) {
+                                    calculateroute(value.landmarksMap!);
+                                  });
+                                });
+                              },
+                              icon: Semantics(
+                                label: "Swap location",
+                                child: Icon(
+                                  Icons.swap_vert_circle_outlined,
+                                  size: 24,
+                                ),
+                              )),
+                        ),
+                      ],
+                    ),
+                    (PathState.sourceFloor != PathState.destinationFloor &&
+                        PathState.filteredOptions != null)
+                        ? Semantics(
+                      excludeSemantics: true,
+                      child: Container(
+                        margin: EdgeInsets.only(top: 0, left: 0),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children:
+                            PathState.filteredOptions!.map((option) {
+                              return AccessiblePathButton(
+                                label: option["label"],
+                                icon: option["icon"],
+                                accessibleBy: option["accessibleBy"],
+                                floorConnector: option["floorConnector"],
+                                PathState: PathState,
+                                calculateroute: calculateroute,
+                              );
+                            }).toList(),
                           ),
                         ),
                       ),
-                      // Container(
-                      //   child: IconButton(
-                      //       onPressed: () {
-                      //         setState(() {
-                      //           PathState.swap();
-                      //           PathState.path.clear();
-                      //           pathMarkers.clear();
-                      //           PathState.directions.clear();
-                      //           if (user.isnavigating == false) {
-                      //             clearPathVariables();
-                      //           }
-                      //           SingletonFunctionController
-                      //               .building.landmarkdata!
-                      //               .then((value) {
-                      //             calculateroute(value.landmarksMap!);
-                      //           });
-                      //         });
-                      //       },
-                      //       icon: Semantics(
-                      //         label: "Swap location",
-                      //         child: Icon(
-                      //           Icons.swap_vert_circle_outlined,
-                      //           size: 24,
-                      //         ),
-                      //       )),
-                      // ),
-                    ],
-                  ),
-                  PathState.sourceFloor != PathState.destinationFloor
-                      ? Semantics(
-                    excludeSemantics: true,
-                    child: Container(
-                      margin: EdgeInsets.only(top: 8, left: 0),
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            AccessiblePathButton(label: "Stairs", icon: Icons.escalator, accessibleBy: "Stairs", PathState: PathState, calculateroute: calculateroute),
-                            AccessiblePathButton(label: "Lift", icon: Icons.elevator, accessibleBy: "Lifts", PathState: PathState, calculateroute: calculateroute),
-                            // AccessiblePathButton(label: "Escalator", icon: Icons.escalator_warning, accessibleBy: "Escalators", PathState: PathState, calculateroute: calculateroute),
-                            AccessiblePathButton(label: "Ramp", icon: Icons.accessible, accessibleBy: "Ramps", PathState: PathState, calculateroute: calculateroute),
-
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                      : Container(),
-                ],
+                    )
+                        : Container(),
+                  ],
+                ),
               ),
             ),
           ),
-          Visibility(
-            visible: PathState.sourceX != 0,
-            child: SlidingUpPanel(
-                controller: _routeDetailPannelController,
-                borderRadius: BorderRadius.all(Radius.circular(24.0)),
-                boxShadow: [
-                  BoxShadow(
-                    blurRadius: 20.0,
-                    color: Colors.grey,
-                  ),
-                ],
-                minHeight: 168,
-                maxHeight: screenHeight,
-                panel: PathState.noPathFound
-                    ? Container(
-                  margin: EdgeInsets.only(top: 36),
-                  child: Semantics(
-                    label: "Can't find a way there",
-                    excludeSemantics: true,
-                    child: Column(
-                      children: [
-                        Image.asset("assets/error.png"),
-                        Text(
-                          "Can't find a way there",
-                          style: const TextStyle(
-                            fontFamily: "Roboto",
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff3f3f46),
-                            height: 40 / 14,
-                          ),
-                          textAlign: TextAlign.center,
-                        )
+          Focus(
+            focusNode: _directionFocus,
+            child: Semantics(
+              child: Visibility(
+                visible: PathState.sourceX != 0,
+                child: SafeArea(
+                  child: SlidingUpPanel(
+                      controller: _routeDetailPannelController,
+                      borderRadius: BorderRadius.all(Radius.circular(24.0)),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 20.0,
+                          color: Colors.grey,
+                        ),
                       ],
-                    ),
-                  ),
-                )
-                    : Semantics(
-                  header: true,
-                  label: "",
-                  sortKey: const OrdinalSortKey(0),
-                  child: Focus(
-                    autofocus: true,
-                    onFocusChange: (hasFocus) {
-                      if (!hasFocus) {
-                        print("printhasFocus");
-                        _startbuttonFocus.requestFocus();
-                      }else{
-                        print("printhasFocus");
-                      }
-                    },
-                    child: Column(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius:
-                            BorderRadius.all(Radius.circular(16.0)),
-                            color: Colors.white,
-                          ),
+                      minHeight: 140,
+                      maxHeight: screenHeight,
+                      panel: PathState.noPathFound
+                          ? Container(
+                        margin: EdgeInsets.only(top: 36),
+                        child: Semantics(
+                          label: "Can't find a way there",
+                          excludeSemantics: true,
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Semantics(
-                                child: Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      width: 38,
-                                      height: 6,
-                                      margin: EdgeInsets.only(top: 8),
-                                      decoration: BoxDecoration(
-                                        color: Color(0xffd9d9d9),
-                                        borderRadius:
-                                        BorderRadius.circular(5.0),
-                                      ),
-                                    ),
-                                  ],
+                              Image.asset("assets/error.png"),
+                              Text(
+                                "Can't find a way there",
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xff3f3f46),
+                                  height: 40 / 14,
                                 ),
-                              ),
-                              Semantics(
-                                label: time.toInt()==0? "Travel time": "Travel time ${time.toInt()} min",
-
-                                child: Container(
-                                  padding: EdgeInsets.only(left: 17, top: 12),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.start,
-                                        children: [
-                                          Semantics(
-                                            excludeSemantics: true,
-                                            child: Text(
-                                              "${time.toInt()} min Walk ",
-                                              style: const TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.w700,
-                                                color: Color(0xff000000),
-                                                height: 26/20,
-                                              ),
-                                              textAlign: TextAlign.left,
-                                            ),
-                                          ),
-                                          Semantics(
-                                            excludeSemantics: true,
-                                            child: Text(
-                                              "| ${distance.toInt()} m",
-                                              style: const TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.w700,
-                                                color: Color(0xff000000),
-                                                height: 26/20,
-                                              ),
-                                              textAlign: TextAlign.left,
-                                            ),
-                                          ),
-                                          // !kIsWeb?Semantics(
-                                          //     excludeSemantics: true,
-                                          //     child: IconButton(
-                                          //       onPressed: () {
-                                          //         setState((){
-                                          //           _isPlaying=!_isPlaying;
-                                          //           singleroute.clear();
-                                          //           pathCovered.clear();
-                                          //         });
-                                          //         //currently using for play preview animation
-                                          //         callPreviewAnimation().then((value){
-                                          //           setState((){
-                                          //             _isPlaying=false;
-                                          //           });
-                                          //         });
-                                          //         // String msg=(pathState().sourceFloor!=pathState().destinationFloor)?tools.generateNarration(UserState.mapPathGuide,isMultiFloor: true):tools.generateNarration(UserState.mapPathGuide,isMultiFloor: false);
-                                          //         // print("narration ${msg}");
-                                          //         // speak(msg, _currentLocale).whenComplete((){
-                                          //         //   setState(() {
-                                          //         //     _isPlaying=false;
-                                          //         //   });
-                                          //         // });
-                                          //       },
-                                          //       icon:Icon(Icons.play_circle_outline_rounded),color: (_isPlaying)?Colors.blue:Colors.black,)):Container(),
-                                          Spacer(),
-                                          Semantics(
-                                            excludeSemantics: true,
-                                            child: IconButton(
-                                                onPressed:(){
-                                                  showMarkers();
-                                                  setState((){
-                                                    _isBuildingPannelOpen =
-                                                    true;
-                                                    _isRoutePanelOpen = false;
-                                                  });
-                                                  widget.directLandID = "";
-                                                  selectedroomMarker.clear();
-                                                  pathMarkers.clear();
-                                                  SingletonFunctionController.building.selectedLandmarkID = null;
-                                                  PathState =
-                                                      pathState.withValues(
-                                                          -1,
-                                                          -1,
-                                                          -1,
-                                                          -1,
-                                                          -1,
-                                                          -1,
-                                                          null,
-                                                          0);
-                                                  PathState.path.clear();
-                                                  PathState.sourcePolyID = "";
-                                                  PathState.destinationPolyID =
-                                                  "";
-                                                  PathState.sourceBid = "";
-                                                  PathState.destinationBid = "";
-                                                  singleroute.clear(); pathCovered.clear();
-                                                  //realWorldPath.clear();
-                                                  PathState.directions = [];
-                                                  interBuildingPath.clear();
-                                                  //  if(user.isnavigating==false){
-                                                  clearPathVariables();
-                                                  //}
-                                                  fitPolygonInScreen(
-                                                      patch.first);
-                                                  exitNavigation();
-                                                  setState((){
-                                                    onStart=false;
-                                                    startingNavigation=false;
-                                                  });
-                                                },
-                                                icon: SvgPicture.asset('assets/routeDetailPannel_ShareIcon.svg',color: Colors.black,)),
-                                          ),
-
-                                          Semantics(
-                                            excludeSemantics: true,
-                                            child: Container(
-                                              margin: EdgeInsets.only(right:10),
-                                              child: IconButton(
-                                                  onPressed:(){
-                                                    showMarkers();
-                                                    setState((){
-                                                      _isBuildingPannelOpen =
-                                                      true;
-                                                      _isRoutePanelOpen = false;
-                                                    });
-                                                    widget.directLandID = "";
-                                                    selectedroomMarker.clear();
-                                                    pathMarkers.clear();
-                                                    SingletonFunctionController
-                                                        .building
-                                                        .selectedLandmarkID = null;
-                                                    PathState = pathState.withValues(-1, -1, -1, -1, -1, -1,
-                                                        null,
-                                                        0);
-                                                    PathState.path.clear();
-                                                    PathState.sourcePolyID = "";
-                                                    PathState.destinationPolyID ="";
-                                                    PathState.sourceBid = "";
-                                                    PathState.destinationBid = "";
-                                                    singleroute.clear();
-                                                    //realWorldPath.clear();
-                                                    PathState.directions = [];
-                                                    interBuildingPath.clear();
-                                                    // if(user.isnavigating==false){
-                                                    clearPathVariables();
-                                                    //}
-                                                    fitPolygonInScreen(patch.first);
-                                                    exitNavigation();
-                                                    setState((){
-                                                      onStart=false;
-                                                      startingNavigation=false;
-                                                    });
-                                                  },
-                                                  icon: Icon(
-                                                    Icons.close_sharp,
-                                                    size: 25,
-                                                    color: Colors.black,
-                                                  )),
-                                            ),
-                                          ),
-
-
-                                        ],
-                                      ),
-                                      // Text(
-                                      //   "via",
-                                      //   style: const TextStyle(
-                                      //     fontFamily: "Roboto",
-                                      //     fontSize: 16,
-                                      //     fontWeight: FontWeight.w400,
-                                      //     color: Color(0xff4a4545),
-                                      //     height: 25 / 16,
-                                      //   ),
-                                      //   textAlign: TextAlign.left,
-                                      // ),
-                                      // Text(
-                                      //   "ETA- ${newTime.hour}:${newTime.minute}",
-                                      //   style: const TextStyle(
-                                      //     fontFamily: "Roboto",
-                                      //     fontSize: 14,
-                                      //     fontWeight: FontWeight.w400,
-                                      //     color: Color(0xff8d8c8c),
-                                      //     height: 20 / 14,
-                                      //   ),
-                                      //   textAlign: TextAlign.left,
-                                      // ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              PathState.sourceFloor != PathState.destinationFloor? ExcludeSemantics(
-                                child: Container(
-                                  child: Row(
-                                      children:[
-                                        Container(
-                                            margin:EdgeInsets.only(left:20),
-                                            child: SvgPicture.asset('assets/routeDetailPannel_manIcon.svg')),
-                                        Container(
-                                            margin:EdgeInsets.only(left:5),
-                                            child: Text("F${PathState.sourceFloor}",style: const TextStyle(
-                                              fontFamily: "Roboto",
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w500,
-                                              color: Color(0xff333333),
-                                              height: 9/12,
-                                            ),)
-                                        ),
-                                        Container(
-                                            margin:EdgeInsets.only(left:3),
-                                            child: Icon(Icons.keyboard_arrow_right_outlined)
-                                        ),
-                                        Container(
-                                            margin:EdgeInsets.only(left:5),
-                                            child: SvgPicture.asset('assets/routeDetailPannel_LisftIcon.svg',color: Colors.black,)),
-                                        Container(
-                                            margin:EdgeInsets.only(left:3),
-                                            child: Icon(Icons.keyboard_arrow_right_outlined)
-                                        ),
-                                        Container(
-                                            margin:EdgeInsets.only(right:3),
-                                            child: SvgPicture.asset('assets/routeDetailPannel_manIcon.svg')),
-                                        Container(
-                                            margin:EdgeInsets.only(right:3),
-                                            child: Text("F${PathState.destinationFloor}",style: const TextStyle(
-                                              fontFamily: "Roboto",
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w500,
-                                              color: Color(0xff333333),
-                                              height: 9/12,
-                                            ),)
-                                        ),
-
-                                      ]
-                                  ),
-                                ),
-                              ) : Container(),
-                              SizedBox(height: screenHeight*0.02),
-                              Container(
-                                color: Color(0xffFAFAFA),
-
-                                padding: EdgeInsets.only(
-                                    left: 17, top: 12, right: 17),
-                                child: Column(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                                  children: [
-                                    isSemanticEnabled? Container(
-                                      padding: EdgeInsets.only(bottom: 0),
-                                      color: Colors.white, // Background color set to white
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          kIsWeb?Container():startNavigationButton(),
-                                          stepsPreviewButton(),
-                                        ],
-                                      ),
-                                    ):Container(
-                                      padding: EdgeInsets.only(bottom: 0),
-                                      color: Colors.white, // Background color set to white
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          stepsPreviewButton(),
-                                          kIsWeb?Container():startNavigationButton()
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      height: screenHeight,
-                                      child: SingleChildScrollView(
-                                        child: Column(
-                                          children: [
-                                            Semantics(
-                                              header: true,
-                                              label:'Direction Instructions',
-                                              child: DirectionInstruction(
-                                                viewModel: DirectionInstructionViewModel(PathState.directions, PathState.sourceBid,PathState.sourceName,PathState.sourceFloor, PathState.destinationBid,PathState.destinationName,PathState.destinationFloor,Building.buildingData,context),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              height: 15,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                textAlign: TextAlign.center,
                               )
                             ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                )),
+                      )
+                          : Semantics(
+                        label: distance>=1000?"Walk For ${time.toInt()} min about (${(distance/1000).toStringAsFixed(1)} KM),":"Walk For ${time.toInt()} min about (${distance} m),",
+                        header: true,
+                        sortKey: const OrdinalSortKey(0),
+                        child: Focus(
+                          autofocus: true,
+                          onFocusChange: (hasFocus) {
+                            if (!hasFocus) {
+                              print("printhasFocus");
+                              _startbuttonFocus.requestFocus();
+                            } else {
+                              print("printhasFocus");
+                            }
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius:
+                              BorderRadius.all(Radius.circular(16.0)),
+                              color: Colors.white,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 32,
+                                  height: 4,
+                                  margin: EdgeInsets.only(top: 6, bottom: 6),
+                                  decoration: BoxDecoration(
+                                    color: Color(0xff79747e),
+                                    borderRadius: BorderRadius.circular(5.0),
+                                  ),
+                                ),
+                                Container(
+                                  margin:
+                                  EdgeInsets.only(left: 16, right: 16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          ExcludeSemantics(
+                                            child: Text(
+                                              'Walk',
+                                              style: TextStyle(
+                                                color: const Color(0xFF171717),
+                                                fontSize: 18,
+                                                fontFamily: 'Roboto',
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                          ),
+                                          Spacer(),
+                                          SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: _routeDetailPannelController
+                                                .isAttached
+                                                ? _routeDetailPannelController
+                                                .isPanelClosed
+                                                ? closeRoutePreview()
+                                                : closeRoutePreviewPannel()
+                                                : closeRoutePreview(),
+                                          )
+                                        ],
+                                      ),
+                                      Container(
+                                        margin: EdgeInsets.only(top: 4),
+                                        child: Semantics(
+                                          excludeSemantics: true,
+                                          child: Text(
+                                            distance>=1000?"${time.toInt()} min (${(distance/1000).toStringAsFixed(1)} KM)":"${time.toInt()} min (${distance} m)",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff615e5e),
+                                              height: 26 / 20,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                PathState.sourceFloor !=
+                                    PathState.destinationFloor
+                                    ? ExcludeSemantics(
+                                  child: Container(
+                                    child: Row(children: [
+                                      Container(
+                                          margin:
+                                          EdgeInsets.only(left: 20),
+                                          child: SvgPicture.asset(
+                                              'assets/routeDetailPannel_manIcon.svg')),
+                                      Container(
+                                          margin:
+                                          EdgeInsets.only(left: 5),
+                                          child: Text(
+                                            "F${PathState.sourceFloor}",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 12,
+                                              fontWeight:
+                                              FontWeight.w500,
+                                              color: Color(0xff333333),
+                                              height: 9 / 12,
+                                            ),
+                                          )),
+                                      Container(
+                                          margin:
+                                          EdgeInsets.only(left: 3),
+                                          child: Icon(Icons
+                                              .keyboard_arrow_right_outlined)),
+                                      Container(
+                                          margin:
+                                          EdgeInsets.only(left: 5),
+                                          child: SvgPicture.asset(
+                                            'assets/routeDetailPannel_LisftIcon.svg',
+                                            color: Colors.black,
+                                          )),
+                                      Container(
+                                          margin:
+                                          EdgeInsets.only(left: 3),
+                                          child: Icon(Icons
+                                              .keyboard_arrow_right_outlined)),
+                                      Container(
+                                          margin:
+                                          EdgeInsets.only(right: 3),
+                                          child: SvgPicture.asset(
+                                              'assets/routeDetailPannel_manIcon.svg')),
+                                      Container(
+                                          margin:
+                                          EdgeInsets.only(right: 3),
+                                          child: Text(
+                                            "F${PathState.destinationFloor}",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 12,
+                                              fontWeight:
+                                              FontWeight.w500,
+                                              color: Color(0xff333333),
+                                              height: 9 / 12,
+                                            ),
+                                          )),
+                                    ]),
+                                  ),
+                                )
+                                    : Container(),
+                                Container(
+                                  margin: EdgeInsets.only(
+                                      left: 12, top: 8, right: 12),
+                                  child: Row(
+                                    children: [
+                                      canNavigate()
+                                          ? startNavigationButton()
+                                          : playPreviewButton(),
+                                      const SizedBox(
+                                        width: 8,
+                                      ),
+                                      stepsPreviewButton(),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 8,
+                                ),
+                                Divider(
+                                  color: Color(0xffEBEBEB),
+                                ),
+                                PathState.directionInstructionViewModel !=
+                                    null
+                                    ? Expanded(
+                                  child: Container(
+                                    margin: EdgeInsets.only(
+                                        left: 16, right: 16),
+                                    child: SingleChildScrollView(
+                                      child: Column(
+                                        children: [
+                                          Semantics(
+                                            header: true,
+                                            label:
+                                            'Direction Instructions',
+                                            child: DirectionInstruction(
+                                              viewModel: PathState
+                                                  .directionInstructionViewModel!,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                    : Container()
+                              ],
+                            ),
+                          ),
+                        ),
+                      )),
+                ),
+              ),
+            ),
           ),
-
         ],
       ),
     );
   }
-  Widget startNavigationButton(){
+
+  Widget openInAppButton() {
+    return ElevatedButton.icon(
+      icon: Icon(Icons.phone_android_sharp, color: Colors.white),
+      label: Text('Open In App', style: TextStyle(color: Colors.white)),
+      onPressed: () async {
+        // HelperClass.openMobileApp();
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.blue,
+        padding: EdgeInsets.symmetric(horizontal: 22.0, vertical: 10.0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+      ),
+    );
+  }
+
+  Widget playPreviewButton() {
+
     return Semantics(
-      label: "Start Navigation",
+      label: "Play Preview",
       hint: "Button. Double tap to activate",
-
-
-
       sortKey: const OrdinalSortKey(1),
-
       child: Focus(
         focusNode: _startbuttonFocus,
         child: Semantics(
           excludeSemantics: true,
           child: ElevatedButton.icon(
-            icon: Icon(Icons.navigation, color: Colors.white),
-            label: Text('Start', style: TextStyle(color: Colors.white)),
+            icon: Icon(Icons.double_arrow_rounded, color: Colors.blue),
+            label: Text('Preview', style: TextStyle(color: Colors.blue)),
             onPressed: () async {
-              startNavigation();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              padding: EdgeInsets.symmetric(horizontal: 48.0, vertical: 10.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-  Widget stepsPreviewButton(){
-    return Semantics(
-      label: _routeDetailPannelController
-          .isAttached
-          ? _routeDetailPannelController
-          .isPanelClosed
-          ? "Steps Preview"
-          : "Close Steps preview"
-          : "Steps Preview",
-      hint: "Button. Double tap to activate",
+              InteractionManager().logInteraction("Play Preview");
+              if (playPreviewManager?.isPlaying == false) {
 
-      child: Focus(
-        child: Semantics(
-          excludeSemantics: true,
-          child: ElevatedButton.icon(
-            icon: Icon(
-              _routeDetailPannelController
-                  .isAttached
-                  ? _routeDetailPannelController
-                  .isPanelClosed
-                  ? Icons
-                  .short_text_outlined
-                  : Icons.map_sharp
-                  : Icons
-                  .short_text_outlined,
-              color: Colors.blue,
-            ),
-            label: Text(
-              _routeDetailPannelController
-                  .isAttached
-                  ? _routeDetailPannelController
-                  .isPanelClosed
-                  ? "${LocaleData.steps.getString(context)}"
-                  : "${LocaleData.maps.getString(context)}"
-                  : "${LocaleData.steps.getString(context)}",
-              style: TextStyle(
-                color: Colors.blue,
-              ),
-            ),
-            onPressed: () {
-              if (_routeDetailPannelController
-                  .isPanelOpen) {
-                _routeDetailPannelController
-                    .close();
-              } else {
-                _routeDetailPannelController
-                    .open();
-                _directionFocus.requestFocus();
+                List<String> intermediatesBids = tools.findIntermediateBuildings(PathState.singleCellListPath);
+                setBuildingFloors(intermediatesBids, floor: PathState.sourceFloor);
+                fitPathPoints(floor: PathState.sourceFloor, bid: PathState.sourceBid);
+
+                playPreviewManager?.clearPreview();
+                PlayPreviewManager.alignMapToPath = alignMapToPath;
+                PlayPreviewManager.findLift = findLift;
+                PlayPreviewManager.findCommonLift = findCommonLift;
+                PlayPreviewManager.createRooms =
+                    (int floor, String bid) {
+                  print("got called");
+                  List<String> intermediatesBids = tools.findIntermediateBuildings(PathState.singleCellListPath);
+                  setBuildingFloors([...intermediatesBids, bid], floor: floor);
+                  fitPathPoints(floor: floor, bid: bid);
+                };
+                playPreviewManager?.playPreviewAnimation(
+                    pathList: PathState.singleCellListPath).then((value){
+                  List<String> intermediatesBids = tools.findIntermediateBuildings(PathState.singleCellListPath);
+                  setBuildingFloors(intermediatesBids, floor: PathState.sourceFloor);
+                  fitPathPoints(floor: PathState.sourceFloor);
+                });
               }
             },
             style: ElevatedButton.styleFrom(
@@ -9227,218 +9844,312 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     );
   }
 
-  Future<void> startNavigation() async {
-    if(startingNavigation){
-      if(currentNavigationLog==null){
+  void fitPathPoints({int? floor, String? bid}) {
+    floor ??= SingletonFunctionController
+        .building.floor[bid??buildingAllApi.getStoredString()];
+    List<Cell> renderedPath = [];
+    if(bid != null){
+      renderedPath = PathState.singleCellListPath.where((cell) => cell.floor == floor && cell.bid == bid).toList();
+    }
+    if(renderedPath.isEmpty){
+      renderedPath = PathState.singleCellListPath.where((cell) => cell.floor == floor).toList();
+    }
+    if (renderedPath.length >=2) {
+      List<LatLng> points = [LatLng(renderedPath.first.lat, renderedPath.first.lng), LatLng(renderedPath.last.lat, renderedPath.last.lng)];
+      fitTwoPoints(points);
+    }
+  }
 
-        startNavigationLog(
-            UserCredentials()
-                .getUserId(),
-            PathState.sourcePolyID,
-            PathState.destinationPolyID);
+  Widget closeRoutePreviewPannel() {
+    return IconButton(
+      onPressed: () {
+        _routeDetailPannelController.close();
+      },
+      padding: EdgeInsets.zero, // No padding
+      icon: Icon(
+        Icons.expand_circle_down,
+        size: 22, // Smaller visual size
+        color: Colors.black,
+      ),
+    );
+  }
+
+  Widget closeRoutePreview() {
+    return GestureDetector(
+      onTap: () {
+        playPreviewManager?.clearPreview();
+
+        SingletonFunctionController.building.landmarkdata!.then((value) async {
+          print("SingletonFunctionController landmarks ${value.landmarks!.length}");
+          List<Landmarks> createLandmarks = [];
+          value.landmarks!.forEach((value){
+            if(value.floor == SingletonFunctionController.building.floor[value.buildingID]){
+              createLandmarks.add(value);
+            }
+          });
+          land current = land();
+          landmarkMarkers.clear();
+          current.landmarks = createLandmarks;
+          createMarkers(current, 0, buildingAllApi.selectedBuildingID,forced: true);
+        });
+
+        showMarkers();
+        setState(() {
+          _isBuildingPannelOpen = true;
+          _isRoutePanelOpen = false;
+        });
+        widget.directLandID = "";
+        selectedroomMarker.clear();
+        pathMarkers.clear();
+        SingletonFunctionController.building.selectedLandmarkID = null;
+        PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
+        PathState.path.clear();
+        PathState.sourcePolyID = "";
+        PathState.destinationPolyID = "";
+        PathState.sourceBid = "";
+        PathState.destinationBid = "";
+        singleroute.clear();
+        PathState.directions = [];
+        interBuildingPath.clear();
+        fitPolygonInScreen(patch.first);
+        exitNavigation();
+        setState(() {
+          playPreviewManager?.clear();
+          onStart = false;
+          startingNavigation = false;
+        });
+      },
+      child: Semantics(
+        label: "Close route preview",
+        child: Icon(
+          Icons.close,
+          size: 22, // Smaller visual size
+          color: Colors.black,
+        ),
+      ),
+    );
+  }
+
+  Widget startNavigationButton() {
+
+    return Semantics(
+      label: "Start Navigation",
+      hint: "Button. Double tap to activate",
+      sortKey: const OrdinalSortKey(1),
+      child: Focus(
+        focusNode: _startbuttonFocus,
+        child: Semantics(
+          excludeSemantics: true,
+          child: ElevatedButton.icon(
+            icon: Icon(Icons.navigation, color: Colors.white),
+            label: Text('Start', style: TextStyle(color: Colors.white)),
+            onPressed: () async {
+              InteractionManager().logInteraction("Start Navigation");
+              print("landmarkMarkers.clear() ${landmarkMarkers.length} ${_landmarks.length}");
+
+
+              landmarkMarkers.forEach((value){
+                print("value ${value.markerId.value}");
+                if(!value.markerId.value.toLowerCase().contains("main entry")){
+                  value.visible = false;
+                }
+              });
+
+              // landmarkMarkers.clear();
+              // _landmarks.clear();
+              clustringOFF = true;
+              startNavigation();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              padding: EdgeInsets.symmetric(horizontal: 22.0, vertical: 10.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget stepsPreviewButton() {
+    return Semantics(
+      label: _routeDetailPannelController.isAttached
+          ? _routeDetailPannelController.isPanelClosed
+          ? "Steps Preview"
+          : "Close Steps preview"
+          : "Steps Preview",
+      hint: "Button. Double tap to activate",
+      child: Focus(
+        child: Semantics(
+          excludeSemantics: true,
+          child: ElevatedButton.icon(
+            icon: Icon(
+              _routeDetailPannelController.isAttached
+                  ? _routeDetailPannelController.isPanelClosed
+                  ? Icons.short_text_outlined
+                  : Icons.map_sharp
+                  : Icons.short_text_outlined,
+              color: Colors.blue,
+            ),
+            label: Text(
+              _routeDetailPannelController.isAttached
+                  ? _routeDetailPannelController.isPanelClosed
+                  ? "${LocaleData.steps.getString(context)}"
+                  : "${LocaleData.maps.getString(context)}"
+                  : "${LocaleData.steps.getString(context)}",
+              style: TextStyle(
+                color: Colors.blue,
+              ),
+            ),
+            onPressed: () {
+              if (_routeDetailPannelController.isPanelOpen) {
+                _routeDetailPannelController.close();
+              } else {
+                _routeDetailPannelController.open();
+                // _directionFocus.requestFocus();
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              side: BorderSide(color: Colors.blue),
+              padding: EdgeInsets.symmetric(horizontal: 22.0, vertical: 10.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool canNavigate() {
+    if (kIsWeb) {
+      return false;
+    }
+    if (PathState.sourceX == user.coordX && PathState.sourceY == user.coordY) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  // void pathPreview(){
+  //   if (currentNavigationLog != null) {
+  //
+  //   }
+  // }
+
+  Future<void> startNavigation() async {
+    if (startingNavigation) {
+      if (currentNavigationLog == null) {
+        startNavigationLog(UserCredentials().getUserId(),
+            PathState.sourcePolyID, PathState.destinationPolyID);
       }
-      tools.setBuildingAngle(
-          SingletonFunctionController
-              .building
-              .patchData[PathState
-              .sourceBid]!
-              .patchData!
-              .buildingAngle!);
-      if (PathState.sourceX == PathState.destinationX &&
-          PathState.sourceY == PathState.destinationY) {
+      clearMarkers();
+      tools.setBuildingAngle(SingletonFunctionController
+          .building.patchData[PathState.sourceBid]!.patchData!.buildingAngle!);
+      if (PathState.sourceBid == PathState.destinationBid && PathState.sourceFloor == PathState.destinationFloor && tools.calculateDistance([PathState.sourceX, PathState.sourceY], [PathState.destinationX, PathState.destinationY]) < 15) {
         //HelperClass.showToast("Source and Destination can not be same");
         setState(() {
           _isRoutePanelOpen = false;
         });
-        closeNavigation();
+        closeNavigation(force: true);
         return;
       }
       setState(() {
         circles.clear();
         _markers.clear();
         markerSldShown = false;
-
       });
       user.onConnection = false;
-      PathState.didPathStart =
-      true;
-
-      UserState.cols =
-      SingletonFunctionController
-          .building
-          .floorDimenssion[
-      PathState
-          .sourceBid]![PathState
-          .sourceFloor]![0];
-      UserState
-          .rows = SingletonFunctionController
-          .building
-          .floorDimenssion[
-      PathState
-          .destinationBid]![PathState
-          .destinationFloor]![1];
-      UserState.lngCode =
-          _currentLocale;
-      UserState.reroute =
-          reroute;
-      UserState
-          .closeNavigation =
-          closeNavigation;
+      PathState.didPathStart = true;
+      _currentPoint = null;
+      UserState.cols = SingletonFunctionController.building
+          .floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0];
+      UserState.rows = SingletonFunctionController.building.floorDimenssion[
+      PathState.destinationBid]![PathState.destinationFloor]![1];
+      UserState.lngCode = _currentLocale;
+      UserState.reroute = reroute;
+      UserState.closeNavigation = closeNavigation;
       UserState.alignMapToPath = alignMapToPath;
-      UserState.startOnPath =
-          startOnPath;
+      UserState.startOnPath = startOnPath;
       UserState.speak = speak;
-      UserState.paintMarker =
-          paintMarker;
-      UserState.createCircle =
-          updateCircle;
-
+      UserState.paintMarker = paintMarker;
+      UserState.createCircle = updateCircle;
+      UserState.autoRecenter = recenterMap;
       //detected=false;
       //user.SingletonFunctionController.building = SingletonFunctionController.building;
-      wsocket.message["path"]
-      ["source"] =
-          PathState.sourceName;
-      wsocket.message["path"]
-      ["destination"] =
-          PathState
-              .destinationName;
+      print("PathState.sourceName:${user.locationName}");
+      wsocket.message["path"]["source"] = user.locationName;
+      wsocket.message["path"]["destination"] = PathState.destinationName;
+      // networkManager.ws.updatePath(source: user.locationName);
+      // networkManager.ws.updatePath(destination: PathState.destinationName);
       // user.ListofPaths = PathState.listofPaths;
       // user.patchData = SingletonFunctionController.building.patchData;
       // user.buildingNumber = PathState.listofPaths.length-1;
-      buildingAllApi
-          .selectedID =
-          PathState.sourceBid;
-      buildingAllApi
-          .selectedBuildingID =
-          PathState.sourceBid;
-      UserState.cols =
-      SingletonFunctionController
-          .building
-          .floorDimenssion[
-      PathState
-          .sourceBid]![PathState
-          .sourceFloor]![0];
-      UserState.rows =
-      SingletonFunctionController
-          .building
-          .floorDimenssion[
-      PathState
-          .sourceBid]![PathState
-          .sourceFloor]![1];
-      user.bid =
-          PathState.sourceBid;
-      user.coordX =
-          PathState.sourceX;
-      user.coordY =
-          PathState.sourceY;
+      buildingAllApi.selectedID = PathState.sourceBid;
+      buildingAllApi.selectedBuildingID = PathState.sourceBid;
+      UserState.cols = SingletonFunctionController.building
+          .floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![0];
+      UserState.rows = SingletonFunctionController.building
+          .floorDimenssion[PathState.sourceBid]![PathState.sourceFloor]![1];
+      user.bid = PathState.sourceBid;
+      user.coordX = PathState.sourceX;
+      user.coordY = PathState.sourceY;
       user.temporaryExit = false;
-      UserState.reroute =
-          reroute;
-      UserState
-          .closeNavigation =
-          closeNavigation;
-      UserState.alignMapToPath =
-          alignMapToPath;
-      UserState.startOnPath =
-          startOnPath;
+      UserState.reroute = reroute;
+      UserState.closeNavigation = closeNavigation;
+      UserState.alignMapToPath = alignMapToPath;
+      UserState.startOnPath = startOnPath;
       UserState.speak = speak;
-      UserState.paintMarker =
-          paintMarker;
-      UserState.createCircle =
-          updateCircle;
-      UserState.changeBuilding =
-          changeBuilding;
+      UserState.paintMarker = paintMarker;
+      UserState.createCircle = updateCircle;
+      UserState.changeBuilding = changeBuilding;
+      UserState.autoRecenter = recenterMap;
       //user.realWorldCoordinates = PathState.realWorldCoordinates;
-      user.floor =
-          PathState.sourceFloor;
-
-      user.path = PathState
-          .singleListPath;
+      print("startnavigation 1 ${PathState.sourceFloor}");
+      user.floor = PathState.sourceFloor;
+      user.path = PathState.singleListPath;
       user.isnavigating = true;
-      user.cellPath = PathState
-          .singleCellListPath;
-      PathState
-          .singleCellListPath
-          .forEach(
-              (element) {});
-      print("printuser1 ${user.pathobj.sourceFloor}  ${PathState.sourceFloor}");
+      user.cellPath = PathState.singleCellListPath;
+      PathState.singleCellListPath.forEach((element) {});
       user.pathobj = PathState;
-      user
-          .moveToStartofPath(context)
-          .then((value) async {
+      user.moveToStartofPath(context).then((value) async {
+        print("startnavigation 2 ${user.floor}");
         setState(() {
-          PathState.index = user.pathobj.index;
           markers.clear();
-          List<double> val = tools.localtoglobal(
-              user.showcoordX
-                  .toInt(),
-              user.showcoordY
-                  .toInt(),
-              SingletonFunctionController
-                  .building
-                  .patchData[
-              PathState
-                  .sourceBid]);
-          if(markers.isEmpty){
+          List<double> val = [user.lat, user.lng];
+          if (markers.isEmpty) {
             print("markers were empty");
-            markers.putIfAbsent(
-                user.bid,
-                    () => []);
-            markers[user.bid]
-                ?.add(Marker(
-              markerId: MarkerId(
-                  "UserLocation"),
-              position: LatLng(
-                  val[0], val[1]),
-              icon:
-              BitmapDescriptor
-                  .fromBytes(
-                  userloc),
-              anchor: Offset(
-                  0.5, 0.829),
+            markers.putIfAbsent(user.bid, () => []);
+            markers[user.bid]?.add(Marker(
+              markerId: MarkerId("UserLocation"),
+              position: LatLng(val[0], val[1]),
+              icon: BitmapDescriptor.fromBytes(userloc),
+              anchor: Offset(0.5, 0.829),
             ));
-          }else{
+          } else {
             print("markers were not empty");
           }
+          val = [user.lat, user.lng];
 
-
-          val = tools.localtoglobal(
-              user.coordX
-                  .toInt(),
-              user.coordY
-                  .toInt(),
+          List<double> destination = tools.localtoglobal(
+              PathState.destinationX,
+              PathState.destinationY,
               SingletonFunctionController
-                  .building
-                  .patchData[
-              PathState
-                  .sourceBid]);
-
-          List<double> destination = tools.localtoglobal(PathState.destinationX, PathState.destinationY, SingletonFunctionController
-              .building
-              .patchData[
-          PathState
-              .destinationBid]);
-
+                  .building.patchData[PathState.destinationBid]);
           PathState.destinationLat = destination[0];
           PathState.destinationLng = destination[1];
-
           user.pathobj = PathState;
-
-          print("printuser2 ${user.pathobj.sourceFloor}  ${PathState.sourceFloor}");
-
-          if (kDebugMode) {
-            markers[user.bid]
-                ?.add(Marker(
-              markerId: MarkerId(
-                  "debug"),
-              position: LatLng(
-                  val[0],
-                  val[1]),
-              icon: BitmapDescriptor
-                  .fromBytes(
-                  userlocdebug),
-              anchor: Offset(
-                  0.5, 0.829),
+          if (!kIsWeb && kDebugMode) {
+            markers[user.bid]?.add(Marker(
+              markerId: MarkerId("debug"),
+              position: LatLng(val[0], val[1]),
+              icon: BitmapDescriptor.fromBytes(userlocdebug),
+              anchor: Offset(0.5, 0.829),
             ));
           }
           // circles.add(
@@ -9454,87 +10165,66 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         });
       });
       _isRoutePanelOpen = false;
+      SingletonFunctionController.currentBeacon ="";
+      SingletonFunctionController.building.selectedLandmarkID = null;
 
-      SingletonFunctionController
-          .building
-          .selectedLandmarkID =
-      null;
+      _isnavigationPannelOpen = true;
 
-      _isnavigationPannelOpen =
-      true;
-
-      semanticShouldBeExcluded =
-      false;
+      semanticShouldBeExcluded = false;
 
       StartPDR();
 
-      if (SingletonFunctionController
-          .building
-          .floor[
-      PathState
-          .sourceBid] !=
-          PathState
-              .sourceFloor) {
-        SingletonFunctionController
-            .building.floor[
-        PathState
-            .sourceBid] =
-            PathState
-                .sourceFloor;
+      if (SingletonFunctionController.building.floor[PathState.sourceBid] !=
+          PathState.sourceFloor) {
+        SingletonFunctionController.building.floor[PathState.sourceBid] =
+            PathState.sourceFloor;
         createRooms(
             SingletonFunctionController
-                .building
-                .polylinedatamap[
-            PathState
-                .sourceBid]!,
-            PathState
-                .sourceFloor);
-        SingletonFunctionController
-            .building
-            .landmarkdata!
-            .then((value) {
-          createMarkers(
-              value,
-              PathState
-                  .sourceFloor,
-              bid: PathState
-                  .sourceBid);
+                .building.polylinedatamap[PathState.sourceBid]!,
+            PathState.sourceFloor);
+        SingletonFunctionController.building.landmarkdata!.then((value) {
+          createMarkers(value, PathState.sourceFloor, PathState.sourceBid);
         });
       }
       await Future.delayed(const Duration(milliseconds: 500));
-
       alignMapToPath([
-        PathState
-            .singleCellListPath[
-        user.pathobj
-            .index]
-            .lat,
-        PathState
-            .singleCellListPath[
-        user.pathobj
-            .index ]
-            .lng
+        PathState.singleCellListPath[user.pathobj.index].lat,
+        PathState.singleCellListPath[user.pathobj.index].lng
       ], [
-        PathState
-            .singleCellListPath[
-        user.pathobj
-            .index +
-            2]
-            .lat,
-        PathState
-            .singleCellListPath[
-        user.pathobj
-            .index +
-            2]
-            .lng
-      ]);
-
+        PathState.singleCellListPath[user.pathobj.index + 1].lat,
+        PathState.singleCellListPath[user.pathobj.index + 1].lng
+      ], isTurn: true,animate: true);
       print("startnavigation function called");
-      Future.delayed(Duration(seconds: 2)).then((onValue){
+      Future.delayed(Duration(seconds: 2)).then((onValue) {
         setState(() {
-          onStart=true;
+          onStart = true;
         });
       });
+      double angle = tools.calculateAngleBWUserandCellPath(
+          user.cellPath[user.pathobj.index],
+          user.cellPath[user.pathobj.index + 1],
+          user.pathobj.numCols![user.bid]![user.floor]!,
+          user.theta);
+      String direction = tools.angleToClocks(angle, context) == "None"
+          ? "Straight"
+          : tools.angleToClocks(angle, context);
+
+      print("direction and angle we got :${direction}--${angle}");
+      if (user.floor != user.pathobj.destinationFloor &&
+          user.pathobj.connections[user.bid]?[user.floor] ==
+              (user.showcoordY * UserState.cols + user.showcoordX)) {
+        speak(
+            "Use this lift and go to ${tools.numericalToAlphabetical(user.pathobj.destinationFloor)} floor",
+            _currentLocale,
+            prevpause: false);
+
+      } else if (direction == "Straight") {
+        speak(convertTolng("Go Straight", _currentLocale, ''), _currentLocale);
+      } else {
+        print("speakdirection $direction");
+        speak(convertTolng("Turn $direction", _currentLocale, direction),
+            _currentLocale);
+      }
       user.snapper.setPath(user.cellPath);
       await user.snapper.startGpsUpdates();
       user.handleGPS(context);
@@ -9543,7 +10233,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   final FocusNode _focusNodeA = FocusNode();
   final FocusNode _focusNodeC = FocusNode();
-  String semanticsLabel="";
+  String semanticsLabel = "";
   int _rating = 0;
   String _feedback = '';
   PanelController _feedbackController = PanelController();
@@ -9581,9 +10271,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       visible: showFeedback,
       child: Focus(
         autofocus: true,
+        focusNode: _destination,
         child: Semantics(
           excludeSemantics: false,
-          label: "You’ve Arrived ${destiN.isEmpty ? "Your Destination" : destiN}. It is ${finalDestinationDirection}",
+          label:
+          "You’ve Arrived ${destiN.isEmpty ? "Your Destination" : destiN}. It is ${finalDestinationDirection}",
           child: Container(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -9821,7 +10513,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                           UserCredentials().getuserName(),
                           PathState.sourcePolyID,
                           PathState.destinationPolyID,
-                          CONSTANTS().playStore);
+                          "com.iwayplus.accessibleashoka");
                       if (_feedback.isNotEmpty) {}
                       showFeedback = false;
                       _feedbackController.hide();
@@ -9860,75 +10552,56 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     );
   }
 
-  void _submitFeedback() {
-    String feedbackMessage = 'Rating: $_rating\n';
-    if (_feedback.isNotEmpty) {
-      feedbackMessage += 'Feedback: $_feedback';
-    }
 
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(
-    //     content: Text(feedbackMessage),
-    //     duration: Duration(seconds: 3),
-    //   ),
-    // );
-    _feedbackController.close();
-    _feedbackTextController.clear();
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => VenueSelectionScreen()),
-          (Route<dynamic> route) => false,
-    );
-  }
-  Future<void> alignMapToPath(List<double> A, List<double> B,{bool isTurn=false}) async {
+  LatLng? lastTarget;
+  double cameraBearing = 0;
+  double smoothingFactor = 0.05; // keep camera fixed until a turn
+
+  Future<void> alignMapToPath(List<double> A, List<double> B,{bool isTurn=false, bool animate = false}) async {
     print("enteredddd");
     print(onStart);
-    double screenHeight=MediaQuery.of(context).size.height;
-    double pixelRatio=MediaQuery.of(context).devicePixelRatio;
     mapState.tilt = 52.5;
-    List<double> val = tools.localtoglobal(
-        user.showcoordX.toInt(),
-        user.showcoordY.toInt(),
-        SingletonFunctionController.building.patchData[user.bid]);
     mapState.target = LatLng(A[0], A[1]);
     mapState.bearing = tools.calculateBearing(A, B);
-    ScreenCoordinate screenCenter = await _googleMapController.getScreenCoordinate(mapState.target);
-
-    // Adjust the y-coordinate to shift the camera upwards (moving the target down)
-    int newX = screenCenter.x-10;
-    int newY=0;
-    if(Platform.isAndroid){
-      newY = screenCenter.y  - ((screenHeight*0.58)).toInt();
-    }else{
-      newY = screenCenter.y  - ((screenHeight*0.08)*pixelRatio).toInt();
-    }// Adjust 300 as needed for how far you want the user at the bottom
-
-    // Convert the new screen coordinate back to LatLng
-    LatLng newCameraTarget = await _googleMapController.getLatLng(ScreenCoordinate(x: newX, y: newY));
+    if(mapState.bearing == 0.0){
+      _googleMapController.animateCamera(CameraUpdate.zoomTo(21));
+      return;
+    }
+    print("mapState.bearing ${mapState.bearing} ${mapState.tilt} ${mapState.zoom} ${mapState.target}");
+// if(isTurn) {
     setState(() {
-      if(isTurn){
-        Future.delayed(Duration(microseconds: 2500)).then((onValue){
-          _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
-            CameraPosition(
-                target: (onStart==false)?mapState.target:mapState.target,
-                zoom: mapState.zoom,
-                bearing: mapState.bearing!,
-                tilt: mapState.tilt),
-          ));
-        });
-
-      }else{
+      if (animate) {
+        mapState.zoom=21;
         _googleMapController.moveCamera(CameraUpdate.newCameraPosition(
           CameraPosition(
-              target: (onStart==false)?mapState.target:mapState.target,
+              target: mapState.target,
               zoom: mapState.zoom,
               bearing: mapState.bearing!,
               tilt: mapState.tilt),
         ));
+      } else {
+        _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(
+              target: mapState.target,
+              zoom: 21.0,
+              bearing: mapState.bearing!,
+              tilt: mapState.tilt),
+        ));
       }
-
-
     });
+// }
+  }
+  static double normalizeBearing(double newBearing, double lastBearing) {
+    double diff = newBearing - lastBearing;
+    // wrap into [-180, 180] range
+    if (diff > 180) diff -= 360;
+    if (diff < -180) diff += 360;
+
+    return lastBearing + diff;
+  }
+
+  static double smoothBearing(double current, double target, double factor) {
+    return current + (target - current) * factor; // factor ~0.2
   }
 
   void shouldBeOpenedVarChangeFunc() {
@@ -9945,17 +10618,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
   void noshouldStepOpenfunc() {
-    Future.delayed(Duration(seconds: 10)).then((_){
+    Future.delayed(Duration(seconds: 10)).then((_) {
       setState(() {
         shouldStepOpen = false;
       });
     });
-
   }
+
   bool isLift = false;
   final ScrollController _scrollController = ScrollController();
   Timer? _scrollTimer;
   Timer? _messageTimer;
+  bool disposed = false;
 
   void _startScrolling() {
     _scrollTimer = Timer.periodic(Duration(seconds: 5), (timer) {
@@ -9991,14 +10665,22 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   void resumeCompassSubscription() {
     compassSubscription?.resume();
   }
+
   void cancelCompassSubscription() {
     compassSubscription.cancel();
   }
-  void getPathDirections(){
+
+  void getPathDirections() {
     setState(() {
-      user.theta = tools.calculateBearing_fromLatLng(LatLng(user.lat, user.lng), LatLng(user.cellPath[user.pathobj.index+1].lat, user.cellPath[user.pathobj.index+1].lng));
+      user.theta = tools.calculateBearing_fromLatLng(
+          LatLng(user.lat, user.lng),
+          LatLng(user.cellPath[user.pathobj.index + 1].lat,
+              user.cellPath[user.pathobj.index + 1].lng));
       if (mapState.interaction2) {
-        mapState.bearing = tools.calculateBearing_fromLatLng(LatLng(user.lat, user.lng), LatLng(user.cellPath[user.pathobj.index+1].lat, user.cellPath[user.pathobj.index+1].lng));
+        mapState.bearing = tools.calculateBearing_fromLatLng(
+            LatLng(user.lat, user.lng),
+            LatLng(user.cellPath[user.pathobj.index + 1].lat,
+                user.cellPath[user.pathobj.index + 1].lng));
         _googleMapController.moveCamera(
           CameraUpdate.newCameraPosition(
             CameraPosition(
@@ -10012,13 +10694,37 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       } else {
         if (markers.length > 0 && markers[user.bid] != null)
           markers[user.bid]![0] = customMarker.rotate(
-              tools.calculateBearing_fromLatLng(LatLng(user.lat, user.lng), LatLng(user.cellPath[user.pathobj.index+1].lat, user.cellPath[user.pathobj.index+1].lng)) - mapbearing, markers[user.bid]![0]);
+              tools.calculateBearing_fromLatLng(
+                  LatLng(user.lat, user.lng),
+                  LatLng(user.cellPath[user.pathobj.index + 1].lat,
+                      user.cellPath[user.pathobj.index + 1].lng)) -
+                  mapbearing,
+              markers[user.bid]![0]);
       }
-
     });
   }
-  bool insideLift=false;
-  bool onStart=false;
+
+  void moveUserHard() {
+    bool isvalid = MotionModel.isValidStep(
+        user,
+        SingletonFunctionController
+            .building.floorDimenssion[user.bid]![user.floor]![0],
+        SingletonFunctionController
+            .building.floorDimenssion[user.bid]![user.floor]![1],
+        SingletonFunctionController
+            .building.nonWalkable[user.bid]![user.floor]!,
+        reroute,
+        context);
+    if (isvalid) {
+      user.move(context).then((value) {
+        print("renderedddd here");
+        ();
+      });
+    }
+  }
+
+  bool insideLift = false;
+  bool onStart = false;
   Widget navigationPannel() {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -10026,7 +10732,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     double distance = 0;
     DateTime currentTime = DateTime.now();
     if (PathState.singleCellListPath.isNotEmpty) {
-      distance = tools.PathDistance(PathState.singleCellListPath);
+      distance = tools.PathDistance(PathState.singleCellListPath,
+          index: user.pathobj.index);
       time = distance / 120;
       time = time.ceil().toDouble();
 
@@ -10034,235 +10741,184 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       distance = double.parse(distance.toStringAsFixed(1));
     }
     DateTime newTime = currentTime.add(Duration(minutes: time.toInt()));
-
-    try {
-      //implement the turn functionality.
-      // if(UserState.reachedLift){
-      //    updateCircle(user.lat,user.lng);
-      //     UserState.reachedLift=false;
-      //
-      // }
-
-      if (user.isnavigating && user.pathobj.numCols![user.bid] != null) {
-        int col = user.pathobj.numCols![user.bid]![user.floor]!;
-
-        if (MotionModel.reached(user, col) == false &&
-            user.bid == user.cellPath[user.pathobj.index + 1].bid) {
-          List<int> a = [user.showcoordX, user.showcoordY];
-          List<int> tval = tools.eightcelltransition(user.theta);
-          //
-          List<int> b = [user.showcoordX + tval[0], user.showcoordY + tval[1]];
-
-          int index =
-          user.path.indexOf((user.showcoordY * col) + user.showcoordX);
-
-          int node = user.path[index + 1];
-
-
-
-          List<int> c = [node % col, node ~/ col];
-          int val = tools.calculateAngleSecond(a, b, c).toInt();
-
-          try {
-            if (user.bid == buildingAllApi.outdoorID) {
-              double a = user.theta<0?user.theta+360:user.theta;
-              val = (tools.calculateBearing_fromLatLng(
-                  LatLng(user.cellPath[index].lat, user.cellPath[index].lng),
-                  LatLng(user.cellPath[index + 1].lat,
-                      user.cellPath[index + 1].lng)) - a).toInt().abs();
-
-              if(val<10 && val>-10){
-                val = 0;
-              }
-            }
-          }catch(_){}
-          for (int i = 0; i < getPoints.length; i++) {
-            if (val == 0 || (val<60 && val>-60)) {
-              if(pdr == null || pdr!.isPaused){
-                Future.delayed(Duration(milliseconds: 1500)).then((value) => {
-                  print("pdr started"),
-                  StartPDR(),
-                });
-              }
-              break;
-            }
-            if (getPoints[i][0] == user.showcoordX &&
-                getPoints[i][1] == user.showcoordY) {
-              print("pdr stopped");
-
-              StopPDR();
-              getPoints.removeAt(i);
-              break;
-            }
-          }
-        }
-      }
-    }catch(e){}
     return Visibility(
         visible: _isnavigationPannelOpen,
         child: Stack(
           children: [
-            SlidingUpPanel(
-              controller: _panelController,
-              isDraggable: false,
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24), topRight: Radius.circular(24)),
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 20.0,
-                  color: Colors.grey,
-                ),
-              ],
-              minHeight: 92,
-              maxHeight: screenHeight * 0.9,
-              snapPoint: 0.9,
-              panel: Container(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Container(
-                      height: 92,
-                      padding: EdgeInsets.fromLTRB(11, 22, 14.08, 20),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            child: Semantics(
-                              onDidGainAccessibilityFocus: noshouldStepOpenfunc,
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    width: 12,
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                    children: [
-                                      Semantics(
-                                        excludeSemantics: false,
-                                        child: Row(
-                                          children: [
-                                            Semantics(
-                                              label: "Travel time",
-                                              child: Text(
-                                                "${time.toInt()} min",
-                                                style: const TextStyle(
-                                                    fontFamily: "Roboto",
-                                                    fontSize: 20,
-                                                    fontWeight:
-                                                    FontWeight.w700,
-                                                    height: 26 / 20,
-                                                    color: Color(0xffDC6A01)),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                            ),
-                                            Text(
-                                              " (${distance} m)",
-                                              style: const TextStyle(
-                                                fontFamily: "Roboto",
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.w700,
-                                                height: 26 / 20,
-                                              ),
-                                              textAlign: TextAlign.left,
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 4,
-                                      ),
-                                      Semantics(
-                                        excludeSemantics: true,
-                                        child: Text(
-                                          "ETA- ${newTime.hour}:${newTime.minute}",
-                                          style: const TextStyle(
-                                            fontFamily: "Roboto",
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            color: Color(0xff8d8c8c),
-                                            height: 20 / 14,
-                                          ),
-                                          textAlign: TextAlign.left,
-                                        ),
-                                      )
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                          Semantics(
-                            label: "Exit navigation",
-                            excludeSemantics: true,
-                            child: Container(
-                              height: 40,
-                              width: 65,
-                              decoration: BoxDecoration(
-                                color: Color(0xffDF3535),
-                                borderRadius: BorderRadius.circular(20.0),
-                              ),
-                              child: TextButton(
-                                  onPressed: () {
-                                    int stackSize = getStackSize(context);
-                                    print("Active Screens: $stackSize");
-                                    setState(() {
-                                      StopPDR();
-                                      onStart=false;
-                                      startingNavigation=true;
-                                      PathState.sourceX = user.coordX;
-                                      PathState.sourceY = user.coordY;
-                                      PathState.sourceFloor = user.floor;
-                                      PathState.sourceBid = user.bid;
-                                      PathState.sourceLat = user.lat;
-                                      PathState.sourceLng = user.lng;
-                                      PathState.sourceName = "Your current location";
-
-                                      user.temporaryExit = true;
-                                      user.isnavigating = false;
-                                      _isRoutePanelOpen = true;
-                                      _isnavigationPannelOpen = false;
-
-                                      if (pathMarkers[user.bid] != null) {
-                                        // setCameraPosition(
-                                        //     pathMarkers[user.bid]![
-                                        //     SingletonFunctionController
-                                        //         .building
-                                        //         .floor[user.bid]]!);
-                                        List<LatLng> ll = [pathMarkers[user.bid]![
-                                        SingletonFunctionController
-                                            .building
-                                            .floor[user.bid]]!.first.position, pathMarkers[user.bid]![
-                                        SingletonFunctionController
-                                            .building
-                                            .floor[user.bid]]!.last.position];
-                                        fitTwoPoints(ll);
-                                      }
-                                    });
-                                  },
-                                  child: Text(
-                                    "${LocaleData.exit.getString(context)}",
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xffFFFFFF),
-                                      height: 20 / 14,
+            SafeArea(
+              child: SlidingUpPanel(
+                controller: _panelController,
+                isDraggable: false,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24)),
+                boxShadow: [
+                  BoxShadow(
+                    blurRadius: 20.0,
+                    color: Colors.grey,
+                  ),
+                ],
+                minHeight: 92,
+                maxHeight: screenHeight * 0.9,
+                snapPoint: 0.9,
+                panel: Container(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 92,
+                        padding: EdgeInsets.fromLTRB(11, 22, 14.08, 20),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              child: Semantics(
+                                onDidGainAccessibilityFocus:
+                                noshouldStepOpenfunc,
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 12,
                                     ),
-                                    textAlign: TextAlign.left,
-                                  )),
+                                    Column(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                      children: [
+                                        Semantics(
+                                          excludeSemantics: false,
+                                          child: Row(
+                                            children: [
+                                              Semantics(
+                                                label: "Travel time",
+                                                child: Text(
+                                                  "${time.toInt()} min",
+                                                  style: const TextStyle(
+                                                      fontFamily: "Roboto",
+                                                      fontSize: 20,
+                                                      fontWeight:
+                                                      FontWeight.w700,
+                                                      height: 26 / 20,
+                                                      color: Color(0xffDC6A01)),
+                                                  textAlign: TextAlign.left,
+                                                ),
+                                              ),
+                                              Text(
+                                                " (${distance} m)",
+                                                style: const TextStyle(
+                                                  fontFamily: "Roboto",
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.w700,
+                                                  height: 26 / 20,
+                                                ),
+                                                textAlign: TextAlign.left,
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 4,
+                                        ),
+                                        Semantics(
+                                          excludeSemantics: true,
+                                          child: Text(
+                                            "ETA- ${newTime.hour}:${newTime.minute}",
+                                            style: const TextStyle(
+                                              fontFamily: "Roboto",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
+                                              color: Color(0xff8d8c8c),
+                                              height: 20 / 14,
+                                            ),
+                                            textAlign: TextAlign.left,
+                                          ),
+                                        )
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                            Semantics(
+                              label: "Exit navigation",
+                              excludeSemantics: true,
+                              child: Container(
+                                height: 40,
+                                width: 65,
+                                decoration: BoxDecoration(
+                                  color: Color(0xffDF3535),
+                                  borderRadius: BorderRadius.circular(20.0),
+                                ),
+                                child: TextButton(
+                                    onPressed: () {
+                                      clustringOFF = false;
+                                      setState((){});
+                                      setState(() {
+
+                                        StopPDR();
+                                        onStart = false;
+                                        startingNavigation = true;
+                                        PathState.sourceX = user.coordX;
+                                        PathState.sourceY = user.coordY;
+                                        PathState.sourceFloor = user.floor;
+                                        PathState.sourceBid = user.bid;
+                                        PathState.sourceLat = user.lat;
+                                        PathState.sourceLng = user.lng;
+                                        PathState.sourceName =
+                                        "Your current location";
+
+                                        user.temporaryExit = true;
+                                        user.isnavigating = false;
+                                        _isRoutePanelOpen = true;
+                                        _isnavigationPannelOpen = false;
+
+                                        if (pathMarkers[user.bid] != null) {
+                                          // setCameraPosition(
+                                          //     pathMarkers[user.bid]![
+                                          //     SingletonFunctionController
+                                          //         .building
+                                          //         .floor[user.bid]]!);
+                                          List<LatLng> ll = [
+                                            pathMarkers[user.bid]![
+                                            SingletonFunctionController
+                                                .building
+                                                .floor[user.bid]]!
+                                                .first
+                                                .position,
+                                            pathMarkers[user.bid]![
+                                            SingletonFunctionController
+                                                .building
+                                                .floor[user.bid]]!
+                                                .last
+                                                .position
+                                          ];
+                                          fitTwoPoints(ll);
+                                        }
+                                      });
+                                    },
+                                    child: Text(
+                                      "Exit",
+                                      style: const TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xffFFFFFF),
+                                        height: 20 / 14,
+                                      ),
+                                      textAlign: TextAlign.left,
+                                    )),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Container(
-                      width: screenWidth,
-                      height: 1,
-                      color: Color(0xffEBEBEB),
-                    ),
-                  ],
+                      Container(
+                        width: screenWidth,
+                        height: 1,
+                        color: Color(0xffEBEBEB),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -10282,19 +10938,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           ],
         ));
   }
-  int getStackSize(BuildContext context) {
-    int count = 0;
-    Navigator.popUntil(context, (route) {
-      count++;
-      return true;
-    });
-    print("Current Stack Size: $count");
-    return count;
-  }
-
   final FocusNode _focusNodeB = FocusNode();
-  void exitNavigation(){
-    setState((){
+  void exitNavigation() {
+    setState(() {
       if (PathState.didPathStart) {
         showFeedback = true;
         Future.delayed(Duration(seconds: 5));
@@ -10302,7 +10948,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         _feedbackTextController.clear();
       }
     });
-    markNavigationUnsuccessful();
+    markNavigationUnsuccessful("User Exited Navigation");
     markerSldShown = true;
     focusturnArrow.clear();
     clearPathVariables();
@@ -10316,11 +10962,20 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     PathState.destinationPolyID = "";
     singleroute.clear();
     pathCovered.clear();
+    if (Platform.isIOS) {
+      BluetoothScanIOSClass.stopScan();
+    } else {
+      bluetoothScanAndroidClass.stopScan();
+    }
     fitPolygonInScreen(patch.first);
-    setState((){
-      if (markers.length > 0){
-        List<double> lvalue = tools.localtoglobal(user.showcoordX.toInt(),user.showcoordY.toInt(),SingletonFunctionController.building.patchData[user.bid]);
-        markers[user.bid]?[0] = customMarker.move(LatLng(lvalue[0], lvalue[1]), markers[user.bid]![0]);
+    setState(() {
+      if (markers.length > 0) {
+        List<double> lvalue = tools.localtoglobal(
+            user.showcoordX.toInt(),
+            user.showcoordY.toInt(),
+            SingletonFunctionController.building.patchData[user.bid]);
+        markers[user.bid]?[0] = customMarker.move(
+            LatLng(lvalue[0], lvalue[1]), markers[user.bid]![0]);
       }
     });
   }
@@ -10528,7 +11183,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         'Filters'); // Replace 'yourBoxName' with the name of your box
     return box.length;
   }
-
 
   Widget buildingDetailPannel() {
     buildingAll element = new buildingAll.buildngAllAPIModel();
@@ -11679,20 +12333,15 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   late StreamSubscription<MagnetometerEvent> magnetometerSubscription;
 
-  void identifyFrontLandmark(){
+  void identifyFrontLandmark() {
     List<int> transitionValue = tools.eightcelltransition(user.theta);
     List<int> newUserCord = [
       user.coordX + transitionValue[0],
       user.coordY + transitionValue[1]
     ];
     for (var landmark in getallnearestInfo) {
-      double value = tools.calculateAngle2(
-          [user.coordX, user.coordY],
-          newUserCord,
-          [
-            landmark.coordinateX!,
-            landmark.coordinateY!
-          ]);
+      double value = tools.calculateAngle2([user.coordX, user.coordY],
+          newUserCord, [landmark.coordinateX!, landmark.coordinateY!]);
       if (value < 45) {
         value = value + 45;
       }
@@ -11706,16 +12355,18 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   Widget ExploreModePannel() {
     List<Widget> Exwidgets = [];
     for (int i = 0; i < getallnearestInfo.length; i++) {
-      Exwidgets.add(ExploreModeWidget(getallnearestInfo[i], finalDirections[i]));
+      Exwidgets.add(
+          ExploreModeWidget(getallnearestInfo[i], finalDirections[i]));
     }
     final size = MediaQuery.of(context).size;
     // Calculate the diagonal length of the screen
-    final screenDiagonal = sqrt(size.width * size.width + size.height * size.height);
+    final screenDiagonal =
+    sqrt(size.width * size.width + size.height * size.height);
 
     return Visibility(
         visible: _isExploreModePannelOpen,
         child: SlidingUpPanel(
-          maxHeight: 90+ (getallnearestInfo.length * 65),
+          maxHeight: 90 + (getallnearestInfo.length * 100),
           minHeight: 90 + 8,
           controller: ExploreModePannelController,
           panel: Container(
@@ -11749,7 +12400,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                     ),
                     IconButton(
                         onPressed: () {
-                          if (exploremodeLandmarkTimer != null && exploremodeLandmarkTimer!.isActive) {
+                          if (exploremodeLandmarkTimer != null &&
+                              exploremodeLandmarkTimer!.isActive) {
                             exploremodeLandmarkTimer!.cancel();
                           }
                           isLiveLocalizing = false;
@@ -11779,31 +12431,44 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   NavigationLog? currentNavigationLog;
   void startNavigationLog(String userId, String source, String destination) {
     currentNavigationLog = NavigationLog(
-      userId: userId,
-      source: source,
-      destination: destination,
-      startTime: DateTime.now(),
+        userId: userId,
+        source: source,
+        destination: destination,
+        startTime: DateTime.now(),
+        // abruptEnd: false,
+        directionButton: true
     );
+    print("startNavigationLog:${currentNavigationLog}");
   }
-  void markNavigationSuccessful(){
+
+  void markNavigationSuccessful() {
     if (currentNavigationLog != null) {
       currentNavigationLog!.markSuccessful();
       saveLog(currentNavigationLog!);
       NavigationLogManager().logNavigation(currentNavigationLog!);
     }
   }
-  void markNavigationUnsuccessful(){
+  String exitReason='';
+  void markNavigationUnsuccessful(String reason) {
     if (currentNavigationLog != null) {
-      currentNavigationLog!.markUnsuccessful("User exited navigation");
+      currentNavigationLog!.markUnsuccessful(reason);
       saveLog(currentNavigationLog!);
       NavigationLogManager().logNavigation(currentNavigationLog!);
+      setState(() {
+        exitReason=reason;
+      });
     }
   }
+
+
+
+
   void incrementRerouteCount() {
     if (currentNavigationLog != null) {
       currentNavigationLog!.incrementReroute();
     }
   }
+
   void saveLog(NavigationLog log) {
     // Save log to database or local storage
     print("Navigation Log: ${log.toJson()}");
@@ -11833,7 +12498,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     return Visibility(
         visible: _isBuildingPannelOpen && !user.isnavigating,
         child: Semantics(
-          label: "You are near ${user.locationName}, ${LocaleData.floor.getString(context)} ${user.floor}",
+          label:
+          "You are near ${user.locationName}, ${LocaleData.floor.getString(context)} ${user.floor}",
           excludeSemantics: true,
           child: SlidingUpPanel(
             controller: _panelController,
@@ -11844,7 +12510,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 color: Colors.grey,
               ),
             ],
-            minHeight: 80,
+            minHeight: 92,
+            maxHeight: 92,
             panel: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(16.0)),
@@ -11854,11 +12521,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  SizedBox(height: 6,),
+                  SizedBox(
+                    height: 6,
+                  ),
                   Row(
                     children: [
                       Container(
-                        width: screenWidth-50,
+                        width: screenWidth - 50,
                         margin: EdgeInsets.only(bottom: 20),
                         padding: EdgeInsets.only(left: 17, top: 12),
                         child: Semantics(
@@ -11907,9 +12576,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           ),
         ));
   }
+
   Set<Marker> getCombinedMarkers() {
     Set<Marker> combinedMarkers = Set();
-
+    combinedMarkers = combinedMarkers
+        .union(MGMarkers)
+        .union(_markers)
+        .union(focusturnArrow)
+        .union(Markers)
+    // .union(debugMarker)
+        .union(GpsMarker)
+        .union(nearbyLandmarks.values.toSet())
+        .union(_exploreModeMarker)
+        .union(_exploreModeDebugBeaconMarker);
     if (user.floor ==
         SingletonFunctionController
             .building.floor[buildingAllApi.getStoredString()]) {
@@ -11940,30 +12619,50 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       }
     });
 
-    // Always union the general Markers set at the end
-    if (SingletonFunctionController.building.floor[user.bid] == user.floor) {
-      markers.forEach((key, value) {
-        combinedMarkers = combinedMarkers.union(Set<Marker>.of(value));
+    // // Always union the general Markers set at the end
+    // if (SingletonFunctionController.building.floor[user.bid] == user.floor) {
+    //   markers.forEach((key, value) {
+    //     combinedMarkers = combinedMarkers.union(Set<Marker>.of(value));
+    //   });
+    // }
+
+    if (playPreviewManager != null) {
+      buildingAllApi.allBuildingID.forEach((key, value) {
+        if (playPreviewManager?.previewMarker[key] != null &&
+            playPreviewManager?.previewMarker[key]![
+            SingletonFunctionController.building.floor[key]] !=
+                null) {
+          combinedMarkers = combinedMarkers.union(
+              playPreviewManager!.previewMarker[key]![
+              SingletonFunctionController.building.floor[key]]!);
+          // print("combined markers:${key} ${value} ${combinedMarkers.length} ${SingletonFunctionController.building.floor[key]}");
+        }
       });
     }
+
     return combinedMarkers;
   }
+
   Set<Polygon> cachedPolygon = {};
   Set<Polygon> getCombinedPolygons() {
-    if(cachedPolygon.isEmpty){
+    if (cachedPolygon.isEmpty) {
       Set<Polygon> polygons = Set();
 
       closedpolygons.forEach((key, value) {
         polygons = polygons.union(value);
       });
+
       polygons.union(otherpatch);
       polygons.union(_polygon);
-      polygons.union(blurPatch);
+
+      // polygons.union(blurPatch);
+
       polygons.union(patch);
       cachedPolygon = polygons;
       return polygons;
     }
-    return cachedPolygon.union(patch).union(otherpatch).union(blurPatch);
+    return cachedPolygon.union(patch).union(otherpatch);
+    // .union(blurPatch);
   }
 
   Set<gmap.Polyline> getCombinedPolylines() {
@@ -11973,6 +12672,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     polylines.forEach((key, value) {
       poly = poly.union(value).union(focusturn);
     });
+
+    if (mapState.zoom > 20.8) {
+      dottedPath.forEach((key, value) {
+        poly = poly.union(value);
+      });
+    }
 
     interBuildingPath.forEach((key, value) {
       poly = poly.union(value).union(focusturn);
@@ -11989,13 +12694,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       }
     });
 
-    if (singleroute[buildingAllApi.outdoorID] != null &&
-        singleroute[buildingAllApi.outdoorID]![SingletonFunctionController.building.floor[buildingAllApi.outdoorID]] !=
-            null) {
-      poly = poly.union(singleroute[buildingAllApi.outdoorID]![
-      SingletonFunctionController.building.floor[buildingAllApi.outdoorID]]!);
-    }
-
     buildingAllApi.allBuildingID.forEach((key, value) {
       if (pathCovered[key] != null &&
           pathCovered[key]![SingletonFunctionController.building.floor[key]] !=
@@ -12005,10 +12703,24 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       }
     });
 
+    if (playPreviewManager != null) {
+      buildingAllApi.allBuildingID.forEach((key, value) {
+        if (playPreviewManager?.pathCovered[key] != null &&
+            playPreviewManager?.pathCovered[key]![
+            SingletonFunctionController.building.floor[key]] !=
+                null) {
+          //combinedMarkers = combinedMarkers.union(playPreviewManager!.previewMarker[key]![SingletonFunctionController.building.floor[key]]!);
+          poly = poly.union(playPreviewManager!.pathCovered[key]![
+          SingletonFunctionController.building.floor[key]]!);
+        }
+      });
+    }
+
     return poly;
   }
 
   void _updateMarkers(double zoom) {
+    print("zoomLevel $zoom");
     if (SingletonFunctionController.building.updateMarkers) {
       Set<Marker> updatedMarkers = Set();
       if (user.isnavigating) {
@@ -12055,33 +12767,33 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         setState(() {
           Markers.forEach((marker) {
             List<String> words = marker.markerId.value.split(' ');
-            if (SingletonFunctionController.building.ignoredMarker.contains(words[1])) {
+            if (SingletonFunctionController.building.ignoredMarker
+                .contains(words[1])) {
               if (marker.markerId.value.contains("Door")) {
                 Marker _marker = customMarker.visibility(true, marker);
-
                 updatedMarkers.add(_marker);
               }
               if (marker.markerId.value.contains("Room")) {
                 Marker _marker = customMarker.visibility(false, marker);
                 updatedMarkers.add(_marker);
               }
-            }else if (marker.markerId.value.contains("toppriority")) {
-              Marker _marker = customMarker.visibility(zoom > 19, marker);
+            } else if (marker.markerId.value.contains("toppriority")) {
+              Marker _marker = customMarker.visibility(zoom > 16, marker);
               updatedMarkers.add(_marker);
-            }else if (marker.markerId.value.contains("Room")) {
+            } else if (marker.markerId.value.contains("Room")) {
               Marker _marker = customMarker.visibility(zoom > 20.5, marker);
               updatedMarkers.add(_marker);
-            }else if (marker.markerId.value.contains("Rest")) {
+            } else if (marker.markerId.value.contains("Rest")) {
               Marker _marker = customMarker.visibility(zoom > 19, marker);
               updatedMarkers.add(_marker);
-            }else if (marker.markerId.value.contains("Entry")) {
+            } else if (marker.markerId.value.contains("Entry")) {
               Marker _marker = customMarker.visibility(
-                  (zoom > 18.5 && zoom < 19) || zoom > 20.3, marker);
+                  (zoom > 12.5 && zoom < 13) || zoom > 20.3, marker);
               updatedMarkers.add(_marker);
-            }else if (marker.markerId.value.contains("Building")) {
+            } else if (marker.markerId.value.contains("Building")) {
               Marker _marker = customMarker.visibility(zoom < 16.0, marker);
               updatedMarkers.add(_marker);
-            }else if (marker.markerId.value.contains("Lift")) {
+            } else if (marker.markerId.value.contains("Lift")) {
               Marker _marker = customMarker.visibility(zoom > 19, marker);
               updatedMarkers.add(_marker);
             }
@@ -12091,6 +12803,7 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       }
     }
   }
+
   void hideMarkers() {
     SingletonFunctionController.building.updateMarkers = false;
     Set<Marker> updatedMarkers = Set();
@@ -12100,10 +12813,12 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     });
     Markers = updatedMarkers;
   }
+
   void showMarkers() {
     SingletonFunctionController.building.ignoredMarker.clear();
     SingletonFunctionController.building.updateMarkers = true;
   }
+
   void _updateBuilding(double zoom) {
     Set<Polygon> updatedclosedPolygon = Set();
     Set<Polygon> updatedpatchPolygon = Set();
@@ -12132,27 +12847,40 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       focusturnArrow.clear();
     });
   }
-  String finalDestinationDirection="";
-  void closeNavigation() {
-    final closeNavigation = StackTrace.current;
-    print("closeNavigation Stack: \n$closeNavigation");
-    if(_isreroutePannelOpen || !user.isnavigating){
+
+  String finalDestinationDirection = "";
+  FocusNode _destination=FocusNode();
+  void closeNavigation({bool force = false}) {
+    if ((_isreroutePannelOpen || !user.isnavigating) && !force) {
       return;
     }
+    SingletonFunctionController.building.landmarkdata!.then((value) async {
+      print("SingletonFunctionController landmarks ${value.landmarks!.length}");
+      List<Landmarks> createLandmarks = [];
+      value.landmarks!.forEach((value){
+        if(value.floor == SingletonFunctionController.building.floor[value.buildingID]){
+          createLandmarks.add(value);
+        }
+      });
+      land current = land();
+      landmarkMarkers.clear();
+      current.landmarks = createLandmarks;
+      createMarkers(current, 0, buildingAllApi.selectedBuildingID,forced: true);
+    });
     String destname = PathState.destinationName;
+    _destination.requestFocus();
     //String destPolyyy=PathState.destinationPolyID;
     destiName = destname;
     List<int> tv = tools.eightcelltransition(user.theta);
-    List<Cell> turnPoints =
-    tools.getCellTurnpoints(user.cellPath);
+    List<Cell> turnPoints = tools.getTurnpoints_inCell(user.cellPath);
     double angle = tools.calculateAngle2(
         [user.showcoordX, user.showcoordY],
         [user.showcoordX + tv[0], user.showcoordY + tv[1]],
         [PathState.destinationX, PathState.destinationY]);
     String direction = tools.angleToClocks4(angle, context);
     markNavigationSuccessful();
-    currentNavigationLog=null;
-    finalDestinationDirection=direction;
+    currentNavigationLog = null;
+    finalDestinationDirection = direction;
     //isSemanticEnabled? showDestinationDialog(context,user.convertTolng("You have reached ${destname}. It is ${direction}","", 0.0, context, angle, "", "",destname: destname)): ();
     flutterTts.pause().then((value) {
       speak(
@@ -12178,21 +12906,26 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     user.reset();
     PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
     selectedroomMarker.clear();
-    user.isnavigating = false;
     pathMarkers.clear();
     PathState.path.clear();
     PathState.sourcePolyID = "";
     PathState.destinationPolyID = "";
-    singleroute.clear(); pathCovered.clear();
+    SingletonFunctionController.currentBeacon = "";
+    singleroute.clear();
+    pathCovered.clear();
     fitPolygonInScreen(patch.first);
+    if (Platform.isIOS) {
+      BluetoothScanIOSClass.stopScan();
+    } else {
+      bluetoothScanAndroidClass.stopScan();
+    }
     Future.delayed(Duration.zero, () async {
       setState(() {
         focusturnArrow.clear();
       });
     });
-
     // setState(() {
-    if (markers.length > 0) {
+    if (markers.length > 0){
       List<double> lvalue = tools.localtoglobal(
           user.showcoordX.toInt(),
           user.showcoordY.toInt(),
@@ -12200,32 +12933,29 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       markers[user.bid]?[0] = customMarker.move(
           LatLng(lvalue[0], lvalue[1]), markers[user.bid]![0]);
     }
-    // });
     showFeedback = true;
     Future.delayed(Duration(seconds: 5));
+    _announceDirection('You have arrived ${destname}. It is ${direction}');
     _feedbackController.open();
   }
 
-  void onLandmarkVenueClicked(String ID, {bool DirectlyStartNavigation = false})async{
+  void onLandmarkVenueClicked(String ID,
+      {bool DirectlyStartNavigation = false}) async {
+    print("onLandmarkVenueClicked $ID ${StackTrace.current}");
+    _polygon.clear();
     land snapshot = land();
     // Collect all API call futures
     List<Future<void>> apiCalls = [];
-    SingletonFunctionController.building.landmarkdata;
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
-      apiCalls.add(landmarkApi().fetchLandmarkData(id: key).then((value) {
-        if(key != buildingAllApi.outdoorID){
-          snapshot.mergeLandmarks(value.landmarks);
-          print("merged $key");
-        }
+      apiCalls.add(RepositoryManager().getLandmarkDataNew(key).then((value) {
+        snapshot.mergeLandmarks(value.landmarks);
+        print("merged $key");
       }));
     });
-    apiCalls.add(GlobalAnnotation().fetchGlobalAnnotationData(buildingAllApi.outdoorID).then((globalData) async {
-      var landmarks = await GlobalAnnotationController.OptionalWrapLandmarks(globalData);
-      snapshot.mergeLandmarks(landmarks);
-    }));
-
     // Wait for all API calls to complete
     await Future.wait(apiCalls);
+    land? localData = await SingletonFunctionController.building.landmarkdata;
+    snapshot.mergeLandmarks(localData?.landmarks);
     _isBuildingPannelOpen = false;
     try {
       if (snapshot.landmarksMap![ID]!.floor != 0) {
@@ -12265,7 +12995,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         SingletonFunctionController
             .building.patchData[snapshot.landmarksMap![ID]!.buildingID]);
     int floor = snapshot.landmarksMap![ID]!.floor!;
-
     try {
       List<Nodes>? nodes = SingletonFunctionController
           .building
@@ -12278,14 +13007,9 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           .firstWhere((element) =>
       element.id == snapshot.landmarksMap![ID]!.properties!.polyId)
           .nodes;
-
       List<LatLng> corners = [];
       for (var element in nodes!) {
-        List<double> value = tools.localtoglobal(
-            element.coordx!,
-            element.coordy!,
-            SingletonFunctionController
-                .building.patchData[snapshot.landmarksMap![ID]!.buildingID]);
+        List<double> value = [element.lat!, element.lon!];
         corners.add(LatLng(value[0], value[1]));
       }
       _polygon.add(Polygon(
@@ -12299,25 +13023,38 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     } catch (e) {
       print("error in onLandmarkVenueClicked $e");
     }
-
+    outdoorBlockMarker.forEach((value){
+      value.visible = false;
+    });
+    outDoorGlobalBlock.forEach((value){
+      value.visible = false;
+    });
+    setState(() {});
     _googleMapController.animateCamera(
       CameraUpdate.newLatLngZoom(
         LatLng(coords[0], coords[1]),
         22,
       ),
     );
-
     if (snapshot.landmarksMap![ID]!.buildingID != buildingAllApi.outdoorID &&
-        SingletonFunctionController.building.floor[snapshot.landmarksMap![ID]!.buildingID] != floor) {
-      SingletonFunctionController.building.floor[snapshot.landmarksMap![ID]!.buildingID!] = floor;
-      createRooms(SingletonFunctionController.building.polylinedatamap[snapshot.landmarksMap![ID]!.buildingID]!, floor);
-      createMarkers(snapshot, floor);
+        SingletonFunctionController
+            .building.floor[snapshot.landmarksMap![ID]!.buildingID] !=
+            floor) {
+      SingletonFunctionController
+          .building.floor[snapshot.landmarksMap![ID]!.buildingID!] = floor;
+      createRooms(
+          SingletonFunctionController.building
+              .polylinedatamap[snapshot.landmarksMap![ID]!.buildingID]!,
+          floor);
+
+      createMarkers(snapshot, floor, snapshot.landmarksMap![ID]!.buildingID!);
     }
-    if (widget.directLandID.length > 2){
+    if (widget.directLandID.length > 2) {
       await Future.delayed(const Duration(milliseconds: 2000));
     }
-    polygonTap(null, ID);
+    polygonTap(null, ID, 'assets/Generic Marker.png');
   }
+
   void fromSourceAndDestinationPage(List<String> value) {
     _isBuildingPannelOpen = false;
     markers.clear();
@@ -12326,9 +13063,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       land.landmarksMap![value[1]]!.properties!.polyId!;
       PathState.sourceX = land.landmarksMap![value[0]]!.coordinateX!;
       PathState.sourceY = land.landmarksMap![value[0]]!.coordinateY!;
+      PathState.sourceLat = double.parse(land.landmarksMap![value[0]]!.properties!.latitude!);
+      PathState.sourceLng = double.parse(land.landmarksMap![value[0]]!.properties!.longitude!);
       if (land.landmarksMap![value[0]]!.doorX != null) {
         PathState.sourceX = land.landmarksMap![value[0]]!.doorX!;
         PathState.sourceY = land.landmarksMap![value[0]]!.doorY!;
+        PathState.sourceLat = double.parse(land.landmarksMap![value[0]]!.properties?.doorLat??land.landmarksMap![value[0]]!.properties!.latitude!);
+        PathState.sourceLng = double.parse(land.landmarksMap![value[0]]!.properties?.doorLng??land.landmarksMap![value[0]]!.properties!.longitude!);
       }
       PathState.sourceBid = land.landmarksMap![value[0]]!.buildingID!;
       tools.setBuildingAngle(SingletonFunctionController
@@ -12336,7 +13077,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       PathState.sourceFloor = land.landmarksMap![value[0]]!.floor!;
       PathState.sourcePolyID = value[0];
       PathState.sourceName = land.landmarksMap![value[0]]!.name!;
-
       PathState.destinationName = land.landmarksMap![value[1]]!.name!;
       PathState.destinationX = land.landmarksMap![value[1]]!.coordinateX!;
       PathState.destinationY = land.landmarksMap![value[1]]!.coordinateY!;
@@ -12366,15 +13106,19 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         _isLandmarkPanelOpen = false;
         PathState.sourceX = value.landmarksMap![ID]!.coordinateX!;
         PathState.sourceY = value.landmarksMap![ID]!.coordinateY!;
+        PathState.sourceLat = double.parse(value.landmarksMap![ID]!.properties!.latitude!);
+        PathState.sourceLng = double.parse(value.landmarksMap![ID]!.properties!.longitude!);
         if (value.landmarksMap![ID]!.doorX != null) {
           PathState.sourceX = value.landmarksMap![ID]!.doorX!;
           PathState.sourceY = value.landmarksMap![ID]!.doorY!;
+          PathState.sourceLat = double.parse(value.landmarksMap![ID]!.properties?.doorLat??value.landmarksMap![ID]!.properties!.latitude!);
+          PathState.sourceLng = double.parse(value.landmarksMap![ID]!.properties?.doorLng??value.landmarksMap![ID]!.properties!.longitude!);
         }
         PathState.sourceFloor = value.landmarksMap![ID]!.floor!;
         PathState.sourcePolyID = ID;
         PathState.sourceName = user.key == ID
             ? "Your current location"
-            : value.landmarksMap![ID]!.name!;
+            : (value.landmarksMap![ID]!.renderDetail?.name??value.landmarksMap![ID]!.name!);
         PathState.sourceBid = value.landmarksMap![ID]!.buildingID!;
         PathState.path.clear();
         PathState.directions.clear();
@@ -12423,30 +13167,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
       } else {
         i--;
       }
-
-      //List<LatLng> coordinates = [];
       final Uint8List greytorch =
       await getImagesFromMarker('assets/previewarrow.png', 75);
-      // BitmapDescriptor greytorch = await BitmapDescriptor.fromAssetImage(
-      //   ImageConfiguration(size: Size(15, 15)),
-      //   'assets/previewarrow.png',
-      // );
-      // for(int a = i;a>i-5;a--){
-      //   if(a!=i && tools.isTurn([user.path[a-1]%turn.numCols!,user.path[a-1]~/turn.numCols!], [user.path[a]%turn.numCols!,user.path[a]~/turn.numCols!], [user.path[a+1]%turn.numCols!,user.path[a+1]~/turn.numCols!])){
-      //     break;
-      //   }
-      //   List<double> ltln = tools.localtoglobal(user.path[a]%turn.numCols!, user.path[a]~/turn.numCols!);
-      //   coordinates.insert(0,LatLng(ltln[0], ltln[1]));
-      // }
-      //
-      // for(int a = i+1;a<i+6;a++){
-      //   // if(a!=i && tools.isTurn([user.path[a-1]%turn.numCols!,user.path[a-1]~/turn.numCols!], [user.path[a]%turn.numCols!,user.path[a]~/turn.numCols!], [user.path[a+1]%turn.numCols!,user.path[a+1]~/turn.numCols!])){
-      //   //   break;
-      //   // }
-      //   List<double> ltln = tools.localtoglobal(user.path[a]%turn.numCols!, user.path[a]~/turn.numCols!);
-      //   coordinates.add(LatLng(ltln[0], ltln[1]));
-      // }
-
       if (turn.floor != null &&
           SingletonFunctionController
               .building.floor[buildingAllApi.getStoredString()] !=
@@ -12454,11 +13176,11 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         SingletonFunctionController
             .building.floor[buildingAllApi.getStoredString()] = turn.floor!;
         createRooms(
-            SingletonFunctionController.building.polyLineData!,
+            SingletonFunctionController
+                .building.polylinedatamap[buildingAllApi.getStoredString()]!,
             SingletonFunctionController
                 .building.floor[buildingAllApi.getStoredString()]!);
       }
-
       List<int> nextPoint = [
         user.path[i] % turn.numCols!,
         user.path[i] ~/ turn.numCols!
@@ -12467,7 +13189,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
           SingletonFunctionController.building.patchData[turn.Bid]);
       List<double> latlng2 = tools.localtoglobal(nextPoint[0], nextPoint[1],
           SingletonFunctionController.building.patchData[turn.Bid]);
-
       setState(() {
         // focusturn.add(gmap.Polyline(
         //   polylineId: PolylineId("focusturn"),
@@ -12481,7 +13202,6 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
             icon: BitmapDescriptor.fromBytes(greytorch),
             anchor: Offset(0.5, 0.5)));
       });
-
       mapState.target = LatLng(latlng[0], latlng[1]);
       mapState.bearing = tools
           .calculateBearing([latlng2[0], latlng2[1]], [latlng[0], latlng[1]]);
@@ -12495,36 +13215,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     }
   }
 
-  // void turnMarkersVisible(int node){
-  //   Set<Marker> tempSet=Set();
-  //
-  //   if (pathMarkers[user.Bid] != null && pathMarkers[user.Bid]![user.floor]!= null) {
-  //
-  //     for(var marker in pathMarkers[user.Bid]![user.floor]!){
-  //
-  //       if(marker.markerId.value.contains(node.toString())){
-  //         tempSet.add(customMarker.visibility(true, marker));
-  //       }else{
-  //         tempSet.add(marker);
-  //       }
-  //     }
-  //     pathMarkers[user.Bid]![user.floor]!=tempSet;
-  //   }
-  //
-  //   for (var marker in pathMarkers[user.Bid]![user.floor]!) {
-  //     if(marker.visible == true){
-  //
-  //     }
-  //   }
-  //
-  // }
-
   Timer? exploremodeLandmarkTimer;
-
   String closestBuildingId = "";
+  String newBuildingID = "";
   void focusBuildingChecker(CameraPosition position) {
-    blurPatch.clear();
-    restBuildingMarker.clear();
     LatLng currentLatLng = position.target;
     // String closestBuildingId = "";
     double? minDistance;
@@ -12541,6 +13235,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         }
       }
     });
+    if (newBuildingID != closestBuildingId) {
+      //patchTransition(closestBuildingId);
+    }
+    newBuildingID = closestBuildingId;
 
     // Store the nearest SingletonFunctionController.building ID
     if (closestBuildingId.isNotEmpty) {
@@ -12549,27 +13247,39 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
   }
 
   Set<Circle> circles = Set();
+
   @override
-  void dispose(){
-    SingletonFunctionController.SC_LOCALIZED_BEACON="";
+  void dispose() {
+    _messageTimer?.cancel();
+    _landmarks.clear();
+    gpsSubscription?.cancel(); // <-- This triggers native onCancel()
+    gpsSubscription = null;
+    wsocket.disconnect();
+    _localizeTimer?.cancel();
+    SingletonFunctionController.SC_LOCALIZED_BEACON = "";
+    SingletonFunctionController.currentBeacon = "";
     disposed = true;
-    compassSubscription.cancel();
-    UserState.geoLat=0.0;
-    UserState.geoLng=0.0;
+    fingerprinting.disableFingerprinting();
+    SingletonFunctionController().dispose();
+    UserState.geoLat = 0.0;
+    UserState.geoLng = 0.0;
     flutterTts.stop();
     _controller12?.dispose();
     SingletonFunctionController.building.qrOpened = false;
-    SingletonFunctionController.building.dispose();
-    SingletonFunctionController.apibeaconmap.clear();
-    NavigationLogManager().syncLogsToServer();
+    SingletonFunctionController.building.destinationQr = false;
+    if(currentNavigationLog!=null){
+      NavigationLogManager().syncLogsToServer().then((_){
+        currentNavigationLog=null;
+      });
+    }
     magneticValues.clear();
+    _moveController.dispose();
     _googleMapController.dispose();
+    _subscription.cancel();
     for (final subscription in _streamSubscriptions) {
       subscription.cancel();
     }
     flutterTts.cancelHandler;
-    SingletonFunctionController.btadapter.stopScanning();
-    _messageTimer?.cancel();
     _controller.dispose();
     WidgetsBinding.instance.removeObserver(this);
     bluetoothScanAndroidClass.stopScan();
@@ -12577,10 +13287,8 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     for (var controller in _controllers) {
       controller.dispose();
     }
-    if(pdr != null){
-      pdr!.cancel();
-    }
-    magnetometerSubscription.cancel();
+    accData.stopMagnetometer();
+    magnetoData.stopAccelerometer();
     super.dispose();
   }
 
@@ -12595,25 +13303,23 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
 
   IconData _mainIcon = Icons.volume_up_outlined;
   Color _mainColor = Colors.green;
-  void _recenterMap() {
+
+  void recenterMap() {
     try {
       alignMapToPath([
-        PathState.singleCellListPath[user.pathobj.index].lat,
-        PathState.singleCellListPath[user.pathobj.index].lng
+        user.cellPath[user.pathobj.index].lat,
+        user.cellPath[user.pathobj.index].lng
       ], [
-        PathState.singleCellListPath[user.pathobj.index + 1].lat,
-        PathState.singleCellListPath[user.pathobj.index + 1].lng
+        user.cellPath[user.pathobj.index + 1].lat,
+        user.cellPath[user.pathobj.index + 1].lng
       ]);
       mapState.aligned = true;
-    }catch(e){
-
-    }
+    } catch (e) {}
   }
 
   Future<BitmapDescriptor> createBitmapDescriptorFromWidget(
       BuildContext context, Widget widget) async {
     final GlobalKey key = GlobalKey();
-
     // Wrap the widget in an Offstage widget to prevent it from being displayed on the screen
     final offstageWidget = Offstage(
       child: Material(
@@ -12624,16 +13330,13 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
         ),
       ),
     );
-
     // Add the widget to the overlay for rendering off-screen
     OverlayState? overlayState = Overlay.of(context);
     OverlayEntry overlayEntry =
     OverlayEntry(builder: (context) => offstageWidget);
     overlayState.insert(overlayEntry);
-
     // Allow some time for the widget to render
     await Future.delayed(Duration(milliseconds: 10000));
-
     // Capture the widget as an image
     final RenderRepaintBoundary boundary =
     key.currentContext!.findRenderObject() as RenderRepaintBoundary;
@@ -12641,997 +13344,10 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
     final ByteData? byteData =
     await image.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List pngBytes = byteData!.buffer.asUint8List();
-
     // Remove the widget from the overlay
     overlayEntry.remove();
-
     return BitmapDescriptor.fromBytes(pngBytes);
   }
-
-  // Future<void> addCustomMarker(LatLng position, String bid, int floor) async {
-  //
-  //   pathMarkers.putIfAbsent(bid, ()=>Map());
-  //   pathMarkers[bid]!.putIfAbsent(floor, ()=>Set());
-  //   pathMarkers[bid]![floor]!.add(Marker(
-  //       markerId: MarkerId("destination${bid}"),
-  //       position: position,
-  //       icon: await  CustomMarker(text: "hello").toBitmapDescriptor(
-  //           logicalSize: const Size(150, 150), imageSize: const Size(300, 400))
-  //   ));
-  //   setState(() {
-  //
-  //   });
-  // }
-
-  Future<RenderRepaintBoundary> _capturePngFromWidget(
-      BuildContext context, Widget widget, GlobalKey key) async {
-    final RenderRepaintBoundary boundary =
-    key.currentContext!.findRenderObject() as RenderRepaintBoundary;
-    return await Future.delayed(Duration(milliseconds: 20), () {
-      return boundary;
-    });
-  }
-
-  // Future<RenderRepaintBoundary> _capturePngFromWidget(BuildContext context, Widget widget) async {
-  //   final RenderRepaintBoundary boundary = RenderRepaintBoundary();
-  //   final RenderView renderView = RenderView(
-  //     child: RenderProxyBox(boundary),
-  //     configuration: ViewConfiguration(devicePixelRatio: MediaQuery.of(context).devicePixelRatio),
-  //     view: WidgetsBinding.instance.window,
-  //   );
-  //   final PipelineOwner pipelineOwner = PipelineOwner()..rootNode = renderView;
-  //   renderView.prepareInitialFrame();
-  //   final BuildOwner buildOwner = BuildOwner(focusManager: FocusManager());
-  //   final RenderObjectToWidgetElement<RenderBox> rootElement =
-  //   RenderObjectToWidgetAdapter<RenderBox>(
-  //     container: boundary,
-  //     child: widget,
-  //   ).attachToRenderTree(buildOwner);
-  //   buildOwner.buildScope(rootElement);
-  //   buildOwner.finalizeTree();
-  //   await Future.delayed(Duration(milliseconds: 20)); // wait for widget to build
-  //   pipelineOwner.flushLayout();
-  //   pipelineOwner.flushCompositingBits();
-  //   pipelineOwner.flushPaint();
-  //   return boundary;
-  // }
-
-  // void _addCustomMarker(String bid, int floor, LatLng position) async {
-  //
-  //   final customMarker = await createCustomMarkerBitmap(context, 'Your Text', Icons.location_on);
-  //   pathMarkers.putIfAbsent(bid, ()=>Map());
-  //   pathMarkers[bid]!.putIfAbsent(floor, ()=>Set());
-  //   pathMarkers[bid]![floor]!.add(Marker(
-  //     markerId: MarkerId('custom_marker'),
-  //     position: position, // Your desired position
-  //     icon: BitmapDescriptor.defaultMarker,
-  //     onTap: () {
-  //
-  //       // Handle tap functionality here
-  //     },
-  //   ));
-  // }
-
-  late Timer EM_TIMER;
-  String EM_LastBeacon = "";
-
-
-  @override
-  Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-    double statusBarHeight = MediaQuery.of(context).padding.top;
-    double screenWidthPixels = MediaQuery.of(context).size.width *
-        MediaQuery.of(context).devicePixelRatio;
-    double screenHeightPixel = MediaQuery.of(context).size.height *
-        MediaQuery.of(context).devicePixelRatio;
-    isSemanticEnabled = MediaQuery.of(context).accessibleNavigation;
-    HelperClass.SemanticEnabled = MediaQuery.of(context).accessibleNavigation;
-    return Scaffold(
-      body: Stack(
-        children: [
-          detected
-              ? Semantics(excludeSemantics: true, child: ExploreModePannel())
-              : Semantics(excludeSemantics: true, child: Container()),
-          Semantics(
-            excludeSemantics: true,
-            child: Container(
-              child: GoogleMap(
-                padding:
-                EdgeInsets.only(left: 20), // <--- padding added here
-                initialCameraPosition: _initialCameraPosition,
-                myLocationButtonEnabled: false,
-                myLocationEnabled: true,
-                zoomControlsEnabled: false,
-                zoomGesturesEnabled: true,
-                mapToolbarEnabled: false,
-                // circles: _userLocation != null && _accuracy != null
-                //     ? {
-                //   Circle(
-                //     circleId: CircleId('accuracyCircle'),
-                //     center: _userLocation!,
-                //     radius: _accuracy!,  // Draw accuracy circle
-                //     strokeColor: Colors.blueAccent,
-                //     fillColor: Colors.blueAccent.withOpacity(0.2),
-                //     strokeWidth: 1,
-                //   )
-                // }
-                //     : {},
-
-                polygons: getCombinedPolygons().union(_polygon).union(globalCampus),
-
-                polylines: getCombinedPolylines(),
-                markers: getCombinedMarkers()
-                    .union(_markers)
-                    .union(focusturnArrow)
-                    .union(Markers)
-                    .union(restBuildingMarker).union(debugMarker).union(GpsMarker).union(nearbyLandmarks.values.toSet()).union(_exploreModeMarker).union(gpsTrackingMarker)
-                    .union(_exploreModeDebugBeaconMarker),
-                buildingsEnabled: false,
-                compassEnabled: false,
-                rotateGesturesEnabled: true,
-                minMaxZoomPreference: MinMaxZoomPreference(2, 30),
-                onMapCreated: (controller) {
-                  controller.setMapStyle(maptheme);
-                  _googleMapController = controller;
-                  //zoomWhileWait(buildingAllApi.allBuildingID, controller);
-
-                  _initMarkers();
-                },
-                onCameraMove: (CameraPosition cameraPosition) {
-                  mapState.cameraposition = cameraPosition; // User has started panning
-
-                  //Check zoom level and decide rendering strategy
-                  if (cameraPosition.zoom > 17.8) {
-                    focusBuildingChecker(cameraPosition);
-                  } else if (cameraPosition.zoom > 16.5) {
-                    renderCampusPatchTransition(
-                      buildingAllApi.allBuildingID.keys.toList(),
-                      outdoorID: buildingAllApi.outdoorID,
-                    );
-                  } else {
-                    renderCampusPatchTransition([buildingAllApi.outdoorID]);
-                  }
-
-                  // Update map alignment based on camera position
-                  mapState.aligned = cameraPosition.target.latitude.toStringAsFixed(5) ==
-                      mapState.target.latitude.toStringAsFixed(5);
-
-                  mapState.interaction = true; // Interaction has occurred
-                  mapbearing = cameraPosition.bearing;
-
-                  // Sync zoom level only when there’s no active interaction
-                  if (!mapState.interaction) {
-                    mapState.zoom = cameraPosition.zoom;
-                  }
-                  isLiveLocalizing? () : _updateMarkers(cameraPosition.zoom);
-                  //_updateBuilding(cameraPosition.zoom);
-                  // _updateMarkers(cameraPosition.zoom);
-                  if (cameraPosition.zoom < 17) {
-                    _markers.clear();
-                    markerSldShown = false;
-                  } else {
-                    markerSldShown = true;
-                  }
-
-                  // Update specific markers if they should be shown
-                  if (markerSldShown) {
-                    _updateMarkers11(cameraPosition.zoom);
-                  }
-                },
-                onCameraIdle: () {
-                  if (mapState.cameraposition != null) {
-                    print("selecting landmark");
-                    selectPinLandmark(mapState.cameraposition!);
-                    mapState.cameraposition = null; // User has stopped panning
-                  }
-                  if (!mapState.interaction) {
-                    mapState.interaction2 = true;
-                  }
-                },
-                onCameraMoveStarted: () {
-                  user.building = SingletonFunctionController.building;
-                  mapState.interaction2 = false;
-                },
-                circles: circles,
-              ),
-            ),
-          ),
-          //debug----
-
-
-          DebugToggle.PDRIcon
-              ? Positioned(
-              top: 150,
-              right: 50,
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(),
-                  borderRadius: BorderRadius.circular(20),
-                  color: (isPdr) ? Colors.green : Colors.red,
-                ),
-                height: 20,
-                width: 20,
-              ))
-              : Container(),
-
-          Positioned(
-            bottom: isLiveLocalizing?screenHeight*0.6:150.0, // Adjust the position as needed
-            right: 16.0,
-            child: Semantics(
-              excludeSemantics: false,
-              child: Column(
-                children: [
-                  //
-                  // // Text(Building.thresh),
-
-                  isSemanticEnabled || PinLandmarkPannel.isPanelOpened()
-                      ? Container()
-                      : SpeedDial(
-                    icon: _mainIcon,
-                    foregroundColor: _mainColor,
-                    backgroundColor: Colors.white,
-                    visible: true,
-                    curve: Curves.bounceInOut,
-                    children: [
-                      SpeedDialChild(
-                        child: Icon(Icons.volume_up_outlined,
-                            color: Colors.white),
-                        backgroundColor: Colors.green,
-                        onTap: () => {
-                          setState(() {
-                            _mainIcon = Icons.volume_up_outlined;
-                            _mainColor = Colors.green;
-                          }),
-                          UserState.ttsAllStop = false,
-                          UserState.ttsOnlyTurns = false,
-                        },
-                      ),
-                      SpeedDialChild(
-                        child: Icon(Icons.volume_down_outlined,
-                            color: Colors.black),
-                        backgroundColor: Colors.blueAccent,
-                        onTap: () => {
-                          setState(() {
-                            _mainIcon = Icons.volume_down_outlined;
-                            _mainColor = Colors.blueAccent;
-                          }),
-                          UserState.ttsOnlyTurns = true,
-                          UserState.ttsAllStop = false,
-                        },
-                      ),
-                      SpeedDialChild(
-                        child: Icon(Icons.volume_off_outlined,
-                            color: Colors.white),
-                        backgroundColor: Colors.red,
-                        onTap: () => {
-                          setState(() {
-                            _mainIcon = Icons.volume_off_outlined;
-                            _mainColor = Colors.red;
-                          }),
-                          UserState.ttsAllStop = true,
-                          UserState.ttsOnlyTurns = false,
-                        },
-                      ),
-                    ],
-                  ),
-                  Visibility(
-                    visible: DebugToggle.StepButton,
-                    child: Container(
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius:
-                            BorderRadius.all(Radius.circular(24))),
-                        child: IconButton(
-                            onPressed: () {
-                              //StartPDR();
-                              bool isvalid = MotionModel.isValidStep(
-                                  user,
-                                  SingletonFunctionController
-                                      .building.floorDimenssion[
-                                  user.bid]![user.floor]![0],
-                                  SingletonFunctionController
-                                      .building.floorDimenssion[
-                                  user.bid]![user.floor]![1],
-                                  SingletonFunctionController.building
-                                      .nonWalkable[user.bid]![user.floor]!,
-                                  reroute, context);
-                              if (isvalid) {
-
-                                user.move(context).then((value) {
-                                  print("renderedddd here");
-                                  renderHere();
-                                });
-
-                              } else {
-                                if (user.isnavigating) {
-                                  // reroute();
-                                  // showToast("You are out of path");
-                                }
-                              }
-                            },
-                            icon: Icon(Icons.directions_walk))),
-                  ),
-
-                  SizedBox(height: 28.0),
-                  DebugToggle.Slider ? Text("${user.theta}") : Container(),
-                  // Text(SingletonFunctionController.SC_IL_RSSI_AVERAGE.toString()),
-
-
-                  // Text("coord [${user.coordX},${user.coordY}] \n"
-                  //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                  //     "angle ${tools.AngleBetweenBuildingandGlobalNorth} \n"
-                  // "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
-                  // // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
-                  //     "floor ${user.floor}\n"
-                  //     "sourceFloor ${PathState.sourceFloor}\n"
-                  //      "userBid ${user.bid} \n"
-                  // "stepSize ${UserState.stepSize}\n"
-                  //     "index ${user.pathobj.index} \n"
-                  //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
-
-                  DebugToggle.Slider
-                      ? Slider(
-                      value: user.theta,
-                      min: -180,
-                      max: 180,
-                      onChanged: (newvalue) {
-                        double? compassHeading = newvalue;
-                        setState(() {
-                          user.theta = compassHeading!;
-                          if (mapState.interaction2) {
-                            mapState.bearing = compassHeading!;
-                            _googleMapController.moveCamera(
-                              CameraUpdate.newCameraPosition(
-                                CameraPosition(
-                                  target: mapState.target,
-                                  zoom: mapState.zoom,
-                                  bearing: mapState.bearing!,
-                                ),
-                              ),
-                              //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
-                            );
-                          } else {
-                            if (markers.length > 0)
-                              markers[user.bid]?[0] = customMarker.rotate(
-                                  compassHeading! - mapbearing,
-                                  markers[user.bid]![0]);
-                          }
-                        });
-                      })
-                      : Container(),
-                  !isLiveLocalizing?  !isSemanticEnabled && !PinLandmarkPannel.isPanelOpened()
-
-                      ? Semantics(
-                    label: "Change floor",
-                    child: SpeedDial(
-                      child: Text(
-                        SingletonFunctionController.building.floor == 0
-                            ? 'G'
-                            : '${SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]}',
-                        style: const TextStyle(
-                          fontFamily: "Roboto",
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xff24b9b0),
-                          height: 19 / 16,
-
-                        ),
-                      ),
-                      activeIcon: Icons.close,
-                      backgroundColor: Colors.white,
-                      children: List.generate(
-                        user.isnavigating?(Building.numberOfFloorsDelhi.values.map((list) => list.length).fold(0, (a, b) => a > b ? a : b)):(Building.numberOfFloorsDelhi[buildingAllApi.getStoredString()] ?? [0]).length, (int i) {
-
-                          List<int> floorList = user.isnavigating?Building.numberOfFloorsDelhi.values.reduce((a, b) => a.length > b.length ? a : b):Building.numberOfFloorsDelhi[buildingAllApi.getStoredString()] ?? [0];
-                          List<int> revfloorList = floorList;
-                          revfloorList.sort();
-
-                          return SpeedDialChild(
-                            child: Semantics(
-                              label: "${revfloorList[i]}",
-                              child: Text(
-                                revfloorList[i] == 0
-                                    ? 'G'
-                                    : '${revfloorList[i]}',
-                                style: const TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  height: 19 / 16,
-                                ),
-                              ),
-                            ),
-                            backgroundColor: pathMarkers[i] == null
-                                ? Colors.white
-                                : Color(0xff24b9b0),
-                            onTap: () {
-                              _polygon.clear();
-                              cachedPolygon.clear();
-                              circles.clear();
-
-                              _markers.clear();
-                              _markerLocationsMap.clear();
-                              _markerLocationsMapLanName.clear();
-
-                              if(PathState.singleCellListPath.isNotEmpty){
-                                List<String> intermediatesBids = tools.findIntermediateBuildings(PathState.singleCellListPath);
-                                for (var bid in intermediatesBids) {
-                                  SingletonFunctionController.building.floor[bid] = revfloorList[i];
-                                  createRooms(
-                                    SingletonFunctionController.building.polylinedatamap[bid]!,
-                                    SingletonFunctionController.building.floor[bid]!,
-                                  );
-                                }
-                              }else{
-                                SingletonFunctionController.building.floor[buildingAllApi.getStoredString()] = revfloorList[i];
-                                createRooms(
-                                  SingletonFunctionController.building.polylinedatamap[buildingAllApi.getStoredString()]!,
-                                  SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]!,
-                                );
-                              }
-
-                              if(!user.isnavigating){
-                                SingletonFunctionController.building.landmarkdata!.then((value) {
-                                  createMarkers(
-                                      value,
-                                      SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]!,
-                                      bid: buildingAllApi.getStoredString()
-                                  );
-                                });
-                              }
-
-
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  )
-                      : nofloorColumn() : Container(),
-                  SizedBox(height: 28.0), // Adjust the height as needed
-
-                  // Container(
-                  //   width: 300,
-                  //   height: 100,
-                  //   child: SingleChildScrollView(
-                  //     scrollDirection: Axis.horizontal,
-                  //     child: Column(
-                  //       crossAxisAlignment: CrossAxisAlignment.start,
-                  //       children: [
-                  //         Text(testBIn.keys.toString()),
-                  //         Text(testBIn.values.toString()),
-                  //         Text("summap"),
-                  //         Text(sortedsumMapfordebug.toString()),
-                  //       ],
-                  //     ),
-                  //   ),
-                  // ),
-                  !isLiveLocalizing? isSemanticEnabled && _isRoutePanelOpen || isSemanticEnabled && _isLandmarkPanelOpen || PinLandmarkPannel.isPanelOpened() ? Container(): Semantics(
-                    child: FloatingActionButton(
-                      onPressed: () async {
-                        //  _getUserLocation();
-                        // SingletonFunctionController.btadapter.emptyBin();
-                        // if (!user.isnavigating && !isLocalized) {
-                        //   SingletonFunctionController.btadapter.stopScanning();
-                        //   if (Platform.isAndroid){
-                        //     SingletonFunctionController.timer = Future.delayed(const Duration(seconds: 7));
-                        //     bluetoothScanAndroidClass.listenToScanInitialLocalization(Building.apibeaconmap).then((value){
-                        //       setState((){
-                        //         isLocalized = false;
-                        //       });
-                        //       if(kDebugMode){
-                        //         showToast("SC_LOCALIZED_BEACON:${SingletonFunctionController.SC_LOCALIZED_BEACON}");
-                        //       }
-                        //
-                        //       print("beacon coming out to be:${value}");
-                        //       localizeUser(pinSelectionMarker: true);
-                        //     });
-                        //   } else {
-                        //     //SingletonFunctionController.btadapter.startScanningIOS(SingletonFunctionController.apibeaconmap);
-                        //     BluetoothScanIOSClass.getInitialLocalizedDevice().then((value){
-                        //       print("localized--");
-                        //       print(value);
-                        //       if(value != null){
-                        //         localizeUser(pinSelectionMarker: true);
-                        //       }
-                        //     });
-                        //   }
-                        //   setState((){
-                        //     isLocalized = true;
-                        //     resBeacons =
-                        //         SingletonFunctionController.apibeaconmap;
-                        //   });
-                        //   late Timer _timer;
-                        //   _timer = Timer.periodic(
-                        //       Duration(milliseconds: 5000), (timer) {
-                        //     //localizeUser();
-                        //     _timer.cancel();
-                        //   });
-                        //
-                        //   // late Timer _timer;
-                        //   // _timer = Timer.periodic(
-                        //   //     Duration(milliseconds: 5000), (timer) {
-                        //   //   localizeUser().then((value) => {
-                        //   //     setState(() {
-                        //   //       isLocalized = false;
-                        //   //     })
-                        //   //   });
-                        //   //   _timer.cancel();
-                        //   // });
-                        // } else {
-                        //   _recenterMap();
-                        // }
-                        debugMarker.clear();
-                        if (!user.isnavigating && !isLocalized) {
-                          SingletonFunctionController.btadapter.emptyBin();
-                          SingletonFunctionController.btadapter
-                              .stopScanning();
-                          if (Platform.isAndroid) {
-                            SingletonFunctionController.btadapter
-                                .startScanning(
-                                SingletonFunctionController.apibeaconmap);
-                          } else {
-                            SingletonFunctionController.btadapter
-                                .startScanning(
-                                SingletonFunctionController.apibeaconmap);
-                          }
-                          setState(() {
-                            isLocalized = true;
-                            resBeacons =
-                                SingletonFunctionController.apibeaconmap;
-                          });
-                          late Timer _timer;
-                          _timer = Timer.periodic(
-                              Duration(milliseconds: 5000), (timer) {
-                            localizeUser().then((value) => {
-                              setState(() {
-                                isLocalized = false;
-                              })
-                            });
-
-                            _timer.cancel();
-                          });
-                        } else {
-                          _recenterMap();
-                        }
-
-                      },
-                      child: Semantics(
-                        label:
-                        !user.isnavigating ? "Localize" : "Recenter Map",
-                        onDidGainAccessibilityFocus:
-                        close_isnavigationPannelOpen,
-                        child: (isLocalized)
-                            ? lott.Lottie.asset(
-                          'assets/localized.json', // Path to your Lottie animation
-                          width: 70,
-                          height: 70,
-                        )
-                            : Icon(
-                            (!user.isnavigating)
-                                ? Icons.my_location_sharp
-                                : (mapState.aligned
-                                ? CupertinoIcons.location_north_fill
-                                : CupertinoIcons.location_north),
-                            color: (!user.isnavigating)
-                                ? Colors.black
-                                : Colors.blue),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                        BorderRadius.circular(26.0), // Change radius here
-                      ),
-                      backgroundColor:
-                      Colors.white, // Set the background color of the FAB
-                    ),
-                  ) : Container(),
-                  // FloatingActionButton(
-                  //   onPressed: () async {
-                  //     bluetoothScanAndroidClass.startbin();
-                  //     bluetoothScanAndroidClass.emptyBin();
-                  //     setState(() {
-                  //       bluetoothScanAndroidClass.bluetoothDebug(SingletonFunctionController.apibeaconmap);
-                  //     });
-                  //   },
-                  //   child: Icon(Icons.pin_drop_rounded),
-                  //   shape: RoundedRectangleBorder(
-                  //     borderRadius:
-                  //     BorderRadius.circular(26.0), // Change radius here
-                  //   ),
-                  //   backgroundColor:
-                  //   Colors.white, // Set the background color of the FAB
-                  // ),
-                  SizedBox(height: 28.0),
-                  (!kIsWeb &&  Platform.isAndroid) && !user.isnavigating &&
-                      (!_isLandmarkPanelOpen &&
-                          !_isRoutePanelOpen &&
-                          _isBuildingPannelOpen &&
-                          !_isnavigationPannelOpen && user.initialallyLocalised)
-                      ? FloatingActionButton(
-                    onPressed: () async {
-
-                      if (user.initialallyLocalised) {
-                        //Vibration.vibrate();
-                        //FlutterBeep.beep();
-                        setState(() {
-                          if (isLiveLocalizing) {
-                            isLiveLocalizing = false;
-                            HelperClass.showToast(
-                                "Explore mode is disabled");
-                            if (exploremodeLandmarkTimer != null && exploremodeLandmarkTimer!.isActive) {
-                              exploremodeLandmarkTimer!.cancel();
-                            }
-                            _exploreModeTimer!.cancel();
-                            _isExploreModePannelOpen = false;
-                            _isBuildingPannelOpen = true;
-                            lastBeaconValue = "";
-                          } else {
-                            speak(
-                                "${LocaleData.exploremodenabled.getString(context)}", _currentLocale);
-                            exploremodeLandmarkTimer = Timer.periodic(Duration(seconds: 5), (Timer t) => identifyFrontLandmark());
-                            isLiveLocalizing = true;
-                            HelperClass.showToast("Explore mode enabled");
-                            _exploreModeTimer = Timer.periodic(
-                                Duration(milliseconds: 5000),
-                                    (timer) async {
-                                  PB_startAnimation();
-                                  if (Platform.isAndroid) {
-                                    SingletonFunctionController.btadapter
-                                        .startScanning(
-                                        SingletonFunctionController
-                                            .apibeaconmap);
-                                  } else {
-                                    SingletonFunctionController.btadapter
-                                        .startScanning(
-                                        SingletonFunctionController
-                                            .apibeaconmap);
-                                  }
-                                  Future.delayed(
-                                      Duration(milliseconds: 1500))
-                                      .then((value) => {
-
-                                    realTimeReLocalizeUser(
-                                        resBeacons)
-
-                                    // listenToBin()
-                                  });
-                                });
-                            _isBuildingPannelOpen = false;
-                            _isExploreModePannelOpen = true;
-                          }
-                        });
-                      }
-                    },
-                    child: Semantics(
-                      label: "Explore mode",
-                      child: SvgPicture.asset(
-                        "assets/Navigation_RTLIcon.svg",
-                        // color:
-                        // (isLiveLocalizing) ? Colors.white : Colors.cyan,
-                      ),
-                    ),
-                    backgroundColor: Color(
-                        0xff24B9B0), // Set the background color of the FAB
-                  )
-                      : Container(),  // Adjust the height as needed// Adjust the height as needed
-                  // FloatingActionButton(
-                  //   onPressed: () async {
-                  //     AppSettings.openAppSettings(type: AppSettingsType.settings, asAnotherTask: true);
-                  //   },
-                  //   child: Icon(Icons.settings),
-                  //   backgroundColor: Color(
-                  //       0xff24B9B0), // Set the background color of the FAB
-                  // )
-                ],
-              ),
-            ),
-          ),
-          //-------
-          // (user.isnavigating && recenter)? Positioned(
-          //   bottom: 145,
-          //   right: 220,
-          //   child: Container(
-          //     height: 50,
-          //     width: 150, // Adjust width as needed
-          //     child: ElevatedButton(
-          //       onPressed: () {
-          //         // Implement recenter logic here
-          //         _recenterMap();
-          //       },
-          //       style: ElevatedButton.styleFrom(
-          //         foregroundColor: Colors.white, // Background color
-          //         backgroundColor: Colors.blueGrey.withOpacity(0.5), // Text color
-          //         shape: RoundedRectangleBorder(
-          //           borderRadius: BorderRadius.circular(30), // Rounded corners
-          //         ),
-          //       ),
-          //       child: Row(
-          //         mainAxisSize: MainAxisSize.min,
-          //         mainAxisAlignment: MainAxisAlignment.center,
-          //         children: [
-          //           Icon(Icons.my_location, size: 24),
-          //           SizedBox(width: 8), // Space between icon and text
-          //           Text('Recenter', style: TextStyle(fontSize: 16)),
-          //         ],
-          //       ),
-          //     ),
-          //   ),
-          // ):Container(),
-          SafeArea(
-            child: Stack(
-              children:[
-
-                Positioned(
-                    top:25,
-                    left: 30,
-                    right: 30,
-                    child: Container(
-                      height: 3,
-                      child: AnimatedBuilder(
-                        animation: PB_controller,
-                        builder: (context, child) {
-                          return LinearProgressIndicator(
-                            borderRadius: BorderRadius.circular(15), // Apply the border radius directly
-                            value: PBanimation.value, // Progress value between 0.0 and 1.0
-                            minHeight: 6.0, // Customize the height of the progress bar
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.teal), // Customize the color
-                            backgroundColor: Colors.grey[300], // Background color of the progress bar
-                          );
-                        },
-                      ),
-                    )
-                ),
-                !isLiveLocalizing? Positioned(
-                    top: 16,
-                    left: 16,
-                    right: 16,
-                    child: _isLandmarkPanelOpen ||
-                        _isRoutePanelOpen ||
-                        _isnavigationPannelOpen || PinLandmarkPannel.isPanelOpened()
-                        ? Semantics(excludeSemantics: true, child: Container())
-                        : FocusScope(
-                      autofocus: true,
-                      child: Focus(
-                        child: Semantics(
-                          sortKey: const OrdinalSortKey(0), // header: true,
-                          child: HomepageSearch(
-                            onVenueClicked: onLandmarkVenueClicked,
-                            fromSourceAndDestinationPage:
-                            fromSourceAndDestinationPage,
-                            user: user,
-                          ),
-                        ),
-                      ),
-                    )) : Container()] ,
-            ),
-          ),
-          FutureBuilder(
-            future: SingletonFunctionController.building.landmarkdata,
-            builder: (context, snapshot) {
-              if (_isLandmarkPanelOpen) {
-                return SafeArea(child: landmarkdetailpannel(context, snapshot));
-              } else {
-                return Semantics(excludeSemantics: true, child: Container());
-              }
-            },
-          ),
-          Padding(
-            padding: EdgeInsets.only(top:statusBarHeight),
-            child: routeDeatilPannel(),
-          ),
-          SafeArea(child: feedbackPanel(context)),
-          navigationPannel(),
-          SafeArea(child: reroutePannel(context)),
-          SafeArea(child: ExploreModePannel()),
-          SafeArea(child: PinLandmarkPannel.getPanelWidget(context,updateNearbyLandmarkMarkers, localizeOnPinedLandmark, closePinnedLandmarkPannel, nearbyLandmarks,PinedLandmark)),
-          detected ? Semantics(child: SafeArea(child: nearestLandmarkpannel())) : Container(),
-          SizedBox(height: 28.0), // Adjust the height as needed
-          // FloatingActionButton(
-          //     onPressed: (){
-          //
-          //       //SingletonFunctionController.building.floor == 0 ? 'G' : '${SingletonFunctionController.building.floor}',
-          //
-          //       int firstKey = SingletonFunctionController.building.floor.values.first;
-          //
-          //
-          //
-          //
-          //
-          //
-          //
-          //     },
-          //     child: Icon(Icons.add)
-          // ),
-
-          // FloatingActionButton(
-          //   onPressed: () async {
-          //
-          //     //StopPDR();
-          //
-          //     if (user.initialallyLocalised) {
-          //       setState(() {
-          //         isLiveLocalizing = !isLiveLocalizing;
-          //       });
-          //       HelperClass.showToast("realTimeReLocalizeUser started");
-          //
-          //       Timer.periodic(
-          //           Duration(milliseconds: 5000),
-          //               (timer) async {
-          //
-          //             SingletonFunctionController.btadapter.startScanning(resBeacons);
-          //
-          //
-          //             // setState(() {
-          //             //   sumMap=  SingletonFunctionController.btadapter.calculateAverage();
-          //             // });
-          //
-          //
-          //             Future.delayed(Duration(milliseconds: 2000)).then((value) => {
-          //               realTimeReLocalizeUser(resBeacons)
-          //               // listenToBin()
-          //
-          //
-          //             });
-          //
-          //             setState(() {
-          //               debugPQ = SingletonFunctionController.btadapter.returnPQ();
-          //
-          //             });
-          //
-          //           });
-          //
-          //     }
-          //
-          //   },
-          //   child: Icon(
-          //     Icons.location_history_sharp,
-          //     color: (isLiveLocalizing)
-          //         ? Colors.cyan
-          //         : Colors.black,
-          //   ),
-          //   backgroundColor: Colors
-          //       .white, // Set the background color of the FAB
-          // ),
-          (SingletonFunctionController.building.buildingsLoaded || SingletonFunctionController.building.destinationQr || user.initialallyLocalised || SingletonFunctionController.building.qrOpened || PinLandmarkPannel.isPanelOpened())
-              ?Container(): Container(
-            height: screenHeight,
-            width: screenWidth,
-            color: Colors.white.withOpacity(0.8),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                lott.Lottie.asset(
-                  'assets/loding_animation.json', // Path to your Lottie animation
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 56, right: 56),
-                  child: LinearProgressIndicator(
-                    value: _progressValue,
-                    backgroundColor: Colors.grey,
-                    valueColor:
-                    AlwaysStoppedAnimation<Color>(Colors.red),
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                  ),
-                )
-              ],
-            ),
-          ),
-          ExcludeSemantics(child: Visibility(visible:nearbyLandmarks.isNotEmpty,child: Center(child: PickupLocationPin())))
-        ],
-      ),
-    );
-  }
-
-  //
-  // int d=0;
-  // bool listenToBin(){
-  //   double highestweight = 0;
-  //   String nearestBeacon = "";
-  //   Map<String, double> sumMap = SingletonFunctionController.btadapter.calculateAverage();
-  //
-  //
-  //
-  //  // widget.direction = "";
-  //
-  //
-  //   for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
-  //     if(SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty){
-  //       SingletonFunctionController.btadapter.BIN[i]!.forEach((key, value) {
-  //         key = "";
-  //         value = 0.0;
-  //       });
-  //     }
-  //   }
-  //   SingletonFunctionController.btadapter.numberOfSample.clear();
-  //   SingletonFunctionController.btadapter.rs.clear();
-  //   Building.thresh = "";
-  //
-  //   d++;
-  //   sumMap.forEach((key, value) {
-  //
-  //     setState(() {
-  //      // direction = "${widget.direction}$key   $value\n";
-  //     });
-  //
-  //
-  //
-  //     if(value>highestweight){
-  //       highestweight =  value;
-  //       nearestBeacon = key;
-  //     }
-  //   });
-  //
-  //   //
-  //
-  //
-  //   if(nearestBeacon !=""){
-  //
-  //     if(user.pathobj.path[Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor] != null){
-  //       if(user.key != Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.sId){
-  //
-  //         if(user.floor == Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor  && highestweight >9){
-  //           List<int> beaconcoord = [Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.coordinateX!,Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.coordinateY!];
-  //           List<int> usercoord = [user.showcoordX, user.showcoordY];
-  //           double d = tools.calculateDistance(beaconcoord, usercoord);
-  //           if(d < 5){
-  //             //near to user so nothing to do
-  //             return true;
-  //           }else{
-  //             int distanceFromPath = 100000000;
-  //             int? indexOnPath = null;
-  //             int numCols = user.pathobj.numCols![user.Bid]![user.floor]!;
-  //             user.path.forEach((node) {
-  //               List<int> pathcoord = [node % numCols, node ~/ numCols];
-  //               double d1 = tools.calculateDistance(beaconcoord, pathcoord);
-  //               if(d1<distanceFromPath){
-  //                 distanceFromPath = d1.toInt();
-  //
-  //
-  //                 indexOnPath = user.path.indexOf(node);
-  //
-  //               }
-  //             });
-  //
-  //             if(distanceFromPath>5){
-  //               _timer.cancel();
-  //               repaintUser(nearestBeacon);
-  //               return false;//away from path
-  //             }else{
-  //               user.key = Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.sId!;
-  //
-  //               speak("You are near ${Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.name}");
-  //               user.moveToPointOnPath(indexOnPath!);
-  //               moveUser();
-  //               return true; //moved on path
-  //             }
-  //           }
-  //
-  //
-  //           //
-  //           //
-  //           //
-  //           //
-  //           //
-  //         }else{
-  //
-  //           speak("You have reached ${tools.numericalToAlphabetical(Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor!)} floor");
-  //           paintUser(nearestBeacon); //different floor
-  //           return true;
-  //         }
-  //
-  //       }
-  //     }else{
-  //
-  //
-  //
-  //       _timer.cancel();
-  //       repaintUser(nearestBeacon);
-  //       return false;
-  //     }
-  //   }
-  //   return false;
-  // }
 
   Map<String, double> sortMapByValue(Map<String, double> map) {
     var sortedEntries = map.entries.toList()
@@ -13639,6 +13355,1194 @@ class _NavigationState extends State<Navigation> with TickerProviderStateMixin, 
               (a, b) => b.value.compareTo(a.value)); // Sorting in descending order
 
     return Map.fromEntries(sortedEntries);
+  }
+
+  late Timer EM_TIMER;
+  String EM_LastBeacon = "";
+
+  Future<bool> _handleBackPress() async {
+    if (_isLandmarkPanelOpen) {
+      setState(() {
+        _polygon.clear();
+        cachedPolygon.clear();
+        //  circles.clear();
+        showMarkers();
+        toggleLandmarkPanel();
+        _isBuildingPannelOpen = true;
+        _isLandmarkPanelOpen = false;
+      });
+      return false;
+    }
+    if (_isRoutePanelOpen) {
+      setState(() {
+        SingletonFunctionController.building.landmarkdata!.then((value) {
+          createMarkers(value, SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]??0, user.bid);
+        });
+        PlayPreviewManager().clearPreview();
+        _isRoutePanelOpen = false;
+        _isLandmarkPanelOpen = true;
+        showMarkers();
+        List<double> mvalues = tools.localtoglobal(
+            PathState.destinationX,
+            PathState.destinationY,
+            SingletonFunctionController
+                .building.patchData[PathState.destinationBid]);
+        _googleMapController.animateCamera(
+          CameraUpdate.newLatLngZoom(
+            LatLng(mvalues[0], mvalues[1]),
+            20, // Specify your custom zoom level here
+          ),
+        );
+        PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
+        PathState.path.clear();
+        PathState.sourcePolyID = "";
+        PathState.destinationPolyID = "";
+        singleroute.clear();
+        //realWorldPath.clear();
+        _isBuildingPannelOpen = true;
+        if (user.isnavigating == false) {
+          clearPathVariables();
+        }
+        Marker? temp =
+            selectedroomMarker[buildingAllApi.getStoredString()]?.first;
+        selectedroomMarker.clear();
+        selectedroomMarker[buildingAllApi.getStoredString()]?.add(temp!);
+        pathMarkers.clear();
+      });
+      return false;
+    }
+    if (_isnavigationPannelOpen) {
+      setState(() {
+        _isnavigationPannelOpen = false;
+        _isRoutePanelOpen = true;
+        initializeMarkers();
+        StopPDR();
+        onStart = false;
+        startingNavigation = true;
+        PathState.sourceX = user.coordX;
+        PathState.sourceY = user.coordY;
+        PathState.sourceFloor = user.floor;
+        PathState.sourceBid = user.bid;
+        PathState.sourceLat = user.lat;
+        PathState.sourceLng = user.lng;
+        PathState.sourceName = "Your current location";
+        user.temporaryExit = true;
+        user.isnavigating = false;
+        markNavigationUnsuccessful("User Exited Navigation");
+        if (pathMarkers[user.bid] != null) {
+          setCameraPosition(pathMarkers[user.bid]![
+          SingletonFunctionController.building.floor[user.bid]]!);
+          List<LatLng> ll = [
+            pathMarkers[user.bid]![
+            SingletonFunctionController.building.floor[user.bid]]!
+                .first
+                .position,
+            pathMarkers[user.bid]![
+            SingletonFunctionController.building.floor[user.bid]]!
+                .last
+                .position
+          ];
+          fitTwoPoints(ll);
+        }
+      });
+      return false;
+    }
+    Navigator.pop(context);
+    print("got here");
+    // All panels closed, allow screen pop
+    return false;
+  }
+
+  Timer? _localizeTimer;
+
+  @override
+  Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+    double statusBarHeight = MediaQuery.of(context).padding.top;
+    isSemanticEnabled = MediaQuery.of(context).accessibleNavigation;
+    HelperClass.SemanticEnabled = MediaQuery.of(context).accessibleNavigation;
+    bool mapLoading = (SingletonFunctionController.building.buildingsLoaded || SingletonFunctionController.building.destinationQr || SingletonFunctionController.building.qrOpened || PinLandmarkPannel.isPanelOpened()) && initialInAppLoading;
+    return Lowfedility.LFDesign?Homepage(key: Homepage.homePageKey):
+    PopScope(
+      canPop:(Platform.isIOS)?true:false,
+      onPopInvoked:(didpop) async {
+        if(Platform.isAndroid) {
+          print("didpop:${didpop}");
+          if(didpop==false){
+            bool res=await _handleBackPress();
+            if(res==true){
+              Navigator.pop(context);
+            }
+          }
+        }
+      },
+      child: Scaffold(
+        body: Stack(
+          children: [
+            detected
+                ? Semantics(excludeSemantics: true, child: ExploreModePannel())
+                : Semantics(excludeSemantics: true, child: Container()),
+            Semantics(
+              excludeSemantics: true,
+              child: Container(
+                child: GoogleMap(
+                  padding: EdgeInsets.only(left: 20), // <--- padding added here
+                  initialCameraPosition: _initialCameraPosition,
+                  myLocationButtonEnabled: false,
+                  myLocationEnabled: false,
+                  zoomControlsEnabled: false,
+                  zoomGesturesEnabled: true,
+                  mapToolbarEnabled: false,
+                  polygons: getCombinedPolygons().union(_polygon).union(globalCampus).union(allGlobalBlocks).union(outDoorGlobalBlock).union(blurPatchCampus),
+                  polylines: getCombinedPolylines(),
+                  markers: getCombinedMarkers()
+                      .union(_markers)
+                  // .union(blurPatchMarker)
+                      .union(outdoorBlockMarker)
+                      .union(focusturnArrow).union(blockMarker)
+                      .union(Markers).union(roomNameMarkers).union(blurPatchCampusMarker)
+                  // .union(debugMarker)
+                      .union(GpsMarker).union(nearbyLandmarks.values.toSet()).union(_exploreModeMarker)
+                      .union(_exploreModeDebugBeaconMarker).union(fingerprinting.getMarkers()).union(landmarkMarkers),
+                  buildingsEnabled: false,
+                  compassEnabled: false,
+                  rotateGesturesEnabled: true,
+                  minMaxZoomPreference: MinMaxZoomPreference(2, 30),
+                  onMapCreated: (controller){
+                    controller.setMapStyle(maptheme);
+                    _googleMapController = controller;
+                    playPreviewManager = PlayPreviewManager();
+                    //zoomWhileWait(buildingAllApi.allBuildingID, controller);
+                    mapClustering.initMarkers().then((value){
+                      landmarkMarkers = mapClustering.recalculateClusters(_lastZoom,mapState.bearing);
+                    });
+                    // _initMarkers();
+                  },
+                  onCameraMove: (CameraPosition cameraPosition) {
+                    mapState.cameraposition = cameraPosition; // User has started panning
+                    playPreviewManager?.cameraPosition = cameraPosition;
+                    if (cameraPosition.zoom < 19) {
+                      MGMarkers.forEach((_element) {
+                        _element.visible = false;
+                      });
+                    } else {
+                      MGMarkers.forEach((_element) {
+                        _element.visible = true;
+                      });
+                    }
+
+                    if (cameraPosition.zoom <= 17) {
+
+                      // blurPatch.forEach((polygon) {
+                      //   polygon.visible = false;
+                      // });
+                      // blurPatchMarker.forEach((marker) {
+                      //   marker.visible = false;
+                      // });
+
+                      // outDoorGlobalBlock.forEach((polygon) {
+                      //   polygon.visible = false;
+                      // });
+                      // outdoorBlockMarker.forEach((marker) {
+                      //   marker.visible = false;
+                      // });
+
+                      blurPatchCampus.forEach((polygon) {
+                        polygon.visible = true;
+                      });
+                      blurPatchCampusMarker.forEach((marker) {
+                        marker.visible = true;
+                      });
+                      outDoorGlobalBlock.forEach((polygon) {
+                        polygon.visible = false;
+                      });
+                      outdoorBlockMarker.forEach((marker) {
+                        marker.visible = false;
+                      });
+                      setState(() {});
+                    } else if (cameraPosition.zoom > 14.8 &&
+                        cameraPosition.zoom < 18) {
+                      blurPatchCampus.forEach((polygon) {
+                        polygon.visible = false;
+                      });
+                      blurPatchCampusMarker.forEach((marker) {
+                        marker.visible = false;
+                      });
+
+                      // blurPatch.forEach((polygon) {
+                      //   polygon.visible = true;
+                      // });
+                      // blurPatchMarker.forEach((marker) {
+                      //   marker.visible = true;
+                      // });
+                      outDoorGlobalBlock.forEach((polygon) {
+                        polygon.visible = true;
+                      });
+                      outdoorBlockMarker.forEach((marker) {
+                        marker.visible = true;
+                      });
+                      setState(() {});
+                    } else if (cameraPosition.zoom >= 18) {
+                      // print("cameraposition ${cameraPosition.zoom}");
+
+                      // blurPatch.forEach((polygon) {
+                      //   polygon.visible = false;
+                      // });
+                      // blurPatchMarker.forEach((marker) {
+                      //   marker.visible = false;
+                      // });
+
+                      blurPatchCampus.forEach((polygon) {
+                        polygon.visible = false;
+                      });
+                      blurPatchCampusMarker.forEach((marker) {
+                        marker.visible = false;
+                      });
+                      outDoorGlobalBlock.forEach((polygon) {
+                        polygon.visible = false;
+                      });
+                      outdoorBlockMarker.forEach((marker) {
+                        marker.visible = false;
+                      });
+
+                      if (cameraPosition.zoom < 19) {
+                        // print("cameraposition ${cameraPosition.zoom}");
+                        // ✅ Show outdoor blocks when zoom < 19
+                        outDoorGlobalBlock.forEach((polygon) {
+                          polygon.visible = true;
+                        });
+                        outdoorBlockMarker.forEach((marker) {
+                          marker.visible = true;
+                        });
+                        setState(() {});
+                      } else {
+                        // print("cameraposition ${cameraPosition.zoom}");
+                        // Hide outdoor blocks when zoom >= 19
+                        outDoorGlobalBlock.forEach((polygon) {
+                          polygon.visible = false;
+                        });
+                        outdoorBlockMarker.forEach((marker) {
+                          marker.visible = false;
+                        });
+                        setState(() {});
+                        // blurPatch.forEach((polygon) {
+                        //   polygon.visible = false;
+                        // });
+                        // blurPatchMarker.forEach((marker) {
+                        //   marker.visible = false;
+                        // });
+
+                        blurPatchCampus.forEach((polygon) {
+                          polygon.visible = false;
+                        });
+                        blurPatchCampusMarker.forEach((marker) {
+                          marker.visible = false;
+                        });
+                        setState(() {});
+                      }
+                      setState(() {});
+                    }
+                    mapState.zoom = cameraPosition.zoom;
+                    //Check zoom level and decide rendering strategy
+                    if (cameraPosition.zoom > 16.8) {
+                      focusBuildingChecker(cameraPosition);
+                    } else if (cameraPosition.zoom > 15.5) {
+                    } else {
+                      //renderCampusPatchTransition([buildingAllApi.outdoorID]);
+                    }
+                    // print("cameraPosition.zoom ${cameraPosition.zoom}");
+                    // if(cameraPosition.zoom <20.5){
+                    //   // doorMarkers.forEach((_element){
+                    //   //   _element.visible = false;
+                    //   // });
+                    //   roomNameMarkers.forEach((_element){
+                    //     _element.visible = false;
+                    //   });
+                    // }else{
+                    //   // doorMarkers.forEach((_element) {
+                    //   //   _element.visible = true;
+                    //   // });
+                    //   roomNameMarkers.forEach((_element) {
+                    //     _element.visible = true;
+                    //   });
+                    // }
+                    // Update map alignment based on camera position
+                    mapState.aligned = cameraPosition.target.latitude
+                        .toStringAsFixed(5) ==
+                        mapState.target.latitude.toStringAsFixed(5);
+
+                    mapState.interaction =
+                    true; // Interaction has occurred
+                    mapState.bearing = cameraPosition.bearing;
+                    mapbearing = cameraPosition.bearing;
+
+                    // Sync zoom level only when there’s no active interaction
+                    if (!mapState.interaction) {
+                      mapState.zoom = cameraPosition.zoom;
+                    }
+                    // isLiveLocalizing? () : _updateMarkers(cameraPosition.zoom);
+                    //_updateBuilding(cameraPosition.zoom);
+                    // _updateMarkers(cameraPosition.zoom);
+                    if (cameraPosition.zoom < 17) {
+                      _markers.clear();
+                      markerSldShown = false;
+                    } else {
+                      markerSldShown = true;
+                    }
+
+                    if (PathState.Cellpath.isEmpty && cameraPosition.zoom < 19 &&
+                        cameraPosition.zoom > 17) {
+                      print("cameraPosition.zoom${cameraPosition.zoom}");
+                      allGlobalBlocks.addAll(globalBlock);
+                      blockMarker.forEach((val) {
+                        val.visible = true;
+                      });
+                    } else {
+                      blockMarker.forEach((val) {
+                        val.visible = false;
+                      });
+                      allGlobalBlocks.clear();
+                    }
+
+                    // print("user.isnavigating ${user.isnavigating}");
+                    // if (cameraPosition.zoom > 19) {
+                    //   clustringOFF = false;
+                    //   landmarkMarkers.forEach((value){
+                    //     if(!value.markerId.value.toLowerCase().contains("main entry")) {
+                    //       value.visible = false;
+                    //     }
+                    //   });
+                    // } else if( user.isnavigating){
+                    //   // clustringOFF = true;
+                    //   print("cameraPosition.zoom < 19 ${cameraPosition.zoom}");
+                    //   if(cameraPosition.zoom > 19){
+                    //     landmarkMarkers.forEach((value){
+                    //       if(!value.markerId.value.toLowerCase().contains("main entry")){
+                    //         value.visible = false;
+                    //       }else{
+                    //         value.visible = true;
+                    //       }
+                    //     });
+                    //   }else{
+                    //     landmarkMarkers.forEach((value){
+                    //       value.visible = false;
+                    //     });
+                    //   }
+                    //
+                    // } else {
+                    //   print("Clustring will be off");
+                    //   // clustringOFF = true;
+                    //   // landmarkMarkers.forEach((value){
+                    //   //   value.visible = false;
+                    //   // });
+                    // }
+
+                    if ((cameraPosition.zoom - _lastZoom).abs() > 0.2) {
+                      _lastZoom = cameraPosition.zoom;
+                      print("Clustring is ${clustringOFF}");
+                      if (cameraPosition.zoom < 19 ) {
+                        // landmarkMarkers.clear();
+                        landmarkMarkers.forEach((value) {
+                          value.visible = false;
+                        });
+                        setState(() {});
+
+                      } else {
+                        landmarkMarkers = mapClustering.recalculateClusters(_lastZoom, mapState.bearing);
+                        setState(() {});
+                        landmarkMarkers.forEach((value) {
+                          if (selectedMarkerId.isNotEmpty) {
+                            if (value.markerId
+                                .toString()
+                                .contains(selectedMarkerId)) {
+                              value.visible = false;
+                            } else {
+                              value.visible = true;
+                            }
+                          }
+                        });
+                      }
+                    }
+                  },
+                  onCameraIdle: () {
+
+                    // setState(() {
+                    //   landmarkMarkers = outdoorBlockMarkersset;
+                    // });
+
+                    Set<Marker> updatedMarkers =
+                    landmarkMarkers.where((marker) {
+                      String markerId = marker.markerId.value;
+                      String polyId =
+                          markerId.split("polyId-").last.split(" ").first;
+
+                      return polygonCalculation
+                          .landmarkWithLatLng[polyId] !=
+                          null && marker.flat;
+                    }).map((marker) {
+                      String markerId = marker.markerId.value;
+                      String polyId =
+                          markerId.split("polyId-").last.split(" ").first;
+                      List<LatLng> points = polygonCalculation.landmarkWithLatLng[polyId]!;
+                      List<LatLng> calculatedPoints = points;
+
+                      int leftMost = LeftMost().leftMostPoint(
+                        PointForCenter(calculatedPoints[0].latitude,
+                            calculatedPoints[0].longitude, "name"),
+                        PointForCenter(calculatedPoints[1].latitude,
+                            calculatedPoints[1].longitude, "name1"),
+                        mapState.bearing,
+                      );
+
+                      double rotation;
+                      if (leftMost == -1) {
+                        rotation = polygonCalculation.calculateBearing(
+                            calculatedPoints[0], calculatedPoints[1]);
+                      } else {
+                        rotation = polygonCalculation.calculateBearing(
+                            calculatedPoints[1], calculatedPoints[0]);
+                      }
+
+                      // print("marker.markerId.toString() ${marker.markerId.toString()} $leftMost $rotation");
+                      return marker.copyWith(rotationParam: rotation);
+                    }).toSet();
+                    landmarkMarkers.removeWhere((marker)=>updatedMarkers.where((newMarker)=>newMarker.markerId == marker.markerId).isNotEmpty);
+                    setState(() {
+                      landmarkMarkers = landmarkMarkers.union(updatedMarkers);
+                    });
+
+
+                    if(PinLandmarkPannel.isPanelOpened()){
+                      selectPinLandmark(mapState.cameraposition!);
+                    }
+                    if (!mapState.interaction) {
+                      mapState.interaction2 = true;
+                    }
+                  },
+                  onCameraMoveStarted: () {
+                    user.building = SingletonFunctionController.building;
+                    mapState.interaction2 = false;
+                  },
+                  circles: circles,
+                ),
+              ),
+            ),
+            //debug----
+
+            DebugToggle.PDRIcon
+                ? Positioned(
+                top: 150,
+                right: 50,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(),
+                    borderRadius: BorderRadius.circular(20),
+                    color: (isPdr) ? Colors.green : Colors.red,
+                  ),
+                  height: 20,
+                  width: 20,
+                ))
+                : Container(),
+
+            Positioned(
+              bottom: isLiveLocalizing
+                  ? screenHeight * 0.6
+                  : 150.0, // Adjust the position as needed
+              right: 16.0,
+              child: Semantics(
+                excludeSemantics: false,
+                child: Column(
+                  children: [
+                    isSemanticEnabled || PinLandmarkPannel.isPanelOpened() || !_isnavigationPannelOpen
+                        ? Container()
+                        : SpeedDial(
+                      icon: _mainIcon,
+                      foregroundColor: _mainColor,
+                      backgroundColor: Colors.white,
+                      visible: true,
+                      curve: Curves.bounceInOut,
+                      children: [
+                        SpeedDialChild(
+                          child: Icon(Icons.volume_up_outlined,
+                              color: Colors.white),
+                          backgroundColor: Colors.green,
+                          label: "All instructions", // full TTS
+                          labelStyle: TextStyle(fontSize: 14.0),
+                          onTap: () {
+                            setState(() {
+                              _mainIcon = Icons.volume_up_outlined;
+                              _mainColor = Colors.green;
+                            });
+                            UserState.ttsAllStop = false;
+                            UserState.ttsOnlyTurns = false;
+                          },
+                        ),
+                        SpeedDialChild(
+                          child: Icon(Icons.volume_down_outlined,
+                              color: Colors.black),
+                          backgroundColor: Colors.blueAccent,
+                          label: "Only turns", // partial TTS
+                          labelStyle: TextStyle(fontSize: 14.0),
+                          onTap: () {
+                            setState(() {
+                              _mainIcon =
+                                  Icons.volume_down_outlined;
+                              _mainColor = Colors.blueAccent;
+                            });
+                            UserState.ttsOnlyTurns = true;
+                            UserState.ttsAllStop = false;
+                          },
+                        ),
+                        SpeedDialChild(
+                          child: Icon(Icons.volume_off_outlined,
+                              color: Colors.white),
+                          backgroundColor: Colors.red,
+                          label: "Mute all", // no TTS
+                          labelStyle: TextStyle(fontSize: 14.0),
+                          onTap: () {
+                            setState(() {
+                              _mainIcon = Icons.volume_off_outlined;
+                              _mainColor = Colors.red;
+                            });
+                            UserState.ttsAllStop = true;
+                            UserState.ttsOnlyTurns = false;
+                          },
+                        ),
+                      ],
+                    ),
+                    Visibility(
+                      visible: DebugToggle.StepButton,
+                      child: Container(
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius:
+                              BorderRadius.all(Radius.circular(24))),
+                          child: IconButton(
+                              onPressed: () {
+                                //StartPDR();
+                                bool isvalid = MotionModel.isValidStep(
+                                    user,
+                                    SingletonFunctionController
+                                        .building.floorDimenssion[
+                                    user.bid]![user.floor]![0],
+                                    SingletonFunctionController
+                                        .building.floorDimenssion[
+                                    user.bid]![user.floor]![1],
+                                    SingletonFunctionController
+                                        .building.nonWalkable[
+                                    user.bid]![user.floor]!,
+                                    reroute,
+                                    context);
+                                if (isvalid) {
+                                  user.move(context).then((value) {
+                                    print("renderedddd here");
+                                    renderHere();
+                                  });
+                                } else {
+                                  if (user.isnavigating) {
+                                    // reroute();
+                                    // showToast("You are out of path");
+                                  }
+                                }
+                              },
+                              icon: Icon(Icons.directions_walk))),
+                    ),
+                    SizedBox(height: 28.0),
+                    DebugToggle.Slider
+                        ? Text("${user.theta}")
+                        : Container(),
+                    // if(_currentPoint!=null)Text("${_currentPoint!} ${_currentPoint!}"),
+                    // Text("coord [${user.coordX},${user.coordY}] \n"
+                    //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                    //     "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
+                    // // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
+                    //     "floor ${user.floor}\n"
+                    //     "userBid ${user.bid} \n"
+                    //     "stepSize ${UserState.stepSize}\n"
+                    //     "index ${user.pathobj.index} \n"
+                    //     "theta ${user.theta} \n"
+                    //     "theta ${tools.AngleBetweenBuildingandGlobalNorth} \n"
+                    //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+                    DebugToggle.Slider
+                        ? Slider(
+                        value: user.theta,
+                        min: -180,
+                        max: 180,
+                        onChanged: (newvalue) {
+                          double? compassHeading = newvalue;
+                          setState(() {
+                            user.theta = compassHeading!;
+                            if (mapState.interaction2) {
+                              mapState.bearing = compassHeading!;
+                              _googleMapController.moveCamera(
+                                CameraUpdate.newCameraPosition(
+                                  CameraPosition(
+                                    target: mapState.target,
+                                    zoom: mapState.zoom,
+                                    bearing: mapState.bearing!,
+                                  ),
+                                ),
+                                //duration: Duration(milliseconds: 500), // Adjust the duration here (e.g., 500 milliseconds for a faster animation)
+                              );
+                            } else {
+                              if (markers.length > 0)
+                                markers[user.bid]?[0] =
+                                    customMarker.rotate(
+                                        compassHeading! - mapbearing,
+                                        markers[user.bid]![0]);
+                            }
+                          });
+                        })
+                        : Container(),
+                    !isLiveLocalizing? !isSemanticEnabled && !PinLandmarkPannel.isPanelOpened() && (playPreviewManager != null ? !playPreviewManager!.isPlaying : true)
+                        ? Semantics(
+                      label: "Change floor",
+                      child: SpeedDial(
+                        activeIcon: Icons.close,
+                        backgroundColor: Colors.white,
+                        children: List.generate(
+                          (Building.numberOfFloorsDelhi[
+                          buildingAllApi
+                              .getStoredString()] ??
+                              [0])
+                              .length,
+                              (int i) {
+                            //
+                            List<int> floorList = Building
+                                .numberOfFloorsDelhi[
+                            buildingAllApi
+                                .getStoredString()] ??
+                                [0];
+                            List<int> revfloorList = floorList;
+                            revfloorList.sort();
+                            return SpeedDialChild(
+                              // labelWidget: (i == 0 || i == 2)
+                              //     ? Padding(
+                              //         padding:
+                              //             const EdgeInsets.only(
+                              //                 right: 8.0),
+                              //         child: Container(
+                              //           height: 35,
+                              //           decoration:
+                              //               BoxDecoration(
+                              //             color:
+                              //                 Color(0xff011b33),
+                              //             borderRadius:
+                              //                 BorderRadius.circular(
+                              //                     8), // Optional: rounded corners
+                              //           ),
+                              //           padding: const EdgeInsets
+                              //               .all(
+                              //               8.0), // Optional: padding inside the container
+                              //           child: Image.asset(
+                              //             'assets/logo.png',
+                              //             width: 80,
+                              //             height: 80,
+                              //           ),
+                              //         ),
+                              //       )
+                              //     : null,
+                              // label: (i==0 || i==2)?'Empower':null ,
+                              child: Semantics(
+                                label: "${revfloorList[i]}",
+                                child: Text(
+                                  revfloorList[i] == 0
+                                      ? 'G'
+                                      : '${revfloorList[i]}',
+                                  style: const TextStyle(
+                                    fontFamily: "Roboto",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    height: 19 / 16,
+                                  ),
+                                ),
+                              ),
+                              backgroundColor: (SingletonFunctionController
+                                  .building
+                                  .floor[
+                              buildingAllApi
+                                  .getStoredString()] ==
+                                  revfloorList[i] ||
+                                  PathState.destinationFloor !=
+                                      null &&
+                                      PathState
+                                          .destinationFloor ==
+                                          revfloorList[
+                                          i])
+                                  ? Colors.blue[400]
+                                  : Colors.white,
+
+                              onTap: () {
+                                currentSelectedFloor = revfloorList[i];
+                                print(
+                                    "floor selected:${revfloorList[i]} , ${SingletonFunctionController.building.floor}");
+                                _polygon.clear();
+                                cachedPolygon.clear();
+                                circles.clear();
+                                _markers.clear();
+                                if(PathState.singleCellListPath.isNotEmpty){
+                                  List<String> intermediatesBids = tools.findIntermediateBuildings(PathState.singleCellListPath);
+                                  setBuildingFloors([...intermediatesBids, buildingAllApi.getStoredString()], floor: revfloorList[i]);
+                                }else{
+                                  SingletonFunctionController
+                                      .building.floor[
+                                  buildingAllApi
+                                      .getStoredString()] =
+                                  revfloorList[i];
+                                  print("SingletonFunctionController.building.floor${SingletonFunctionController
+                                      .building.floor[
+                                  buildingAllApi
+                                      .getStoredString()]}");
+                                  createRooms(
+                                    SingletonFunctionController
+                                        .building
+                                        .polylinedatamap[
+                                    buildingAllApi
+                                        .getStoredString()]!,
+                                    SingletonFunctionController
+                                        .building.floor[
+                                    buildingAllApi
+                                        .getStoredString()]!,
+                                  );
+                                }
+                                if (pathMarkers[i] !=
+                                    null) {
+                                  //setCameraPosition(pathMarkers[i]!);
+                                }
+                                // Markers.clear();
+                                SingletonFunctionController
+                                    .building
+                                    .landmarkdata!
+                                    .then((value) {
+                                  createMarkers(
+                                      value,
+                                      SingletonFunctionController
+                                          .building
+                                          .floor[
+                                      buildingAllApi
+                                          .getStoredString()]!,
+                                      buildingAllApi
+                                          .getStoredString());
+                                });
+                                fitPathPoints(floor: revfloorList[i]);
+                              },
+                            );
+                          },
+                        ),
+                        child: Text(
+                          SingletonFunctionController
+                              .building.floor[
+                          buildingAllApi
+                              .getStoredString()] ==
+                              0
+                              ? 'G'
+                              : '${SingletonFunctionController.building.floor[buildingAllApi.getStoredString()]}',
+                          style: const TextStyle(
+                            fontFamily: "Roboto",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xff24b9b0),
+                            height: 19 / 16,
+                          ),
+                        ),
+                      ),
+                    )
+                        : nofloorColumn()
+                        : Container(),
+                    SizedBox(height: 28.0), // Adjust the height as needed
+                    // Container(
+                    //   width: 300,
+                    //   height: 100,
+                    //   child: SingleChildScrollView(
+                    //     scrollDirection: Axis.horizontal,
+                    //     child: Column(
+                    //       crossAxisAlignment: CrossAxisAlignment.start,
+                    //       children: [
+                    //         Text(testBIn.keys.toString()),
+                    //         Text(testBIn.values.toString()),
+                    //         Text("summap"),
+                    //         Text(sortedsumMapfordebug.toString()),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    !isLiveLocalizing? isSemanticEnabled || _isRoutePanelOpen || isSemanticEnabled && _isLandmarkPanelOpen || PinLandmarkPannel.isPanelOpened()
+                        ? Container()
+                        : Semantics(
+                      child: FloatingActionButton(
+                        onPressed: () async {
+                          InteractionManager().logInteraction("Relocalization Button");
+                          debugMarker.clear();
+                          if (!user.isnavigating) {
+                            if (SingletonFunctionController
+                                .currentBeacon.isNotEmpty &&
+                                bleManager.trimBufferTimer !=
+                                    null &&
+                                await FlutterBluePlus.isOn) {
+                              setState(() {
+                                isFromLocalize = true;
+                              });
+                              // _localizeTimer=Timer.periodic(Duration(seconds: 5), (_){
+                              print(
+                                  "SingletonFunctionController.currentBeacon:${SingletonFunctionController.currentBeacon}");
+                              if (SingletonFunctionController
+                                  .currentBeacon.isEmpty){
+                                _localizeTimer!.cancel();
+                              }
+                              paintUser(
+                                  SingletonFunctionController
+                                      .currentBeacon,
+                                  null,
+                                  render: true,
+                                  speakTTS: true,
+                                  providePinSelection: false);
+                            } else {
+                              if(isLocalized)return;
+                              setState(() {
+                                isLocalized = true;
+                              });
+                              gpsSubscription = GPSService.locationStream.listen((Location location) {
+                                gpsBuffer.add(location.latitude, location.longitude);
+                              }, onError: (error) {
+                                print("Error receiving GPS data: $error");
+                              });
+                              if(Platform.isAndroid){
+                                bleManager.startScanning(
+                                    bufferSize: 5,
+                                    streamFrequency: 5,
+                                    duration: 5);
+                              }else{
+                                BluetoothScanIOSClass.startScan();
+                              }
+                              late Timer _timer;
+                              _timer = Timer.periodic(
+                                  Duration(milliseconds: 5000),
+                                      (timer) {
+                                    localizeUser().then((value) => {
+                                      setState(() {
+                                        isLocalized = false;
+                                      })
+                                    });
+
+                                    _timer.cancel();
+                                  });
+                            }
+                          } else {
+                            recenterMap();
+                          }
+                        },
+                        child: Semantics(
+                          label: !user.isnavigating
+                              ? "Localize"
+                              : "Recenter Map",
+                          onDidGainAccessibilityFocus:
+                          close_isnavigationPannelOpen,
+                          child: (isLocalized)
+                              ? lott.Lottie.asset(
+                            'assets/localized.json', // Path to your Lottie animation
+                            width: 70,
+                            height: 70,
+                          )
+                              : Icon(
+                              (!user.isnavigating)
+                                  ? (user.coordX == 0.0 && user.coordY == 0.0)?Icons.my_location_sharp:Icons.my_location_sharp
+                                  : (mapState.aligned
+                                  ? CupertinoIcons
+                                  .location_north_fill
+                                  : CupertinoIcons
+                                  .location_north),
+                              color: (!user.isnavigating)
+                                  ? (user.coordX == 0.0 && user.coordY == 0.0)?Colors.white:Colors.blue
+                                  : Colors.blue),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              26.0), // Change radius here
+                        ),
+                        backgroundColor: (user.coordX == 0.0 && user.coordY == 0.0)?Colors.red:Colors.white, // Set the background color of the FAB
+                      ),
+                    ):Container(),
+                    // SizedBox(
+                    //   height: 30,
+                    // ), // Adjust the height as needed// Adjust the height as needed
+                    // FloatingActionButton(onPressed: (){
+                    //   print("current landmark length ${_landmarks.length}");
+                    //   print("current landmark length ${landmarkMarkers.length}");
+                    //   _landmarks.forEach((val){
+                    //     print("val print${val.name}");
+                    //   });
+                    //   landmarkMarkers.forEach((val){
+                    //     print("val print${val.markerId}");
+                    //   });
+                    //
+                    //   setState(() {
+                    //
+                    //   });
+                    // },child: Icon(Icons.add_location_alt),),
+                    // FloatingActionButton(onPressed: (){
+                    //   Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //       builder: (context) => LoggingScreen(
+                    //         logging: bluetoothScanAndroidClass.logging,
+                    //         loggingTaps: bluetoothScanAndroidClass.loggingTaps,
+                    //       ),
+                    //     ),
+                    //   );
+                    // },child: Icon(Icons.bluetooth_audio),)
+                  ],
+                ),
+              ),
+            ),
+
+            SafeArea(
+              child: Stack(
+                children:[
+                  !isLiveLocalizing? Positioned(
+                      top: 16,
+                      left: 16,
+                      right: 16,
+                      child: _isLandmarkPanelOpen ||
+                          _isRoutePanelOpen ||
+                          _isnavigationPannelOpen || PinLandmarkPannel.isPanelOpened() || mapLoading
+                          ? Semantics(excludeSemantics: true, child: Container())
+                          : FocusScope(
+                        autofocus: true,
+                        child: Focus(
+                          child: Semantics(
+                            sortKey: const OrdinalSortKey(0), // header: true,
+                            child:HomepageSearch(
+                              onVenueClicked: onLandmarkVenueClicked,
+                              fromSourceAndDestinationPage:
+                              fromSourceAndDestinationPage,
+                              user: user,
+                            ),
+                          ),
+                        ),
+                      )) : Container()] ,
+              ),
+            ),
+            FutureBuilder(
+              future: SingletonFunctionController.building.landmarkdata,
+              builder: (context, snapshot) {
+                if (_isLandmarkPanelOpen) {
+                  return SafeArea(
+                      child: landmarkdetailpannel(context, snapshot));
+                } else {
+                  return Semantics(
+                      excludeSemantics: true, child: Container());
+                }
+              },
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: statusBarHeight),
+              child: routeDeatilPannel(),
+            ),
+            SafeArea(child: feedbackPanel(context)),
+            navigationPannel(),
+            SafeArea(child: reroutePannel(context)),
+            SafeArea(child: ExploreModePannel()),
+            SafeArea(child: PinLandmarkPannel.getPanelWidget(context,updateNearbyLandmarkMarkers, localizeOnPinedLandmark, closePinnedLandmarkPannel, nearbyLandmarks,PinedLandmark)),
+            detected
+                ? Semantics(
+                child: SafeArea(child: nearestLandmarkpannel()))
+                : Container(),
+            SizedBox(height: 28.0), // Adjust the height as needed
+
+            mapLoading? Container(
+              height: screenHeight,
+              width: screenWidth,
+              color: Colors.black.withOpacity(0.3),
+              child: Center(
+                child: LoadingAnimationWidget.progressiveDots(
+                    color: Colors.teal,
+                    size: 50
+                ),
+              ),
+            ) : Container(
+              height: 0, width: 0,),
+
+            // Container(
+            //   height: screenHeight,
+            //   width: screenWidth,
+            //   color: Colors.white.withOpacity(0.8),
+            //   child: Column(
+            //     mainAxisAlignment: MainAxisAlignment.center,
+            //     children: [
+            //       lott.Lottie.asset(
+            //         'assets/loding_animation.json', // Path to your Lottie animation
+            //       ),
+            //       Padding(
+            //         padding: const EdgeInsets.only(left: 56, right: 56),
+            //         child: LinearProgressIndicator(
+            //           value: _progressValue,
+            //           backgroundColor: Colors.grey,
+            //           valueColor:
+            //           AlwaysStoppedAnimation<Color>(Colors.red),
+            //           borderRadius: BorderRadius.all(Radius.circular(10)),
+            //         ),
+            //       )
+            //     ],
+            //   ),
+            // ),
+
+            ExcludeSemantics(
+                child: Visibility(
+                    visible: nearbyLandmarks.isNotEmpty,
+                    child: Center(child: PickupLocationPin())))
+          ],
+        ),
+      ),
+    );
+  }
+
+
+
+
+//
+// int d=0;
+// bool listenToBin(){
+//   double highestweight = 0;
+//   String nearestBeacon = "";
+//   Map<String, double> sumMap = SingletonFunctionController.btadapter.calculateAverage();
+//
+//
+//
+//  // widget.direction = "";
+//
+//
+//   for (int i = 0; i < SingletonFunctionController.btadapter.BIN.length; i++) {
+//     if(SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty){
+//       SingletonFunctionController.btadapter.BIN[i]!.forEach((key, value) {
+//         key = "";
+//         value = 0.0;
+//       });
+//     }
+//   }
+//   SingletonFunctionController.btadapter.numberOfSample.clear();
+//   SingletonFunctionController.btadapter.rs.clear();
+//   Building.thresh = "";
+//
+//   d++;
+//   sumMap.forEach((key, value) {
+//
+//     setState(() {
+//      // direction = "${widget.direction}$key   $value\n";
+//     });
+//
+//
+//
+//     if(value>highestweight){
+//       highestweight =  value;
+//       nearestBeacon = key;
+//     }
+//   });
+//
+//   //
+//
+//
+//   if(nearestBeacon !=""){
+//
+//     if(user.pathobj.path[Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor] != null){
+//       if(user.key != Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.sId){
+//
+//         if(user.floor == Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor  && highestweight >9){
+//           List<int> beaconcoord = [Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.coordinateX!,Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.coordinateY!];
+//           List<int> usercoord = [user.showcoordX, user.showcoordY];
+//           double d = tools.calculateDistance(beaconcoord, usercoord);
+//           if(d < 5){
+//             //near to user so nothing to do
+//             return true;
+//           }else{
+//             int distanceFromPath = 100000000;
+//             int? indexOnPath = null;
+//             int numCols = user.pathobj.numCols![user.Bid]![user.floor]!;
+//             user.path.forEach((node) {
+//               List<int> pathcoord = [node % numCols, node ~/ numCols];
+//               double d1 = tools.calculateDistance(beaconcoord, pathcoord);
+//               if(d1<distanceFromPath){
+//                 distanceFromPath = d1.toInt();
+//
+//
+//                 indexOnPath = user.path.indexOf(node);
+//
+//               }
+//             });
+//
+//             if(distanceFromPath>5){
+//               _timer.cancel();
+//               repaintUser(nearestBeacon);
+//               return false;//away from path
+//             }else{
+//               user.key = Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.sId!;
+//
+//               speak("You are near ${Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.name}");
+//               user.moveToPointOnPath(indexOnPath!);
+//               moveUser();
+//               return true; //moved on path
+//             }
+//           }
+//
+//
+//           //
+//           //
+//           //
+//           //
+//           //
+//         }else{
+//
+//           speak("You have reached ${tools.numericalToAlphabetical(Building.SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor!)} floor");
+//           paintUser(nearestBeacon); //different floor
+//           return true;
+//         }
+//
+//       }
+//     }else{
+//
+//
+//
+//       _timer.cancel();
+//       repaintUser(nearestBeacon);
+//       return false;
+//     }
+//   }
+//   return false;
+// }
+}
+
+class BluetoothOffScreen extends StatelessWidget {
+  const BluetoothOffScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.bluetooth_disabled, size: 100, color: Colors.blueGrey),
+              const SizedBox(height: 20),
+              const Text(
+                "Bluetooth is turned off",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "Please restart your Bluetooth in your device settings to continue.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 30),
+
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -13650,38 +14554,15 @@ class CircleAnimation {
 }
 
 class CustomMarker extends StatelessWidget {
-  final String text;
   final IconData dirIcon;
-  CustomMarker({required this.text, required this.dirIcon});
+  CustomMarker({required this.dirIcon});
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        color: Color(0xffFFFF00), // Set the background color to yellow
-        shape: BoxShape.rectangle,
-        borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(35),
-            topRight: Radius.circular(35),
-            bottomRight: Radius.circular(35),
-            bottomLeft: Radius.circular(1)),
-        border: Border.all(
-          color: Colors.black, // Set the border color to white
-          width: 2, // Set the border width (adjust as needed)
-        ),
-      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(dirIcon, color: Colors.black, size: 32),
-          SizedBox(width: 4),
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Text(
-              text,
-              style: TextStyle(color: Colors.black, fontSize: 18),
-            ),
-          ),
+          Icon(dirIcon, color: Colors.black, size: 42),
         ],
       ),
     );
@@ -13749,7 +14630,8 @@ class ChatMessageClipper extends CustomClipper<Path> {
 }
 
 class LatLngTween extends Tween<LatLng> {
-  LatLngTween({required LatLng begin, required LatLng end}) : super(begin: begin, end: end);
+  LatLngTween({required LatLng begin, required LatLng end})
+      : super(begin: begin, end: end);
 
   @override
   LatLng lerp(double t) {
@@ -13767,9 +14649,17 @@ class ClosestPointResult {
 
   ClosestPointResult(this.latLngPoint, this.intPoint, this.projectLength);
 }
+
 class IntPoint {
   int x;
   int y;
 
   IntPoint(this.x, this.y);
+}
+
+class _TtsItem {
+  final String msg;
+  final String lngcode;
+  final bool prevpause;
+  _TtsItem(this.msg, this.lngcode, this.prevpause);
 }

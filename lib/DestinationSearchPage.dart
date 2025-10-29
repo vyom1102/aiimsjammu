@@ -972,21 +972,10 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
                     }
                     return DestinationPageChipsWidget(
                       svgPath: '',
-                      text: optionListForUI[i],
+                      text: optionListForUI.toList()[i],
                       onSelect: item.select!,
                       selected: item.selected,
-
-                      onTap: (String Text) {
-                        if (Text.isNotEmpty) {
-                          search(Text);
-                        } else {
-                          search(Text);
-                          _controller.text="";
-                          searchResults = [];
-                          searcCategoryhResults = [];
-                          vall = -1;
-                        }
-                      }, icon: _icons[i]
+                      icon: getIcon(optionListForUI.toList()[i].toLowerCase()),
                     );
                   },
                   direction: Axis.horizontal,

@@ -4,7 +4,7 @@ class DataVersion {
 
   DataVersion({this.status, this.versionData});
 
-  DataVersion.fromJson(Map<dynamic, dynamic> json) {
+  DataVersion.fromJson(dynamic json) {
     status = json['status'];
     versionData = json['versionData'] != null
         ? new DataVersionModel.fromJson(json['versionData'])
@@ -28,6 +28,7 @@ class DataVersionModel {
   int? patchDataVersion;
   int? polylineDataVersion;
   int? landmarksDataVersion;
+  int? globalAnnotationVersion;
   String? createdAt;
   String? updatedAt;
   int? iV;
@@ -39,6 +40,7 @@ class DataVersionModel {
         this.patchDataVersion,
         this.polylineDataVersion,
         this.landmarksDataVersion,
+        this.globalAnnotationVersion,
         this.createdAt,
         this.updatedAt,
         this.iV});
@@ -50,6 +52,7 @@ class DataVersionModel {
     patchDataVersion = json['patchDataVersion'];
     polylineDataVersion = json['polylineDataVersion'];
     landmarksDataVersion = json['landmarksDataVersion'];
+    globalAnnotationVersion = json['globalAnnotationVersion'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
@@ -63,6 +66,7 @@ class DataVersionModel {
     data['patchDataVersion'] = this.patchDataVersion;
     data['polylineDataVersion'] = this.polylineDataVersion;
     data['landmarksDataVersion'] = this.landmarksDataVersion;
+    data['globalAnnotationVersion'] = this.globalAnnotationVersion;
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;

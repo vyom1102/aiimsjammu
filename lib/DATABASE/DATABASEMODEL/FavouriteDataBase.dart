@@ -1,6 +1,5 @@
 import 'package:hive/hive.dart';
 
-import '../../LOGIN SIGNUP/LOGIN SIGNUP APIS/MODELS/SignInAPIModel.dart';
 part 'FavouriteDataBase.g.dart';
 
 @HiveType(typeId: 4)

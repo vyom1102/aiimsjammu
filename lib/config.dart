@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 class AppConfig {
+  static String appID = "com.iwayplus.aiimsjammu";
+
+
   static String get baseUrl {
     if (kDebugMode) {
       return 'https://maps.iwayplus.in';

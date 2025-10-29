@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '/Elements/HelperClass.dart';
 import '../APIMODELS/landmark.dart';
-import '../navigationTools.dart';
 import '../APIMODELS/landmark.dart';
+import 'package:iwaymaps/navigationTools.dart';
+import 'HelperClass.dart';
 
 class ExploreModeWidget extends StatelessWidget {
   nearestLandInfo currentInfo;

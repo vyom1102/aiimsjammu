@@ -584,7 +584,7 @@ class _MapPreviewState extends State<MapPreview> {
                   createARPatch(landmarkData);
                 }
                 if(widget.globalData != null){
-                  closedpolygons[widget.globalData!.mappingElements!.first.buildingID!] = await globalRendering(widget.globalData!,null)??Set();
+                  // closedpolygons[widget.globalData!.mappingElements!.first.buildingID!] = await globalRendering(widget.globalData!)??Set();
                 }
               },
               initialCameraPosition: CameraPosition(

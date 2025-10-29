@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
+import '/config.dart';
 
 import 'navigationLogModel.dart';
 
@@ -48,9 +49,7 @@ class NavigationLogManager {
     try{
       print("navigation logs::${_logs}");
       final response = await http.post(
-        Uri.parse(kDebugMode
-            ? "https://dev.iwayplus.in/secured/save-navigation-logs"
-            : "https://maps.iwayplus.in/secured/save-navigation-logs"),
+        Uri.parse("${AppConfig.baseUrl}/secured/save-navigation-logs"),
         headers:{
           'Content-Type': 'application/json',
           'x-access-token': accessToken,

@@ -1,15 +1,14 @@
 import 'dart:collection';
 
-import 'package:geodesy/geodesy.dart';
-import '/waypoint.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
+import 'package:iwaymaps/waypoint.dart';
+
+
 import 'APIMODELS/GlobalAnnotationModel.dart';
 import 'APIMODELS/beaconData.dart';
-import '/APIMODELS/buildingAll.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart';
 import 'APIMODELS/polylinedata.dart';
-import 'APIMODELS/polylinedata.dart' as poly;
 
 class Building{
   bool buildingsLoaded = false;
@@ -22,7 +21,6 @@ class Building{
   Map<String,Map<int,List<int>>> floorDimenssion = Map();
   List<Landmarks>? listOfNearbyLandmarksToLocalize;
   //Map<int,List<poly.Nodes>> wayPoints = {};
-  polylinedata? polyLineData = null;
   Map<String,polylinedata> polylinedatamap = Map();
   Future<land>? landmarkdata = null;
   List<beacon>? beacondata = null;
@@ -51,7 +49,6 @@ class Building{
     ARCoordinates.clear();
 
     // Nullify future, lists, and other objects to remove references
-    polyLineData = null;
     landmarkdata = null;
     beacondata = null;
     selectedLandmarkID = null;

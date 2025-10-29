@@ -24,9 +24,28 @@ class buildingAllApi {
   static String selectedID="";
   static String selectedBuildingID="";
   static String selectedVenue="AIIMSJAMMU";
-  static Map<String,g.LatLng> allBuildingID = {};
-
-  static String outdoorID = "";
+  static Map<String,g.LatLng> allBuildingID = {"66794105b80a6778c53c4856": g.LatLng(32.56361449037205,
+      75.03635674681276),
+    "6798c6df96af63c3e82659ec": g.LatLng(32.56407494260096,
+        75.03513729442497),
+    "6798c81c96af63c3e826add3": g.LatLng(32.56457352216475,
+        75.035511009239),
+    "6798c8fa96af63c3e8277db2": g.LatLng(32.56387091813491,
+        75.03579721455554),
+    "6798c99e96af63c3e828203d": g.LatLng(32.56413312709048,
+        75.03661931346608),
+    "6798ce3596af63c3e8294dbc": g.LatLng(32.565109981338004,
+        75.03320147595436),
+    "679ca3fde7e7001d98497002": g.LatLng(32.56599416559548,
+        75.03392001626828),
+    "67e190f9494c674815c10628": g.LatLng(32.56383615415665,
+        75.039034761183),
+    "6798ca0396af63c3e828c472": g.LatLng(32.56292907666193,
+        75.03840723939935),
+  };
+  static Map<String,g.LatLng> globalBuildingIDS = {};
+  static String outdoorID = "67986e4114ef508e9429a5ad";
+  static Map<String,g.LatLng> onlyRenderBuildingID = {};
 
 
   void checkForUpdate() async {

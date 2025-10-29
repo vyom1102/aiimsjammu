@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_svg/svg.dart';
 
-import '/Elements/locales.dart';
+import '../Elements/locales.dart';
 import '../directionClass.dart';
 
 class OutDoorInstructionWidget extends StatefulWidget{
   double ListHeight;
-  double TotalOutDoorInFeet;
+  int TotalOutDoorInMeter;
   String EndBuildingName;
 
   List<direction> directions;
@@ -19,7 +19,7 @@ class OutDoorInstructionWidget extends StatefulWidget{
   String endName;
 
 
-  OutDoorInstructionWidget({required this.ListHeight,required this.TotalOutDoorInFeet,required this.EndBuildingName,required this.directions,required this.ShowLandmark,required this.endName});
+  OutDoorInstructionWidget({required this.ListHeight,required this.TotalOutDoorInMeter,required this.EndBuildingName,required this.directions,required this.ShowLandmark,required this.endName});
 
   @override
   _OutDoorInstructionWidgetState createState() => _OutDoorInstructionWidgetState();
@@ -30,10 +30,17 @@ class _OutDoorInstructionWidgetState extends State<OutDoorInstructionWidget>{
   bool ListExpand = false;
 
 
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    // print("widget.directions[0].distanceToNextTurnInFeet");
+    // widget.directions.forEach((value){
+    //   print(value.distanceToNextTurnInFeet);
+    //   print((value.distanceToNextTurnInFeet!*0.3048).ceil());
+    // });
+
 
     return GestureDetector(
       onTap: (){
@@ -66,7 +73,7 @@ class _OutDoorInstructionWidgetState extends State<OutDoorInstructionWidget>{
             ),
             SizedBox(width: 20,),
             Semantics(
-              label: "Take Outdoor path and Walk ${widget.TotalOutDoorInFeet.toInt()} meters to reach ${widget.EndBuildingName}",
+              label: "Take Outdoor path and Walk ${widget.TotalOutDoorInMeter} meters to reach ${widget.EndBuildingName}",
               child: Container(
                 width: screenWidth*0.74,
                 child: Column(
@@ -106,7 +113,7 @@ class _OutDoorInstructionWidgetState extends State<OutDoorInstructionWidget>{
                             child: Icon(Icons.keyboard_arrow_down),
                           ),
                           !ListExpand? Container(child: Text(
-                            "Walk ${(widget.TotalOutDoorInFeet*0.3048).ceil()} meters to reach ${widget.EndBuildingName}",
+                            "Walk ${(widget.TotalOutDoorInMeter )} meters to reach ${widget.EndBuildingName}",
                             style: const TextStyle(
                               fontFamily: "Roboto",
                               fontSize: 14,
@@ -116,7 +123,7 @@ class _OutDoorInstructionWidgetState extends State<OutDoorInstructionWidget>{
                             ),
                             textAlign: TextAlign.left,
                           ),) : Container(child: Text(
-                            "Walk ${(widget.TotalOutDoorInFeet*0.3048).ceil()} meters to reach ${widget.EndBuildingName}",
+                            "Walk ${(widget.TotalOutDoorInMeter)} meters to reach ${widget.EndBuildingName}",
                             style: const TextStyle(
                               fontFamily: "Roboto",
                               fontSize: 14,
@@ -174,7 +181,7 @@ class _OutDoorInstructionWidgetState extends State<OutDoorInstructionWidget>{
                                       SizedBox(height: 1,),
                                       ExcludeSemantics(
                                         child: Text(
-                                          ((direction.turnDirection??"").substring(0,4)=="Take")? "${direction.distanceToNextTurnInFeet}" :"${((direction.distanceToNextTurnInFeet??0)*0.3048).ceil()} m",
+                                          ((direction.turnDirection??"").substring(0,4)=="Take")? "${direction.distanceToNextTurnInFeet!*0.3048}" :"${((direction.distanceToNextTurnInFeet??1)*0.3048).ceil()} m",
                                           style: const TextStyle(
                                             fontFamily: "Roboto",
                                             fontSize: 14,
@@ -192,7 +199,6 @@ class _OutDoorInstructionWidgetState extends State<OutDoorInstructionWidget>{
                                   ListExpand? Container(
                                     height: 35,
                                     width: 35,
-
                                     child: getCustomIcon((direction.turnDirection??""), context),
                                   ):Container(),
 

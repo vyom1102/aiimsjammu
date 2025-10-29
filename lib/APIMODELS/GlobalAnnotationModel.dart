@@ -1,3 +1,5 @@
+import '../dijkastra.dart';
+
 class MappingElement {
   final String? id;
   final String? sId;
@@ -57,43 +59,78 @@ class MappingElement {
 }
 
 class Properties {
-  String? name;
-  String? fillOpacity;
-  String? height;
-  int? level;
-  String? fillColor;
-  String? strokeColor;
-  String? strokeOpacity;
+  final String? name;
+  final String? fillOpacity;
+  final String? height;
+  final int? level;
+  final String? fillColor;
+  final String? strokeColor;
+  final String? strokeOpacity;
+  final String? strokeWidth;
+  final String? imageFile;
+  final String? objectFile;
+  final String? direction;
+  final String? pathNature;
+  final String? pathType;
+  final String? accessibility;
+  final String? type;
 
-  Properties(
-      {this.name,
-        this.fillOpacity,
-        this.height,
-        this.level,
-        this.fillColor,
-        this.strokeColor,
-        this.strokeOpacity});
+  Properties({
+    required this.name,
+    required this.fillOpacity,
+    required this.height,
+    required this.level,
+    required this.fillColor,
+    required this.strokeColor,
+    required this.strokeOpacity,
+    required this.strokeWidth,
+    required this.imageFile,
+    required this.objectFile,
+    required this.direction,
+    required this.pathNature,
+    required this.pathType,
+    required this.accessibility,
+    required this.type,
+  });
 
-  Properties.fromJson(Map<dynamic, dynamic> json) {
-    name = json['name'];
-    fillOpacity = json['fillOpacity'];
-    height = json['height'];
-    level = json['level'];
-    fillColor = json['fillColor'];
-    strokeColor = json['strokeColor'];
-    strokeOpacity = json['strokeOpacity'];
+  factory Properties.fromJson(Map<dynamic, dynamic> json) {
+    return Properties(
+      name: json['name'],
+      fillOpacity: json['fillOpacity'],
+      height: json['height'],
+      level: json['level'],
+      fillColor: json['fillColor'],
+      strokeColor: json['strokeColor'],
+      strokeOpacity: json['strokeOpacity'],
+      strokeWidth: json['strokeWidth'],
+      imageFile: json['imageFile'],
+      objectFile: json['objectFile'],
+      direction: json['direction'],
+      pathNature: json['pathNature'],
+      pathType: json['pathType'],
+      accessibility: json['accessibility'],
+      type: json['type'],
+    );
   }
 
   Map<dynamic, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['name'] = this.name;
-    data['fillOpacity'] = this.fillOpacity;
-    data['height'] = this.height;
-    data['level'] = this.level;
-    data['fillColor'] = this.fillColor;
-    data['strokeColor'] = this.strokeColor;
-    data['strokeOpacity'] = this.strokeOpacity;
-    return data;
+    return {
+      'name': name,
+      'fillOpacity': fillOpacity,
+      'height': height,
+      'level': level,
+      'fillColor': fillColor,
+      'strokeColor': strokeColor,
+      'strokeOpacity': strokeOpacity,
+      'strokeWidth': strokeWidth,
+      'imageFile': imageFile,
+      'objectFile': objectFile,
+      'direction': direction,
+      'pathNature': pathNature,
+      'pathType': pathType,
+      'accessibility': accessibility,
+      'type': type,
+    };
   }
 }
 
@@ -270,30 +307,41 @@ class GlobalModel {
   final String? buildingName;
   final String? venueName;
   final EntriesNetwork? entriesNetwork;
-
+  final List<dynamic>? liftNodes;
+  final List<dynamic>? stairsNodes;
+  final List<dynamic>? escalatorNodes;
+  final List<dynamic>? rampNodes;
 
   GlobalModel({
     required this.mappingElements,
     required this.pathNetwork,
     required this.buildingName,
     required this.venueName,
-    required this.entriesNetwork
+    required this.entriesNetwork,
+    required this.liftNodes,
+    required this.stairsNodes,
+    required this.escalatorNodes,
+    required this.rampNodes,
   });
 
-  factory GlobalModel.fromJson(Map<dynamic, dynamic> json) {
+  factory GlobalModel.fromJson(dynamic json) {
     print("got mastergraph ${json['masterGraph']}");
     return GlobalModel(
-        mappingElements: (json['mappingElements'] as List<dynamic>)
-            .map((e) => MappingElement.fromJson(e))
-            .toList(),
-        pathNetwork: PathNetwork.fromJson({
-          'pathNetworkGlobal': json['pathNetworkGlobal'],
-          'pathNetwork': json['pathNetwork'],
-          'masterGraph': json['masterGraph'],
-        }),
-        buildingName: json['buildingName'],
-        venueName: json['venueName'],
-        entriesNetwork: json['entriesNetwork'] != null?EntriesNetwork.fromJson(json['entriesNetwork']):json['entriesNetwork']
+      mappingElements: (json['mappingElements'] as List<dynamic>)
+          .map((e) => MappingElement.fromJson(e))
+          .toList(),
+      pathNetwork: PathNetwork.fromJson({
+        'pathNetworkGlobal': json['pathNetworkGlobal'],
+        'pathNetwork': json['pathNetwork'],
+        'masterGraph': json['masterGraph'],
+      }),
+      buildingName: json['buildingName'],
+      venueName: json['venueName'],
+      entriesNetwork: json['entriesNetwork'] != null?EntriesNetwork.fromJson(json['entriesNetwork']):json['entriesNetwork'],
+      liftNodes: json['liftNodes'],
+      stairsNodes: json['stairsNodes'],
+      escalatorNodes: json['escalatorNodes'],
+      rampNodes: json['rampNodes'],
     );
   }
 
@@ -304,6 +352,71 @@ class GlobalModel {
     data['buildingName'] = this.buildingName;
     data['venueName'] = this.venueName;
     data['entriesNetwork'] =  this.entriesNetwork;
+    data['liftNodes'] = this.liftNodes;
+    data['stairsNodes'] = this.stairsNodes;
+    data['escalatorNodes'] = this.escalatorNodes;
+    data['rampNodes'] = this.rampNodes;
     return data;
+  }
+}
+
+extension GlobalModelExtension on GlobalModel {
+  List<String> getNodesForNonPreferableOption(PathOption option) {
+    List<String> clean(List<dynamic>? nodes) {
+      return nodes
+          ?.map((e) => e.toString().split(',')..removeLast())
+          .map((parts) => parts.join(','))
+          .toList() ??
+          [];
+    }
+
+    switch (option) {
+      case PathOption.lift:
+        return [
+          ...clean(stairsNodes),
+          ...clean(escalatorNodes),
+          ...clean(rampNodes),
+        ];
+      case PathOption.stairs:
+        return [
+          ...clean(liftNodes),
+          ...clean(escalatorNodes),
+          ...clean(rampNodes),
+        ];
+      case PathOption.escalator:
+        return [
+          ...clean(liftNodes),
+          ...clean(stairsNodes),
+          ...clean(rampNodes),
+        ];
+      case PathOption.ramp:
+        return [
+          ...clean(liftNodes),
+          ...clean(stairsNodes),
+          ...clean(escalatorNodes),
+        ];
+    }
+  }
+
+  List<String> getNodesForOption(PathOption option) {
+
+    switch (option) {
+      case PathOption.lift:
+        return [
+          ...?liftNodes,
+        ];
+      case PathOption.stairs:
+        return [
+          ...?stairsNodes,
+        ];
+      case PathOption.escalator:
+        return [
+          ...?escalatorNodes,
+        ];
+      case PathOption.ramp:
+        return [
+          ...?rampNodes,
+        ];
+    }
   }
 }

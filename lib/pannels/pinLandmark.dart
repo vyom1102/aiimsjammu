@@ -102,28 +102,108 @@ class _pinLandmarkState extends State<pinLandmark> {
         ),
         SizedBox(height: 12,),
         Container(
-          height: 100, // Adjust the height of the CupertinoPicker
-          child: CupertinoPicker(
-            scrollController: _controller,
-            looping: false,
-            itemExtent: 40, // Height for each item
-            onSelectedItemChanged: (index) {
-              if(selectedindex != index){
-                print("changing index $selectedindex");
-                selectedindex = index;
-                widget.update(widget.nearbyLandmarks.keys.toList()[selectedindex]);
+          height: 100,
+          child: GestureDetector(
+            onVerticalDragEnd: (details) {
+              if (details.primaryVelocity! < 0) {
+                // user swiped up
+                if (selectedindex < widget.nearbyLandmarks.length - 1) {
+                  selectedindex++;
+                  _controller.animateToItem(selectedindex, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+                  widget.update(widget.nearbyLandmarks.keys.toList()[selectedindex]);
+                }
+              } else if (details.primaryVelocity! > 0) {
+                // user swiped down
+                if (selectedindex > 0) {
+                  selectedindex--;
+                  _controller.animateToItem(selectedindex, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+                  widget.update(widget.nearbyLandmarks.keys.toList()[selectedindex]);
+                }
               }
             },
-            children:
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Wheel ScrollView
+                Expanded(
+                  child: SizedBox(
+                    height: 240, // Or 3 * itemExtent
+                    child: ListWheelScrollView.useDelegate(
+                      controller: _controller,
+                      itemExtent: 80,
+                      physics: const NeverScrollableScrollPhysics(),
+                      childDelegate: ListWheelChildBuilderDelegate(
+                        builder: (context, index) {
+                          final marker = widget.nearbyLandmarks.values.toList()[index];
+                          final isSelected = index == selectedindex;
 
-            widget.nearbyLandmarks.values
-                .where((marker) => marker.markerId.value.split('#')[1] == "true")
-                .map((marker) => Center(
-              child: Text(marker.markerId.value.split('#').first),
-            ))
-                .toList()
+                          return Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 10),
+                            decoration: isSelected
+                                ? BoxDecoration(
+                              border: Border.all(color: Colors.black.withOpacity(0.1), width: 1),
+                              borderRadius: BorderRadius.circular(8),
+                              color: isSelected ? Colors.grey.withOpacity(0.1) : Colors.transparent,
+                            )
+                                : null,
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      marker.markerId.value.split('#')[1],
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    Text(
+                                      "Near ${marker.markerId.value.split('#')[0]}",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        childCount: widget.nearbyLandmarks.length,
+                      ),
+                    ),
+                  ),
+                ),
 
-            ,
+                // Dot Indicator on the right
+                Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(widget.nearbyLandmarks.length, (index) {
+                      bool isActive = index == selectedindex;
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        width: isActive ? 10 : 8,
+                        height: isActive ? 10 : 8,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isActive ? Colors.teal : Colors.grey.withOpacity(0.4),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         Spacer(),

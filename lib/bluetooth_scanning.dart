@@ -1,14 +1,18 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import '/websocket/UserLog.dart';
+import 'package:iwaymaps/websocket/UserLog.dart';
+
 import 'APIMODELS/beaconData.dart';
+import 'Network/NetworkManager.dart';
 
 
 class BLueToothClass {
+  //NetworkManager networkManager = NetworkManager();
   HashMap<int, HashMap<String, double>> BIN = HashMap();
   HashMap<String,int> numberOfSample = HashMap();
   HashMap<String,List<int>> rs = HashMap();
@@ -73,28 +77,25 @@ class BLueToothClass {
     return FlutterBluePlus.isScanningNow ?? false;
   }
   late DateTime SourceTSP;
-  final ws = wsocket("com.iwayplus.aiimsjammu");
 
   void startScanning(HashMap<String, beacon> apibeaconmap) {
     latesILMap.clear();
     latesILMapTimeStamp.clear();
-    print("proof $latesILMap ${latesILMapTimeStamp}");
     SourceTSP = DateTime.now();
-    print("SourceTSP set to : $SourceTSP");
-    wsocket.message["AppInitialization"]["bleScanResults"] = {};
     startbin();
     FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
 
     FlutterBluePlus.scanResults.listen((results) async {
+      // print("resultsrun");
       for (ScanResult result in results) {
         if(result.device.platformName.length > 2){
           String MacId = "${result.device.platformName}";
           int Rssi = result.rssi;
-          wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
+          print("MacID $MacId Rssi $Rssi");
+          //networkManager.ws.updateInitialization(bleScanResults: MapEntry(MacId, Rssi));
           if (apibeaconmap.containsKey(MacId)) {
+            wsocket.message["AppInitialization"]["bleScanResults"][MacId]=Rssi;
             if (result.timeStamp.difference(SourceTSP).inSeconds>=0 && result.timeStamp.difference(SourceTSP).inSeconds < 10) {
-              // print("result.timeStamp.difference(SourceTSP) ${result.timeStamp.difference(SourceTSP)}  ${result.timeStamp.difference(SourceTSP).inSeconds}");
-
               latesILMap.putIfAbsent(MacId,() => []);
               latesILMapTimeStamp.putIfAbsent(MacId,() => []);
 
@@ -102,12 +103,9 @@ class BLueToothClass {
                 latesILMapTimeStamp[MacId]!.add(result.timeStamp);
                 latesILMap[MacId]!.add(Rssi);
               }
-              // print("Beacon $MacId $Rssi ${result.timeStamp.difference(SourceTSP)} ${result.timeStamp} ${SourceTSP}");
-
             }
-
             //print(MacId);
-            //print("mac1 $MacId    rssi $Rssi");
+            // print("mac1 $MacId    rssi $Rssi");
             beacondetail[MacId] = Rssi * -1;
             addtoBin(MacId, Rssi);
             _binController.add(BIN); // Emitting event when BIN changes
@@ -197,7 +195,10 @@ class BLueToothClass {
     }
     try {
       await FlutterBluePlus.startScan(timeout: Duration(seconds: 9));
-    } catch (e) {}
+    } catch (e) {
+
+    }
+
     _scanResultsSubscription = FlutterBluePlus.scanResults.listen((results) {
       _scanResults = results;
       // print("mac $results");
@@ -212,7 +213,6 @@ class BLueToothClass {
 
         if (apibeaconmap.containsKey(MacId)) {
           beacondetail[MacId] = Rssi * -1;
-
           addtoBin(MacId, Rssi);
           _binController.add(BIN); // Emitting event when BIN changes
         }
@@ -227,15 +227,10 @@ class BLueToothClass {
 
   }
 
-
-
-
-
-
   void stopScanning() async{
     await FlutterBluePlus.stopScan();
     emptyBin();
-    // _scanResultsSubscription.cancel();
+    if(!kIsWeb && Platform.isIOS) _scanResultsSubscription.cancel();
     _scanResults.clear();
     // _systemDevices.clear();
     priorityQueue.clear();

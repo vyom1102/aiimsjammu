@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '/APIMODELS/landmark.dart';
-import '/pannels/pinLandmark.dart';
+import 'package:iwaymaps/pannels/pinLandmarkCampus.dart';
+import 'package:iwaymaps/pannels/pinLandmarkIndoor.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+
+import '../APIMODELS/landmark.dart';
 
 class pinLandmarkPannel {
   final PanelController _panelController = PanelController();
+  FocusNode focusNode = FocusNode();
 
   // Method to show the panel
   void showPanel() {
     _panelController.open();
+    focusNode.requestFocus();
   }
 
   // Method to hide the panel
@@ -34,42 +39,78 @@ class pinLandmarkPannel {
     }
   }
 
+  bool isTalkBackOn() {
+    return SemanticsBinding.instance.accessibilityFeatures.accessibleNavigation;
+  }
+
   // Method to get the SlidingUpPanel widget
-  Widget getPanelWidget(BuildContext context, Function(MarkerId) update, Function() localize, Function() closePanel, Map<MarkerId, Marker> nearbyLandmarks, Landmarks? pinedLandmark) {
-    return Stack(
-      children: [
-        Visibility(
-          visible: isPanelOpened(),
-          child: Positioned(
-            left: 10,
-            top: 24,
-            child: ElevatedButton(
-              onPressed: closePanel,
-              style: ElevatedButton.styleFrom(
-                shape: CircleBorder(), // Make the button circular
-                padding: EdgeInsets.all(8), // Adjust the size of the circle
-                elevation: 5, // Add elevation for the raised effect
-                backgroundColor: Color(0xff24B9B0), // Background color of the button
-                foregroundColor: Colors.white, // Icon color
-              ),
-              child: Icon(
-                Icons.arrow_back, // Back arrow icon
-                size: 32, // Adjust the size of the icon
+  Widget getPanelWidget(
+      BuildContext context,
+      Function(MarkerId) update,
+      Function() localize,
+      Function() closePanel,
+      Map<MarkerId, Marker> nearbyLandmarks,
+      Landmarks? pinedLandmark,
+      ) {
+    return Semantics(
+      excludeSemantics: !(_panelController.isAttached && _panelController.isPanelOpen),
+      child: Stack(
+        children: [
+          Visibility(
+            // visible: isPanelOpened(),
+            visible: false,
+            child: Positioned(
+              left: 10,
+              top: 24,
+              child: ElevatedButton(
+                onPressed: localize,
+                style: ElevatedButton.styleFrom(
+                  shape: const CircleBorder(),
+                  padding: const EdgeInsets.all(8),
+                  elevation: 5,
+                  backgroundColor: const Color(0xff24B9B0),
+                  foregroundColor: Colors.white,
+                ),
+                child: Semantics(
+                  label: "Back",
+                  child: Icon(
+                    Icons.arrow_back,
+                    size: 32,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-        SlidingUpPanel(
-        controller: _panelController,
-        panel: pinLandmark(
-          update: update, nearbyLandmarks: nearbyLandmarks,pinedLandmark: pinedLandmark, localize: localize,  // Pass the hidePanel method to close the panel
-        ),
-        minHeight: 0,
-        maxHeight: 250,  // Maximum height of the panel
-        backdropOpacity: 0.5,
-        isDraggable: false,
-      )
-      ],
+
+          // Panel with autofocus
+          Focus(
+            autofocus: true, // 👈 ensures TalkBack starts here
+            child: SlidingUpPanel(
+              controller: _panelController,
+              panel: isTalkBackOn()
+                  ? pinLandmarkIndoor(
+                update: update,
+                nearbyLandmarks: nearbyLandmarks,
+                pinedLandmark: pinedLandmark,
+                localize: localize,
+                focusNode: focusNode
+              )
+                  : pinLandmarkCampus(
+                update: update,
+                nearbyLandmarks: nearbyLandmarks,
+                pinedLandmark: pinedLandmark,
+                localize: localize,
+              ),
+              minHeight: 0,
+              maxHeight: 240,
+              backdropOpacity: 0.5,
+              isDraggable: false,
+            ),
+          ),
+        ],
+      ),
     );
   }
+
 }

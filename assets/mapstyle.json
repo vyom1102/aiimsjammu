@@ -1,7 +1,6 @@
 [
   {
-    "featureType": "administrative",
-    "elementType": "geometry",
+    "elementType": "labels",
     "stylers": [
       {
         "visibility": "off"
@@ -9,24 +8,7 @@
     ]
   },
   {
-    "featureType": "poi",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-  {
-    "featureType": "road",
-    "elementType": "labels.icon",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-  {
-    "featureType": "transit",
+    "featureType": "administrative.neighborhood",
     "stylers": [
       {
         "visibility": "off"

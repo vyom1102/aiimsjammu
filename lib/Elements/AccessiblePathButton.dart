@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../dijkastra.dart';
 import '../pathState.dart';
 import '../singletonClass.dart';
 
@@ -7,6 +8,7 @@ class AccessiblePathButton extends StatefulWidget {
   final String label;
   final IconData icon;
   final String accessibleBy;
+  final PathOption floorConnector;
   final Function calculateroute;
   final pathState PathState;
 
@@ -14,6 +16,7 @@ class AccessiblePathButton extends StatefulWidget {
     required this.label,
     required this.icon,
     required this.accessibleBy,
+    required this.floorConnector,
     required this.PathState,
     required this.calculateroute,
   });
@@ -35,6 +38,7 @@ class _AccessiblePathButtonState extends State<AccessiblePathButton> {
       child: GestureDetector(
         onTap: () {
           widget.PathState.accessiblePath = widget.accessibleBy;
+          widget.PathState.floorConnector = widget.floorConnector;
           widget.PathState.clearforaccessiblepath();
           SingletonFunctionController.building.landmarkdata!.then((value) async {
             try {

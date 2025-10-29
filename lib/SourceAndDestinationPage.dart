@@ -1,21 +1,17 @@
 import 'dart:convert';
 
-import 'package:easter_egg_trigger/easter_egg_trigger.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import '/API/ladmarkApi.dart';
-import '/ELEMENTS/SearchpageRecents.dart';
-import '/singletonClass.dart';
+import 'package:iwaymaps/singletonClass.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '/API/buildingAllApi.dart';
+import 'API/buildingAllApi.dart';
 import 'APIMODELS/landmark.dart';
-import 'DestinationSearchPage.dart';
-import 'ELEMENTS/SearchpageResults.dart';
+
+import 'Elements/SearchpageRecents.dart';
+import 'Repository/RepositoryManager.dart';
 import 'UserState.dart';
+import 'newSearchPage.dart';
 class SourceAndDestinationPage extends StatefulWidget {
   String SourceID ;
   String DestinationID;
@@ -105,7 +101,7 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
     }
 
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
-      await landmarkApi().fetchLandmarkData(id: key).then((value) {
+      await RepositoryManager().getLandmarkDataNew(key).then((value) {
         landmarkData.mergeLandmarks(value.landmarks);
         //optionListForUI.addAll(fetchCategories(value));
       });
@@ -242,7 +238,7 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => DestinationSearchPage(hintText: 'Source location',voiceInputEnabled: false,userLocalized: widget.user != null? widget.user!.key:"",))
+                                          builder: (context) => NewSearchPage(hintText: 'Source location',voiceInputEnabled: false, user: widget.user!,))
                                   ).then((value){
                                     setState(() {
                                       widget.SourceID = value;
@@ -281,7 +277,7 @@ class _SourceAndDestinationPageState extends State<SourceAndDestinationPage> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => DestinationSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
+                                    builder: (context) => NewSearchPage(hintText: 'Destination location',voiceInputEnabled: false, user: widget.user!,))
                             ).then((value){
                               setState(() {
                                 widget.DestinationID = value;

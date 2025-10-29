@@ -4,24 +4,22 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-//import 'package:fuzzy/fuzzy.dart';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/adapters.dart';
-import '/newSearchPage.dart';
-import '/Elements/HelperClass.dart';
-import '/Elements/locales.dart';
-import '/SourceAndDestinationPage.dart';
-
-import '/APIMODELS/landmark.dart';
-import '../DestinationSearchPage.dart';
-import 'package:animated_checkmark/animated_checkmark.dart';
-
+import '../API/buildingAllApi.dart';
+import '../API/ladmarkApi.dart';
+import '../APIMODELS/landmark.dart';
+import '../ELEMENTS/HelperClass.dart';
+import '../Repository/RepositoryManager.dart';
+import '../singletonClass.dart';
+import '../SourceAndDestinationPage.dart';
+import '../newSearchPage.dart';
+import '../Elements/locales.dart';
 import '../UserState.dart';
+import '../websocket/interactionManager.dart';
 import 'HomepageFilter.dart';
 
 class HomepageSearch extends StatefulWidget {
   final searchText;
-  UserState? user;
+  UserState user;
   final Function(String ID,{bool DirectlyStartNavigation}) onVenueClicked;
   final Function(List<String>) fromSourceAndDestinationPage;
   HomepageSearch({super.key, this.searchText = "Search", required this.onVenueClicked, required this.fromSourceAndDestinationPage,required this.user});
@@ -33,18 +31,6 @@ class HomepageSearch extends StatefulWidget {
 class _HomepageSearchState extends State<HomepageSearch> {
   List<String> optionsTags = [];
   List<String> floorOptionsTags = [];
-
-  List<String> options = [
-    'Washroom', 'Entry',
-    'Reception', 'Lift',
-  ];
-
-  List<IconData> _icons = [
-    Icons.wash_sharp,
-    Icons.door_front_door_outlined,
-    Icons.desk_sharp,
-    Icons.elevator
-  ];
   //double ratio=0.0;
   String currentSelectedFilter = "";
   int vall = 0;
@@ -63,9 +49,104 @@ class _HomepageSearchState extends State<HomepageSearch> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    fetchandBuild();
     print("Running init");
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // print("callingg...");
+    fetchandBuild(); // Called again when dependencies change
+  }
+
+  land landmarkData = land();
+  void fetchandBuild()async{
+    await fetchlist();
+  }
+  Set<String> optionListForUI ={};
+  bool isUpdated=false;
+
+  String getIcon(String option) {
+    switch (option.toLowerCase()) {
+      case 'washroom':
+        return 'assets/washroomIcon.png';
+      case 'cafeteria':
+        return 'assets/cafeteria.png';
+      case 'drinking water':
+        return 'assets/waterPoint.png';
+      case 'atm':
+        return 'assets/atmIcon.png';
+      case 'exit':
+        return 'assets/entryExit.png';
+      case 'lift':
+        return 'assets/liftIcon.png';
+      case 'reception':
+        return 'assets/receptionIcon.png';
+      default:
+        return ''; // Return a default icon if no match is found
+    }
+  }
+  Future<void> loadLandmarkData() async {
+    try {
+      Set<String> tempOptionSet = {}; // use Set to prevent duplicates
+      await Future.forEach(
+        landmarkData.landmarksMap!.entries,
+            (MapEntry keyValue) async {
+          var value = keyValue.value;
+          final subType = value.element?.subType ?? '';
+          final buildingID = value.buildingID;
+          // Always include global types
+          if (subType == "restRoom") {
+            tempOptionSet.add("Washroom");
+          } else if (subType == "ATM") {
+            tempOptionSet.add("ATM");
+          } else if (subType == "Drinking Water") {
+            tempOptionSet.add("Drinking Water");
+          }
+          if (widget.user.bid == buildingAllApi.outdoorID) return;
+          // Conditional based on selected building ID
+          if (buildingID == widget.user.bid) {
+            if (subType == "Cafeteria") {
+              tempOptionSet.add("Cafeteria");
+            } else if (subType == "main entry") {
+              tempOptionSet.add("Exit");
+            } else if (subType == "lift") {
+              tempOptionSet.add("Lift");
+            } else if (subType == "Help Desk | Reception") {
+              tempOptionSet.add("Reception");
+            }
+          }
+        },
+      );
+
+      setState(() {
+        optionListForUI = tempOptionSet; // overwrite old list
+        isUpdated = true;
+      });
+    } catch (e) {
+      print("Error in updating list: $e");
+      setState(() {
+        isUpdated = false;
+      });
+    }
+  }
+  Future<void> fetchlist() async {
+    land? singletonData = await SingletonFunctionController.building.landmarkdata;
+    if(singletonData != null){
+      landmarkData = singletonData;
+      await loadLandmarkData();
+      return;
+    }
+    buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
+      await landmarkApi().fetchLandmarkData(id: key).then((value) async {
+        landmarkData.mergeLandmarks(value.landmarks);
+        print("buildingAllApi.getStoredAllBuildingID()${value.landmarks}");
+        await loadLandmarkData();
+      });
+      // print("buildingAllApi.getStoredAllBuildingID() runned");
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,187 +154,160 @@ class _HomepageSearchState extends State<HomepageSearch> {
     double screenHeight = MediaQuery.of(context).size.height;
     return Column(
       children: [
-        Semantics(
-          header: true,
-          label: "Search Bar",
-          child: Container(
-              width: screenWidth - 32,
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(
-                  color: Colors.white, // You can customize the border color
-                  width: 1.0, // You can customize the border width
+        Container(
+            width: screenWidth - 32,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white, // You can customize the border color
+                width: 1.0, // You can customize the border width
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey, // Shadow color
+                  offset:
+                  Offset(0, 2), // Offset of the shadow
+                  blurRadius: 4, // Spread of the shadow
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey, // Shadow color
-                    offset:
-                    Offset(0, 2), // Offset of the shadow
-                    blurRadius: 4, // Spread of the shadow
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: FocusScope(
-                      autofocus: true,
-                      child: Focus(
-                        child: Semantics(
-                          sortKey: const OrdinalSortKey(0),
-                          label: "${LocaleData.waytogo.getString(context)}",
-
-                          child: InkWell(
-                            onTap: (){
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => NewSearchPage(hintText: 'Destination location',voiceInputEnabled: false,))
-                              ).then((value){
-                                print("POP22");
-                                widget.onVenueClicked(value,DirectlyStartNavigation: false);
-                              });
-                            },
-                            child: Semantics(
-                              excludeSemantics: true,
-                              child: Container(
-                                  margin: EdgeInsets.only(left: 16),
-                                  child: Text(
-                                    "${LocaleData.waytogo.getString(context)}",
-                                    style: const TextStyle(
-                                      fontFamily: "Roboto",
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
-                                      color: Color(0xff8e8d8d),
-                                      height: 25 / 16,
-                                    ),
-                                  )),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: 40,
-                    height: 48,
-                    margin: EdgeInsets.only(right: 5),
-                    child: Center(
-                      child: IconButton(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => NewSearchPage(hintText: 'Destination location',voiceInputEnabled: true,))
-                          ).then((value){
-                            print("POPPP");
-                            widget.onVenueClicked(value);
-                          });
-                        },
-                        icon: Semantics(
-                          label: "Voice search",
-                          sortKey: const OrdinalSortKey(1),
-                          child: Icon(
-                            Icons.mic_none_sharp,
-                            color: Color(0xff8E8C8C),
-                            size: 24,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  Container(
-                    width: 47,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: Color(0xff24B9B0),
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(3), // Adjust the radius as needed
-                        bottomRight: Radius.circular(3), // Adjust the radius as needed
-                        topLeft: Radius.circular(3), // Adjust the radius as needed
-                        bottomLeft: Radius.circular(3), // Adjust the radius as needed
-                      ),
-                    ),
-                    child: Center(
-                      child: IconButton(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SourceAndDestinationPage(user: widget.user,))
-                          ).then((value){
-                            widget.fromSourceAndDestinationPage(value);
-                          });
-                        },
-
-                        icon: Semantics(
-                          label: "Get Direction",
-                          child: SvgPicture.asset(
-                              "assets/HomepageSearch_topBarDirectionIcon.svg"),
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              )),
-        ),
-        Semantics(
-          header: true,
-          label: "Facilities Filter",
-          child: Container(
-            width: screenWidth,
-            child: ChipsChoice<int>.single(
-              value: vall,
-              onChanged: (val){
-                setState(() => vall = val);
-                if(HelperClass.SemanticEnabled){
-                  speak("${options[val]} selected");
-                }else if(lastValueStored == val){
-                  speak("${options[val]} selected");
-                }
-                lastValueStored = val;
-                print("wilsonchecker");
-                print(val);
-              },
-              choiceItems: C2Choice.listFrom<int, String>(
-                source: options,
-                value: (i, v) => i,
-                label: (i, v) => v,
-              ),
-              choiceBuilder: (item, i) {
-                return HomepageFilter(svgPath: '', text: options[i], onSelect: (bool selected) {  }, onClicked: widget.onVenueClicked, icon: getIcon(options[i].toLowerCase()),);
-              },
-              direction: Axis.horizontal,
+              ],
             ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(
+                  height:24,
+                    width: 24,
+                    margin: EdgeInsets.only(left: 12, top: 2),
+                    child: Image.asset("assets/AppIcon.png")),
+                Expanded(
+                  child: FocusScope(
+                    autofocus: true,
+                    child: Focus(
+                      child: Semantics(
+                        header: true,
+                        textField: true,
+                        sortKey: const OrdinalSortKey(0),
+                        label: "${LocaleData.waytogo.getString(context)}",
+
+                        child: InkWell(
+                          onTap: (){
+                            InteractionManager().logInteraction("Navigation Search");
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => NewSearchPage(hintText: 'Destination location',voiceInputEnabled: false, user:widget.user))
+                            ).then((value){
+                              print("POP22");
+                              fetchandBuild();
+                              InteractionManager().logInteraction("${value}");
+                              widget.onVenueClicked(value,DirectlyStartNavigation: false);
+                            });
+                          },
+                          child: Semantics(
+                            excludeSemantics: true,
+                            child: Container(
+                                margin: EdgeInsets.only(left: 8),
+                                child: Text(
+                                  "${LocaleData.waytogo.getString(context)}",
+                                  style: const TextStyle(
+                                    fontFamily: "PT_Sans",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xff8e8d8d),
+                                    height: 25 / 16,
+                                  ),
+                                )),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 40,
+                  height: 48,
+                  margin: EdgeInsets.only(right: 5),
+                  child: Center(
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => NewSearchPage(hintText: 'Destination location',voiceInputEnabled: true, user: widget.user))
+                        ).then((value){
+                          print("POPPP");
+                          widget.onVenueClicked(value);
+                        });
+                      },
+                      icon: Semantics(
+                        label: "Voice search",
+                        sortKey: const OrdinalSortKey(1),
+                        child: Icon(
+                          Icons.mic_none_sharp,
+                          color: Color(0xff8E8C8C),
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )),
+        optionListForUI.isNotEmpty?Container(
+          width: screenWidth,
+          child: ChipsChoice<int>.single(
+            value: vall,
+            onChanged:(val){
+              setState(() => vall = val);
+              if(HelperClass.SemanticEnabled){
+                speak("${optionListForUI.toList()[val]} selected");
+              }else if(lastValueStored == val){
+                speak("${optionListForUI.toList()[val]} selected");
+              }
+              lastValueStored = val;
+              print("wilsonchecker ${optionListForUI.toList()[val]}");
+              print(val);
+            },
+            choiceItems: C2Choice.listFrom<int, String>(
+              source: optionListForUI.toList(),
+              value: (i, v) => i,
+              label: (i, v) => v,
+            ),
+            choiceBuilder: (item, i){
+              return HomepageFilter(svgPath: '', text: optionListForUI.toList()[i], onSelect: (bool selected) {  }, onClicked: widget.onVenueClicked, icon: getIcon(optionListForUI.toList()[i].toLowerCase()), user: widget.user,);
+            },
+            direction: Axis.horizontal,
           ),
-        ),
+        ):Container(),
       ],
     );
   }
 }
 
-IconData getIcon(String option) {
+String getIcon(String option) {
   switch (option.toLowerCase()) {
     case 'washroom':
-      return Icons.wash_sharp;
+      return 'assets/washroomIcon.png';
     case 'cafeteria':
-      return Icons.local_cafe;
+      return 'assets/cafeteria.png';
     case 'drinking water':
-      return Icons.water_drop;
+      return 'assets/waterPoint.png';
     case 'atm':
-      return Icons.atm_sharp;
-    case 'entry':
-      return Icons.door_front_door_outlined;
+      return 'assets/atmIcon.png';
+    case 'exit':
+      return 'assets/entryExit.png';
     case 'lift':
-      return Icons.elevator;
+      return 'assets/liftIcon.png';
     case 'reception':
-      return Icons.desk_sharp;
+      return 'assets/receptionIcon.png';
+    case 'stair':
+      return 'assets/stairIcon.png';
+    case 'ramp':
+      return 'assets/rampIcon.png';
     default:
-      return Icons.help_outline; // Return a default icon if no match is found
+      return ''; // Return a default icon if no match is found
   }
 }
 

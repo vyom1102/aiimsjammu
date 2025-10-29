@@ -24,18 +24,36 @@ import 'AiimsJammu/Screens/DoctorProfile1.dart';
 import 'AiimsJammu/Screens/ServiceInfo1.dart';
 import 'AiimsJammu/Screens/SplashScreen.dart';
 import 'AiimsJammu/Widgets/WebSocketDriver.dart';
+import 'BluetoothManager/BLEManager.dart';
 import 'DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/BuildingByVenueMapAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/CategoryAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/DB2BeaconAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/DB2BuildingByVenueMapAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/DB2DataVersionLocalModel.dart';
+import 'DATABASE/DATABASEMODEL/DB2GlobalAnnotationAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/DB2LandMarkApiModel.dart';
+import 'DATABASE/DATABASEMODEL/DB2OutDoorModel.dart';
+import 'DATABASE/DATABASEMODEL/DB2PatchAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/DB2PolyLineAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/DB2WayPointModel.dart';
 import 'DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
+import 'DATABASE/DATABASEMODEL/ExhibitorAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/ExhibitorAPIModelNEW.dart';
 import 'DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
+import 'DATABASE/DATABASEMODEL/FingerPrintingAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/GlobalAnnotationAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
 import 'DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
 import 'DATABASE/DATABASEMODEL/OutDoorModel.dart';
 import 'DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/SessionAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/SignINAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/SubEventAPIModel.dart';
+import 'DATABASE/DATABASEMODEL/VenueBeaconAPIModel.dart';
 import 'DATABASE/DATABASEMODEL/WayPointModel.dart';
 import 'Elements/deeplinks.dart';
 import 'LOGIN SIGNUP/SignIn.dart';
@@ -43,10 +61,14 @@ import 'MainScreen.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import 'config.dart';
+import 'fingerprinting/fingerprinting.dart';
 
 final interactionManager = InteractionManager();
 final sessionManager = SessionManager();
 final navigationManager=NavigationLogManager();
+BLEManager bleManager=BLEManager();
+Fingerprinting fingerprinting=Fingerprinting();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // await Firebase.initializeApp();
@@ -61,41 +83,81 @@ Future<void> main() async {
   await Hive.openBox<PolyLineAPIModel>("PolyLineAPIModelFile");
   Hive.registerAdapter(BuildingAllAPIModelAdapter());
   await Hive.openBox<BuildingAllAPIModel>("BuildingAllAPIModelFile");
-  Hive.registerAdapter(FavouriteDataBaseModelAdapter());
-  await Hive.openBox<FavouriteDataBaseModel>("FavouriteDataBaseModelFile");
   Hive.registerAdapter(BeaconAPIModelAdapter());
   await Hive.openBox<BeaconAPIModel>('BeaconAPIModelFile');
   Hive.registerAdapter(BuildingAPIModelAdapter());
   await Hive.openBox<BuildingAPIModel>('BuildingAPIModelFile');
   Hive.registerAdapter(OutDoorModelAdapter());
   await Hive.openBox<OutDoorModel>('OutDoorModelFile');
+  Hive.registerAdapter(DB2OutDoorModelAdapter());
+  await Hive.openBox<DB2OutDoorModel>('DB2OutDoorModelFile');
   Hive.registerAdapter(WayPointModelAdapter());
   await Hive.openBox<WayPointModel>('WayPointModelFile');
   Hive.registerAdapter(DataVersionLocalModelAdapter());
   await Hive.openBox<DataVersionLocalModel>('DataVersionLocalModelFile');
-  Hive.registerAdapter(LocalNotificationAPIDatabaseModelAdapter());
-  await Hive.openBox<LocalNotificationAPIDatabaseModel>('LocalNotificationAPIDatabaseModel');
   Hive.registerAdapter(GlobalAnnotationAPIModelAdapter());
   await Hive.openBox<GlobalAnnotationAPIModel>('GlobalAnnotationAPIModelFile');
+  Hive.registerAdapter(DB2GlobalAnnotationAPIModelAdapter());
+  await Hive.openBox<DB2GlobalAnnotationAPIModel>('DB2GlobalAnnotationAPIFile');
+  Hive.registerAdapter(VenueBeaconAPIModelAdapter());
+  await Hive.openBox<VenueBeaconAPIModel>('VenueBeaconAPIModelFile');
+  Hive.registerAdapter(DB2DataVersionLocalModelAdapter());
+  await Hive.openBox<DB2DataVersionLocalModel>('DB2DataVersionLocalModelFile');
+  Hive.registerAdapter(DB2LandMarkApiModelAdapter());
+  await Hive.openBox<DB2LandMarkApiModel>('DB2LandMarkApiModelFile');
+  Hive.registerAdapter(DB2PatchAPIModelAdapter());
+  await Hive.openBox<DB2PatchAPIModel>('DB2PatchAPIModelFile');
+  Hive.registerAdapter(DB2PolyLineAPIModelAdapter());
+  await Hive.openBox<DB2PolyLineAPIModel>('DB2PolyLineAPIModelFile');
+  Hive.registerAdapter(DB2BeaconAPIModelAdapter());
+  await Hive.openBox<DB2BeaconAPIModel>('DB2BeaconAPIModelFile');
+  Hive.registerAdapter(DB2WayPointModelAdapter());
+  await Hive.openBox<DB2WayPointModel>('DB2WayPointModelFile');
+  Hive.registerAdapter(BuildingByVenueMapAPIModelAdapter());
+  print("Registration success BuildingByVenueAPIModelAdapter");
+  await Hive.openBox<BuildingByVenueMapAPIModel>('BuildingByVenueMapModelFile');
+  Hive.registerAdapter(DB2BuildingByVenueMapAPIModelAdapter());
+  print("Registration success DB2BuildingByVenueAPIModelAdapter");
+  await Hive.openBox<DB2BuildingByVenueMapAPIModel>('DB2BuildingByVenueMapModelFile');
+  Hive.registerAdapter(FingerPrintingAPIModelAdapter());
+  await Hive.openBox<FingerPrintingAPIModel>('FingerPrintingModelFile');
 
+  Hive.registerAdapter(CategoryAPIModelAdapter());
+  await Hive.openBox<CategoryAPIModel>('CategoryAPIModelFile');
+  Hive.registerAdapter(ExhibitorAPIModelAdapter());
+  await Hive.openBox<CategoryAPIModel>('ExhibitorAPIModelFile');
+
+  Hive.registerAdapter(ExhibitorAPIModelNEWAdapter());
+  await Hive.openBox<ExhibitorAPIModelNEW>('ExhibitorAPIModelFileNEW');
+
+  Hive.registerAdapter(SessionAPIModelAdapter());
+  await Hive.openBox<SessionAPIModel>('SessionAPIModelFile');
+  Hive.registerAdapter(SubEventAPIModelAdapter());
+  await Hive.openBox<SubEventAPIModel>('SubEventAPIModelFile');
+  await Hive.openBox('UserInformation');
+  await Hive.openBox('nearbyServicesBox');
+  await Hive.openBox('showcase_box');
   await interactionManager.initialize();
   await sessionManager.initialize();
   await navigationManager.initialize();
-
-  await Hive.openBox('Favourites');
-  await Hive.openBox('UserInformation');
-
   // await Firebase.initializeApp();
-
-  // await Hive.openBox('Favourites');
-  await Hive.openBox('DashboardList');
-
+  await Hive.openBox('Favourites');
   await Hive.openBox('Filters');
   await Hive.openBox('SignInDatabase');
   await Hive.openBox('LocationPermission');
   await Hive.openBox('VersionData');
+  await Hive.openBox('DashboardList');
   await Hive.openBox('user');
-
+  await Hive.openBox('notifications');
+  await Hive.openBox('newnotifications');
+  await Hive.openBox('exhibitorBox');
+  await Hive.openBox('SwitchingDatabaseInfo');
+  var switchDatabaseBox = Hive.box('SwitchingDatabaseInfo');
+  if(!switchDatabaseBox.containsKey("greenDataBase")){
+    switchDatabaseBox.put('greenDataBase', true);
+  }else{
+    print("greenDataBase contians key");
+  }
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

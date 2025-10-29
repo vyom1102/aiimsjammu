@@ -1,6 +1,4 @@
 import 'package:hive/hive.dart';
-
-import '../../APIMODELS/DataVersion.dart';
 part 'DataVersionLocalModel.g.dart';
 
 @HiveType(typeId: 10)

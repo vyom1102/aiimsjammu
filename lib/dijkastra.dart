@@ -1,13 +1,24 @@
 // Function to calculate Euclidean distance between two points
 import 'dart:math';
-
 import 'package:collection/collection.dart';
-import 'package:iwaymaps/singletonClass.dart';
 import '/path.dart';
-
 import 'API/buildingAllApi.dart';
 import 'APIMODELS/GlobalAnnotationModel.dart';
 import 'navigationTools.dart';
+
+class paths{
+  List<MapEntry<String, Map<int, List<int>>>> localPath;
+  List<MapEntry<String, Map<int, List<List<double>>>>> globalPath;
+
+  paths(this.localPath, this.globalPath);
+}
+
+enum PathOption {
+  lift,
+  stairs,
+  escalator,
+  ramp
+}
 
 // Function to calculate Euclidean distance between two points
 double euclideanDistance(String point1, String point2, {String? prevPoint}) {
@@ -41,30 +52,73 @@ double euclideanDistance(String point1, String point2, {String? prevPoint}) {
 }
 
 
-double masterEuclideanDistance(String node1, String node2) {
+double masterEuclideanDistance(String node1, String node2, {String? prevPoint}) {
   List<String> parts1 = node1.split(',');
   List<String> parts2 = node2.split(',');
 
-  int x1 = int.parse(parts1[1]);
-  int y1 = int.parse(parts1[2]);
   int floor1 = int.parse(parts1[3]);
-  List<double> l1 = tools.localtoglobal(
-      x1,
-      y1,
-      SingletonFunctionController.building.patchData[parts1[0]]);
+  List<double> l1 = [double.parse(parts1[5]), double.parse(parts1[4])];
 
-  int x2 = int.parse(parts2[1]);
-  int y2 = int.parse(parts2[2]);
-  List<double> l2 = tools.localtoglobal(x2, y2, SingletonFunctionController.building.patchData[parts2[0]]);
+  List<double> l2 = [double.parse(parts2[5]), double.parse(parts2[4])];
   int floor2 = int.parse(parts2[3]);
 
-  double distance = sqrt(pow(l2[0] - l1[0], 2) + pow(l2[1] - l1[1], 2));
+  double distance = tools.calculateAerialDist(l1[0], l1[1], l2[0], l2[1]);
 
   if (floor1 != floor2) {
     distance += 15; // Add floor change penalty
   }
 
+  // if (prevPoint != null) {
+  //   List<String> partsPrev = prevPoint.split(',');
+  //   List<double> l0 = [double.parse(partsPrev[5]), double.parse(partsPrev[4])];
+  //
+  //   double turnAngle = angle(l0, l1, l2);
+  //   if (turnAngle > 30) { // Only penalize sharp turns
+  //     distance += turnAngle * 0.1; // Adjust multiplier as needed
+  //   }
+  // }
+
   return distance;
+}
+
+double angle(List<double> a, List<double> b, List<double> c) {
+  const double R = 6371.0; // Earth's radius in km
+  const double pi = 3.14159265358979323846;
+
+  // Convert degrees to radians
+  double toRad(double deg) => deg * pi / 180.0;
+
+  double lat1 = toRad(a[1]), lon1 = toRad(a[0]);
+  double lat2 = toRad(b[1]), lon2 = toRad(b[0]);
+  double lat3 = toRad(c[1]), lon3 = toRad(c[0]);
+
+  // Convert to Cartesian coordinates (3D)
+  List<double> toCartesian(double lat, double lon) {
+    return [
+      R * cos(lat) * cos(lon),
+      R * cos(lat) * sin(lon),
+      R * sin(lat)
+    ];
+  }
+
+  var p1 = toCartesian(lat1, lon1);
+  var p2 = toCartesian(lat2, lon2);
+  var p3 = toCartesian(lat3, lon3);
+
+  // Vectors BA and BC
+  double bax = p1[0] - p2[0], bay = p1[1] - p2[1], baz = p1[2] - p2[2];
+  double bcx = p3[0] - p2[0], bcy = p3[1] - p2[1], bcz = p3[2] - p2[2];
+
+  // Dot product and magnitudes
+  double dot = bax * bcx + bay * bcy + baz * bcz;
+  double magBA = sqrt(bax * bax + bay * bay + baz * baz);
+  double magBC = sqrt(bcx * bcx + bcy * bcy + bcz * bcz);
+
+  // Angle in degrees
+  double cosTheta = dot / (magBA * magBC);
+  cosTheta = cosTheta.clamp(-1.0, 1.0); // Clamp for numerical stability
+
+  return acos(cosTheta) * (180.0 / pi);
 }
 
 
@@ -115,13 +169,20 @@ Future<List<List<int>>> dijkstra(Map<String, dynamic> graph, String start, Strin
   return []; // Return an empty list if there's no path
 }
 
+
+
 Future<List<String>> masterDijkstra(
-    Map<String, dynamic> graph, String start, String goal, int col,
+    GlobalModel masterGraph, String start, String goal, PathOption floorConnector,
     {bool isoutdoorPath = false}) async {
 
   var distances = <String, double>{};
   var previous = <String, String>{};
+  var visited = <String>{};
   var unvisited = PriorityQueue<MapEntry<String, double>>((a, b) => a.value.compareTo(b.value));
+
+  var graph = masterGraph.pathNetwork!.masterGraph!;
+
+  var nonPreferableConnectors = masterGraph.getNodesForNonPreferableOption(floorConnector);
 
   for (var node in graph.keys) {
     distances[node] = double.infinity;
@@ -134,22 +195,29 @@ Future<List<String>> masterDijkstra(
   while (unvisited.isNotEmpty) {
     var currentNode = unvisited.removeFirst().key;
 
+    // Skip if already visited
+    if (visited.contains(currentNode)) continue;
+    visited.add(currentNode);
+
     if (currentNode == goal) {
       var path = <String>[];
       while (previous.containsKey(currentNode)) {
-        print("masterpath $currentNode");
         path.add(currentNode);
         currentNode = previous[currentNode]!;
       }
-      path.add(currentNode); // Add the start node
+      path.add(currentNode);
 
       return path.reversed.toList();
     }
 
     if (graph.containsKey(currentNode)) {
       for (var neighbor in graph[currentNode]!) {
-        if(neighbor != null){
-          var newDist = distances[currentNode]! + masterEuclideanDistance(currentNode, neighbor);
+        if(neighbor != null && !nonPreferableConnectors.contains(neighbor) && !visited.contains(neighbor)){
+          String? prevNode = previous[currentNode];
+          // Simple edge distance without angle dependency
+          var edgeDistance = masterEuclideanDistance(currentNode, neighbor, prevPoint: prevNode);
+          var newDist = distances[currentNode]! + edgeDistance;
+
           if (newDist < distances[neighbor]!) {
             distances[neighbor] = newDist;
             previous[neighbor] = currentNode;
@@ -161,18 +229,7 @@ Future<List<String>> masterDijkstra(
   }
 
   print("masterpath not found []");
-  return []; // Return an empty list if no path found
-}
-
-
-/// Extracts the coordinate portion from a node key in the format `uniqueID,x,y,floor`
-List<int> _extractCoordinates(String node) {
-  var parts = node.split(',');
-  return parts.sublist(1).map(int.parse).toList();
-}
-String _extractBid(String node) {
-  var parts = node.split(',');
-  return parts[0];
+  return [];
 }
 
 List<List<int>> addCoordinatesBetweenVertices(List<List<int>> coordinates, int col) {
@@ -231,7 +288,7 @@ List<int> masterAddCoordinatesBetweenVertices(List<String> nodes, int col) {
     var signY = startY < endY ? 1 : -1;
 
     // Add the starting point
-    if(newCoordinates.isNotEmpty && newCoordinates.last != startY*col+startX){
+    if(newCoordinates.isEmpty || (newCoordinates.isNotEmpty && newCoordinates.last != startY*col+startX)){
       newCoordinates.add(startY*col+startX);
     }
 
@@ -322,32 +379,31 @@ List<String> masterFindNearestAndSecondNearestVertices(Map<String, dynamic> path
   final stackTrace = StackTrace.current;
   print("stateDebug Stack: \n$stackTrace");
   String nearestToCoord1 = '';
-  String secondNearestToCoord1 = '';
   String nearestToCoord2 = '';
-  String secondNearestToCoord2 = '';
   double minDistToCoord1 = double.infinity;
-  double secondMinDistToCoord1 = double.infinity;
   double minDistToCoord2 = double.infinity;
-  double secondMinDistToCoord2 = double.infinity;
 
   print("Source and destination points are $coord1 and $coord2");
 
-  List<int> coord1Parsed = _extractCoordinates(coord1);
+  List<int> coord1Parsed = tools.extractCoordinates(coord1);
   int coord1Floor = coord1Parsed[2];
   String coord1Bid = tools.extractBid(coord1);
 
-  List<int> coord2Parsed = _extractCoordinates(coord2);
+  List<int> coord2Parsed = tools.extractCoordinates(coord2);
   int coord2Floor = coord2Parsed[2];
   String coord2Bid = tools.extractBid(coord2);
 
   print("Source and destination points extracted are $coord1Parsed and $coord2Parsed  $pathNetwork");
   // Iterate through each vertex in the pathNetwork
   pathNetwork.forEach((vertex, neighbors) {
-    List<int> v = _extractCoordinates(vertex);
+    List<int> v = tools.extractCoordinates(vertex);
     String vBid = tools.extractBid(vertex);
 
     // Calculate distances from coord1 and coord2 to vertex v
     double distToCoord1 = sqrt(pow(v[0] - coord1Parsed[0], 2) + pow(v[1] - coord1Parsed[1], 2));
+    if(v.length<3){
+      print("v $v");
+    }
     if(v[2] != coord1Floor || vBid != coord1Bid){
       distToCoord1 = double.infinity;
     }
@@ -359,41 +415,23 @@ List<String> masterFindNearestAndSecondNearestVertices(Map<String, dynamic> path
 
     // Update nearest and second nearest vertices for coord1
     if (distToCoord1 < minDistToCoord1) {
-      secondMinDistToCoord1 = minDistToCoord1;
-      secondNearestToCoord1 = nearestToCoord1;
       minDistToCoord1 = distToCoord1;
       nearestToCoord1 = vertex;
-    } else if (distToCoord1 < secondMinDistToCoord1) {
-      secondMinDistToCoord1 = distToCoord1;
-      secondNearestToCoord1 = vertex;
     }
 
     // Update nearest and second nearest vertices for coord2
     if (distToCoord2 < minDistToCoord2) {
-      secondMinDistToCoord2 = minDistToCoord2;
-      secondNearestToCoord2 = nearestToCoord2;
       minDistToCoord2 = distToCoord2;
       nearestToCoord2 = vertex;
-    } else if (distToCoord2 < secondMinDistToCoord2) {
-      secondMinDistToCoord2 = distToCoord2;
-      secondNearestToCoord2 = vertex;
     }
   });
 
-  print("_extractCoordinates(nearestToCoord1) $nearestToCoord1 ${_extractCoordinates(nearestToCoord1)}");
-  print("_extractCoordinates(nearestToCoord2) $nearestToCoord2 ${_extractCoordinates(nearestToCoord2)}");
-  if (_extractCoordinates(nearestToCoord1).sublist(0, 2).join(',') == coord1Parsed.sublist(0, 2).join(',')) {
-    secondNearestToCoord1 = nearestToCoord1;
-  }
-  if (_extractCoordinates(nearestToCoord2).sublist(0, 2).join(',') == coord2Parsed.sublist(0, 2).join(',')) {
-    secondNearestToCoord2 = nearestToCoord2;
-  }
+  print("tools.extractCoordinates(nearestToCoord1) $nearestToCoord1 ${tools.extractCoordinates(nearestToCoord1)}");
+  print("tools.extractCoordinates(nearestToCoord2) $nearestToCoord2 ${tools.extractCoordinates(nearestToCoord2)}");
 
   return [
     nearestToCoord1,
-    secondNearestToCoord1,
     nearestToCoord2,
-    secondNearestToCoord2
   ];
 }
 
@@ -489,10 +527,9 @@ List<int> mergeLists(List<int> l1, List<int> l2, List<int> l3) {
 }
 
 
-Future<List<String>> findShortestPath (Map<String, dynamic> graph, int sourceX, int sourceY, int destinationX, int destinationY, List<int>? nonWalkableCells, int col, int row, String bid, int floor, {bool isoutdoorPath = false})async{
+Future<List<MapEntry<String, Map<int, List<int>>>>> findShortestPath (Map<String, dynamic> graph, int sourceX, int sourceY, int destinationX, int destinationY, List<int>? nonWalkableCells, int col, int row, String bid, int floor, {bool isoutdoorPath = false})async{
   nonWalkableCells ??= [];
-  List<String> states = [];
-  states = findNearestAndSecondNearestVertices(graph, [sourceX,sourceY], [destinationX,destinationY]);
+  List<String> states = findNearestAndSecondNearestVertices(graph, [sourceX,sourceY], [destinationX,destinationY]);
   String start1 = states[0];
   String start2 = states[1];
   String goal1 = states[2];
@@ -500,10 +537,9 @@ Future<List<String>> findShortestPath (Map<String, dynamic> graph, int sourceX, 
 
   print("states debug $states");
 
+
   List<List<int>> temppath1 = await dijkstra(graph,start1,goal1,col,isoutdoorPath: isoutdoorPath);
   List<List<int>> temppath2 = await dijkstra(graph,start2,goal2,col, isoutdoorPath: isoutdoorPath);
-
-
 
   List<List<int>> temppath =[];
 
@@ -550,15 +586,16 @@ Future<List<String>> findShortestPath (Map<String, dynamic> graph, int sourceX, 
   List<int>l1 = [];
   List<int>l2 = [];
   List<int>l3 = [];
-
   if((sourceY*col)+sourceX != (temppath[s][1]*col)+temppath[s][0] && !isoutdoorPath){
     await findPath(row, col, nonWalkableCells, ((sourceY*col) + sourceX), ((temppath[s][1]*col)+temppath[s][0])).then((value){
+      //value = getFinalOptimizedPath(value, nonWalkableCells, numCols, sourceX, sourceY, destinationX, destinationY);
+      // print("path inside 1  between ${((sourceY*col) + sourceX)} and ${((temppath[s][1]*col)+temppath[s][0])} is $value");
       l1 = value;
+      // print("l1 $l1");
     });
   }
 
   for(int i = s ; i<=e; i++){
-    print("adding cell ${temppath[i][0]},${temppath[i][1]}");
     l2.add((temppath[i][1]*col) + temppath[i][0]);
   }
   if((sourceY*col)+sourceX != (temppath[0][1]*col)+temppath[0][0] && isoutdoorPath){
@@ -570,64 +607,54 @@ Future<List<String>> findShortestPath (Map<String, dynamic> graph, int sourceX, 
     l2.insert(0,(sourceY*col) + sourceX);
   }
 
+  // print("l2 $l2");
   if((temppath[e][1]*col)+temppath[e][0] != (destinationY*col)+destinationX && !isoutdoorPath){
+
     await findPath(row, col, nonWalkableCells, ((temppath[e][1]*col)+temppath[e][0]), ((destinationY*col) + destinationX)).then((value){
+      //value = getFinalOptimizedPath(value, nonWalkableCells, numCols, sourceX, sourceY, destinationX, destinationY);
+      // print("path inside 2 $value");
       l3 = value;
+      // print("l3 $l3");
     });
+
+
   }
 
   if(l1.isNotEmpty || l3.isNotEmpty){
     try {
-      List<int> optimizedPath = getFinalOptimizedPath(
+      return [MapEntry(bid, { floor :  getFinalOptimizedPath(
           mergeLists(l1, l2, l3),
           nonWalkableCells,
           col,
           sourceX,
           sourceY,
           destinationX,
-          destinationY);
-      return tools.convertToFourPointerPath(optimizedPath, bid, floor);
+          destinationY)})];
     }catch(e){
-      List<int> optimizedPath = mergeLists(l1, l2, l3);
-      return tools.convertToFourPointerPath(optimizedPath, bid, floor);
+      return [MapEntry(bid, { floor :  mergeLists(l1, l2, l3)})];
     }
   }else{
-    List<int> optimizedPath = mergeLists(l1, l2, l3);
-    return tools.convertToFourPointerPath(optimizedPath, bid, floor);
+    return [MapEntry(bid, { floor :  mergeLists(l1, l2, l3)})];
   }
 
 }
-Future<List<String>> masterFindShortestPath (Map<String, dynamic> graph, int sourceX, int sourceY, String sourceBid, int sourceFloor, int destinationX, int destinationY, String destinationBid, int destinationFloor, List<int>? nonWalkableCells, int col, int row, {bool isoutdoorPath = false})async{
+
+
+
+Future<paths> masterFindShortestPath (GlobalModel masterGraph, int sourceX, int sourceY,double sourceLat, double sourceLng, String sourceBid, int sourceFloor, int destinationX, int destinationY, String destinationBid, int destinationFloor, List<int>? nonWalkableCells, Map<String, Map<int, List<int>>> col, PathOption floorConnector, {bool isoutdoorPath = false})async{
   nonWalkableCells ??= [];
   List<String> states = [];
-  states = masterFindNearestAndSecondNearestVertices(graph, "$sourceBid,$sourceX,$sourceY,$sourceFloor", "$destinationBid,$destinationX,$destinationY,$destinationFloor");
+  states = masterFindNearestAndSecondNearestVertices(masterGraph.pathNetwork!.masterGraph!, "$sourceBid,$sourceX,$sourceY,$sourceFloor", "$destinationBid,$destinationX,$destinationY,$destinationFloor");
   String start1 = states[0];
-  String start2 = states[1];
-  String goal1 = states[2];
-  String goal2 = states[3];
+  String goal1 = states[1];
 
   print("states debug $states");
 
-  List<String> temppath1 = await masterDijkstra(graph,start1,goal1,col, isoutdoorPath: isoutdoorPath);
-  List<String> temppath2 = await masterDijkstra(graph,start2,goal2,col, isoutdoorPath: isoutdoorPath);
+  List<String> temppath1 = await masterDijkstra(masterGraph,start1,goal1, floorConnector, isoutdoorPath: isoutdoorPath);
 
+  print("temp1 $temppath1");
 
-
-  List<String> temppath =[];
-
-  if (temppath1.isEmpty || temppath2.isEmpty) {
-    temppath = temppath1.isEmpty ? temppath2 : temppath1;
-  } else {
-    final distance = masterEuclideanDistance(start1, start2);
-
-    if (distance <= 10) {
-      temppath = (temppath1.length > temppath2.length) ? temppath2 : temppath1;
-      print("returning ${temppath == temppath2 ? '1 $temppath2' : '2'}");
-    } else {
-      print("returning 3");
-      temppath = temppath1;
-    }
-  }
+  List<String> temppath =temppath1;
 
   var zerothElement = tools.extractCoordinates(temppath[0]);
   var firstElement = tools.extractCoordinates(temppath[1]);
@@ -638,7 +665,7 @@ Future<List<String>> masterFindShortestPath (Map<String, dynamic> graph, int sou
     if(distance1<distance2){
       temppath.removeAt(0);
     }
-    temppath.insert(0,"$sourceBid,$sourceX,$sourceY,$sourceFloor");
+    temppath.insert(0,"$sourceBid,$sourceX,$sourceY,$sourceFloor,$sourceLng,$sourceLat");
   }
 
   List<List<String>> paths = segmentPath(temppath);
@@ -649,17 +676,63 @@ Future<List<String>> masterFindShortestPath (Map<String, dynamic> graph, int sou
     String currentBid = tools.extractBid(segment[0]);
     int currentFloor = tools.extractCoordinates(segment[0]).last;
     if(currentBid != buildingAllApi.outdoorID){
-      int numCols = SingletonFunctionController.building.floorDimenssion[currentBid]![currentFloor]![0];
-      var tempFilled = masterAddCoordinatesBetweenVertices(segment, numCols);
-      var filled = tools.convertToFourPointerPath(tempFilled, currentBid, currentFloor);
-      fullPath.addAll(filled);
+      // int numCols = SingletonFunctionController.building.floorDimenssion[currentBid]![currentFloor]![0];
+      // var tempFilled = masterAddCoordinatesBetweenVertices(segment, numCols);
+      // var filled = tools.convertToFourPointerPath(tempFilled, currentBid, currentFloor);
+      // fullPath.addAll(filled);
+      fullPath.addAll(segment);
     }else{
       fullPath.addAll(segment);
     }
   });
 
-  return fullPath;
+  print("fullPath $fullPath");
+
+  return convertPath(fullPath, col);
 }
+
+paths convertPath(
+    List<String> path,
+    Map<String, Map<int, List<int>>> col,
+    ) {
+  final result = <MapEntry<String, Map<int, List<int>>>>[];
+  final globalResult = <MapEntry<String, Map<int, List<List<double>>>>>[];
+
+  for (final node in path) {
+    final parts = node.split(',');
+    if (parts.length != 6) continue;
+
+    final buildingID = parts[0];
+    final x = int.tryParse(parts[1]);
+    final y = int.tryParse(parts[2]);
+    final floor = int.tryParse(parts[3]);
+    final lat = double.tryParse(parts[5]);
+    final lng = double.tryParse(parts[4]);
+    final cols = col[buildingID]?[floor]?[0];
+    print("floors $x,$y,$floor,$cols");
+
+    if (x == null || y == null || floor == null || cols == null) continue;
+
+    final index = (y * cols) + x;
+    final globalCoordinate = [lat!, lng!];
+
+    if(result.isNotEmpty && result.last.key == buildingID){
+      result.last.value.putIfAbsent(floor, ()=>[]);
+      result.last.value[floor]!.add(index);
+
+      globalResult.last.value.putIfAbsent(floor, ()=>[]);
+      globalResult.last.value[floor]!.add(globalCoordinate);
+    }else{
+      result.add(MapEntry(buildingID, {floor: [index]}));
+
+      globalResult.add(MapEntry(buildingID, {floor: [globalCoordinate]}));
+    }
+  }
+
+  return paths(result, globalResult);
+}
+
+
 
 List<List<String>> segmentPath(List<String> path) {
   if (path.isEmpty) return [];
@@ -685,6 +758,7 @@ List<List<String>> segmentPath(List<String> path) {
   }
 
   segments.add(currentSegment);
+  print("segments $segments");
   return segments;
 }
 

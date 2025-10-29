@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:math';
+
 import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
-import 'Elements/HelperClass.dart';
+
+import 'Cell.dart';
 import 'GPS.dart';
-import '/Cell.dart';
-import '/navigationTools.dart';
 import 'GPSService.dart';
+import 'navigationTools.dart';
 
 class KalmanFilter {
   double? latitudeEstimate;
@@ -139,21 +140,25 @@ class PathSnapper {
     "position": position};
   }
 
-  Cell? snapToPathKalman(Location position,double latitude, double longitude, int index, List<Cell> path) {
-    print("snapToPathKalman ${position.latitude},${position.longitude}");
+  Cell? snapToPathKalman(Location? position,double latitude, double longitude, int index, List<Cell> path, {bool filterLong = true, bool excludeTurns = true}) {
+    print("snapToPathKalman ${position?.latitude},${position?.longitude}");
     double minDistance = double.infinity;
     Cell? nearestCell;
 
-    List<Cell>? points = tools.findSegmentContainingPoint(path, index);
+    List<Cell>? points = tools.findSegmentContainingPoint(path, index, filterLong: filterLong);
     if(points == null){
       return null;
     }
-    int d1 = tools.calculateAerialDist(path[index].lat, path[index].lng, points[0].lat, points[0].lng).ceil();
-    int d2 = tools.calculateAerialDist(path[index].lat, path[index].lng, points[1].lat, points[1].lng).ceil();
-    print("d1 is $d1 and d2 is $d2");
-    if(d1<3 || d2<3){
-      return null;
+
+    if(excludeTurns){
+      int d1 = tools.calculateAerialDist(path[index].lat, path[index].lng, points[0].lat, points[0].lng).ceil();
+      int d2 = tools.calculateAerialDist(path[index].lat, path[index].lng, points[1].lat, points[1].lng).ceil();
+      print("d1 is $d1 and d2 is $d2");
+      if(d1<3 || d2<3){
+        return null;
+      }
     }
+
     Cell start = points[0];
     Cell end = points[1];
 
@@ -173,7 +178,7 @@ class PathSnapper {
     if(nearestCell != null){
       // path.insert(nearestCell.imaginedIndex!, nearestCell);
     }else{
-      HelperClass.showToast("old gps position identified");
+      // HelperClass.showToast("old gps position identified");
       return null;
     }
     return nearestCell;
@@ -192,7 +197,8 @@ class PathSnapper {
         start.numCols,
         imaginedIndex: path.indexOf(start),
         imaginedCell: true,
-        position: position
+        position: position,
+      masterGraph: true
     ) ;
   }
 
