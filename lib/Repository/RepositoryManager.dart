@@ -70,8 +70,8 @@ class RepositoryManager{
 
     Future<void> loadBuildings() async {
         print("loadBuildings ${StackTrace.current}");
-        print("loadBuildings");
         BuildingData buildingData = await getBuildingByVenueNew(VenueManager().venueName);
+        print("loadBuildings${buildingData.buildings}");
         VenueManager().buildings = buildingData;
 
     }
@@ -139,7 +139,6 @@ class RepositoryManager{
             print("DB1 ALREADY CREATED FROM PRELOADED JSON");
         }
         VenueManager().runDataVersionCycle();
-
     }
 
 
@@ -655,11 +654,11 @@ class RepositoryManager{
     }
 
     Future<dynamic> _fetchAndStorePatchDataFromAPI(Detail detail, String bID, bool isGreen) async {
+        print("_fetchAndStorePatchDataFromAPI $bID ${detail.body} ${detail.headers} ${detail.url}");
         final response = await networkManager.api.request(detail);
-
+        print("_fetchAndStorePatchDataFromAPI ${response.statusCode} ${response.data}");
         if (response.statusCode == 200) {
             final data = response.data;
-
             if (isGreen) {
                 final model = PatchAPIModel(responseBody: data);
                 DataBaseManager().saveData(model, detail, bID);

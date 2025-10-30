@@ -51,7 +51,7 @@ class Apimanager{
       }else if(response.statusCode == 403){
         Response refreshResponse = await request(Apidetails.refreshToken());
         print("Apidetails.refreshToken().conversionFunction(refreshResponse.data)");
-        print(Apidetails.refreshToken().conversionFunction(refreshResponse.data).toString());
+        print(refreshResponse.data);
         apiDetail.updateAccessToken(Apidetails.refreshToken().conversionFunction(refreshResponse.data).accessToken);
         DataBaseManager().updateAccessToken(Apidetails.refreshToken().conversionFunction(refreshResponse.data).accessToken);
         DataBaseManager().updateRefreshToken(Apidetails.refreshToken().conversionFunction(refreshResponse.data).refreshToken);

@@ -2326,6 +2326,8 @@ class _HomePageState extends State<HomePage> {
         floatingActionButton: FloatingActionButton(
           heroTag: 'homepage',
           onPressed: (){
+            print("FloatingActionButton");
+
             Navigator.push(
               context,
               MaterialPageRoute(

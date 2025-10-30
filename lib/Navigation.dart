@@ -1855,7 +1855,7 @@ class _NavigationState extends State<Navigation>
       Map<String, Landmarks>? landmarksMapAll = {};
       buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
         print("getStoredAllBuildingID $key");
-        await RepositoryManager().getLandmarkDataNew(key).then((value) {
+        await landmarkApi().fetchLandmarkData(id: key).then((value) {
           print("key $key $value");
           landmarksMapAll!.addAll(value.landmarksMap!);
         });
@@ -3119,7 +3119,7 @@ class _NavigationState extends State<Navigation>
       itterated.add(id);
       // try {
       // var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(id);
-      var globalData = await RepositoryManager().getGlobalAnnotationDataNew(id);
+      var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(id);
       print("globalData ${globalData.runtimeType}");
 
       GlobalAnnotationController controller = GlobalAnnotationController(
@@ -3195,7 +3195,7 @@ class _NavigationState extends State<Navigation>
             print("Globalannotationcheck${key}");
             // try {
             //   var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(key);
-            var globalData = await RepositoryManager().getGlobalAnnotationDataNew(key);
+            var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(key);
             print("globalData ${globalData.runtimeType}");
             Building.GlobalAnnotation = globalData;
             GlobalAnnotationController controller = GlobalAnnotationController(
@@ -3237,8 +3237,7 @@ class _NavigationState extends State<Navigation>
           }
           try {
             // var waypointData = await waypointapi().fetchwaypoint(key, outdoor: key == buildingAllApi.outdoorID);
-            var waypointData = await RepositoryManager()
-                .getWaypointNew(key, key == buildingAllApi.outdoorID);
+            var waypointData = await waypointapi().fetchwaypoint(key, outdoor: key == buildingAllApi.outdoorID);
             Building.waypoint[key] = waypointData.cast<PathModel>();
           } catch (_) {}
           // print("buildingAllApi.selectedBuildingID ${buildingAllApi.selectedBuildingID}");
@@ -12947,7 +12946,7 @@ class _NavigationState extends State<Navigation>
     // Collect all API call futures
     List<Future<void>> apiCalls = [];
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
-      apiCalls.add(RepositoryManager().getLandmarkDataNew(key).then((value) {
+      apiCalls.add(landmarkApi().fetchLandmarkData(id: key).then((value) {
         snapshot.mergeLandmarks(value.landmarks);
         print("merged $key");
       }));
