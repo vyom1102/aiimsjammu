@@ -32,9 +32,11 @@ import '../../API/PatchApi.dart';
 import '../../API/PolyLineApi.dart';
 import '../../API/RefreshTokenAPI.dart';
 import '../../API/UsergetAPI.dart';
+import '../../API/buildingByVenueAPI.dart';
 import '../../API/ladmarkApi.dart';
 import '../../API/outBuilding.dart';
 import '../../API/waypoint.dart';
+import '../../APIMODELS/DataVersion.dart';
 import '../../APIMODELS/landmark.dart';
 import '../../DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import '../../DATABASE/BOXES/BuildingAPIModelBox.dart';
@@ -47,9 +49,7 @@ import '../../DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import '../../DATABASE/BOXES/WayPointModelBOX.dart';
 import '../../Elements/HelperClass.dart';
 import '../../Navigation.dart';
-import '../../Repository/RepositoryManager.dart';
 import '../../UserState.dart';
-import '../../VenueManager/VenueManager.dart';
 import '../../VersioInfo.dart';
 import '../../buildingState.dart';
 import '../../config.dart';
@@ -142,14 +142,9 @@ class _HomePageState extends State<HomePage> {
   Map<dynamic, dynamic> combinedLandmarkData = {};
   final ws = wsocket("com.iwayplus.aiimsjammu");
 
-
   @override
   void initState() {
     super.initState();
-    mapDataVersionCycle();
-    SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID);
-    SingletonFunctionController().mapCLustring.initMarkers();
-
     getUserDataFromHive();
     fetchAndStoreBuildingIds();
     getDriverDetail();
@@ -159,7 +154,6 @@ class _HomePageState extends State<HomePage> {
     getLocs();
     wsocket.message["AppInitialization"]["BID"]=buildingAllApi.selectedBuildingID;
     wsocket.message["AppInitialization"]["buildingName"]=buildingAllApi.selectedVenue;
-    // SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID);
     versionApiCheck();
     checkForReload();
     versionApiCall();
@@ -169,15 +163,10 @@ class _HomePageState extends State<HomePage> {
     requestNotificationPermission();
     // dataDownload();
     SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID);
+    SingletonFunctionController().mapCLustring.initMarkers();
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
-  }
 
-  RepositoryManager repositoryManager = RepositoryManager();
-
-  Future<void> mapDataVersionCycle() async {
-    print("mapDataVersionCycle");
-    VenueManager().runDataVersionCycle();
   }
   Future<void> fetchAllLandmarkData() async {
     if (globalBuildingIds.isEmpty) {
@@ -991,6 +980,9 @@ class _HomePageState extends State<HomePage> {
   var versionBox = Hive.box('VersionData');
   void versionApiCall() async{
     try {
+      await DataVersionApi()
+          .fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
+
       loadInfoToFile();
     }catch(e){
 
@@ -1397,6 +1389,7 @@ class _HomePageState extends State<HomePage> {
 
     // Check if the result contains wifi or mobile connectivity
     if (connectivityResult.contains(ConnectivityResult.mobile) || connectivityResult.contains(ConnectivityResult.wifi)) {
+      Buildingbyvenueapi.findBuildings();
       setState(() {
         carouselImages.clear();
         _services.clear();
@@ -1611,6 +1604,7 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
+                          // builder: (context) => NotificationScreen(),
                           builder: (context) => Navigation(),
                         ),
                       );
@@ -2326,8 +2320,6 @@ class _HomePageState extends State<HomePage> {
         floatingActionButton: FloatingActionButton(
           heroTag: 'homepage',
           onPressed: (){
-            print("FloatingActionButton");
-
             Navigator.push(
               context,
               MaterialPageRoute(

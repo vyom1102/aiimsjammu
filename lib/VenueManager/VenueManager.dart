@@ -1,5 +1,5 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:iwaymaps/API/DataVersionApi.dart';
+import 'package:iwaymaps/API/DataVersionApiNewForRepo.dart';
 import '../APIMODELS/Buildingbyvenue.dart';
 import '../APIMODELS/DataVersion.dart';
 import '../APIMODELS/landmark.dart';
@@ -127,7 +127,7 @@ class VenueManager extends BuildingStore{
 
   Future<void> runDataVersionCycle() async {
     print("runDataVersionCycle $buildings");
-    List<DataVersionModel>? dataVersion = await DataVersionapi().fetchDataVersion(_venueName);
+    List<DataVersionModel>? dataVersion = await DataVersionapiNewForRepo().fetchDataVersion(_venueName);
     if(buildings?.buildings == null || buildings!.buildings!.isEmpty){
      await RepositoryManager().loadBuildings().then((_) async {
        print("Buildign was empty");

@@ -62,6 +62,7 @@ import '/websocket/UserLog.dart';
 import '../newSearchPage.dart';
 import '../path_snapper.dart';
 import 'API/DataVersionApi.dart';
+import 'API/DataVersionApiNewForRepo.dart';
 import 'API/GlobalAnnotationapi.dart';
 import 'API/PolyLineApi.dart';
 import 'API/RatingsaveAPI.dart';
@@ -1534,8 +1535,10 @@ class _NavigationState extends State<Navigation>
           value.position.longitude);
       if (d < distance) {
         distance = d;
-        updateNearbyLandmarkMarkers(id!);
-        id = key;
+        if(id != null){
+          updateNearbyLandmarkMarkers(id!);
+          id = key;
+        }
       }
     });
     if (id != null) {
@@ -3102,7 +3105,7 @@ class _NavigationState extends State<Navigation>
         createMarkers: createMarkers);
 
     // try{
-    //   await DataVersionApi().fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
+      await DataVersionApi().fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
     // }catch(e){
     //   Navigator.pushReplacement(context, MaterialPageRoute(
     //       builder: (context) => const SomethingWentWrongPage(

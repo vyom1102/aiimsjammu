@@ -59,6 +59,8 @@ String getDecryptedData(String encryptedData){
     );
     print("landmark debug ${response.statusCode}  ${response.body}");
     if (response.statusCode == 200) {
+      print('LANDMARK DATA FROM API');
+
       try{
         Map<String, dynamic> responseBody = json.decode(response.body);
         final landmarkData = LandMarkApiModel(responseBody: responseBody);
