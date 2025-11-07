@@ -50,10 +50,13 @@ class GlobalSearchPage extends StatefulWidget {
   bool voiceInputEnabled;
   String userLocalized;
   UserState? user;
+  bool frombottombar;
+
 
   GlobalSearchPage(
       {this.hintText = "",
         this.previousFilter = "",
+        this.frombottombar = false,
         required this.voiceInputEnabled,
         this.userLocalized = "",this.user});
 
@@ -1010,7 +1013,11 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
 
 
   void onVenueClicked(String name, String location, String ID, String bid) {
-    Navigator.pop(context, ID);
+    if(widget.frombottombar){
+      PassLocationId(context, ID);
+    }else if(!widget.frombottombar) {
+      Navigator.pop(context, ID);
+    }
   }
   bool isTyping=true;
   @override
@@ -1047,7 +1054,8 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       SizedBox(width: 6),
-                      Container(
+                      if(!widget.frombottombar)
+                        Container(
                         width: 48,
                         height: 48,
                         child: IconButton(

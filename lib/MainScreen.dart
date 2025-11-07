@@ -50,8 +50,8 @@ class _MainScreenState extends State<MainScreen> {
 
   final screens = [
     HomePage(),
-    // GlobalSearchPage(voiceInputEnabled: false,frombottombar: true,),
-    GlobalSearchPage(voiceInputEnabled: false),
+    GlobalSearchPage(voiceInputEnabled: false,frombottombar: true,),
+    // GlobalSearchPage(voiceInputEnabled: false),
     QRScannerScreen(),
     FavouriteRGCIScreen(),
     ProfilePage(),
@@ -228,12 +228,12 @@ class _MainScreenState extends State<MainScreen> {
 
               onPressed: (){
                 // if(UserState.geoFenced){
-                //   Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //       builder: (context) => Navigation(),
-                //     ),
-                //   );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Navigation(),
+                    ),
+                  );
                 // }else{
                 //   HelperClass.showToast("Not at the current venue");
                 // }

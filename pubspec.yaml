@@ -60,7 +60,6 @@ dependencies:
   easy_search_bar: ^2.5.0
   auto_size_text: ^3.0.0
   sensors_plus: ^4.0.2
-  device_information: ^0.0.4
   marquee_widget: ^1.2.0
   google_maps: ^6.3.0
   geodesy: ^0.10.2
@@ -97,7 +96,6 @@ dependencies:
   translator: ^1.0.0
   test: ^1.16.0
   mockito: ^5.1.0
-  flutter_beep: ^1.0.0
   new_version_plus: ^0.0.11
   cached_network_image: ^3.3.1
   loading_animation_widget: ^1.2.1
@@ -153,6 +151,7 @@ flutter:
     - assets/
     - assets/images/
     - assets/profilePageAssets/
+    - assets/preLoad/
     - assets/DoctorProfileAssets/
 
   # To add assets to your application, add an assets section, like this:

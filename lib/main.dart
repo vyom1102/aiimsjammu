@@ -83,6 +83,11 @@ Future<void> main() async {
   await Hive.openBox<PolyLineAPIModel>("PolyLineAPIModelFile");
   Hive.registerAdapter(BuildingAllAPIModelAdapter());
   await Hive.openBox<BuildingAllAPIModel>("BuildingAllAPIModelFile");
+  Hive.registerAdapter(FavouriteDataBaseModelAdapter());
+  await Hive.openBox<FavouriteDataBaseModel>("FavouriteDataBaseModelFile");
+  Hive.registerAdapter(LocalNotificationAPIDatabaseModelAdapter());
+  await Hive.openBox<LocalNotificationAPIDatabaseModel>('LocalNotificationAPIDatabaseModel');
+
   Hive.registerAdapter(BeaconAPIModelAdapter());
   await Hive.openBox<BeaconAPIModel>('BeaconAPIModelFile');
   Hive.registerAdapter(BuildingAPIModelAdapter());

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
-import 'package:device_information/device_information.dart';
+import 'package:device_meta/device_meta.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
@@ -38,8 +38,9 @@ class patchAPI {
 
 
   Future<patchDataModel> fetchPatchData({String? id = null}) async {
-    String manufacturer = kIsWeb?"WEB":await DeviceInformation.deviceManufacturer;
-    String deviceModel = kIsWeb?"WEB":await DeviceInformation.deviceModel;
+    DeviceMeta deviceMeta = await DeviceMeta.init(storageKey: "exampleapp");
+    String manufacturer = kIsWeb?"WEB":deviceMeta.manufacturer!;
+    String deviceModel = kIsWeb?"WEB":deviceMeta.model!;
     print("checking data ${id??buildingAllApi.getStoredString()}");
     print(accessToken);
     print(refreshToken);
