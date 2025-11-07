@@ -56,6 +56,10 @@ double masterEuclideanDistance(String node1, String node2, {String? prevPoint}) 
   List<String> parts1 = node1.split(',');
   List<String> parts2 = node2.split(',');
 
+  if(parts2.length != 6){
+    print("part2 $parts2");
+  }
+
   int floor1 = int.parse(parts1[3]);
   List<double> l1 = [double.parse(parts1[5]), double.parse(parts1[4])];
 
