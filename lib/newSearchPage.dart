@@ -15,6 +15,7 @@ import 'APIMODELS/landmark.dart';
 import 'ELEMENTS/HelperClass.dart';
 import 'Elements/DestinationPageChipsWidget.dart';
 import 'NAVIGATIONTools.dart';
+import 'Repository/RepositoryManager.dart';
 import 'StringStorage.dart';
 import 'UserState.dart';
 import 'config.dart';
@@ -366,7 +367,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
   Set<String> floors = {};
   Future<void> fetchFloors(String building,String name)async{
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
-      await landmarkApi().fetchLandmarkData(id: key).then((value){
+      await RepositoryManager().getLandmarkDataNew(key).then((value){
         value.landmarksMap?.forEach((key, landmark){
           if (landmark.floor != null &&
               landmark.buildingName == building &&
@@ -476,7 +477,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
     }
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
       if(!buildingAllApi.onlyRenderBuildingID.keys.contains(key)){
-        await landmarkApi().fetchLandmarkData(id: key).then((value) async {
+        await RepositoryManager().getLandmarkDataNew(key).then((value) async {
           landmarkData.mergeLandmarks(value.landmarks);
           await loadLandmarkData();
         });

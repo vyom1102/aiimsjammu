@@ -177,6 +177,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+
 class Navigation extends StatefulWidget {
   String directLandID = "";
   String directsourceID = "";
@@ -568,7 +569,7 @@ class _NavigationState extends State<Navigation>
   }
 
   void clearMarkers() {
-    // fingerprinting.clearMarkers();
+    fingerprinting.clearMarkers();
   }
   bool isFromLocalize = true; // Initialize at class level
   Future<void> initializeMarkers() async {
@@ -1533,10 +1534,8 @@ class _NavigationState extends State<Navigation>
           value.position.longitude);
       if (d < distance) {
         distance = d;
-        if(id != null){
-          updateNearbyLandmarkMarkers(id!);
-          id = key;
-        }
+        updateNearbyLandmarkMarkers(id!);
+        id = key;
       }
     });
     if (id != null) {
@@ -1856,7 +1855,7 @@ class _NavigationState extends State<Navigation>
       Map<String, Landmarks>? landmarksMapAll = {};
       buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
         print("getStoredAllBuildingID $key");
-        await landmarkApi().fetchLandmarkData(id: key).then((value) {
+        await RepositoryManager().getLandmarkDataNew(key).then((value) {
           print("key $key $value");
           landmarksMapAll!.addAll(value.landmarksMap!);
         });
@@ -3103,7 +3102,7 @@ class _NavigationState extends State<Navigation>
         createMarkers: createMarkers);
 
     // try{
-      await DataVersionApi().fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
+    //   await DataVersionApi().fetchDataVersionApiData(buildingAllApi.selectedBuildingID);
     // }catch(e){
     //   Navigator.pushReplacement(context, MaterialPageRoute(
     //       builder: (context) => const SomethingWentWrongPage(
@@ -3120,7 +3119,7 @@ class _NavigationState extends State<Navigation>
       itterated.add(id);
       // try {
       // var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(id);
-      var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(id);
+      var globalData = await RepositoryManager().getGlobalAnnotationDataNew(id);
       print("globalData ${globalData.runtimeType}");
 
       GlobalAnnotationController controller = GlobalAnnotationController(
@@ -3196,7 +3195,7 @@ class _NavigationState extends State<Navigation>
             print("Globalannotationcheck${key}");
             // try {
             //   var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(key);
-            var globalData = await GlobalAnnotation().fetchGlobalAnnotationData(key);
+            var globalData = await RepositoryManager().getGlobalAnnotationDataNew(key);
             print("globalData ${globalData.runtimeType}");
             Building.GlobalAnnotation = globalData;
             GlobalAnnotationController controller = GlobalAnnotationController(
@@ -3238,7 +3237,8 @@ class _NavigationState extends State<Navigation>
           }
           try {
             // var waypointData = await waypointapi().fetchwaypoint(key, outdoor: key == buildingAllApi.outdoorID);
-            var waypointData = await waypointapi().fetchwaypoint(key, outdoor: key == buildingAllApi.outdoorID);
+            var waypointData = await RepositoryManager()
+                .getWaypointNew(key, key == buildingAllApi.outdoorID);
             Building.waypoint[key] = waypointData.cast<PathModel>();
           } catch (_) {}
           // print("buildingAllApi.selectedBuildingID ${buildingAllApi.selectedBuildingID}");
@@ -3432,7 +3432,24 @@ class _NavigationState extends State<Navigation>
           LatLng positionPoint = polygonCalculation.midpoint(
               calculatedPoints[0], calculatedPoints[1]);
 
+          // Convert to Turf Points (GeoJSON format: [lng, lat])
+          final features = latLngPoints.map((latLng) {
+            return turf.Feature(
+              geometry: turf.Point(
+                coordinates:
+                turf.Position(latLng.longitude, latLng.latitude),
+              ),
+            );
+          }).toList();
 
+          // Create a FeatureCollection
+          final collection = turf.FeatureCollection(features: features);
+
+          // Calculate centroid
+          final centerFeature = turf.centroid(collection);
+
+          final center = centerFeature.geometry!.coordinates;
+          print("Centroid: lat=${center.lat}, lng=${center.lng}");
           outdoorBlockMarker.add(Marker(
               markerId: MarkerId("Outdoor Block Layer ${currentPolygon.polygonId.toString()}"),
               anchor: markerName.anchor,
@@ -5435,8 +5452,8 @@ class _NavigationState extends State<Navigation>
                   if (polyArray.id != null) {
                     polygonCalculation.landmarkWithPolygonPoints[polyArray.id!] = coordinates;
                     polygonCalculation.landmarkWithLatLng[polyArray.id!] = breadthCenterPoints;
-                    print(
-                        "coordinatespolyArray.name 4.1 ${polyArray.id}--$coordinates---${polygonCalculation.landmarkWithLatLng[polyArray.id!]}");
+                    // print(
+                    //     "coordinatespolyArray.name 4.1 ${polyArray.id}--$coordinates---${polygonCalculation.landmarkWithLatLng[polyArray.id!]}");
                   }
                   coordinates.add(coordinates.first);
                   closedpolygons[value.polyline!.buildingID!]!.add(Polygon(
@@ -6270,11 +6287,11 @@ class _NavigationState extends State<Navigation>
               SingletonFunctionController
                   .building.patchData[bid ?? buildingAllApi.getStoredString()]);
 
-          print("MarkerLandmarkInformation in Room");
+          // print("MarkerLandmarkInformation in Room");
           try {
             _landmarks.add(landmarks[i]);
           } catch (e) {
-            print("MarkerLandmarkInformation error ${e}");
+            // print("MarkerLandmarkInformation error ${e}");
           }
         } else if (landmarks[i].element != null &&
             landmarks[i].element!.subType != null &&
@@ -6457,7 +6474,8 @@ class _NavigationState extends State<Navigation>
                 .url !=
                 null));
 
-    var landmark = snapshot.data!.landmarksMap![SingletonFunctionController.building.selectedLandmarkID];
+    var landmark = snapshot.data!
+        .landmarksMap![SingletonFunctionController.building.selectedLandmarkID];
     var inputFormat = intl.DateFormat("yyyy-MM-ddTHH:mm");
     List<Widget> events = [];
     // print("eventsState.groupedDataByVenue![SingletonFunctionController.building.selectedLandmarkID] ${SingletonFunctionController.building.selectedLandmarkID} ${landmark?.sId} ${eventsState.groupedDataByVenue![landmark?.sId]}");
@@ -12947,7 +12965,7 @@ class _NavigationState extends State<Navigation>
     // Collect all API call futures
     List<Future<void>> apiCalls = [];
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) {
-      apiCalls.add(landmarkApi().fetchLandmarkData(id: key).then((value) {
+      apiCalls.add(RepositoryManager().getLandmarkDataNew(key).then((value) {
         snapshot.mergeLandmarks(value.landmarks);
         print("merged $key");
       }));
@@ -13693,7 +13711,7 @@ class _NavigationState extends State<Navigation>
 
                     if (PathState.Cellpath.isEmpty && cameraPosition.zoom < 19 &&
                         cameraPosition.zoom > 17) {
-                      print("cameraPosition.zoom${cameraPosition.zoom}");
+                      // print("cameraPosition.zoom${cameraPosition.zoom}");
                       allGlobalBlocks.addAll(globalBlock);
                       blockMarker.forEach((val) {
                         val.visible = true;
@@ -13706,37 +13724,37 @@ class _NavigationState extends State<Navigation>
                     }
 
                     // print("user.isnavigating ${user.isnavigating}");
-                    // if (cameraPosition.zoom > 19) {
-                    //   clustringOFF = false;
-                    //   landmarkMarkers.forEach((value){
-                    //     if(!value.markerId.value.toLowerCase().contains("main entry")) {
-                    //       value.visible = false;
-                    //     }
-                    //   });
-                    // } else if( user.isnavigating){
-                    //   // clustringOFF = true;
-                    //   print("cameraPosition.zoom < 19 ${cameraPosition.zoom}");
-                    //   if(cameraPosition.zoom > 19){
-                    //     landmarkMarkers.forEach((value){
-                    //       if(!value.markerId.value.toLowerCase().contains("main entry")){
-                    //         value.visible = false;
-                    //       }else{
-                    //         value.visible = true;
-                    //       }
-                    //     });
-                    //   }else{
-                    //     landmarkMarkers.forEach((value){
-                    //       value.visible = false;
-                    //     });
-                    //   }
-                    //
-                    // } else {
-                    //   print("Clustring will be off");
-                    //   // clustringOFF = true;
-                    //   // landmarkMarkers.forEach((value){
-                    //   //   value.visible = false;
-                    //   // });
-                    // }
+                    if (cameraPosition.zoom > 19 && !user.isnavigating) {
+                      clustringOFF = false;
+                      landmarkMarkers.forEach((value){
+                        if(!value.markerId.value.toLowerCase().contains("main entry")) {
+                          value.visible = false;
+                        }
+                      });
+                    } else if( user.isnavigating){
+                      // clustringOFF = true;
+                      // print("cameraPosition.zoom < 19 ${cameraPosition.zoom}");
+                      if(cameraPosition.zoom > 19){
+                        landmarkMarkers.forEach((value){
+                          if(!value.markerId.value.toLowerCase().contains("main entry")){
+                            value.visible = false;
+                          }else{
+                            value.visible = true;
+                          }
+                        });
+                      }else{
+                        landmarkMarkers.forEach((value){
+                          value.visible = false;
+                        });
+                      }
+
+                    } else {
+                      // print("Clustring will be off");
+                      // clustringOFF = true;
+                      // landmarkMarkers.forEach((value){
+                      //   value.visible = false;
+                      // });
+                    }
 
                     if ((cameraPosition.zoom - _lastZoom).abs() > 0.2) {
                       _lastZoom = cameraPosition.zoom;

@@ -219,7 +219,8 @@ class MapClustering {
           }else if(landmarks[i].element!.type == "Rooms" && landmarks[i].element!.subType == "main entry"){
             // final result = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(landmarks[i].name!, 'assets/MapEntry.png', imageSize: const Size(100, 100),);
             print("main entry ${landmarks[i].name}");
-            bitMapMarkers[landmarks[i].properties!.polyId!] = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(landmarks[i].name!, 'assets/MapEntry.png', imageSize: const Size(75, 75),fontSizee: 32);;
+            // bitMapMarkers[landmarks[i].properties!.polyId!] = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(landmarks[i].name!, 'assets/MapEntry.png', imageSize: const Size(75, 75),fontSizee: 32);;
+            bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.entryMarker;
           }
           else if(landmarks[i].name != null && landmarks[i].name!.toLowerCase().contains("gate")){
             bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.blueDotMarker;
@@ -234,12 +235,11 @@ class MapClustering {
             try {
               if(landmarks[i].wasPolyIdNull == false){
                 String? code;
-                if(landmarks[i].name!.contains(" - ")){
-                  code = landmarks[i].name!.split(" - ")[0];
+                if(landmarks[i].name!.contains(" - ") || landmarks[i].name!.contains("-")){
+                  code = landmarks[i].name!.split("-")[0];
                 }else{
-                  code = landmarks[i].name!.split(" ")[0];
+                  code = landmarks[i].name??"";
                 }
-
                 // bitMapMarkers[landmarks[i].properties!.polyId!] = MarkerIconWithAnchor(icon, Offset(0,0));
                 bitMapMarkers[landmarks[i].properties!.polyId!] = await HelperClass().bitmapDescriptorFromCenteredTextFormatEDName(code);
               }else{
@@ -545,7 +545,7 @@ class MapClustering {
           }
         } else {
             List<LatLng>? calculatedPoints = polygonCalculations.landmarkWithLatLng[landmark.properties!.polyId];
-            print("print${landmark.name} ${landmark.properties!.polyId} ${calculatedPoints?.length}");
+            // print("print${landmark.name} ${landmark.properties!.polyId} ${calculatedPoints?.length}");
             if(calculatedPoints != null){
               int leftMost = LeftMost().leftMostPoint(PointForCenter(calculatedPoints![0].latitude, calculatedPoints[0].longitude, "name"), PointForCenter(calculatedPoints[1].latitude, calculatedPoints[1].longitude, "name"), zoomLevel);
               double rotation;

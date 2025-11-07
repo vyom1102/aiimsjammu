@@ -1,0 +1,15 @@
+{
+  "status": true,
+  "versionData": {
+    "_id": "67986e4114ef508e9429a5af",
+    "building_ID": "67986e4114ef508e9429a5ad",
+    "buildingDataVersion": 4,
+    "patchDataVersion": 3,
+    "polylineDataVersion": 5,
+    "landmarksDataVersion": 6,
+    "createdAt": "2025-01-28T05:42:25.861Z",
+    "updatedAt": "2025-08-22T13:18:58.323Z",
+    "__v": 0,
+    "globalAnnotationVersion": 27
+  }
+}

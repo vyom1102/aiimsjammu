@@ -139,7 +139,7 @@ class _HomepageSearchState extends State<HomepageSearch> {
       return;
     }
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
-      await landmarkApi().fetchLandmarkData(id: key).then((value) async {
+      await RepositoryManager().getLandmarkDataNew(key).then((value) async {
         landmarkData.mergeLandmarks(value.landmarks);
         print("buildingAllApi.getStoredAllBuildingID()${value.landmarks}");
         await loadLandmarkData();

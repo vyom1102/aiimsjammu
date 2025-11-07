@@ -1,0 +1,145 @@
+{
+  "patchData": {
+    "_id": "6798ce4596af63c3e8296158",
+    "building_ID": "6798ce3596af63c3e8294dbc",
+    "breadth": "91",
+    "fileName": "004ef3cf-9294-4171-adc0-1554759d5400_AIIMSJAMMU-NightShelter-ground_NS GF_page-0001.jpg",
+    "length": "203",
+    "corridorWidth": null,
+    "realtimeLocalisationThreshold": null,
+    "coordinates": [
+      {
+        "localRef": {
+          "lat": "0",
+          "lng": "0"
+        },
+        "globalRef": {
+          "lat": "32.56526685961424",
+          "lng": "75.03351621603838"
+        }
+      },
+      {
+        "localRef": {
+          "lat": "91",
+          "lng": "0"
+        },
+        "globalRef": {
+          "lat": "32.56541290156407",
+          "lng": "75.03326871499269"
+        }
+      },
+      {
+        "localRef": {
+          "lat": "91",
+          "lng": "203"
+        },
+        "globalRef": {
+          "lat": "32.56495310346955",
+          "lng": "75.03288673577674"
+        }
+      },
+      {
+        "localRef": {
+          "lat": "0",
+          "lng": "203"
+        },
+        "globalRef": {
+          "lat": "32.564807061062815",
+          "lng": "75.03313423727332"
+        }
+      }
+    ],
+    "parkingCoords": [],
+    "pickupCoords": [],
+    "walkingCoords": [],
+    "createdAt": "2025-01-28T12:32:05.812Z",
+    "updatedAt": "2025-01-31T10:51:33.796Z",
+    "__v": 0,
+    "geoJsonMap": null,
+    "buildingAngle": "35.00",
+    "buildingName": "Night Shelter",
+    "pdrThreshold": null,
+    "arPatch": [
+      {
+        "properties": {
+          "arValue": "1",
+          "latitude": "32.56525116676916",
+          "longitude": "75.03350317926855"
+        },
+        "_id": "67cacbfdd58d03a7d9b8f1af",
+        "coordinateX": 5,
+        "coordinateY": 0
+      },
+      {
+        "properties": {
+          "arValue": "2",
+          "latitude": "32.56517490619332",
+          "longitude": "75.03343982559261"
+        },
+        "_id": "67cacbfed58d03a7d9b8f89d",
+        "coordinateX": 39,
+        "coordinateY": 0
+      },
+      {
+        "properties": {
+          "arValue": "3",
+          "latitude": "32.56522044763277",
+          "longitude": "75.03336264585327"
+        },
+        "_id": "67cacbfed58d03a7d9b8f8a1",
+        "coordinateX": 39,
+        "coordinateY": 29
+      },
+      {
+        "properties": {
+          "arValue": "4",
+          "latitude": "32.56494007786866",
+          "longitude": "75.03312972792699"
+        },
+        "_id": "67cacbfed58d03a7d9b8f8a5",
+        "coordinateX": 164,
+        "coordinateY": 29
+      },
+      {
+        "properties": {
+          "arValue": "5",
+          "latitude": "32.564894536429215",
+          "longitude": "75.03320690766631"
+        },
+        "_id": "67cacbfed58d03a7d9b8f89f",
+        "coordinateX": 164,
+        "coordinateY": 0
+      },
+      {
+        "properties": {
+          "arValue": "6",
+          "latitude": "32.564820518811494",
+          "longitude": "75.03314541733378"
+        },
+        "_id": "67cacbfed58d03a7d9b8f8a8",
+        "coordinateX": 197,
+        "coordinateY": 0
+      },
+      {
+        "properties": {
+          "arValue": "7",
+          "latitude": "32.564961854313225",
+          "longitude": "75.03290589400481"
+        },
+        "_id": "67cacbfdd58d03a7d9b8f186",
+        "coordinateX": 197,
+        "coordinateY": 90
+      },
+      {
+        "properties": {
+          "arValue": "8",
+          "latitude": "32.56539250227089",
+          "longitude": "75.03326365593959"
+        },
+        "_id": "67cacbfed58d03a7d9b8f8a3",
+        "coordinateX": 5,
+        "coordinateY": 90
+      }
+    ]
+  }
+}

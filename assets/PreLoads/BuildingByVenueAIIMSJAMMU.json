@@ -1,0 +1,545 @@
+{
+  "buildings": [
+    {
+      "globalAnnotation": false,
+      "_id": "66794105b80a6778c53c4856",
+      "initialBuildingName": "TOWERSIX",
+      "initialVenueName": "AIIMSJAMMU",
+      "buildingName": "OPD",
+      "venueName": "AIIMSJAMMU",
+      "venueCategory": null,
+      "buildingCategory": null,
+      "coordinates": [
+        32.56361449037205,
+        75.03635674681276
+      ],
+      "pickupCoords": [],
+      "address": "AIIMS Jammu, Bari Kamlia, Samba, Jammu And Kashmir",
+      "liveStatus": true,
+      "geofencing": false,
+      "description": null,
+      "features": [],
+      "phone": null,
+      "website": null,
+      "venuePhoto": "imG2yKqO7Nr5-Sun Jul 14 2024 08:50:39 GMT+0000 (Coordinated Universal Time)-AIIMS Jammu.avif",
+      "buildingPhoto": "mPaeKVdKHQwO-Sun Jul 14 2024 08:50:11 GMT+0000 (Coordinated Universal Time)-AIIMS Jammu.avif",
+      "workingDays": [],
+      "createdAt": "2024-06-24T09:48:53.007Z",
+      "updatedAt": "2025-03-17T10:47:37.700Z",
+      "__v": 0,
+      "contributorIds": [],
+      "locked": false,
+      "ownerId": null,
+      "adminIds": [],
+      "appId": null,
+      "appStoreId": null,
+      "deeplinkUrl": null,
+      "boundary": [
+        [
+          32.563975452826746,
+          75.03644807481828
+        ],
+        [
+          32.56385155429297,
+          75.03602110550935
+        ],
+        [
+          32.56325352779979,
+          75.03626541868402
+        ],
+        [
+          32.56337742677029,
+          75.03669238824364
+        ]
+      ]
+    },
+    {
+      "globalAnnotation": false,
+      "_id": "6798c6df96af63c3e82659ec",
+      "initialBuildingName": "TowerTwo",
+      "initialVenueName": "AIIMSJAMMU",
+      "buildingName": "Emergency",
+      "venueName": "AIIMSJAMMU",
+      "venueCategory": null,
+      "buildingCategory": null,
+      "coordinates": [
+        32.56407494260096,
+        75.03513729442497
+      ],
+      "pickupCoords": [],
+      "address": "AIIMS Jammu, Bari Kamlia, Samba, Jammu And Kashmir",
+      "liveStatus": true,
+      "geofencing": false,
+      "description": null,
+      "features": [],
+      "phone": null,
+      "website": null,
+      "venuePhoto": null,
+      "buildingPhoto": null,
+      "locked": false,
+      "adminIds": [],
+      "workingDays": [],
+      "createdAt": "2025-01-28T12:00:31.200Z",
+      "updatedAt": "2025-03-17T10:50:16.472Z",
+      "__v": 0,
+      "contributorIds": [],
+      "appId": null,
+      "appStoreId": null,
+      "deeplinkUrl": null,
+      "boundary": [
+        [
+          32.564162116989166,
+          75.03472801046757
+        ],
+        [
+          32.563786469596806,
+          75.03489020328936
+        ],
+        [
+          32.56398776741489,
+          75.03554657783081
+        ],
+        [
+          32.564363416039676,
+          75.03538438566909
+        ]
+      ]
+    },
+    {
+      "globalAnnotation": false,
+      "_id": "6798c81c96af63c3e826add3",
+      "initialBuildingName": "TowerThree",
+      "initialVenueName": "AIIMSJAMMU",
+      "buildingName": "Ward 1",
+      "venueName": "AIIMSJAMMU",
+      "venueCategory": null,
+      "buildingCategory": null,
+      "coordinates": [
+        32.56457352216475,
+        75.035511009239
+      ],
+      "pickupCoords": [],
+      "address": "AIIMS Jammu, Bari Kamlia, Samba, Jammu And Kashmir",
+      "liveStatus": true,
+      "geofencing": false,
+      "description": null,
+      "features": [],
+      "phone": null,
+      "website": null,
+      "venuePhoto": null,
+      "buildingPhoto": null,
+      "locked": false,
+      "adminIds": [],
+      "workingDays": [],
+      "createdAt": "2025-01-28T12:05:48.492Z",
+      "updatedAt": "2025-03-17T10:50:44.316Z",
+      "__v": 0,
+      "contributorIds": [],
+      "appId": null,
+      "appStoreId": null,
+      "deeplinkUrl": null,
+      "boundary": [
+        [
+          32.56492232659071,
+          75.03561275596087
+        ],
+        [
+          32.56478561141012,
+          75.03516704321123
+        ],
+        [
+          32.56422471761181,
+          75.03540926238588
+        ],
+        [
+          32.5643614332472,
+          75.0358549754095
+        ]
+      ]
+    },
+    {
+      "globalAnnotation": false,
+      "_id": "6798c8fa96af63c3e8277db2",
+      "initialBuildingName": "TowerOneAndFour",
+      "initialVenueName": "AIIMSJAMMU",
+      "buildingName": "Diagnostic",
+      "venueName": "AIIMSJAMMU",
+      "venueCategory": null,
+      "buildingCategory": null,
+      "coordinates": [
+        32.56387091813491,
+        75.03579721455554
+      ],
+      "pickupCoords": [],
+      "address": "AIIMS Jammu, Bari Kamlia, Samba, Jammu And Kashmir",
+      "liveStatus": true,
+      "geofencing": false,
+      "description": null,
+      "features": [],
+      "phone": null,
+      "website": null,
+      "venuePhoto": null,
+      "buildingPhoto": null,
+      "locked": false,
+      "adminIds": [],
+      "workingDays": [],
+      "createdAt": "2025-01-28T12:09:30.006Z",
+      "updatedAt": "2025-03-10T13:37:56.923Z",
+      "__v": 0,
+      "contributorIds": [],
+      "appId": null,
+      "appStoreId": null,
+      "deeplinkUrl": null,
+      "boundary": [
+        [
+          32.56420932252713,
+          75.03566958840383
+        ],
+        [
+          32.56370807189169,
+          75.03539224285146
+        ],
+        [
+          32.5635125098914,
+          75.03588983584848
+        ],
+        [
+          32.5640137618195,
+          75.03616718320393
+        ]
+      ]
+    },
+    {
+      "globalAnnotation": false,
+      "_id": "6798c99e96af63c3e828203d",
+      "initialBuildingName": "TowerFive",
+      "initialVenueName": "AIIMSJAMMU",
+      "buildingName": "Ward 2",
+      "venueName": "AIIMSJAMMU",
+      "venueCategory": null,
+      "buildingCategory": null,
+      "coordinates": [
+        32.56413312709048,
+        75.03661931346608
+      ],
+      "pickupCoords": [],
+      "address": "AIIMS Jammu, Bari Kamlia, Samba, Jammu And Kashmir",
+      "liveStatus": true,
+      "geofencing": false,
+      "description": null,
+      "features": [],
+      "phone": null,
+      "website": null,
+      "venuePhoto": null,
+      "buildingPhoto": null,
+      "locked": false,
+      "adminIds": [],
+      "workingDays": [],
+      "createdAt": "2025-01-28T12:12:14.705Z",
+      "updatedAt": "2025-03-17T10:53:59.459Z",
+      "__v": 0,
+      "contributorIds": [],
+      "appId": null,
+      "appStoreId": null,
+      "deeplinkUrl": null,
+      "boundary": [
+        [
+          32.56422496913995,
+          75.03620728829708
+        ],
+        [
+          32.5638469941744,
+          75.03636168058688
+        ],
+        [
+          32.56404128422766,
+          75.03703133803685
+        ],
+        [
+          32.56441926045059,
+          75.03687694647681
+        ]
+      ]
+    },
+    {
+      "_id": "6798ca0396af63c3e828c472",
+      "initialBuildingName": "AcademicsBlock",
+      "initialVenueName": "AIIMSJAMMU",
+      "buildingName": "Academic",
+      "venueName": "AIIMSJAMMU",
+      "venueCategory": "Hospital",
+      "buildingCategory": null,
+      "coordinates": [
+        32.56292907666193,
+        75.03840723939935
+      ],
+      "pickupCoords": [],
+      "address": "AIIMS Jammu, Bari Kamlia, Samba, Jammu And Kashmir",
+      "liveStatus": true,
+      "geofencing": false,
+      "description": null,
+      "features": [],
+      "phone": null,
+      "website": null,
+      "venuePhoto": null,
+      "buildingPhoto": null,
+      "locked": false,
+      "adminIds": [],
+      "workingDays": [],
+      "createdAt": "2025-01-28T12:13:55.012Z",
+      "updatedAt": "2025-08-14T17:34:05.223Z",
+      "__v": 0,
+      "contributorIds": [],
+      "appId": null,
+      "appStoreId": null,
+      "deeplinkUrl": null,
+      "globalAnnotation": false,
+      "boundary": [
+        [
+          32.563514001639035,
+          75.03832572266037
+        ],
+        [
+          32.5631909699557,
+          75.03775742502683
+        ],
+        [
+          32.5624940834946,
+          75.03831510051577
+        ],
+        [
+          32.562817116691164,
+          75.03888339960838
+        ]
+      ]
+    },
+    {
+      "globalAnnotation": false,
+      "_id": "6798ce3596af63c3e8294dbc",
+      "initialBuildingName": "NightShelter",
+      "initialVenueName": "AIIMSJAMMU",
+      "buildingName": "Night Shelter",
+      "venueName": "AIIMSJAMMU",
+      "venueCategory": null,
+      "buildingCategory": null,
+      "coordinates": [
+        32.565109981338004,
+        75.03320147595436
+      ],
+      "pickupCoords": [],
+      "address": "AIIMS Jammu, Bari Kamlia, Samba, Jammu And Kashmir",
+      "liveStatus": true,
+      "geofencing": false,
+      "description": null,
+      "features": [],
+      "phone": null,
+      "website": null,
+      "venuePhoto": null,
+      "buildingPhoto": null,
+      "locked": false,
+      "adminIds": [],
+      "workingDays": [],
+      "createdAt": "2025-01-28T12:31:49.221Z",
+      "updatedAt": "2025-03-17T10:55:24.894Z",
+      "__v": 0,
+      "contributorIds": [],
+      "appId": null,
+      "appStoreId": null,
+      "deeplinkUrl": null,
+      "boundary": [
+        [
+          32.56526685961424,
+          75.03351621603838
+        ],
+        [
+          32.56541290156407,
+          75.03326871499269
+        ],
+        [
+          32.56495310346955,
+          75.03288673577674
+        ],
+        [
+          32.564807061062815,
+          75.03313423727332
+        ]
+      ]
+    },
+    {
+      "globalAnnotation": false,
+      "_id": "679ca3fde7e7001d98497002",
+      "initialBuildingName": "AyushBlock",
+      "initialVenueName": "AIIMSJAMMU",
+      "buildingName": "Ayush",
+      "venueName": "AIIMSJAMMU",
+      "venueCategory": null,
+      "buildingCategory": null,
+      "coordinates": [
+        32.56599416559548,
+        75.03392001626828
+      ],
+      "pickupCoords": [],
+      "address": "AIIMS Jammu, Bari Kamlia, Samba, Jammu And Kashmir",
+      "liveStatus": true,
+      "geofencing": false,
+      "description": null,
+      "features": [],
+      "phone": null,
+      "website": null,
+      "venuePhoto": null,
+      "buildingPhoto": null,
+      "locked": false,
+      "adminIds": [],
+      "workingDays": [],
+      "createdAt": "2025-01-31T10:20:45.286Z",
+      "updatedAt": "2025-03-17T10:55:48.554Z",
+      "__v": 0,
+      "contributorIds": [],
+      "appId": null,
+      "appStoreId": null,
+      "deeplinkUrl": null,
+      "boundary": [
+        [
+          32.565722909558964,
+          75.03399076093649
+        ],
+        [
+          32.56611419297185,
+          75.03421719707649
+        ],
+        [
+          32.56626542188522,
+          75.0338492715473
+        ],
+        [
+          32.565874137719916,
+          75.03362283558363
+        ]
+      ]
+    },
+    {
+      "globalAnnotation": false,
+      "_id": "67e190f9494c674815c10628",
+      "initialBuildingName": "Auditorium",
+      "initialVenueName": "AIIMSJAMMU",
+      "buildingName": "Auditorium",
+      "venueName": "AIIMSJAMMU",
+      "venueCategory": null,
+      "buildingCategory": null,
+      "coordinates": [
+        32.56383615415665,
+        75.039034761183
+      ],
+      "pickupCoords": [],
+      "address": "AIIMS Jammu, Bari Kamlia, Samba, Jammu And Kashmir",
+      "liveStatus": true,
+      "geofencing": false,
+      "description": null,
+      "features": [],
+      "phone": null,
+      "website": null,
+      "venuePhoto": null,
+      "buildingPhoto": null,
+      "locked": false,
+      "deeplinkUrl": null,
+      "appId": null,
+      "appStoreId": null,
+      "adminIds": [],
+      "workingDays": [],
+      "createdAt": "2025-03-24T17:06:01.931Z",
+      "updatedAt": "2025-03-25T18:20:49.783Z",
+      "__v": 0,
+      "boundary": [
+        [
+          32.56418121754525,
+          75.03888241489608
+        ],
+        [
+          32.5637372235731,
+          75.03861397391836
+        ],
+        [
+          32.563491090146734,
+          75.03918710610901
+        ],
+        [
+          32.56393508546035,
+          75.03945554894733
+        ]
+      ]
+    }
+  ],
+  "campus": {
+    "_id": "67986e4114ef508e9429a5ad",
+    "initialBuildingName": "AIIMSJammuCampus",
+    "initialVenueName": "AIIMSJAMMU",
+    "buildingName": "AIIMS Jammu Campus",
+    "venueName": "AIIMSJAMMU Campus",
+    "venueCategory": null,
+    "buildingCategory": null,
+    "coordinates": [
+      32.5647593337469,
+      75.036297335925
+    ],
+    "pickupCoords": [],
+    "address": "AIIMS Jammu, Bari Kamlia, Samba, Jammu And Kashmir",
+    "liveStatus": true,
+    "geofencing": false,
+    "description": null,
+    "features": [],
+    "phone": null,
+    "website": null,
+    "venuePhoto": null,
+    "buildingPhoto": null,
+    "locked": false,
+    "adminIds": [],
+    "workingDays": [],
+    "createdAt": "2025-01-28T05:42:25.857Z",
+    "updatedAt": "2025-08-22T13:18:58.316Z",
+    "__v": 0,
+    "contributorIds": [],
+    "appId": "com.iwayplus.aiimsjammu",
+    "appStoreId": "6677034083",
+    "deeplinkUrl": "aiimsj.com",
+    "globalAnnotation": true,
+    "boundary": [
+      [
+        32.56874732264764,
+        75.03392690710848
+      ],
+      [
+        32.5637278749947,
+        75.03114838510714
+      ],
+      [
+        32.5607712564146,
+        75.03866755787317
+      ],
+      [
+        32.56579089969884,
+        75.0414463527419
+      ]
+    ],
+    "totalFloors": [
+      -1,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "buildingNames": [
+      "OPD",
+      "Emergency",
+      "Ward 1",
+      "Diagnostic",
+      "Ward 2",
+      "Academic",
+      "Night Shelter",
+      "Ayush",
+      "Auditorium"
+    ]
+  }
+}

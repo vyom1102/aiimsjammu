@@ -1,0 +1,140 @@
+{
+  "buildingName": "Ward 2",
+  "venueName": "AIIMSJAMMU",
+  "mappingElements": [
+    {
+      "properties": {
+        "centroid": [],
+        "visible": true,
+        "lineCategory": "waypoint",
+        "level": 0,
+        "name": "new",
+        "fillColor": "#3ae97d",
+        "strokeColor": "#3ae97d",
+        "direction": "Bidirectional",
+        "pathNature": "open",
+        "pathType": "pedestrian",
+        "accessibility": "no tactile",
+        "gpsAvailibility": "available"
+      },
+      "_id": "67cfd52585d8335595e0fd8e",
+      "id": "Polygon-y2ehfr8",
+      "building_ID": "6798c99e96af63c3e828203d",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              75.0367259058105,
+              32.56424153667875
+            ],
+            [
+              75.03678271999772,
+              32.56424153667875
+            ],
+            [
+              75.0367259058105,
+              32.56418472249153
+            ],
+            [
+              75.0367259058105,
+              32.56424153667875
+            ]
+          ]
+        ],
+        "type": "Polygon",
+        "coordinnatesLocal": [
+          [
+            [
+              153,
+              46
+            ],
+            [
+              169,
+              52
+            ],
+            [
+              146,
+              66
+            ],
+            [
+              153,
+              46
+            ]
+          ]
+        ]
+      },
+      "associatedPolygons": [],
+      "associatedPoints": [],
+      "type": "Feature",
+      "createdBy": "66a88ee9257426b3e75c4c70",
+      "__v": 0
+    },
+    {
+      "properties": {
+        "centroid": [],
+        "visible": true,
+        "lineCategory": "waypoint",
+        "level": 0,
+        "name": "wqq",
+        "fillColor": "#3ae97d",
+        "strokeColor": "#3ae97d",
+        "direction": "Bidirectional",
+        "pathNature": "open",
+        "pathType": "pedestrian",
+        "accessibility": "no tactile",
+        "gpsAvailibility": "available"
+      },
+      "_id": "67cfd55885d8335595e1d499",
+      "id": "Polygon-svcd2k2",
+      "building_ID": "6798c99e96af63c3e828203d",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              75.0368259058105,
+              32.564341536678754
+            ],
+            [
+              75.03688271999772,
+              32.564341536678754
+            ],
+            [
+              75.0368259058105,
+              32.564284722491536
+            ],
+            [
+              75.0368259058105,
+              32.564341536678754
+            ]
+          ]
+        ],
+        "type": "Polygon",
+        "coordinnatesLocal": [
+          [
+            [
+              194,
+              22
+            ],
+            [
+              210,
+              27
+            ],
+            [
+              187,
+              41
+            ],
+            [
+              194,
+              22
+            ]
+          ]
+        ]
+      },
+      "associatedPolygons": [],
+      "associatedPoints": [],
+      "type": "Feature",
+      "createdBy": "66a88ee9257426b3e75c4c70",
+      "__v": 0
+    }
+  ]
+}

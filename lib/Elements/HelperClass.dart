@@ -1135,8 +1135,6 @@ class HelperClass{
     );
   }
 
-
-
   Future<void> saveJsonToAndroidDownloads(String fileName, String jsonString) async {
     if(!kIsWeb){
       Directory? downloadsDir;

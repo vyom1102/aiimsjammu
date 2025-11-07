@@ -24,6 +24,7 @@ import '../../API/RefreshTokenAPI.dart';
 import '../../APIMODELS/landmark.dart';
 import '../../Elements/SearchpageCategoryResult.dart';
 import '../../Elements/SearchpageResults.dart';
+import '../../Repository/RepositoryManager.dart';
 import '../../StringStorage.dart';
 import '../../Userbox.dart';
 import '../../config.dart';
@@ -284,7 +285,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
       return;
     }
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
-      await landmarkApi().fetchLandmarkData(id: key).then((value) async {
+      await RepositoryManager().getLandmarkDataNew(key).then((value) async {
         landmarkData.mergeLandmarks(value.landmarks);
         await loadLandmarkData();
       });

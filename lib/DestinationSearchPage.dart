@@ -37,6 +37,7 @@ import 'Elements/SearchpageResults.dart';
 import 'package:iwaymaps/buildingState.dart';
 
 import 'FloorSelectionPage.dart';
+import 'Repository/RepositoryManager.dart';
 import 'navigationTools.dart';
 
 
@@ -344,7 +345,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   Future<void> fetchlist() async {
     print("fetchlist");
     buildingAllApi.getStoredAllBuildingID().forEach((key, value) async {
-      await landmarkApi().fetchLandmarkData(id: key).then((value) {
+      await RepositoryManager().getLandmarkDataNew(key).then((value) {
         landmarkData.mergeLandmarks(value.landmarks);
         optionListItemBuildingNameNew.add(value.landmarks!.first.buildingName!);
         _iconsBuilding.add(Icons.home_work_outlined);

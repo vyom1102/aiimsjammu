@@ -150,6 +150,7 @@ class _HomePageState extends State<HomePage> {
     getUserDataFromHive();
     fetchAndStoreBuildingIds();
     getDriverDetail();
+    mapDataVersionCycle();
     NotificationSocket.receiveMessage();
     // checkForUpdate();
     _pageController = PageController(initialPage: _currentPage);
@@ -171,13 +172,23 @@ class _HomePageState extends State<HomePage> {
 
   }
 
+  Future<void> mapDataVersionCycle() async {
+    print("mapDataVersionCycle");
+    VenueManager().runDataVersionCycle();
+  }
   // Future<void> loadData() async {
   //   await RepositoryManager().loadBuildings().then((value) async {
   //     var buildings = VenueManager().buildings?.buildings;
   //     if(buildings != null) {
   //       for (var building in buildings) {
-  //         await RepositoryManager().runAPICallDataVersion(building.id);
-  //         await RepositoryManager().
+  //         // await RepositoryManager().runAPICallDataVersion(building.id,generateJSON: true);
+  //         await RepositoryManager().runAPICallBeaconData(building.id,generateJSON: true);
+  //         await RepositoryManager().runAPICallLandmarkData(building.id,generateJSON: true);
+  //         await RepositoryManager().runAPICallWaypointData(building.id,generateJSON: true);
+  //         await RepositoryManager().runAPICallGlobalAnnotationData(building.id,generateJSON: true);
+  //         await RepositoryManager().runAPICallPatchData(building.id,generateJSON: true);
+  //         await RepositoryManager().runAPICallPolylineData(building.id,generateJSON: true);
+  //         // await RepositoryManager().runAPIcallBuildingByVenue(building.id,generateJSON: true);
   //       }
   //     }
   //
@@ -689,7 +700,7 @@ class _HomePageState extends State<HomePage> {
     // Helper function to fetch and process data for a building ID
     Future<void> fetchDataForBuilding(String id) async {
       try {
-        var patchData = await patchAPI().fetchPatchData(id: id);
+        var patchData = await RepositoryManager().getLandmarkDataNew(id);
         var polylineData = await PolyLineApi().fetchPolyData(id: id);
         var landmarkData = await landmarkApi().fetchLandmarkData(id: id);
         var waypointData = await waypointapi().fetchwaypoint(id);
@@ -1617,6 +1628,7 @@ class _HomePageState extends State<HomePage> {
                     icon: Icon(Icons.notifications_none_outlined),
                     color: Color(0xff18181b),
                     onPressed: () {
+                      // loadData();
                       Navigator.push(
                         context,
                         MaterialPageRoute(

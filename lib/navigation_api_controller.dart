@@ -18,6 +18,7 @@ import 'Repository/RepositoryManager.dart';
 import 'UserState.dart';
 import 'buildingState.dart';
 
+
 class NavigationAPIController {
   Function createPatch = (patchDataModel value) {};
   Function createotherPatch = (String key, patchDataModel value) {};
@@ -40,7 +41,7 @@ class NavigationAPIController {
   Future<void> patchAPIController(String id, bool selected, {patchDataModel? patchData}) async {
     print("patch for $id");
     // try {
-    var patchData = await patchAPI().fetchPatchData(id: id);
+    patchData ??= await RepositoryManager().getPatchDataNew(id) as patchDataModel;
 
     Building.buildingData ??= Map();
     Building.buildingData![patchData.patchData!.buildingID!] =
@@ -81,7 +82,7 @@ class NavigationAPIController {
   }
 
   Future<land?> landmarkAPIController(String id, bool selected, {land? landmarkData, List<ExhibitorModel>? exhibitors, Categorymodel? categories, SessionModel? sessions, SubEventsModel? subEvents}) async {
-    landmarkData ??= await landmarkApi().fetchLandmarkData(id: id);
+    landmarkData ??= await RepositoryManager().getLandmarkDataNew(id) as land;
     if(exhibitors != null && exhibitors.isNotEmpty){
       landmarkData.populateRenderDetailsUsingExhibitor(exhibitors);
     }
@@ -166,15 +167,15 @@ class NavigationAPIController {
 
   Future<void> ARPatch(String id, bool selected, {Map<int, geo.LatLng>? coordinates}) async {
     if(coordinates == null){
-      var landmarkData = await landmarkApi().fetchLandmarkData(id: id);
+      var landmarkData = await RepositoryManager().getLandmarkDataNew(id) as land;
       coordinates = <int, geo.LatLng>{};
       for (var landmark in landmarkData.landmarks!) {
         if (landmark.element!.subType == "AR" &&
-            landmark.properties!.arName == "P${int.parse(landmark.properties!.arValue!)}") {
+            landmark.properties!.arName ==
+                "P${int.parse(landmark.properties!.arValue!)}") {
           coordinates[int.parse(landmark.properties!.arValue!)] = geo.LatLng(
               double.parse(landmark.properties!.latitude!),
-              double.parse(landmark.properties!.longitude!)
-          );
+              double.parse(landmark.properties!.longitude!));
         }
       }
     }
@@ -192,7 +193,7 @@ class NavigationAPIController {
     }
   }
   Future<polylinedata> polylineAPIController(String id, bool selected, {polylinedata? polylineData}) async {
-    polylineData ??= await PolyLineApi().fetchPolyData(id: id);
+    polylineData ??= await RepositoryManager().getPolylineDataNew(id) as polylinedata;
     SingletonFunctionController.building
         .polylinedatamap[id] = polylineData;
     SingletonFunctionController
@@ -207,11 +208,11 @@ class NavigationAPIController {
     SingletonFunctionController.building.floor[id] = 0;
     return polylineData;
   }
- static polylinedata? data;
- static Future<List<Nodes>> extractWaypoints() async {
+  static polylinedata? data;
+  static Future<List<Nodes>> extractWaypoints() async {
     print("called");
     // data ??= await PolyLineApi().fetchPolyData(id:buildingAllApi.selectedBuildingID);
-    data ??= await PolyLineApi().fetchPolyData(id: buildingAllApi.selectedBuildingID);
+    data ??= await RepositoryManager().getPolylineDataNew(buildingAllApi.selectedBuildingID);
     List<Nodes> waypoints = [];
     for (var floors in data!.polyline!.floors!) {
       for (var polys in floors.polyArray!) {
