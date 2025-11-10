@@ -700,10 +700,10 @@ class _HomePageState extends State<HomePage> {
     // Helper function to fetch and process data for a building ID
     Future<void> fetchDataForBuilding(String id) async {
       try {
-        var patchData = await RepositoryManager().getLandmarkDataNew(id);
-        var polylineData = await PolyLineApi().fetchPolyData(id: id);
-        var landmarkData = await landmarkApi().fetchLandmarkData(id: id);
-        var waypointData = await waypointapi().fetchwaypoint(id);
+        var patchData = await RepositoryManager().getPatchDataNew(id);
+        var polylineData = await RepositoryManager().getPolylineDataNew(id);
+        var landmarkData = await RepositoryManager().getLandmarkDataNew(id);
+        var waypointData = await RepositoryManager().getWaypointData(id);
 
         polylines.add(polylineData);
         patches.add(patchData);
@@ -1411,6 +1411,7 @@ class _HomePageState extends State<HomePage> {
 
 
   Future<void> _refresh() async {
+    mapDataVersionCycle();
     var connectivityResult = await (Connectivity().checkConnectivity());
     print("Connectivity Result: $connectivityResult");
 

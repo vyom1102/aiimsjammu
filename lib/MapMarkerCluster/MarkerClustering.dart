@@ -218,7 +218,7 @@ class MapClustering {
             bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.blueDotMarker;
           }else if(landmarks[i].element!.type == "Rooms" && landmarks[i].element!.subType == "main entry"){
             // final result = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(landmarks[i].name!, 'assets/MapEntry.png', imageSize: const Size(100, 100),);
-            print("main entry ${landmarks[i].name}");
+            // print("main entry ${landmarks[i].name}");
             // bitMapMarkers[landmarks[i].properties!.polyId!] = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(landmarks[i].name!, 'assets/MapEntry.png', imageSize: const Size(75, 75),fontSizee: 32);;
             bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.entryMarker;
           }

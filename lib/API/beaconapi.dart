@@ -10,7 +10,6 @@ import '../APIMODELS/beaconData.dart';
 import '../VersioInfo.dart';
 import 'RefreshTokenAPI.dart';
 
-
 class beaconapi {
   final String baseUrl = "${AppConfig.baseUrl}/secured/building/beacons";
   static var signInBox = Hive.box('SignInDatabase');

@@ -13550,7 +13550,7 @@ class _NavigationState extends State<Navigation>
                       });
                     }
 
-                    if (cameraPosition.zoom <= 17) {
+                    if (cameraPosition.zoom <= 16) {
 
                       // blurPatch.forEach((polygon) {
                       //   polygon.visible = false;
@@ -13726,11 +13726,10 @@ class _NavigationState extends State<Navigation>
                     // print("user.isnavigating ${user.isnavigating}");
                     if (cameraPosition.zoom > 19 && !user.isnavigating) {
                       clustringOFF = false;
-                      landmarkMarkers.forEach((value){
-                        if(!value.markerId.value.toLowerCase().contains("main entry")) {
-                          value.visible = false;
-                        }
-                      });
+                      // landmarkMarkers
+                      //     .where((m) => !m.markerId.value.toLowerCase().contains("main entry"))
+                      //     .forEach((m) => m.visible = false);
+
                     } else if( user.isnavigating){
                       // clustringOFF = true;
                       // print("cameraPosition.zoom < 19 ${cameraPosition.zoom}");

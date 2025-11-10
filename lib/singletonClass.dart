@@ -89,7 +89,7 @@ class SingletonFunctionController {
       building.destinationQr=false;
       await Future.wait(allBuildingID.entries.map((entry) async {
         var key = entry.key;
-        List<beacon> beaconList = await beaconapi().fetchBeaconData(key);
+        List<beacon> beaconList = await RepositoryManager().getBeaconDataNew(key);
         if (building.beacondata == null) {
           building.beacondata = beaconList;
         } else {
