@@ -25,6 +25,8 @@ import '../ELEMENTS/BlurtoothDevice.dart';
 import '../MODELS/MarkerIconWithAnchor.dart';
 import '../MODELS/VenueModel.dart';
 import 'package:http/http.dart' as http;
+import 'dart:io' as io;
+import 'package:flutter/foundation.dart';
 
 class HelperClass{
   static bool SemanticEnabled = false;
@@ -1135,6 +1137,20 @@ class HelperClass{
     );
   }
 
+  Future<void> saveJsonToMacProject(String fileName, String jsonString) async {
+    if (Platform.isMacOS) {
+      print("saveJsonToMacProject");
+      final directory = io.Directory.current; // your project directory
+      final file = File('${directory.path}/$fileName.json');
+
+      try {
+        await file.writeAsString(jsonString, flush: true);
+        print("✅ JSON file saved at: ${file.path}");
+      } catch (e) {
+        print("❌ Error writing JSON file: $e");
+      }
+    }
+  }
   Future<void> saveJsonToAndroidDownloads(String fileName, String jsonString) async {
     if(!kIsWeb){
       Directory? downloadsDir;

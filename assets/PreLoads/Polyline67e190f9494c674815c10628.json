@@ -22,7 +22,7 @@
                 "lat": 32.56395643324673,
                 "lon": 75.03918404853607,
                 "indexNode": "5802",
-                "_id": "67e1a8fb65e55d787308b93e"
+                "_id": "690de2659a569a4eb2d720aa"
               },
               {
                 "coordx": 118,
@@ -30,7 +30,7 @@
                 "lat": 32.56396131244403,
                 "lon": 75.03918699853844,
                 "indexNode": "5410",
-                "_id": "67e1a8fb65e55d787308b93f"
+                "_id": "690de2659a569a4eb2d720ab"
               },
               {
                 "coordx": 118,
@@ -38,7 +38,7 @@
                 "lat": 32.56396131244403,
                 "lon": 75.03918699853844,
                 "indexNode": "5410",
-                "_id": "67e1a8fb65e55d787308b940"
+                "_id": "690de2659a569a4eb2d720ac"
               }
             ],
             "centroid": [],
@@ -50,7 +50,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b93d"
+            "_id": "690de2659a569a4eb2d720a9"
           },
           {
             "contact": "undefined",
@@ -68,7 +68,7 @@
                 "lat": 32.56394375496196,
                 "lon": 75.0388700978227,
                 "indexNode": "15126",
-                "_id": "67e1a8fb65e55d787308b942"
+                "_id": "690de2659a569a4eb2d720ae"
               },
               {
                 "coordx": 0,
@@ -76,7 +76,7 @@
                 "lat": 32.56398602119188,
                 "lon": 75.03877167969989,
                 "indexNode": "15092",
-                "_id": "67e1a8fb65e55d787308b943"
+                "_id": "690de2659a569a4eb2d720af"
               },
               {
                 "coordx": 0,
@@ -84,7 +84,7 @@
                 "lat": 32.56398602119188,
                 "lon": 75.03877167969989,
                 "indexNode": "15092",
-                "_id": "67e1a8fb65e55d787308b944"
+                "_id": "690de2659a569a4eb2d720b0"
               }
             ],
             "centroid": [],
@@ -96,7 +96,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b941"
+            "_id": "690de2659a569a4eb2d720ad"
           },
           {
             "contact": "undefined",
@@ -114,7 +114,7 @@
                 "lat": 32.56375913851749,
                 "lon": 75.03863450458941,
                 "indexNode": "33320",
-                "_id": "67e1a8fb65e55d787308b946"
+                "_id": "690de2659a569a4eb2d720b2"
               },
               {
                 "coordx": 0,
@@ -122,7 +122,7 @@
                 "lat": 32.56394698761349,
                 "lon": 75.03874807968089,
                 "indexNode": "18228",
-                "_id": "67e1a8fb65e55d787308b947"
+                "_id": "690de2659a569a4eb2d720b3"
               },
               {
                 "coordx": 0,
@@ -130,7 +130,7 @@
                 "lat": 32.56394698761349,
                 "lon": 75.03874807968089,
                 "indexNode": "18228",
-                "_id": "67e1a8fb65e55d787308b948"
+                "_id": "690de2659a569a4eb2d720b4"
               },
               {
                 "coordx": 0,
@@ -138,7 +138,7 @@
                 "lat": 32.56375913851749,
                 "lon": 75.03863450458941,
                 "indexNode": "33320",
-                "_id": "67e1a8fb65e55d787308b949"
+                "_id": "690de2659a569a4eb2d720b5"
               },
               {
                 "coordx": 0,
@@ -146,7 +146,7 @@
                 "lat": 32.56375913851749,
                 "lon": 75.03863450458941,
                 "indexNode": "33320",
-                "_id": "67e1a8fb65e55d787308b94a"
+                "_id": "690de2659a569a4eb2d720b6"
               }
             ],
             "centroid": [
@@ -161,7 +161,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b945"
+            "_id": "690de2659a569a4eb2d720b1"
           },
           {
             "contact": "undefined",
@@ -179,7 +179,7 @@
                 "lat": 32.56397626279728,
                 "lon": 75.03876577969514,
                 "indexNode": "15876",
-                "_id": "67e1a8fb65e55d787308b94c"
+                "_id": "690de2659a569a4eb2d720b8"
               },
               {
                 "coordx": 0,
@@ -187,7 +187,7 @@
                 "lat": 32.563966504402686,
                 "lon": 75.03875987969039,
                 "indexNode": "16660",
-                "_id": "67e1a8fb65e55d787308b94d"
+                "_id": "690de2659a569a4eb2d720b9"
               },
               {
                 "coordx": 0,
@@ -195,7 +195,7 @@
                 "lat": 32.563966504402686,
                 "lon": 75.03875987969039,
                 "indexNode": "16660",
-                "_id": "67e1a8fb65e55d787308b94e"
+                "_id": "690de2659a569a4eb2d720ba"
               },
               {
                 "coordx": 0,
@@ -203,7 +203,7 @@
                 "lat": 32.56397626279728,
                 "lon": 75.03876577969514,
                 "indexNode": "15876",
-                "_id": "67e1a8fb65e55d787308b94f"
+                "_id": "690de2659a569a4eb2d720bb"
               },
               {
                 "coordx": 0,
@@ -211,7 +211,7 @@
                 "lat": 32.56397626279728,
                 "lon": 75.03876577969514,
                 "indexNode": "15876",
-                "_id": "67e1a8fb65e55d787308b950"
+                "_id": "690de2659a569a4eb2d720bc"
               }
             ],
             "centroid": [
@@ -226,7 +226,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b94b"
+            "_id": "690de2659a569a4eb2d720b7"
           },
           {
             "contact": "undefined",
@@ -244,7 +244,7 @@
                 "lat": 32.563797379042995,
                 "lon": 75.03878159775142,
                 "indexNode": "26886",
-                "_id": "67e1a8fb65e55d787308b952"
+                "_id": "690de2659a569a4eb2d720be"
               },
               {
                 "coordx": 149,
@@ -252,7 +252,7 @@
                 "lat": 32.563654419735904,
                 "lon": 75.03911448257857,
                 "indexNode": "27001",
-                "_id": "67e1a8fb65e55d787308b953"
+                "_id": "690de2659a569a4eb2d720bf"
               },
               {
                 "coordx": 149,
@@ -260,7 +260,7 @@
                 "lat": 32.563654419735904,
                 "lon": 75.03911448257857,
                 "indexNode": "27001",
-                "_id": "67e1a8fb65e55d787308b954"
+                "_id": "690de2659a569a4eb2d720c0"
               }
             ],
             "centroid": [],
@@ -272,7 +272,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b951"
+            "_id": "690de2659a569a4eb2d720bd"
           },
           {
             "contact": "undefined",
@@ -290,7 +290,7 @@
                 "lat": 32.56384452447022,
                 "lon": 75.03868612963099,
                 "indexNode": "26460",
-                "_id": "67e1a8fb65e55d787308b956"
+                "_id": "690de2659a569a4eb2d720c2"
               },
               {
                 "coordx": 18,
@@ -298,7 +298,7 @@
                 "lat": 32.56382214823085,
                 "lon": 75.03873823334307,
                 "indexNode": "26478",
-                "_id": "67e1a8fb65e55d787308b957"
+                "_id": "690de2659a569a4eb2d720c3"
               },
               {
                 "coordx": 18,
@@ -306,7 +306,7 @@
                 "lat": 32.56381238983625,
                 "lon": 75.03873233333832,
                 "indexNode": "27262",
-                "_id": "67e1a8fb65e55d787308b958"
+                "_id": "690de2659a569a4eb2d720c4"
               },
               {
                 "coordx": 25,
@@ -314,7 +314,7 @@
                 "lat": 32.56380368796538,
                 "lon": 75.038752595893,
                 "indexNode": "27269",
-                "_id": "67e1a8fb65e55d787308b959"
+                "_id": "690de2659a569a4eb2d720c5"
               },
               {
                 "coordx": 25,
@@ -322,7 +322,7 @@
                 "lat": 32.563793929570785,
                 "lon": 75.03874669588825,
                 "indexNode": "28053",
-                "_id": "67e1a8fb65e55d787308b95a"
+                "_id": "690de2659a569a4eb2d720c6"
               },
               {
                 "coordx": 0,
@@ -330,7 +330,7 @@
                 "lat": 32.563825007681025,
                 "lon": 75.03867432962149,
                 "indexNode": "28028",
-                "_id": "67e1a8fb65e55d787308b95b"
+                "_id": "690de2659a569a4eb2d720c7"
               },
               {
                 "coordx": 0,
@@ -338,7 +338,7 @@
                 "lat": 32.56384452447022,
                 "lon": 75.03868612963099,
                 "indexNode": "26460",
-                "_id": "67e1a8fb65e55d787308b95c"
+                "_id": "690de2659a569a4eb2d720c8"
               }
             ],
             "centroid": [
@@ -353,7 +353,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b955"
+            "_id": "690de2659a569a4eb2d720c1"
           },
           {
             "contact": "undefined",
@@ -371,7 +371,7 @@
                 "lat": 32.56413786633018,
                 "lon": 75.03896193535829,
                 "indexNode": "223",
-                "_id": "67e1a8fb65e55d787308b95e"
+                "_id": "690de2659a569a4eb2d720ca"
               },
               {
                 "coordx": 27,
@@ -379,7 +379,7 @@
                 "lat": 32.56407687636394,
                 "lon": 75.03892506032858,
                 "indexNode": "5123",
-                "_id": "67e1a8fb65e55d787308b95f"
+                "_id": "690de2659a569a4eb2d720cb"
               },
               {
                 "coordx": 0,
@@ -387,7 +387,7 @@
                 "lat": 32.564110440723,
                 "lon": 75.03884690476048,
                 "indexNode": "5096",
-                "_id": "67e1a8fb65e55d787308b960"
+                "_id": "690de2659a569a4eb2d720cc"
               },
               {
                 "coordx": 0,
@@ -395,7 +395,7 @@
                 "lat": 32.564171430689235,
                 "lon": 75.03888377979017,
                 "indexNode": "196",
-                "_id": "67e1a8fb65e55d787308b961"
+                "_id": "690de2659a569a4eb2d720cd"
               },
               {
                 "coordx": 27,
@@ -403,7 +403,7 @@
                 "lat": 32.56413786633018,
                 "lon": 75.03896193535829,
                 "indexNode": "223",
-                "_id": "67e1a8fb65e55d787308b962"
+                "_id": "690de2659a569a4eb2d720ce"
               }
             ],
             "centroid": [
@@ -418,7 +418,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b95d"
+            "_id": "690de2659a569a4eb2d720c9"
           },
           {
             "contact": "undefined",
@@ -436,7 +436,7 @@
                 "lat": 32.56382214823085,
                 "lon": 75.03873823334307,
                 "indexNode": "26478",
-                "_id": "67e1a8fb65e55d787308b964"
+                "_id": "690de2659a569a4eb2d720d0"
               },
               {
                 "coordx": 25,
@@ -444,7 +444,7 @@
                 "lat": 32.56381344635998,
                 "lon": 75.03875849589775,
                 "indexNode": "26485",
-                "_id": "67e1a8fb65e55d787308b965"
+                "_id": "690de2659a569a4eb2d720d1"
               },
               {
                 "coordx": 25,
@@ -452,7 +452,7 @@
                 "lat": 32.563811006761334,
                 "lon": 75.03875702089657,
                 "indexNode": "26681",
-                "_id": "67e1a8fb65e55d787308b966"
+                "_id": "690de2659a569a4eb2d720d2"
               },
               {
                 "coordx": 18,
@@ -460,7 +460,7 @@
                 "lat": 32.5638197086322,
                 "lon": 75.03873675834187,
                 "indexNode": "26674",
-                "_id": "67e1a8fb65e55d787308b967"
+                "_id": "690de2659a569a4eb2d720d3"
               },
               {
                 "coordx": 18,
@@ -468,7 +468,7 @@
                 "lat": 32.56382214823085,
                 "lon": 75.03873823334307,
                 "indexNode": "26478",
-                "_id": "67e1a8fb65e55d787308b968"
+                "_id": "690de2659a569a4eb2d720d4"
               }
             ],
             "centroid": [
@@ -483,7 +483,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b963"
+            "_id": "690de2659a569a4eb2d720cf"
           },
           {
             "contact": "undefined",
@@ -501,7 +501,7 @@
                 "lat": 32.56376157811614,
                 "lon": 75.0386359795906,
                 "indexNode": "33124",
-                "_id": "67e1a8fb65e55d787308b96a"
+                "_id": "690de2659a569a4eb2d720d6"
               },
               {
                 "coordx": 25,
@@ -509,7 +509,7 @@
                 "lat": 32.5637305000059,
                 "lon": 75.03870834585737,
                 "indexNode": "33149",
-                "_id": "67e1a8fb65e55d787308b96b"
+                "_id": "690de2659a569a4eb2d720d7"
               },
               {
                 "coordx": 25,
@@ -517,7 +517,7 @@
                 "lat": 32.56372318120995,
                 "lon": 75.0387039208538,
                 "indexNode": "33737",
-                "_id": "67e1a8fb65e55d787308b96c"
+                "_id": "690de2659a569a4eb2d720d8"
               },
               {
                 "coordx": 9,
@@ -525,7 +525,7 @@
                 "lat": 32.563743071200506,
                 "lon": 75.03865760644307,
                 "indexNode": "33721",
-                "_id": "67e1a8fb65e55d787308b96d"
+                "_id": "690de2659a569a4eb2d720d9"
               },
               {
                 "coordx": 9,
@@ -533,7 +533,7 @@
                 "lat": 32.563747950397804,
                 "lon": 75.03866055644545,
                 "indexNode": "33329",
-                "_id": "67e1a8fb65e55d787308b96e"
+                "_id": "690de2659a569a4eb2d720da"
               },
               {
                 "coordx": 0,
@@ -541,7 +541,7 @@
                 "lat": 32.56375913851749,
                 "lon": 75.03863450458941,
                 "indexNode": "33320",
-                "_id": "67e1a8fb65e55d787308b96f"
+                "_id": "690de2659a569a4eb2d720db"
               },
               {
                 "coordx": 0,
@@ -549,7 +549,7 @@
                 "lat": 32.56376157811614,
                 "lon": 75.0386359795906,
                 "indexNode": "33124",
-                "_id": "67e1a8fb65e55d787308b970"
+                "_id": "690de2659a569a4eb2d720dc"
               }
             ],
             "centroid": [
@@ -564,7 +564,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b969"
+            "_id": "690de2659a569a4eb2d720d5"
           },
           {
             "contact": "undefined",
@@ -582,7 +582,7 @@
                 "lat": 32.56409179385686,
                 "lon": 75.03889032452054,
                 "indexNode": "5111",
-                "_id": "67e1a8fb65e55d787308b972"
+                "_id": "690de2659a569a4eb2d720de"
               },
               {
                 "coordx": 15,
@@ -590,7 +590,7 @@
                 "lat": 32.56407959586361,
                 "lon": 75.0388829495146,
                 "indexNode": "6091",
-                "_id": "67e1a8fb65e55d787308b973"
+                "_id": "690de2659a569a4eb2d720df"
               },
               {
                 "coordx": 0,
@@ -598,7 +598,7 @@
                 "lat": 32.564098242729756,
                 "lon": 75.03883952975453,
                 "indexNode": "6076",
-                "_id": "67e1a8fb65e55d787308b974"
+                "_id": "690de2659a569a4eb2d720e0"
               },
               {
                 "coordx": 0,
@@ -606,7 +606,7 @@
                 "lat": 32.564110440723,
                 "lon": 75.03884690476048,
                 "indexNode": "5096",
-                "_id": "67e1a8fb65e55d787308b975"
+                "_id": "690de2659a569a4eb2d720e1"
               },
               {
                 "coordx": 15,
@@ -614,7 +614,7 @@
                 "lat": 32.56409179385686,
                 "lon": 75.03889032452054,
                 "indexNode": "5111",
-                "_id": "67e1a8fb65e55d787308b976"
+                "_id": "690de2659a569a4eb2d720e2"
               }
             ],
             "centroid": [
@@ -629,7 +629,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b971"
+            "_id": "690de2659a569a4eb2d720dd"
           },
           {
             "contact": "undefined",
@@ -647,7 +647,7 @@
                 "lat": 32.5639657113498,
                 "lon": 75.03888337283338,
                 "indexNode": "13362",
-                "_id": "67e1a8fb65e55d787308b978"
+                "_id": "690de2659a569a4eb2d720e4"
               },
               {
                 "coordx": 34,
@@ -655,7 +655,7 @@
                 "lat": 32.56406085569713,
                 "lon": 75.03894089787971,
                 "indexNode": "5718",
-                "_id": "67e1a8fb65e55d787308b979"
+                "_id": "690de2659a569a4eb2d720e5"
               },
               {
                 "coordx": 34,
@@ -663,7 +663,7 @@
                 "lat": 32.56406085569713,
                 "lon": 75.03894089787971,
                 "indexNode": "5718",
-                "_id": "67e1a8fb65e55d787308b97a"
+                "_id": "690de2659a569a4eb2d720e6"
               }
             ],
             "centroid": [],
@@ -675,7 +675,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b977"
+            "_id": "690de2659a569a4eb2d720e3"
           },
           {
             "contact": "undefined",
@@ -693,7 +693,7 @@
                 "lat": 32.563603001563585,
                 "lon": 75.03911256476374,
                 "indexNode": "30341",
-                "_id": "67e1a8fb65e55d787308b97c"
+                "_id": "690de2659a569a4eb2d720e8"
               },
               {
                 "coordx": 133,
@@ -701,7 +701,7 @@
                 "lat": 32.56363283654942,
                 "lon": 75.03904309314764,
                 "indexNode": "30317",
-                "_id": "67e1a8fb65e55d787308b97d"
+                "_id": "690de2659a569a4eb2d720e9"
               },
               {
                 "coordx": 133,
@@ -709,7 +709,7 @@
                 "lat": 32.56363527614806,
                 "lon": 75.03904456814882,
                 "indexNode": "30121",
-                "_id": "67e1a8fb65e55d787308b97e"
+                "_id": "690de2659a569a4eb2d720ea"
               },
               {
                 "coordx": 157,
@@ -717,7 +717,7 @@
                 "lat": 32.56360544116224,
                 "lon": 75.03911403976493,
                 "indexNode": "30145",
-                "_id": "67e1a8fb65e55d787308b97f"
+                "_id": "690de2659a569a4eb2d720eb"
               },
               {
                 "coordx": 157,
@@ -725,7 +725,7 @@
                 "lat": 32.563603001563585,
                 "lon": 75.03911256476374,
                 "indexNode": "30341",
-                "_id": "67e1a8fb65e55d787308b980"
+                "_id": "690de2659a569a4eb2d720ec"
               }
             ],
             "centroid": [
@@ -740,7 +740,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b97b"
+            "_id": "690de2659a569a4eb2d720e7"
           },
           {
             "contact": "undefined",
@@ -758,7 +758,7 @@
                 "lat": 32.56363527614806,
                 "lon": 75.03904456814882,
                 "indexNode": "30121",
-                "_id": "67e1a8fb65e55d787308b982"
+                "_id": "690de2659a569a4eb2d720ee"
               },
               {
                 "coordx": 133,
@@ -766,7 +766,7 @@
                 "lat": 32.56359380297103,
                 "lon": 75.03901949312863,
                 "indexNode": "33453",
-                "_id": "67e1a8fb65e55d787308b983"
+                "_id": "690de2659a569a4eb2d720ef"
               },
               {
                 "coordx": 134,
@@ -774,7 +774,7 @@
                 "lat": 32.56359255984662,
                 "lon": 75.0390223877793,
                 "indexNode": "33454",
-                "_id": "67e1a8fb65e55d787308b984"
+                "_id": "690de2659a569a4eb2d720f0"
               },
               {
                 "coordx": 134,
@@ -782,7 +782,7 @@
                 "lat": 32.563634033023654,
                 "lon": 75.03904746279949,
                 "indexNode": "30122",
-                "_id": "67e1a8fb65e55d787308b985"
+                "_id": "690de2659a569a4eb2d720f1"
               },
               {
                 "coordx": 133,
@@ -790,7 +790,7 @@
                 "lat": 32.56363527614806,
                 "lon": 75.03904456814882,
                 "indexNode": "30121",
-                "_id": "67e1a8fb65e55d787308b986"
+                "_id": "690de2659a569a4eb2d720f2"
               }
             ],
             "centroid": [
@@ -805,7 +805,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b981"
+            "_id": "690de2659a569a4eb2d720ed"
           },
           {
             "contact": "undefined",
@@ -823,7 +823,7 @@
                 "lat": 32.563938735814155,
                 "lon": 75.03888894072792,
                 "indexNode": "14936",
-                "_id": "67e1a8fb65e55d787308b988"
+                "_id": "690de2659a569a4eb2d720f4"
               },
               {
                 "coordx": 44,
@@ -831,7 +831,7 @@
                 "lat": 32.56393376331651,
                 "lon": 75.0389005193306,
                 "indexNode": "14940",
-                "_id": "67e1a8fb65e55d787308b989"
+                "_id": "690de2659a569a4eb2d720f5"
               },
               {
                 "coordx": 44,
@@ -839,7 +839,7 @@
                 "lat": 32.563906927731374,
                 "lon": 75.03888429431753,
                 "indexNode": "17096",
-                "_id": "67e1a8fb65e55d787308b98a"
+                "_id": "690de2659a569a4eb2d720f6"
               },
               {
                 "coordx": 40,
@@ -847,7 +847,7 @@
                 "lat": 32.56391190022901,
                 "lon": 75.03887271571485,
                 "indexNode": "17092",
-                "_id": "67e1a8fb65e55d787308b98b"
+                "_id": "690de2659a569a4eb2d720f7"
               },
               {
                 "coordx": 40,
@@ -855,7 +855,7 @@
                 "lat": 32.563938735814155,
                 "lon": 75.03888894072792,
                 "indexNode": "14936",
-                "_id": "67e1a8fb65e55d787308b98c"
+                "_id": "690de2659a569a4eb2d720f8"
               }
             ],
             "centroid": [
@@ -870,7 +870,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b987"
+            "_id": "690de2659a569a4eb2d720f3"
           },
           {
             "contact": "undefined",
@@ -888,7 +888,7 @@
                 "lat": 32.563990137556296,
                 "lon": 75.03908410006036,
                 "indexNode": "6357",
-                "_id": "67e1a8fb65e55d787308b98e"
+                "_id": "690de2659a569a4eb2d720fa"
               },
               {
                 "coordx": 125,
@@ -896,7 +896,7 @@
                 "lat": 32.56394041257992,
                 "lon": 75.0391998860872,
                 "indexNode": "6397",
-                "_id": "67e1a8fb65e55d787308b98f"
+                "_id": "690de2659a569a4eb2d720fb"
               },
               {
                 "coordx": 135,
@@ -904,7 +904,7 @@
                 "lat": 32.56391578334257,
                 "lon": 75.03922145758797,
                 "indexNode": "7387",
-                "_id": "67e1a8fb65e55d787308b990"
+                "_id": "690de2659a569a4eb2d720fc"
               },
               {
                 "coordx": 135,
@@ -912,7 +912,7 @@
                 "lat": 32.563918222941226,
                 "lon": 75.03922293258915,
                 "indexNode": "7191",
-                "_id": "67e1a8fb65e55d787308b991"
+                "_id": "690de2659a569a4eb2d720fd"
               },
               {
                 "coordx": 125,
@@ -920,7 +920,7 @@
                 "lat": 32.56394285217856,
                 "lon": 75.03920136108839,
                 "indexNode": "6201",
-                "_id": "67e1a8fb65e55d787308b992"
+                "_id": "690de2659a569a4eb2d720fe"
               },
               {
                 "coordx": 85,
@@ -928,7 +928,7 @@
                 "lat": 32.56399257715495,
                 "lon": 75.03908557506155,
                 "indexNode": "6161",
-                "_id": "67e1a8fb65e55d787308b993"
+                "_id": "690de2659a569a4eb2d720ff"
               },
               {
                 "coordx": 85,
@@ -936,7 +936,7 @@
                 "lat": 32.563990137556296,
                 "lon": 75.03908410006036,
                 "indexNode": "6357",
-                "_id": "67e1a8fb65e55d787308b994"
+                "_id": "690de2659a569a4eb2d72100"
               }
             ],
             "centroid": [
@@ -951,7 +951,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b98d"
+            "_id": "690de2659a569a4eb2d720f9"
           },
           {
             "contact": "undefined",
@@ -969,7 +969,7 @@
                 "lat": 32.564055883199494,
                 "lon": 75.0389524764824,
                 "indexNode": "5722",
-                "_id": "67e1a8fb65e55d787308b996"
+                "_id": "690de2659a569a4eb2d72102"
               },
               {
                 "coordx": 38,
@@ -977,7 +977,7 @@
                 "lat": 32.56409491677788,
                 "lon": 75.03897607650141,
                 "indexNode": "2586",
-                "_id": "67e1a8fb65e55d787308b997"
+                "_id": "690de2659a569a4eb2d72103"
               },
               {
                 "coordx": 38,
@@ -985,7 +985,7 @@
                 "lat": 32.56409491677788,
                 "lon": 75.03897607650141,
                 "indexNode": "2586",
-                "_id": "67e1a8fb65e55d787308b998"
+                "_id": "690de2659a569a4eb2d72104"
               }
             ],
             "centroid": [],
@@ -997,7 +997,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b995"
+            "_id": "690de2659a569a4eb2d72101"
           },
           {
             "contact": "undefined",
@@ -1015,7 +1015,7 @@
                 "lat": 32.56409864615111,
                 "lon": 75.0389673925494,
                 "indexNode": "2583",
-                "_id": "67e1a8fb65e55d787308b99a"
+                "_id": "690de2659a569a4eb2d72106"
               },
               {
                 "coordx": 35,
@@ -1023,7 +1023,7 @@
                 "lat": 32.56410596494706,
                 "lon": 75.03897181755296,
                 "indexNode": "1995",
-                "_id": "67e1a8fb65e55d787308b99b"
+                "_id": "690de2659a569a4eb2d72107"
               },
               {
                 "coordx": 35,
@@ -1031,7 +1031,7 @@
                 "lat": 32.56410596494706,
                 "lon": 75.03897181755296,
                 "indexNode": "1995",
-                "_id": "67e1a8fb65e55d787308b99c"
+                "_id": "690de2659a569a4eb2d72108"
               }
             ],
             "centroid": [],
@@ -1043,7 +1043,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b999"
+            "_id": "690de2659a569a4eb2d72105"
           },
           {
             "contact": "undefined",
@@ -1061,7 +1061,7 @@
                 "lat": 32.56381201663489,
                 "lon": 75.03879044775854,
                 "indexNode": "25710",
-                "_id": "67e1a8fb65e55d787308b99e"
+                "_id": "690de2659a569a4eb2d7210a"
               },
               {
                 "coordx": 34,
@@ -1069,7 +1069,7 @@
                 "lat": 32.56371443268892,
                 "lon": 75.03873144771103,
                 "indexNode": "33550",
-                "_id": "67e1a8fb65e55d787308b99f"
+                "_id": "690de2659a569a4eb2d7210b"
               },
               {
                 "coordx": 34,
@@ -1077,7 +1077,7 @@
                 "lat": 32.56371443268892,
                 "lon": 75.03873144771103,
                 "indexNode": "33550",
-                "_id": "67e1a8fb65e55d787308b9a0"
+                "_id": "690de2659a569a4eb2d7210c"
               }
             ],
             "centroid": [],
@@ -1089,7 +1089,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b99d"
+            "_id": "690de2659a569a4eb2d72109"
           },
           {
             "contact": "undefined",
@@ -1107,7 +1107,7 @@
                 "lat": 32.56371657595638,
                 "lon": 75.03896975004503,
                 "indexNode": "26951",
-                "_id": "67e1a8fb65e55d787308b9a2"
+                "_id": "690de2659a569a4eb2d7210e"
               },
               {
                 "coordx": 99,
@@ -1115,7 +1115,7 @@
                 "lat": 32.56371169675908,
                 "lon": 75.03896680004264,
                 "indexNode": "27343",
-                "_id": "67e1a8fb65e55d787308b9a3"
+                "_id": "690de2659a569a4eb2d7210f"
               },
               {
                 "coordx": 99,
@@ -1123,7 +1123,7 @@
                 "lat": 32.56371169675908,
                 "lon": 75.03896680004264,
                 "indexNode": "27343",
-                "_id": "67e1a8fb65e55d787308b9a4"
+                "_id": "690de2659a569a4eb2d72110"
               }
             ],
             "centroid": [],
@@ -1135,7 +1135,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b9a1"
+            "_id": "690de2659a569a4eb2d7210d"
           },
           {
             "contact": "undefined",
@@ -1153,7 +1153,7 @@
                 "lat": 32.56377624592803,
                 "lon": 75.03883080681283,
                 "indexNode": "26903",
-                "_id": "67e1a8fb65e55d787308b9a6"
+                "_id": "690de2659a569a4eb2d72112"
               },
               {
                 "coordx": 51,
@@ -1161,7 +1161,7 @@
                 "lat": 32.563771366730734,
                 "lon": 75.03882785681044,
                 "indexNode": "27295",
-                "_id": "67e1a8fb65e55d787308b9a7"
+                "_id": "690de2659a569a4eb2d72113"
               },
               {
                 "coordx": 51,
@@ -1169,7 +1169,7 @@
                 "lat": 32.563771366730734,
                 "lon": 75.03882785681044,
                 "indexNode": "27295",
-                "_id": "67e1a8fb65e55d787308b9a8"
+                "_id": "690de2659a569a4eb2d72114"
               }
             ],
             "centroid": [],
@@ -1181,7 +1181,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b9a5"
+            "_id": "690de2659a569a4eb2d72111"
           },
           {
             "contact": "undefined",
@@ -1199,7 +1199,7 @@
                 "lat": 32.56393155696871,
                 "lon": 75.03886272281676,
                 "indexNode": "16106",
-                "_id": "67e1a8fb65e55d787308b9aa"
+                "_id": "690de2659a569a4eb2d72116"
               },
               {
                 "coordx": 39,
@@ -1207,7 +1207,7 @@
                 "lat": 32.56392534134667,
                 "lon": 75.0388771960701,
                 "indexNode": "16111",
-                "_id": "67e1a8fb65e55d787308b9ab"
+                "_id": "690de2659a569a4eb2d72117"
               },
               {
                 "coordx": 39,
@@ -1215,7 +1215,7 @@
                 "lat": 32.56392534134667,
                 "lon": 75.0388771960701,
                 "indexNode": "16111",
-                "_id": "67e1a8fb65e55d787308b9ac"
+                "_id": "690de2659a569a4eb2d72118"
               }
             ],
             "centroid": [],
@@ -1227,7 +1227,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b9a9"
+            "_id": "690de2659a569a4eb2d72115"
           },
           {
             "contact": "undefined",
@@ -1245,7 +1245,7 @@
                 "lat": 32.56400615822311,
                 "lon": 75.03906826250923,
                 "indexNode": "5762",
-                "_id": "67e1a8fb65e55d787308b9ae"
+                "_id": "690de2659a569a4eb2d7211a"
               },
               {
                 "coordx": 16,
@@ -1253,7 +1253,7 @@
                 "lat": 32.5640832319365,
                 "lon": 75.03888879416765,
                 "indexNode": "5700",
-                "_id": "67e1a8fb65e55d787308b9af"
+                "_id": "690de2659a569a4eb2d7211b"
               },
               {
                 "coordx": 16,
@@ -1261,7 +1261,7 @@
                 "lat": 32.5640832319365,
                 "lon": 75.03888879416765,
                 "indexNode": "5700",
-                "_id": "67e1a8fb65e55d787308b9b0"
+                "_id": "690de2659a569a4eb2d7211c"
               }
             ],
             "centroid": [],
@@ -1273,7 +1273,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b9ad"
+            "_id": "690de2659a569a4eb2d72119"
           },
           {
             "contact": "undefined",
@@ -1291,7 +1291,7 @@
                 "lat": 32.56391913951445,
                 "lon": 75.0392708880562,
                 "indexNode": "5832",
-                "_id": "67e1a8fb65e55d787308b9b2"
+                "_id": "690de2659a569a4eb2d7211e"
               },
               {
                 "coordx": 78,
@@ -1299,7 +1299,7 @@
                 "lat": 32.56400615822311,
                 "lon": 75.03906826250923,
                 "indexNode": "5762",
-                "_id": "67e1a8fb65e55d787308b9b3"
+                "_id": "690de2659a569a4eb2d7211f"
               },
               {
                 "coordx": 78,
@@ -1307,7 +1307,7 @@
                 "lat": 32.56400615822311,
                 "lon": 75.03906826250923,
                 "indexNode": "5762",
-                "_id": "67e1a8fb65e55d787308b9b4"
+                "_id": "690de2659a569a4eb2d72120"
               }
             ],
             "centroid": [],
@@ -1319,7 +1319,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b9b1"
+            "_id": "690de2659a569a4eb2d7211d"
           },
           {
             "contact": "undefined",
@@ -1337,7 +1337,7 @@
                 "lat": 32.56407701631446,
                 "lon": 75.03890326742099,
                 "indexNode": "5705",
-                "_id": "67e1a8fb65e55d787308b9b6"
+                "_id": "690de2659a569a4eb2d72122"
               },
               {
                 "coordx": 21,
@@ -1345,7 +1345,7 @@
                 "lat": 32.564081895511755,
                 "lon": 75.03890621742337,
                 "indexNode": "5313",
-                "_id": "67e1a8fb65e55d787308b9b7"
+                "_id": "690de2659a569a4eb2d72123"
               },
               {
                 "coordx": 21,
@@ -1353,7 +1353,7 @@
                 "lat": 32.564081895511755,
                 "lon": 75.03890621742337,
                 "indexNode": "5313",
-                "_id": "67e1a8fb65e55d787308b9b8"
+                "_id": "690de2659a569a4eb2d72124"
               }
             ],
             "centroid": [],
@@ -1365,7 +1365,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b9b5"
+            "_id": "690de2659a569a4eb2d72121"
           },
           {
             "contact": "undefined",
@@ -1383,7 +1383,7 @@
                 "lat": 32.56410845119588,
                 "lon": 75.03896602825162,
                 "indexNode": "1993",
-                "_id": "67e1a8fb65e55d787308b9ba"
+                "_id": "690de2659a569a4eb2d72126"
               },
               {
                 "coordx": 30,
@@ -1391,7 +1391,7 @@
                 "lat": 32.564112180569104,
                 "lon": 75.0389573442996,
                 "indexNode": "1990",
-                "_id": "67e1a8fb65e55d787308b9bb"
+                "_id": "690de2659a569a4eb2d72127"
               },
               {
                 "coordx": 30,
@@ -1399,7 +1399,7 @@
                 "lat": 32.56413413695695,
                 "lon": 75.03897061931029,
                 "indexNode": "226",
-                "_id": "67e1a8fb65e55d787308b9bc"
+                "_id": "690de2659a569a4eb2d72128"
               },
               {
                 "coordx": 39,
@@ -1407,7 +1407,7 @@
                 "lat": 32.564122948837266,
                 "lon": 75.03899667116633,
                 "indexNode": "235",
-                "_id": "67e1a8fb65e55d787308b9bd"
+                "_id": "690de2659a569a4eb2d72129"
               },
               {
                 "coordx": 39,
@@ -1415,7 +1415,7 @@
                 "lat": 32.56410099244942,
                 "lon": 75.03898339615564,
                 "indexNode": "1999",
-                "_id": "67e1a8fb65e55d787308b9be"
+                "_id": "690de2659a569a4eb2d7212a"
               },
               {
                 "coordx": 37,
@@ -1423,7 +1423,7 @@
                 "lat": 32.564103478698236,
                 "lon": 75.0389776068543,
                 "indexNode": "1997",
-                "_id": "67e1a8fb65e55d787308b9bf"
+                "_id": "690de2659a569a4eb2d7212b"
               },
               {
                 "coordx": 37,
@@ -1431,7 +1431,7 @@
                 "lat": 32.56410591829689,
                 "lon": 75.03897908185549,
                 "indexNode": "1801",
-                "_id": "67e1a8fb65e55d787308b9c0"
+                "_id": "690de2659a569a4eb2d7212c"
               },
               {
                 "coordx": 39,
@@ -1439,7 +1439,7 @@
                 "lat": 32.56410343204807,
                 "lon": 75.03898487115683,
                 "indexNode": "1803",
-                "_id": "67e1a8fb65e55d787308b9c1"
+                "_id": "690de2659a569a4eb2d7212d"
               },
               {
                 "coordx": 39,
@@ -1447,7 +1447,7 @@
                 "lat": 32.56412050923861,
                 "lon": 75.03899519616515,
                 "indexNode": "431",
-                "_id": "67e1a8fb65e55d787308b9c2"
+                "_id": "690de2659a569a4eb2d7212e"
               },
               {
                 "coordx": 31,
@@ -1455,7 +1455,7 @@
                 "lat": 32.56413045423389,
                 "lon": 75.03897203895978,
                 "indexNode": "423",
-                "_id": "67e1a8fb65e55d787308b9c3"
+                "_id": "690de2659a569a4eb2d7212f"
               },
               {
                 "coordx": 31,
@@ -1463,7 +1463,7 @@
                 "lat": 32.56411337704335,
                 "lon": 75.03896171395147,
                 "indexNode": "1795",
-                "_id": "67e1a8fb65e55d787308b9c4"
+                "_id": "690de2659a569a4eb2d72130"
               },
               {
                 "coordx": 33,
@@ -1471,7 +1471,7 @@
                 "lat": 32.564110890794524,
                 "lon": 75.0389675032528,
                 "indexNode": "1797",
-                "_id": "67e1a8fb65e55d787308b9c5"
+                "_id": "690de2659a569a4eb2d72131"
               },
               {
                 "coordx": 33,
@@ -1479,7 +1479,7 @@
                 "lat": 32.56410845119588,
                 "lon": 75.03896602825162,
                 "indexNode": "1993",
-                "_id": "67e1a8fb65e55d787308b9c6"
+                "_id": "690de2659a569a4eb2d72132"
               }
             ],
             "centroid": [
@@ -1494,7 +1494,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b9b9"
+            "_id": "690de2659a569a4eb2d72125"
           },
           {
             "contact": "undefined",
@@ -1512,7 +1512,7 @@
                 "lat": 32.56409726307619,
                 "lon": 75.03899208010765,
                 "indexNode": "2002",
-                "_id": "67e1a8fb65e55d787308b9c8"
+                "_id": "690de2659a569a4eb2d72134"
               },
               {
                 "coordx": 39,
@@ -1520,7 +1520,7 @@
                 "lat": 32.56410099244942,
                 "lon": 75.03898339615564,
                 "indexNode": "1999",
-                "_id": "67e1a8fb65e55d787308b9c9"
+                "_id": "690de2659a569a4eb2d72135"
               },
               {
                 "coordx": 39,
@@ -1528,7 +1528,7 @@
                 "lat": 32.564122948837266,
                 "lon": 75.03899667116633,
                 "indexNode": "235",
-                "_id": "67e1a8fb65e55d787308b9ca"
+                "_id": "690de2659a569a4eb2d72136"
               },
               {
                 "coordx": 49,
@@ -1536,7 +1536,7 @@
                 "lat": 32.56411051759317,
                 "lon": 75.03902561767305,
                 "indexNode": "245",
-                "_id": "67e1a8fb65e55d787308b9cb"
+                "_id": "690de2659a569a4eb2d72137"
               },
               {
                 "coordx": 49,
@@ -1544,7 +1544,7 @@
                 "lat": 32.564088561205324,
                 "lon": 75.03901234266235,
                 "indexNode": "2009",
-                "_id": "67e1a8fb65e55d787308b9cc"
+                "_id": "690de2659a569a4eb2d72138"
               },
               {
                 "coordx": 46,
@@ -1552,7 +1552,7 @@
                 "lat": 32.56409229057855,
                 "lon": 75.03900365871034,
                 "indexNode": "2006",
-                "_id": "67e1a8fb65e55d787308b9cd"
+                "_id": "690de2659a569a4eb2d72139"
               },
               {
                 "coordx": 46,
@@ -1560,7 +1560,7 @@
                 "lat": 32.5640947301772,
                 "lon": 75.03900513371153,
                 "indexNode": "1810",
-                "_id": "67e1a8fb65e55d787308b9ce"
+                "_id": "690de2659a569a4eb2d7213a"
               },
               {
                 "coordx": 48,
@@ -1568,7 +1568,7 @@
                 "lat": 32.564092243928386,
                 "lon": 75.03901092301287,
                 "indexNode": "1812",
-                "_id": "67e1a8fb65e55d787308b9cf"
+                "_id": "690de2659a569a4eb2d7213b"
               },
               {
                 "coordx": 48,
@@ -1576,7 +1576,7 @@
                 "lat": 32.56410932111893,
                 "lon": 75.03902124802119,
                 "indexNode": "440",
-                "_id": "67e1a8fb65e55d787308b9d0"
+                "_id": "690de2659a569a4eb2d7213c"
               },
               {
                 "coordx": 40,
@@ -1584,7 +1584,7 @@
                 "lat": 32.564119266114204,
                 "lon": 75.03899809081581,
                 "indexNode": "432",
-                "_id": "67e1a8fb65e55d787308b9d1"
+                "_id": "690de2659a569a4eb2d7213d"
               },
               {
                 "coordx": 40,
@@ -1592,7 +1592,7 @@
                 "lat": 32.56410218892366,
                 "lon": 75.0389877658075,
                 "indexNode": "1804",
-                "_id": "67e1a8fb65e55d787308b9d2"
+                "_id": "690de2659a569a4eb2d7213e"
               },
               {
                 "coordx": 42,
@@ -1600,7 +1600,7 @@
                 "lat": 32.56409970267484,
                 "lon": 75.03899355510885,
                 "indexNode": "1806",
-                "_id": "67e1a8fb65e55d787308b9d3"
+                "_id": "690de2659a569a4eb2d7213f"
               },
               {
                 "coordx": 42,
@@ -1608,7 +1608,7 @@
                 "lat": 32.56409726307619,
                 "lon": 75.03899208010765,
                 "indexNode": "2002",
-                "_id": "67e1a8fb65e55d787308b9d4"
+                "_id": "690de2659a569a4eb2d72140"
               }
             ],
             "centroid": [
@@ -1623,7 +1623,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b9c7"
+            "_id": "690de2659a569a4eb2d72133"
           },
           {
             "contact": "undefined",
@@ -1641,7 +1641,7 @@
                 "lat": 32.5639657113498,
                 "lon": 75.03888337283338,
                 "indexNode": "13362",
-                "_id": "67e1a8fb65e55d787308b9d6"
+                "_id": "690de2659a569a4eb2d72142"
               },
               {
                 "coordx": 45,
@@ -1649,7 +1649,7 @@
                 "lat": 32.5639520369813,
                 "lon": 75.03891521399076,
                 "indexNode": "13373",
-                "_id": "67e1a8fb65e55d787308b9d7"
+                "_id": "690de2659a569a4eb2d72143"
               },
               {
                 "coordx": 45,
@@ -1657,7 +1657,7 @@
                 "lat": 32.5639520369813,
                 "lon": 75.03891521399076,
                 "indexNode": "13373",
-                "_id": "67e1a8fb65e55d787308b9d8"
+                "_id": "690de2659a569a4eb2d72144"
               }
             ],
             "centroid": [],
@@ -1669,7 +1669,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b9d5"
+            "_id": "690de2659a569a4eb2d72141"
           },
           {
             "contact": "undefined",
@@ -1687,7 +1687,7 @@
                 "lat": 32.564088561205324,
                 "lon": 75.03901234266235,
                 "indexNode": "2009",
-                "_id": "67e1a8fb65e55d787308b9da"
+                "_id": "690de2659a569a4eb2d72146"
               },
               {
                 "coordx": 49,
@@ -1695,7 +1695,7 @@
                 "lat": 32.564049527626935,
                 "lon": 75.03898874264334,
                 "indexNode": "5145",
-                "_id": "67e1a8fb65e55d787308b9db"
+                "_id": "690de2659a569a4eb2d72147"
               },
               {
                 "coordx": 41,
@@ -1703,7 +1703,7 @@
                 "lat": 32.56405947262221,
                 "lon": 75.03896558543798,
                 "indexNode": "5137",
-                "_id": "67e1a8fb65e55d787308b9dc"
+                "_id": "690de2659a569a4eb2d72148"
               },
               {
                 "coordx": 41,
@@ -1711,7 +1711,7 @@
                 "lat": 32.56406191222086,
                 "lon": 75.03896706043916,
                 "indexNode": "4941",
-                "_id": "67e1a8fb65e55d787308b9dd"
+                "_id": "690de2659a569a4eb2d72149"
               },
               {
                 "coordx": 48,
@@ -1719,7 +1719,7 @@
                 "lat": 32.56405321035,
                 "lon": 75.03898732299386,
                 "indexNode": "4948",
-                "_id": "67e1a8fb65e55d787308b9de"
+                "_id": "690de2659a569a4eb2d7214a"
               },
               {
                 "coordx": 48,
@@ -1727,7 +1727,7 @@
                 "lat": 32.56408980432973,
                 "lon": 75.03900944801168,
                 "indexNode": "2008",
-                "_id": "67e1a8fb65e55d787308b9df"
+                "_id": "690de2659a569a4eb2d7214b"
               },
               {
                 "coordx": 49,
@@ -1735,7 +1735,7 @@
                 "lat": 32.564088561205324,
                 "lon": 75.03901234266235,
                 "indexNode": "2009",
-                "_id": "67e1a8fb65e55d787308b9e0"
+                "_id": "690de2659a569a4eb2d7214c"
               }
             ],
             "centroid": [
@@ -1750,7 +1750,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b9d9"
+            "_id": "690de2659a569a4eb2d72145"
           },
           {
             "contact": "undefined",
@@ -1768,7 +1768,7 @@
                 "lat": 32.56407959586361,
                 "lon": 75.0388829495146,
                 "indexNode": "6091",
-                "_id": "67e1a8fb65e55d787308b9e2"
+                "_id": "690de2659a569a4eb2d7214e"
               },
               {
                 "coordx": 27,
@@ -1776,7 +1776,7 @@
                 "lat": 32.5640646783707,
                 "lon": 75.03891768532264,
                 "indexNode": "6103",
-                "_id": "67e1a8fb65e55d787308b9e3"
+                "_id": "690de2659a569a4eb2d7214f"
               },
               {
                 "coordx": 27,
@@ -1784,7 +1784,7 @@
                 "lat": 32.564067117969344,
                 "lon": 75.03891916032383,
                 "indexNode": "5907",
-                "_id": "67e1a8fb65e55d787308b9e4"
+                "_id": "690de2659a569a4eb2d72150"
               },
               {
                 "coordx": 15,
@@ -1792,7 +1792,7 @@
                 "lat": 32.56408203546226,
                 "lon": 75.03888442451579,
                 "indexNode": "5895",
-                "_id": "67e1a8fb65e55d787308b9e5"
+                "_id": "690de2659a569a4eb2d72151"
               },
               {
                 "coordx": 15,
@@ -1800,7 +1800,7 @@
                 "lat": 32.56407959586361,
                 "lon": 75.0388829495146,
                 "indexNode": "6091",
-                "_id": "67e1a8fb65e55d787308b9e6"
+                "_id": "690de2659a569a4eb2d72152"
               }
             ],
             "centroid": [
@@ -1815,7 +1815,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b9e1"
+            "_id": "690de2659a569a4eb2d7214d"
           },
           {
             "contact": "undefined",
@@ -1833,7 +1833,7 @@
                 "lat": 32.56395315394503,
                 "lon": 75.0393133309804,
                 "indexNode": "2506",
-                "_id": "67e1a8fb65e55d787308b9e8"
+                "_id": "690de2659a569a4eb2d72154"
               },
               {
                 "coordx": 130,
@@ -1841,7 +1841,7 @@
                 "lat": 32.56398298893085,
                 "lon": 75.0392438593643,
                 "indexNode": "2482",
-                "_id": "67e1a8fb65e55d787308b9e9"
+                "_id": "690de2659a569a4eb2d72155"
               },
               {
                 "coordx": 130,
@@ -1849,7 +1849,7 @@
                 "lat": 32.56398054933221,
                 "lon": 75.03924238436312,
                 "indexNode": "2678",
-                "_id": "67e1a8fb65e55d787308b9ea"
+                "_id": "690de2659a569a4eb2d72156"
               },
               {
                 "coordx": 154,
@@ -1857,7 +1857,7 @@
                 "lat": 32.563950714346376,
                 "lon": 75.03931185597922,
                 "indexNode": "2702",
-                "_id": "67e1a8fb65e55d787308b9eb"
+                "_id": "690de2659a569a4eb2d72157"
               },
               {
                 "coordx": 154,
@@ -1865,7 +1865,7 @@
                 "lat": 32.56395315394503,
                 "lon": 75.0393133309804,
                 "indexNode": "2506",
-                "_id": "67e1a8fb65e55d787308b9ec"
+                "_id": "690de2659a569a4eb2d72158"
               }
             ],
             "centroid": [
@@ -1880,7 +1880,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b9e7"
+            "_id": "690de2659a569a4eb2d72153"
           },
           {
             "contact": "undefined",
@@ -1898,7 +1898,7 @@
                 "lat": 32.56398861453087,
                 "lon": 75.03913058052622,
                 "indexNode": "5194",
-                "_id": "67e1a8fb65e55d787308b9ee"
+                "_id": "690de2659a569a4eb2d7215a"
               },
               {
                 "coordx": 129,
@@ -1906,7 +1906,7 @@
                 "lat": 32.56395007767417,
                 "lon": 75.039220314697,
                 "indexNode": "5225",
-                "_id": "67e1a8fb65e55d787308b9ef"
+                "_id": "690de2659a569a4eb2d7215b"
               },
               {
                 "coordx": 129,
@@ -1914,7 +1914,7 @@
                 "lat": 32.56401106764041,
                 "lon": 75.03925718972671,
                 "indexNode": "325",
-                "_id": "67e1a8fb65e55d787308b9f0"
+                "_id": "690de2659a569a4eb2d7215c"
               },
               {
                 "coordx": 98,
@@ -1922,7 +1922,7 @@
                 "lat": 32.5640496044971,
                 "lon": 75.03916745555591,
                 "indexNode": "294",
-                "_id": "67e1a8fb65e55d787308b9f1"
+                "_id": "690de2659a569a4eb2d7215d"
               },
               {
                 "coordx": 98,
@@ -1930,7 +1930,7 @@
                 "lat": 32.56398861453087,
                 "lon": 75.03913058052622,
                 "indexNode": "5194",
-                "_id": "67e1a8fb65e55d787308b9f2"
+                "_id": "690de2659a569a4eb2d7215e"
               }
             ],
             "centroid": [
@@ -1945,7 +1945,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b9ed"
+            "_id": "690de2659a569a4eb2d72159"
           },
           {
             "contact": "undefined",
@@ -1963,7 +1963,7 @@
                 "lat": 32.56395495687147,
                 "lon": 75.03922326469939,
                 "indexNode": "4833",
-                "_id": "67e1a8fb65e55d787308b9f4"
+                "_id": "690de2659a569a4eb2d72160"
               },
               {
                 "coordx": 153,
@@ -1971,7 +1971,7 @@
                 "lat": 32.563925121885646,
                 "lon": 75.03929273631549,
                 "indexNode": "4857",
-                "_id": "67e1a8fb65e55d787308b9f5"
+                "_id": "690de2659a569a4eb2d72161"
               },
               {
                 "coordx": 153,
@@ -1979,7 +1979,7 @@
                 "lat": 32.56392268228699,
                 "lon": 75.03929126131429,
                 "indexNode": "5053",
-                "_id": "67e1a8fb65e55d787308b9f6"
+                "_id": "690de2659a569a4eb2d72162"
               },
               {
                 "coordx": 129,
@@ -1987,7 +1987,7 @@
                 "lat": 32.563952517272824,
                 "lon": 75.03922178969819,
                 "indexNode": "5029",
-                "_id": "67e1a8fb65e55d787308b9f7"
+                "_id": "690de2659a569a4eb2d72163"
               },
               {
                 "coordx": 129,
@@ -1995,7 +1995,7 @@
                 "lat": 32.56395495687147,
                 "lon": 75.03922326469939,
                 "indexNode": "4833",
-                "_id": "67e1a8fb65e55d787308b9f8"
+                "_id": "690de2659a569a4eb2d72164"
               }
             ],
             "centroid": [
@@ -2010,7 +2010,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b9f3"
+            "_id": "690de2659a569a4eb2d7215f"
           },
           {
             "contact": "undefined",
@@ -2028,7 +2028,7 @@
                 "lat": 32.563825007681025,
                 "lon": 75.03867432962149,
                 "indexNode": "28028",
-                "_id": "67e1a8fb65e55d787308b9fa"
+                "_id": "690de2659a569a4eb2d72166"
               },
               {
                 "coordx": 10,
@@ -2036,7 +2036,7 @@
                 "lat": 32.56381257643693,
                 "lon": 75.03870327612819,
                 "indexNode": "28038",
-                "_id": "67e1a8fb65e55d787308b9fb"
+                "_id": "690de2659a569a4eb2d72167"
               },
               {
                 "coordx": 10,
@@ -2044,7 +2044,7 @@
                 "lat": 32.56380037844368,
                 "lon": 75.03869590112225,
                 "indexNode": "29018",
-                "_id": "67e1a8fb65e55d787308b9fc"
+                "_id": "690de2659a569a4eb2d72168"
               },
               {
                 "coordx": 15,
@@ -2052,7 +2052,7 @@
                 "lat": 32.56379416282164,
                 "lon": 75.03871037437561,
                 "indexNode": "29023",
-                "_id": "67e1a8fb65e55d787308b9fd"
+                "_id": "690de2659a569a4eb2d72169"
               },
               {
                 "coordx": 16,
@@ -2060,7 +2060,7 @@
                 "lat": 32.56379291969723,
                 "lon": 75.03871326902627,
                 "indexNode": "29024",
-                "_id": "67e1a8fb65e55d787308b9fe"
+                "_id": "690de2659a569a4eb2d7216a"
               },
               {
                 "coordx": 16,
@@ -2068,7 +2068,7 @@
                 "lat": 32.56374168812559,
                 "lon": 75.03868229400133,
                 "indexNode": "33140",
-                "_id": "67e1a8fb65e55d787308b9ff"
+                "_id": "690de2659a569a4eb2d7216b"
               },
               {
                 "coordx": 0,
@@ -2076,7 +2076,7 @@
                 "lat": 32.56376157811614,
                 "lon": 75.0386359795906,
                 "indexNode": "33124",
-                "_id": "67e1a8fb65e55d787308ba00"
+                "_id": "690de2659a569a4eb2d7216c"
               },
               {
                 "coordx": 0,
@@ -2084,7 +2084,7 @@
                 "lat": 32.563825007681025,
                 "lon": 75.03867432962149,
                 "indexNode": "28028",
-                "_id": "67e1a8fb65e55d787308ba01"
+                "_id": "690de2659a569a4eb2d7216d"
               }
             ],
             "centroid": [
@@ -2099,7 +2099,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308b9f9"
+            "_id": "690de2659a569a4eb2d72165"
           },
           {
             "contact": "undefined",
@@ -2117,7 +2117,7 @@
                 "lat": 32.563603001563585,
                 "lon": 75.03911256476374,
                 "indexNode": "30341",
-                "_id": "67e1a8fb65e55d787308ba03"
+                "_id": "690de2659a569a4eb2d7216f"
               },
               {
                 "coordx": 157,
@@ -2125,7 +2125,7 @@
                 "lat": 32.56364203514198,
                 "lon": 75.03913616478275,
                 "indexNode": "27205",
-                "_id": "67e1a8fb65e55d787308ba04"
+                "_id": "690de2659a569a4eb2d72170"
               },
               {
                 "coordx": 156,
@@ -2133,7 +2133,7 @@
                 "lat": 32.56364327826639,
                 "lon": 75.03913327013207,
                 "indexNode": "27204",
-                "_id": "67e1a8fb65e55d787308ba05"
+                "_id": "690de2659a569a4eb2d72171"
               },
               {
                 "coordx": 156,
@@ -2141,7 +2141,7 @@
                 "lat": 32.563604244688,
                 "lon": 75.03910967011306,
                 "indexNode": "30340",
-                "_id": "67e1a8fb65e55d787308ba06"
+                "_id": "690de2659a569a4eb2d72172"
               },
               {
                 "coordx": 157,
@@ -2149,7 +2149,7 @@
                 "lat": 32.563603001563585,
                 "lon": 75.03911256476374,
                 "indexNode": "30341",
-                "_id": "67e1a8fb65e55d787308ba07"
+                "_id": "690de2659a569a4eb2d72173"
               }
             ],
             "centroid": [
@@ -2164,7 +2164,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba02"
+            "_id": "690de2659a569a4eb2d7216e"
           },
           {
             "contact": "undefined",
@@ -2182,7 +2182,7 @@
                 "lat": 32.56365911233252,
                 "lon": 75.03914648979107,
                 "indexNode": "25833",
-                "_id": "67e1a8fb65e55d787308ba09"
+                "_id": "690de2659a569a4eb2d72175"
               },
               {
                 "coordx": 157,
@@ -2190,7 +2190,7 @@
                 "lat": 32.56367131032577,
                 "lon": 75.039153864797,
                 "indexNode": "24853",
-                "_id": "67e1a8fb65e55d787308ba0a"
+                "_id": "690de2659a569a4eb2d72176"
               },
               {
                 "coordx": 156,
@@ -2198,7 +2198,7 @@
                 "lat": 32.56367255345018,
                 "lon": 75.03915097014632,
                 "indexNode": "24852",
-                "_id": "67e1a8fb65e55d787308ba0b"
+                "_id": "690de2659a569a4eb2d72177"
               },
               {
                 "coordx": 156,
@@ -2206,7 +2206,7 @@
                 "lat": 32.56366035545693,
                 "lon": 75.03914359514039,
                 "indexNode": "25832",
-                "_id": "67e1a8fb65e55d787308ba0c"
+                "_id": "690de2659a569a4eb2d72178"
               },
               {
                 "coordx": 157,
@@ -2214,7 +2214,7 @@
                 "lat": 32.56365911233252,
                 "lon": 75.03914648979107,
                 "indexNode": "25833",
-                "_id": "67e1a8fb65e55d787308ba0d"
+                "_id": "690de2659a569a4eb2d72179"
               }
             ],
             "centroid": [
@@ -2229,7 +2229,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba08"
+            "_id": "690de2659a569a4eb2d72174"
           },
           {
             "contact": "undefined",
@@ -2247,7 +2247,7 @@
                 "lat": 32.56367255345018,
                 "lon": 75.03915097014632,
                 "indexNode": "24852",
-                "_id": "67e1a8fb65e55d787308ba0f"
+                "_id": "690de2659a569a4eb2d7217b"
               },
               {
                 "coordx": 195,
@@ -2255,7 +2255,7 @@
                 "lat": 32.56362407159821,
                 "lon": 75.03926386152249,
                 "indexNode": "24891",
-                "_id": "67e1a8fb65e55d787308ba10"
+                "_id": "690de2659a569a4eb2d7217c"
               },
               {
                 "coordx": 195,
@@ -2263,7 +2263,7 @@
                 "lat": 32.56362163199956,
                 "lon": 75.0392623865213,
                 "indexNode": "25087",
-                "_id": "67e1a8fb65e55d787308ba11"
+                "_id": "690de2659a569a4eb2d7217d"
               },
               {
                 "coordx": 156,
@@ -2271,7 +2271,7 @@
                 "lat": 32.56367011385153,
                 "lon": 75.03914949514514,
                 "indexNode": "25048",
-                "_id": "67e1a8fb65e55d787308ba12"
+                "_id": "690de2659a569a4eb2d7217e"
               },
               {
                 "coordx": 156,
@@ -2279,7 +2279,7 @@
                 "lat": 32.56367255345018,
                 "lon": 75.03915097014632,
                 "indexNode": "24852",
-                "_id": "67e1a8fb65e55d787308ba13"
+                "_id": "690de2659a569a4eb2d7217f"
               }
             ],
             "centroid": [
@@ -2294,7 +2294,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba0e"
+            "_id": "690de2659a569a4eb2d7217a"
           },
           {
             "contact": "undefined",
@@ -2312,7 +2312,7 @@
                 "lat": 32.563876409423166,
                 "lon": 75.03886948895394,
                 "indexNode": "19449",
-                "_id": "67e1a8fb65e55d787308ba15"
+                "_id": "690de2659a569a4eb2d72181"
               },
               {
                 "coordx": 45,
@@ -2320,7 +2320,7 @@
                 "lat": 32.56381541945694,
                 "lon": 75.03883261392424,
                 "indexNode": "24349",
-                "_id": "67e1a8fb65e55d787308ba16"
+                "_id": "690de2659a569a4eb2d72182"
               },
               {
                 "coordx": 39,
@@ -2328,7 +2328,7 @@
                 "lat": 32.56382287820339,
                 "lon": 75.03881524602022,
                 "indexNode": "24343",
-                "_id": "67e1a8fb65e55d787308ba17"
+                "_id": "690de2659a569a4eb2d72183"
               },
               {
                 "coordx": 39,
@@ -2336,7 +2336,7 @@
                 "lat": 32.563883868169626,
                 "lon": 75.03885212104991,
                 "indexNode": "19443",
-                "_id": "67e1a8fb65e55d787308ba18"
+                "_id": "690de2659a569a4eb2d72184"
               },
               {
                 "coordx": 45,
@@ -2344,7 +2344,7 @@
                 "lat": 32.563876409423166,
                 "lon": 75.03886948895394,
                 "indexNode": "19449",
-                "_id": "67e1a8fb65e55d787308ba19"
+                "_id": "690de2659a569a4eb2d72185"
               }
             ],
             "centroid": [
@@ -2359,7 +2359,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba14"
+            "_id": "690de2659a569a4eb2d72180"
           },
           {
             "contact": "undefined",
@@ -2377,7 +2377,7 @@
                 "lat": 32.56396423497455,
                 "lon": 75.03892258899671,
                 "indexNode": "12393",
-                "_id": "67e1a8fb65e55d787308ba1b"
+                "_id": "690de2659a569a4eb2d72187"
               },
               {
                 "coordx": 45,
@@ -2385,7 +2385,7 @@
                 "lat": 32.56402034574348,
                 "lon": 75.03895651402402,
                 "indexNode": "7885",
-                "_id": "67e1a8fb65e55d787308ba1c"
+                "_id": "690de2659a569a4eb2d72188"
               },
               {
                 "coordx": 39,
@@ -2393,7 +2393,7 @@
                 "lat": 32.56402780448994,
                 "lon": 75.03893914612,
                 "indexNode": "7879",
-                "_id": "67e1a8fb65e55d787308ba1d"
+                "_id": "690de2659a569a4eb2d72189"
               },
               {
                 "coordx": 39,
@@ -2401,7 +2401,7 @@
                 "lat": 32.563971693721,
                 "lon": 75.03890522109268,
                 "indexNode": "12387",
-                "_id": "67e1a8fb65e55d787308ba1e"
+                "_id": "690de2659a569a4eb2d7218a"
               },
               {
                 "coordx": 45,
@@ -2409,7 +2409,7 @@
                 "lat": 32.56396423497455,
                 "lon": 75.03892258899671,
                 "indexNode": "12393",
-                "_id": "67e1a8fb65e55d787308ba1f"
+                "_id": "690de2659a569a4eb2d7218b"
               }
             ],
             "centroid": [
@@ -2424,7 +2424,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba1a"
+            "_id": "690de2659a569a4eb2d72186"
           },
           {
             "contact": "undefined",
@@ -2442,7 +2442,7 @@
                 "lat": 32.56374617769136,
                 "lon": 75.03893659994156,
                 "indexNode": "25957",
-                "_id": "67e1a8fb65e55d787308ba21"
+                "_id": "690de2659a569a4eb2d7218d"
               },
               {
                 "coordx": 127,
@@ -2450,7 +2450,7 @@
                 "lat": 32.56369396646616,
                 "lon": 75.03905817526974,
                 "indexNode": "25999",
-                "_id": "67e1a8fb65e55d787308ba22"
+                "_id": "690de2659a569a4eb2d7218e"
               },
               {
                 "coordx": 137,
@@ -2458,7 +2458,7 @@
                 "lat": 32.56369373321531,
                 "lon": 75.0390944967824,
                 "indexNode": "25029",
-                "_id": "67e1a8fb65e55d787308ba23"
+                "_id": "690de2659a569a4eb2d7218f"
               },
               {
                 "coordx": 137,
@@ -2466,7 +2466,7 @@
                 "lat": 32.563691293616664,
                 "lon": 75.0390930217812,
                 "indexNode": "25225",
-                "_id": "67e1a8fb65e55d787308ba24"
+                "_id": "690de2659a569a4eb2d72190"
               },
               {
                 "coordx": 127,
@@ -2474,7 +2474,7 @@
                 "lat": 32.56369152686751,
                 "lon": 75.03905670026856,
                 "indexNode": "26195",
-                "_id": "67e1a8fb65e55d787308ba25"
+                "_id": "690de2659a569a4eb2d72191"
               },
               {
                 "coordx": 85,
@@ -2482,7 +2482,7 @@
                 "lat": 32.56374373809271,
                 "lon": 75.03893512494038,
                 "indexNode": "26153",
-                "_id": "67e1a8fb65e55d787308ba26"
+                "_id": "690de2659a569a4eb2d72192"
               },
               {
                 "coordx": 85,
@@ -2490,7 +2490,7 @@
                 "lat": 32.56374617769136,
                 "lon": 75.03893659994156,
                 "indexNode": "25957",
-                "_id": "67e1a8fb65e55d787308ba27"
+                "_id": "690de2659a569a4eb2d72193"
               }
             ],
             "centroid": [
@@ -2505,7 +2505,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba20"
+            "_id": "690de2659a569a4eb2d7218c"
           },
           {
             "contact": "undefined",
@@ -2523,7 +2523,7 @@
                 "lat": 32.56403847945776,
                 "lon": 75.03899300159179,
                 "indexNode": "5736",
-                "_id": "67e1a8fb65e55d787308ba29"
+                "_id": "690de2659a569a4eb2d72195"
               },
               {
                 "coordx": 52,
@@ -2531,7 +2531,7 @@
                 "lat": 32.564043358655056,
                 "lon": 75.03899595159416,
                 "indexNode": "5344",
-                "_id": "67e1a8fb65e55d787308ba2a"
+                "_id": "690de2659a569a4eb2d72196"
               },
               {
                 "coordx": 52,
@@ -2539,7 +2539,7 @@
                 "lat": 32.564043358655056,
                 "lon": 75.03899595159416,
                 "indexNode": "5344",
-                "_id": "67e1a8fb65e55d787308ba2b"
+                "_id": "690de2659a569a4eb2d72197"
               }
             ],
             "centroid": [],
@@ -2551,7 +2551,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba28"
+            "_id": "690de2659a569a4eb2d72194"
           },
           {
             "contact": "undefined",
@@ -2569,7 +2569,7 @@
                 "lat": 32.56397918268746,
                 "lon": 75.03907383040375,
                 "indexNode": "7336",
-                "_id": "67e1a8fb65e55d787308ba2d"
+                "_id": "690de2659a569a4eb2d72199"
               },
               {
                 "coordx": 123,
@@ -2577,7 +2577,7 @@
                 "lat": 32.563930700835485,
                 "lon": 75.03918672177991,
                 "indexNode": "7375",
-                "_id": "67e1a8fb65e55d787308ba2e"
+                "_id": "690de2659a569a4eb2d7219a"
               },
               {
                 "coordx": 144,
@@ -2585,7 +2585,7 @@
                 "lat": 32.563880199236394,
                 "lon": 75.03923275943212,
                 "indexNode": "9356",
-                "_id": "67e1a8fb65e55d787308ba2f"
+                "_id": "690de2659a569a4eb2d7219b"
               },
               {
                 "coordx": 152,
@@ -2593,7 +2593,7 @@
                 "lat": 32.56387025424112,
                 "lon": 75.03925591663749,
                 "indexNode": "9364",
-                "_id": "67e1a8fb65e55d787308ba30"
+                "_id": "690de2659a569a4eb2d7219c"
               },
               {
                 "coordx": 152,
@@ -2601,7 +2601,7 @@
                 "lat": 32.56389708982626,
                 "lon": 75.03927214165056,
                 "indexNode": "7208",
-                "_id": "67e1a8fb65e55d787308ba31"
+                "_id": "690de2659a569a4eb2d7219d"
               },
               {
                 "coordx": 194,
@@ -2609,7 +2609,7 @@
                 "lat": 32.56384487860106,
                 "lon": 75.03939371697874,
                 "indexNode": "7250",
-                "_id": "67e1a8fb65e55d787308ba32"
+                "_id": "690de2659a569a4eb2d7219e"
               },
               {
                 "coordx": 194,
@@ -2617,7 +2617,7 @@
                 "lat": 32.56362531472262,
                 "lon": 75.03926096687182,
                 "indexNode": "24890",
-                "_id": "67e1a8fb65e55d787308ba33"
+                "_id": "690de2659a569a4eb2d7219f"
               },
               {
                 "coordx": 156,
@@ -2625,7 +2625,7 @@
                 "lat": 32.56367255345018,
                 "lon": 75.03915097014632,
                 "indexNode": "24852",
-                "_id": "67e1a8fb65e55d787308ba34"
+                "_id": "690de2659a569a4eb2d721a0"
               },
               {
                 "coordx": 155,
@@ -2633,7 +2633,7 @@
                 "lat": 32.56367379657459,
                 "lon": 75.03914807549566,
                 "indexNode": "24851",
-                "_id": "67e1a8fb65e55d787308ba35"
+                "_id": "690de2659a569a4eb2d721a1"
               },
               {
                 "coordx": 154,
@@ -2641,7 +2641,7 @@
                 "lat": 32.563675039699,
                 "lon": 75.03914518084498,
                 "indexNode": "24850",
-                "_id": "67e1a8fb65e55d787308ba36"
+                "_id": "690de2659a569a4eb2d721a2"
               },
               {
                 "coordx": 154,
@@ -2649,7 +2649,7 @@
                 "lat": 32.56369943568549,
                 "lon": 75.03915993085687,
                 "indexNode": "22890",
-                "_id": "67e1a8fb65e55d787308ba37"
+                "_id": "690de2659a569a4eb2d721a3"
               },
               {
                 "coordx": 146,
@@ -2657,7 +2657,7 @@
                 "lat": 32.56370938068077,
                 "lon": 75.03913677365149,
                 "indexNode": "22882",
-                "_id": "67e1a8fb65e55d787308ba38"
+                "_id": "690de2659a569a4eb2d721a4"
               },
               {
                 "coordx": 125,
@@ -2665,7 +2665,7 @@
                 "lat": 32.56370865070823,
                 "lon": 75.03905976097434,
                 "indexNode": "25017",
-                "_id": "67e1a8fb65e55d787308ba39"
+                "_id": "690de2659a569a4eb2d721a5"
               },
               {
                 "coordx": 84,
@@ -2673,7 +2673,7 @@
                 "lat": 32.563759618809016,
                 "lon": 75.03894108029684,
                 "indexNode": "24976",
-                "_id": "67e1a8fb65e55d787308ba3a"
+                "_id": "690de2659a569a4eb2d721a6"
               },
               {
                 "coordx": 84,
@@ -2681,7 +2681,7 @@
                 "lat": 32.56397918268746,
                 "lon": 75.03907383040375,
                 "indexNode": "7336",
-                "_id": "67e1a8fb65e55d787308ba3b"
+                "_id": "690de2659a569a4eb2d721a7"
               }
             ],
             "centroid": [
@@ -2696,7 +2696,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba2c"
+            "_id": "690de2659a569a4eb2d72198"
           },
           {
             "contact": "undefined",
@@ -2714,7 +2714,7 @@
                 "lat": 32.56362163199956,
                 "lon": 75.0392623865213,
                 "indexNode": "25087",
-                "_id": "67e1a8fb65e55d787308ba3d"
+                "_id": "690de2659a569a4eb2d721a9"
               },
               {
                 "coordx": 195,
@@ -2722,7 +2722,7 @@
                 "lat": 32.563846075075304,
                 "lon": 75.0393980866306,
                 "indexNode": "7055",
-                "_id": "67e1a8fb65e55d787308ba3e"
+                "_id": "690de2659a569a4eb2d721aa"
               },
               {
                 "coordx": 194,
@@ -2730,7 +2730,7 @@
                 "lat": 32.56384731819971,
                 "lon": 75.03939519197992,
                 "indexNode": "7054",
-                "_id": "67e1a8fb65e55d787308ba3f"
+                "_id": "690de2659a569a4eb2d721ab"
               },
               {
                 "coordx": 194,
@@ -2738,7 +2738,7 @@
                 "lat": 32.56362287512397,
                 "lon": 75.03925949187062,
                 "indexNode": "25086",
-                "_id": "67e1a8fb65e55d787308ba40"
+                "_id": "690de2659a569a4eb2d721ac"
               },
               {
                 "coordx": 195,
@@ -2746,7 +2746,7 @@
                 "lat": 32.56362163199956,
                 "lon": 75.0392623865213,
                 "indexNode": "25087",
-                "_id": "67e1a8fb65e55d787308ba41"
+                "_id": "690de2659a569a4eb2d721ad"
               }
             ],
             "centroid": [
@@ -2761,7 +2761,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba3c"
+            "_id": "690de2659a569a4eb2d721a8"
           },
           {
             "contact": "undefined",
@@ -2779,7 +2779,7 @@
                 "lat": 32.563846075075304,
                 "lon": 75.0393980866306,
                 "indexNode": "7055",
-                "_id": "67e1a8fb65e55d787308ba43"
+                "_id": "690de2659a569a4eb2d721af"
               },
               {
                 "coordx": 172,
@@ -2787,7 +2787,7 @@
                 "lat": 32.56387466693672,
                 "lon": 75.03933150966516,
                 "indexNode": "7032",
-                "_id": "67e1a8fb65e55d787308ba44"
+                "_id": "690de2659a569a4eb2d721b0"
               },
               {
                 "coordx": 172,
@@ -2795,7 +2795,7 @@
                 "lat": 32.563872227338074,
                 "lon": 75.03933003466398,
                 "indexNode": "7228",
-                "_id": "67e1a8fb65e55d787308ba45"
+                "_id": "690de2659a569a4eb2d721b1"
               },
               {
                 "coordx": 195,
@@ -2803,7 +2803,7 @@
                 "lat": 32.56384363547665,
                 "lon": 75.0393966116294,
                 "indexNode": "7251",
-                "_id": "67e1a8fb65e55d787308ba46"
+                "_id": "690de2659a569a4eb2d721b2"
               },
               {
                 "coordx": 195,
@@ -2811,7 +2811,7 @@
                 "lat": 32.563846075075304,
                 "lon": 75.0393980866306,
                 "indexNode": "7055",
-                "_id": "67e1a8fb65e55d787308ba47"
+                "_id": "690de2659a569a4eb2d721b3"
               }
             ],
             "centroid": [
@@ -2826,7 +2826,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba42"
+            "_id": "690de2659a569a4eb2d721ae"
           },
           {
             "contact": "undefined",
@@ -2844,7 +2844,7 @@
                 "lat": 32.56387466693672,
                 "lon": 75.03933150966516,
                 "indexNode": "7032",
-                "_id": "67e1a8fb65e55d787308ba49"
+                "_id": "690de2659a569a4eb2d721b5"
               },
               {
                 "coordx": 153,
@@ -2852,7 +2852,7 @@
                 "lat": 32.5638982863005,
                 "lon": 75.03927651130242,
                 "indexNode": "7013",
-                "_id": "67e1a8fb65e55d787308ba4a"
+                "_id": "690de2659a569a4eb2d721b6"
               },
               {
                 "coordx": 153,
@@ -2860,7 +2860,7 @@
                 "lat": 32.563895846701854,
                 "lon": 75.03927503630123,
                 "indexNode": "7209",
-                "_id": "67e1a8fb65e55d787308ba4b"
+                "_id": "690de2659a569a4eb2d721b7"
               },
               {
                 "coordx": 172,
@@ -2868,7 +2868,7 @@
                 "lat": 32.563872227338074,
                 "lon": 75.03933003466398,
                 "indexNode": "7228",
-                "_id": "67e1a8fb65e55d787308ba4c"
+                "_id": "690de2659a569a4eb2d721b8"
               },
               {
                 "coordx": 172,
@@ -2876,7 +2876,7 @@
                 "lat": 32.56387466693672,
                 "lon": 75.03933150966516,
                 "indexNode": "7032",
-                "_id": "67e1a8fb65e55d787308ba4d"
+                "_id": "690de2659a569a4eb2d721b9"
               }
             ],
             "centroid": [
@@ -2891,7 +2891,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba48"
+            "_id": "690de2659a569a4eb2d721b4"
           },
           {
             "contact": "undefined",
@@ -2909,7 +2909,7 @@
                 "lat": 32.563895846701854,
                 "lon": 75.03927503630123,
                 "indexNode": "7209",
-                "_id": "67e1a8fb65e55d787308ba4f"
+                "_id": "690de2659a569a4eb2d721bb"
               },
               {
                 "coordx": 153,
@@ -2917,7 +2917,7 @@
                 "lat": 32.56390560509645,
                 "lon": 75.03928093630599,
                 "indexNode": "6425",
-                "_id": "67e1a8fb65e55d787308ba50"
+                "_id": "690de2659a569a4eb2d721bc"
               },
               {
                 "coordx": 154,
@@ -2925,7 +2925,7 @@
                 "lat": 32.56390436197204,
                 "lon": 75.03928383095665,
                 "indexNode": "6426",
-                "_id": "67e1a8fb65e55d787308ba51"
+                "_id": "690de2659a569a4eb2d721bd"
               },
               {
                 "coordx": 154,
@@ -2933,7 +2933,7 @@
                 "lat": 32.563894603577445,
                 "lon": 75.0392779309519,
                 "indexNode": "7210",
-                "_id": "67e1a8fb65e55d787308ba52"
+                "_id": "690de2659a569a4eb2d721be"
               },
               {
                 "coordx": 153,
@@ -2941,7 +2941,7 @@
                 "lat": 32.563895846701854,
                 "lon": 75.03927503630123,
                 "indexNode": "7209",
-                "_id": "67e1a8fb65e55d787308ba53"
+                "_id": "690de2659a569a4eb2d721bf"
               }
             ],
             "centroid": [
@@ -2956,7 +2956,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba4e"
+            "_id": "690de2659a569a4eb2d721ba"
           },
           {
             "contact": "undefined",
@@ -2974,7 +2974,7 @@
                 "lat": 32.56391899956394,
                 "lon": 75.03929268096378,
                 "indexNode": "5250",
-                "_id": "67e1a8fb65e55d787308ba55"
+                "_id": "690de2659a569a4eb2d721c1"
               },
               {
                 "coordx": 154,
@@ -2982,7 +2982,7 @@
                 "lat": 32.56395315394503,
                 "lon": 75.0393133309804,
                 "indexNode": "2506",
-                "_id": "67e1a8fb65e55d787308ba56"
+                "_id": "690de2659a569a4eb2d721c2"
               },
               {
                 "coordx": 153,
@@ -2990,7 +2990,7 @@
                 "lat": 32.56395439706944,
                 "lon": 75.03931043632974,
                 "indexNode": "2505",
-                "_id": "67e1a8fb65e55d787308ba57"
+                "_id": "690de2659a569a4eb2d721c3"
               },
               {
                 "coordx": 153,
@@ -2998,7 +2998,7 @@
                 "lat": 32.56392024268835,
                 "lon": 75.0392897863131,
                 "indexNode": "5249",
-                "_id": "67e1a8fb65e55d787308ba58"
+                "_id": "690de2659a569a4eb2d721c4"
               },
               {
                 "coordx": 154,
@@ -3006,7 +3006,7 @@
                 "lat": 32.56391899956394,
                 "lon": 75.03929268096378,
                 "indexNode": "5250",
-                "_id": "67e1a8fb65e55d787308ba59"
+                "_id": "690de2659a569a4eb2d721c5"
               }
             ],
             "centroid": [
@@ -3021,7 +3021,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba54"
+            "_id": "690de2659a569a4eb2d721c0"
           },
           {
             "contact": "undefined",
@@ -3039,7 +3039,7 @@
                 "lat": 32.56398054933221,
                 "lon": 75.03924238436312,
                 "indexNode": "2678",
-                "_id": "67e1a8fb65e55d787308ba5b"
+                "_id": "690de2659a569a4eb2d721c7"
               },
               {
                 "coordx": 130,
@@ -3047,7 +3047,7 @@
                 "lat": 32.564009824516,
                 "lon": 75.03926008437737,
                 "indexNode": "326",
-                "_id": "67e1a8fb65e55d787308ba5c"
+                "_id": "690de2659a569a4eb2d721c8"
               },
               {
                 "coordx": 130,
@@ -3055,7 +3055,7 @@
                 "lat": 32.564012264114645,
                 "lon": 75.03926155937856,
                 "indexNode": "130",
-                "_id": "67e1a8fb65e55d787308ba5d"
+                "_id": "690de2659a569a4eb2d721c9"
               },
               {
                 "coordx": 129,
@@ -3063,7 +3063,7 @@
                 "lat": 32.56401350723906,
                 "lon": 75.0392586647279,
                 "indexNode": "129",
-                "_id": "67e1a8fb65e55d787308ba5e"
+                "_id": "690de2659a569a4eb2d721ca"
               },
               {
                 "coordx": 129,
@@ -3071,7 +3071,7 @@
                 "lat": 32.563981792456616,
                 "lon": 75.03923948971246,
                 "indexNode": "2677",
-                "_id": "67e1a8fb65e55d787308ba5f"
+                "_id": "690de2659a569a4eb2d721cb"
               },
               {
                 "coordx": 130,
@@ -3079,7 +3079,7 @@
                 "lat": 32.56398054933221,
                 "lon": 75.03924238436312,
                 "indexNode": "2678",
-                "_id": "67e1a8fb65e55d787308ba60"
+                "_id": "690de2659a569a4eb2d721cc"
               }
             ],
             "centroid": [
@@ -3094,7 +3094,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba5a"
+            "_id": "690de2659a569a4eb2d721c6"
           },
           {
             "contact": "undefined",
@@ -3112,7 +3112,7 @@
                 "lat": 32.564012264114645,
                 "lon": 75.03926155937856,
                 "indexNode": "130",
-                "_id": "67e1a8fb65e55d787308ba62"
+                "_id": "690de2659a569a4eb2d721ce"
               },
               {
                 "coordx": 0,
@@ -3120,7 +3120,7 @@
                 "lat": 32.56417387028788,
                 "lon": 75.03888525479135,
                 "indexNode": "0",
-                "_id": "67e1a8fb65e55d787308ba63"
+                "_id": "690de2659a569a4eb2d721cf"
               },
               {
                 "coordx": 0,
@@ -3128,7 +3128,7 @@
                 "lat": 32.564171430689235,
                 "lon": 75.03888377979017,
                 "indexNode": "196",
-                "_id": "67e1a8fb65e55d787308ba64"
+                "_id": "690de2659a569a4eb2d721d0"
               },
               {
                 "coordx": 130,
@@ -3136,7 +3136,7 @@
                 "lat": 32.564009824516,
                 "lon": 75.03926008437737,
                 "indexNode": "326",
-                "_id": "67e1a8fb65e55d787308ba65"
+                "_id": "690de2659a569a4eb2d721d1"
               },
               {
                 "coordx": 130,
@@ -3144,7 +3144,7 @@
                 "lat": 32.564012264114645,
                 "lon": 75.03926155937856,
                 "indexNode": "130",
-                "_id": "67e1a8fb65e55d787308ba66"
+                "_id": "690de2659a569a4eb2d721d2"
               }
             ],
             "centroid": [
@@ -3159,7 +3159,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba61"
+            "_id": "690de2659a569a4eb2d721cd"
           },
           {
             "contact": "undefined",
@@ -3177,7 +3177,7 @@
                 "lat": 32.56417387028788,
                 "lon": 75.03888525479135,
                 "indexNode": "0",
-                "_id": "67e1a8fb65e55d787308ba68"
+                "_id": "690de2659a569a4eb2d721d4"
               },
               {
                 "coordx": 0,
@@ -3185,7 +3185,7 @@
                 "lat": 32.56400797757973,
                 "lon": 75.03878495471058,
                 "indexNode": "13328",
-                "_id": "67e1a8fb65e55d787308ba69"
+                "_id": "690de2659a569a4eb2d721d5"
               },
               {
                 "coordx": 0,
@@ -3193,7 +3193,7 @@
                 "lat": 32.56399577958648,
                 "lon": 75.03877757970464,
                 "indexNode": "14308",
-                "_id": "67e1a8fb65e55d787308ba6a"
+                "_id": "690de2659a569a4eb2d721d6"
               },
               {
                 "coordx": 0,
@@ -3201,7 +3201,7 @@
                 "lat": 32.56399577958648,
                 "lon": 75.03877757970464,
                 "indexNode": "14308",
-                "_id": "67e1a8fb65e55d787308ba6b"
+                "_id": "690de2659a569a4eb2d721d7"
               },
               {
                 "coordx": 0,
@@ -3209,7 +3209,7 @@
                 "lat": 32.56417387028788,
                 "lon": 75.03888525479135,
                 "indexNode": "0",
-                "_id": "67e1a8fb65e55d787308ba6c"
+                "_id": "690de2659a569a4eb2d721d8"
               },
               {
                 "coordx": 0,
@@ -3217,7 +3217,7 @@
                 "lat": 32.56417387028788,
                 "lon": 75.03888525479135,
                 "indexNode": "0",
-                "_id": "67e1a8fb65e55d787308ba6d"
+                "_id": "690de2659a569a4eb2d721d9"
               }
             ],
             "centroid": [
@@ -3232,7 +3232,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba67"
+            "_id": "690de2659a569a4eb2d721d3"
           },
           {
             "contact": "undefined",
@@ -3250,7 +3250,7 @@
                 "lat": 32.564112180569104,
                 "lon": 75.0389573442996,
                 "indexNode": "1990",
-                "_id": "67e1a8fb65e55d787308ba6f"
+                "_id": "690de2659a569a4eb2d721db"
               },
               {
                 "coordx": 30,
@@ -3258,7 +3258,7 @@
                 "lat": 32.56413413695695,
                 "lon": 75.03897061931029,
                 "indexNode": "226",
-                "_id": "67e1a8fb65e55d787308ba70"
+                "_id": "690de2659a569a4eb2d721dc"
               },
               {
                 "coordx": 27,
@@ -3266,7 +3266,7 @@
                 "lat": 32.56413786633018,
                 "lon": 75.03896193535829,
                 "indexNode": "223",
-                "_id": "67e1a8fb65e55d787308ba71"
+                "_id": "690de2659a569a4eb2d721dd"
               },
               {
                 "coordx": 27,
@@ -3274,7 +3274,7 @@
                 "lat": 32.56411590994234,
                 "lon": 75.03894866034759,
                 "indexNode": "1987",
-                "_id": "67e1a8fb65e55d787308ba72"
+                "_id": "690de2659a569a4eb2d721de"
               },
               {
                 "coordx": 30,
@@ -3282,7 +3282,7 @@
                 "lat": 32.564112180569104,
                 "lon": 75.0389573442996,
                 "indexNode": "1990",
-                "_id": "67e1a8fb65e55d787308ba73"
+                "_id": "690de2659a569a4eb2d721df"
               }
             ],
             "centroid": [
@@ -3297,7 +3297,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba6e"
+            "_id": "690de2659a569a4eb2d721da"
           },
           {
             "contact": "undefined",
@@ -3315,7 +3315,7 @@
                 "lat": 32.56407687636394,
                 "lon": 75.03892506032858,
                 "indexNode": "5123",
-                "_id": "67e1a8fb65e55d787308ba75"
+                "_id": "690de2659a569a4eb2d721e1"
               },
               {
                 "coordx": 34,
@@ -3323,7 +3323,7 @@
                 "lat": 32.56406817449308,
                 "lon": 75.03894532288328,
                 "indexNode": "5130",
-                "_id": "67e1a8fb65e55d787308ba76"
+                "_id": "690de2659a569a4eb2d721e2"
               },
               {
                 "coordx": 34,
@@ -3331,7 +3331,7 @@
                 "lat": 32.564070614091726,
                 "lon": 75.03894679788446,
                 "indexNode": "4934",
-                "_id": "67e1a8fb65e55d787308ba77"
+                "_id": "690de2659a569a4eb2d721e3"
               },
               {
                 "coordx": 27,
@@ -3339,7 +3339,7 @@
                 "lat": 32.564079315962594,
                 "lon": 75.03892653532978,
                 "indexNode": "4927",
-                "_id": "67e1a8fb65e55d787308ba78"
+                "_id": "690de2659a569a4eb2d721e4"
               },
               {
                 "coordx": 27,
@@ -3347,7 +3347,7 @@
                 "lat": 32.56407687636394,
                 "lon": 75.03892506032858,
                 "indexNode": "5123",
-                "_id": "67e1a8fb65e55d787308ba79"
+                "_id": "690de2659a569a4eb2d721e5"
               }
             ],
             "centroid": [
@@ -3362,7 +3362,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba74"
+            "_id": "690de2659a569a4eb2d721e0"
           },
           {
             "contact": "undefined",
@@ -3372,7 +3372,7 @@
             "floor": "ground",
             "floorElement": "Nonwalkables",
             "id": "b281af3-f16e-df0b-4c8c-2e78b11ffc5b",
-            "name": "Conference Room",
+            "name": "Conference Room-2",
             "nodes": [
               {
                 "coordx": 49,
@@ -3380,7 +3380,7 @@
                 "lat": 32.564049527626935,
                 "lon": 75.03898874264334,
                 "indexNode": "5145",
-                "_id": "67e1a8fb65e55d787308ba7b"
+                "_id": "690de2659a569a4eb2d721e7"
               },
               {
                 "coordx": 98,
@@ -3388,7 +3388,7 @@
                 "lat": 32.56398861453087,
                 "lon": 75.03913058052622,
                 "indexNode": "5194",
-                "_id": "67e1a8fb65e55d787308ba7c"
+                "_id": "690de2659a569a4eb2d721e8"
               },
               {
                 "coordx": 98,
@@ -3396,7 +3396,7 @@
                 "lat": 32.5640496044971,
                 "lon": 75.03916745555591,
                 "indexNode": "294",
-                "_id": "67e1a8fb65e55d787308ba7d"
+                "_id": "690de2659a569a4eb2d721e9"
               },
               {
                 "coordx": 49,
@@ -3404,7 +3404,7 @@
                 "lat": 32.56411051759317,
                 "lon": 75.03902561767305,
                 "indexNode": "245",
-                "_id": "67e1a8fb65e55d787308ba7e"
+                "_id": "690de2659a569a4eb2d721ea"
               },
               {
                 "coordx": 49,
@@ -3412,7 +3412,7 @@
                 "lat": 32.564049527626935,
                 "lon": 75.03898874264334,
                 "indexNode": "5145",
-                "_id": "67e1a8fb65e55d787308ba7f"
+                "_id": "690de2659a569a4eb2d721eb"
               }
             ],
             "centroid": [
@@ -3427,7 +3427,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba7a"
+            "_id": "690de2659a569a4eb2d721e6"
           },
           {
             "contact": "undefined",
@@ -3445,7 +3445,7 @@
                 "lat": 32.56359624256967,
                 "lon": 75.03902096812982,
                 "indexNode": "33257",
-                "_id": "67e1a8fb65e55d787308ba81"
+                "_id": "690de2659a569a4eb2d721ed"
               },
               {
                 "coordx": 133,
@@ -3453,7 +3453,7 @@
                 "lat": 32.56366699093051,
                 "lon": 75.03906374316426,
                 "indexNode": "27573",
-                "_id": "67e1a8fb65e55d787308ba82"
+                "_id": "690de2659a569a4eb2d721ee"
               },
               {
                 "coordx": 103,
@@ -3461,7 +3461,7 @@
                 "lat": 32.56370428466279,
                 "lon": 75.03897690364414,
                 "indexNode": "27543",
-                "_id": "67e1a8fb65e55d787308ba83"
+                "_id": "690de2659a569a4eb2d721ef"
               },
               {
                 "coordx": 103,
@@ -3469,7 +3469,7 @@
                 "lat": 32.563633536301964,
                 "lon": 75.0389341286097,
                 "indexNode": "33227",
-                "_id": "67e1a8fb65e55d787308ba84"
+                "_id": "690de2659a569a4eb2d721f0"
               },
               {
                 "coordx": 133,
@@ -3477,7 +3477,7 @@
                 "lat": 32.56359624256967,
                 "lon": 75.03902096812982,
                 "indexNode": "33257",
-                "_id": "67e1a8fb65e55d787308ba85"
+                "_id": "690de2659a569a4eb2d721f1"
               }
             ],
             "centroid": [
@@ -3492,7 +3492,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba80"
+            "_id": "690de2659a569a4eb2d721ec"
           },
           {
             "contact": "undefined",
@@ -3510,7 +3510,7 @@
                 "lat": 32.56366455133186,
                 "lon": 75.03906226816308,
                 "indexNode": "27769",
-                "_id": "67e1a8fb65e55d787308ba87"
+                "_id": "690de2659a569a4eb2d721f3"
               },
               {
                 "coordx": 156,
@@ -3518,7 +3518,7 @@
                 "lat": 32.56363595947044,
                 "lon": 75.0391288451285,
                 "indexNode": "27792",
-                "_id": "67e1a8fb65e55d787308ba88"
+                "_id": "690de2659a569a4eb2d721f4"
               },
               {
                 "coordx": 156,
@@ -3526,7 +3526,7 @@
                 "lat": 32.56363839906909,
                 "lon": 75.0391303201297,
                 "indexNode": "27596",
-                "_id": "67e1a8fb65e55d787308ba89"
+                "_id": "690de2659a569a4eb2d721f5"
               },
               {
                 "coordx": 133,
@@ -3534,7 +3534,7 @@
                 "lat": 32.56366699093051,
                 "lon": 75.03906374316426,
                 "indexNode": "27573",
-                "_id": "67e1a8fb65e55d787308ba8a"
+                "_id": "690de2659a569a4eb2d721f6"
               },
               {
                 "coordx": 133,
@@ -3542,7 +3542,7 @@
                 "lat": 32.56366455133186,
                 "lon": 75.03906226816308,
                 "indexNode": "27769",
-                "_id": "67e1a8fb65e55d787308ba8b"
+                "_id": "690de2659a569a4eb2d721f7"
               }
             ],
             "centroid": [
@@ -3557,7 +3557,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba86"
+            "_id": "690de2659a569a4eb2d721f2"
           },
           {
             "contact": "undefined",
@@ -3575,7 +3575,7 @@
                 "lat": 32.563594999445264,
                 "lon": 75.03902386278048,
                 "indexNode": "33258",
-                "_id": "67e1a8fb65e55d787308ba8d"
+                "_id": "690de2659a569a4eb2d721f9"
               },
               {
                 "coordx": 44,
@@ -3583,7 +3583,7 @@
                 "lat": 32.56370688064212,
                 "lon": 75.03876334422011,
                 "indexNode": "33168",
-                "_id": "67e1a8fb65e55d787308ba8e"
+                "_id": "690de2659a569a4eb2d721fa"
               },
               {
                 "coordx": 44,
@@ -3591,7 +3591,7 @@
                 "lat": 32.56369956184617,
                 "lon": 75.03875891921655,
                 "indexNode": "33756",
-                "_id": "67e1a8fb65e55d787308ba8f"
+                "_id": "690de2659a569a4eb2d721fb"
               },
               {
                 "coordx": 59,
@@ -3599,7 +3599,7 @@
                 "lat": 32.56368091498003,
                 "lon": 75.03880233897661,
                 "indexNode": "33771",
-                "_id": "67e1a8fb65e55d787308ba90"
+                "_id": "690de2659a569a4eb2d721fc"
               },
               {
                 "coordx": 59,
@@ -3607,7 +3607,7 @@
                 "lat": 32.56368579417733,
                 "lon": 75.03880528897899,
                 "indexNode": "33379",
-                "_id": "67e1a8fb65e55d787308ba91"
+                "_id": "690de2659a569a4eb2d721fd"
               },
               {
                 "coordx": 133,
@@ -3615,7 +3615,7 @@
                 "lat": 32.56359380297103,
                 "lon": 75.03901949312863,
                 "indexNode": "33453",
-                "_id": "67e1a8fb65e55d787308ba92"
+                "_id": "690de2659a569a4eb2d721fe"
               },
               {
                 "coordx": 134,
@@ -3623,7 +3623,7 @@
                 "lat": 32.56359255984662,
                 "lon": 75.0390223877793,
                 "indexNode": "33454",
-                "_id": "67e1a8fb65e55d787308ba93"
+                "_id": "690de2659a569a4eb2d721ff"
               },
               {
                 "coordx": 134,
@@ -3631,7 +3631,7 @@
                 "lat": 32.563594999445264,
                 "lon": 75.03902386278048,
                 "indexNode": "33258",
-                "_id": "67e1a8fb65e55d787308ba94"
+                "_id": "690de2659a569a4eb2d72200"
               }
             ],
             "centroid": [
@@ -3646,7 +3646,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba8c"
+            "_id": "690de2659a569a4eb2d721f8"
           },
           {
             "contact": "undefined",
@@ -3656,7 +3656,7 @@
             "floor": "ground",
             "floorElement": "Nonwalkables",
             "id": "36b6fdb-3411-45a-0b70-ad056418dfd1",
-            "name": "Conference Room-2",
+            "name": "Conference Room",
             "nodes": [
               {
                 "coordx": 44,
@@ -3664,7 +3664,7 @@
                 "lat": 32.56370688064212,
                 "lon": 75.03876334422011,
                 "indexNode": "33168",
-                "_id": "67e1a8fb65e55d787308ba96"
+                "_id": "690de2659a569a4eb2d72202"
               },
               {
                 "coordx": 44,
@@ -3672,7 +3672,7 @@
                 "lat": 32.563777629002956,
                 "lon": 75.03880611925456,
                 "indexNode": "27484",
-                "_id": "67e1a8fb65e55d787308ba97"
+                "_id": "690de2659a569a4eb2d72203"
               },
               {
                 "coordx": 103,
@@ -3680,7 +3680,7 @@
                 "lat": 32.56370428466279,
                 "lon": 75.03897690364414,
                 "indexNode": "27543",
-                "_id": "67e1a8fb65e55d787308ba98"
+                "_id": "690de2659a569a4eb2d72204"
               },
               {
                 "coordx": 103,
@@ -3688,7 +3688,7 @@
                 "lat": 32.563633536301964,
                 "lon": 75.0389341286097,
                 "indexNode": "33227",
-                "_id": "67e1a8fb65e55d787308ba99"
+                "_id": "690de2659a569a4eb2d72205"
               },
               {
                 "coordx": 44,
@@ -3696,7 +3696,7 @@
                 "lat": 32.56370688064212,
                 "lon": 75.03876334422011,
                 "indexNode": "33168",
-                "_id": "67e1a8fb65e55d787308ba9a"
+                "_id": "690de2659a569a4eb2d72206"
               }
             ],
             "centroid": [
@@ -3711,7 +3711,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba95"
+            "_id": "690de2659a569a4eb2d72201"
           },
           {
             "contact": "undefined",
@@ -3729,7 +3729,7 @@
                 "lat": 32.56402642141502,
                 "lon": 75.03896383367827,
                 "indexNode": "7298",
-                "_id": "67e1a8fb65e55d787308ba9c"
+                "_id": "690de2659a569a4eb2d72208"
               },
               {
                 "coordx": 84,
@@ -3737,7 +3737,7 @@
                 "lat": 32.56397918268746,
                 "lon": 75.03907383040375,
                 "indexNode": "7336",
-                "_id": "67e1a8fb65e55d787308ba9d"
+                "_id": "690de2659a569a4eb2d72209"
               },
               {
                 "coordx": 84,
@@ -3745,7 +3745,7 @@
                 "lat": 32.563759618809016,
                 "lon": 75.03894108029684,
                 "indexNode": "24976",
-                "_id": "67e1a8fb65e55d787308ba9e"
+                "_id": "690de2659a569a4eb2d7220a"
               },
               {
                 "coordx": 46,
@@ -3753,7 +3753,7 @@
                 "lat": 32.563806857536576,
                 "lon": 75.03883108357135,
                 "indexNode": "24938",
-                "_id": "67e1a8fb65e55d787308ba9f"
+                "_id": "690de2659a569a4eb2d7220b"
               },
               {
                 "coordx": 46,
@@ -3761,7 +3761,7 @@
                 "lat": 32.56402642141502,
                 "lon": 75.03896383367827,
                 "indexNode": "7298",
-                "_id": "67e1a8fb65e55d787308baa0"
+                "_id": "690de2659a569a4eb2d7220c"
               }
             ],
             "centroid": [
@@ -3776,7 +3776,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308ba9b"
+            "_id": "690de2659a569a4eb2d72207"
           },
           {
             "contact": "undefined",
@@ -3794,7 +3794,7 @@
                 "lat": 32.56391913951445,
                 "lon": 75.0392708880562,
                 "indexNode": "5832",
-                "_id": "67e1a8fb65e55d787308baa2"
+                "_id": "690de2659a569a4eb2d7220e"
               },
               {
                 "coordx": 148,
@@ -3802,7 +3802,7 @@
                 "lat": 32.563877666337405,
                 "lon": 75.03924581303599,
                 "indexNode": "9164",
-                "_id": "67e1a8fb65e55d787308baa3"
+                "_id": "690de2659a569a4eb2d7220f"
               },
               {
                 "coordx": 148,
@@ -3810,7 +3810,7 @@
                 "lat": 32.563877666337405,
                 "lon": 75.03924581303599,
                 "indexNode": "9164",
-                "_id": "67e1a8fb65e55d787308baa4"
+                "_id": "690de2659a569a4eb2d72210"
               }
             ],
             "centroid": [],
@@ -3822,7 +3822,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308baa1"
+            "_id": "690de2659a569a4eb2d7220d"
           },
           {
             "contact": "undefined",
@@ -3840,7 +3840,7 @@
                 "lat": 32.563916919376815,
                 "lon": 75.03885387280963,
                 "indexNode": "17282",
-                "_id": "67e1a8fb65e55d787308baa6"
+                "_id": "690de2659a569a4eb2d72212"
               },
               {
                 "coordx": 0,
@@ -3848,7 +3848,7 @@
                 "lat": 32.56395918560674,
                 "lon": 75.03875545468682,
                 "indexNode": "17248",
-                "_id": "67e1a8fb65e55d787308baa7"
+                "_id": "690de2659a569a4eb2d72213"
               },
               {
                 "coordx": 0,
@@ -3856,7 +3856,7 @@
                 "lat": 32.56395918560674,
                 "lon": 75.03875545468682,
                 "indexNode": "17248",
-                "_id": "67e1a8fb65e55d787308baa8"
+                "_id": "690de2659a569a4eb2d72214"
               }
             ],
             "centroid": [],
@@ -3868,7 +3868,7 @@
             "visibilityType": "visible",
             "directionType": "unidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308baa5"
+            "_id": "690de2659a569a4eb2d72211"
           },
           {
             "contact": "undefined",
@@ -3886,7 +3886,7 @@
                 "lat": 32.56398626823256,
                 "lon": 75.03911457691997,
                 "indexNode": "5778",
-                "_id": "67e1a8fb65e55d787308baaa"
+                "_id": "690de2659a569a4eb2d72216"
               },
               {
                 "coordx": 94,
@@ -3894,7 +3894,7 @@
                 "lat": 32.56399114742986,
                 "lon": 75.03911752692234,
                 "indexNode": "5386",
-                "_id": "67e1a8fb65e55d787308baab"
+                "_id": "690de2659a569a4eb2d72217"
               },
               {
                 "coordx": 94,
@@ -3902,7 +3902,7 @@
                 "lat": 32.56399114742986,
                 "lon": 75.03911752692234,
                 "indexNode": "5386",
-                "_id": "67e1a8fb65e55d787308baac"
+                "_id": "690de2659a569a4eb2d72218"
               }
             ],
             "centroid": [],
@@ -3914,7 +3914,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308baa9"
+            "_id": "690de2659a569a4eb2d72215"
           },
           {
             "contact": "undefined",
@@ -3932,7 +3932,7 @@
                 "lat": 32.56409864615111,
                 "lon": 75.0389673925494,
                 "indexNode": "2583",
-                "_id": "67e1a8fb65e55d787308baae"
+                "_id": "690de2659a569a4eb2d7221a"
               },
               {
                 "coordx": 38,
@@ -3940,7 +3940,7 @@
                 "lat": 32.56409491677788,
                 "lon": 75.03897607650141,
                 "indexNode": "2586",
-                "_id": "67e1a8fb65e55d787308baaf"
+                "_id": "690de2659a569a4eb2d7221b"
               },
               {
                 "coordx": 44,
@@ -3948,7 +3948,7 @@
                 "lat": 32.56408745803142,
                 "lon": 75.03899344440543,
                 "indexNode": "2592",
-                "_id": "67e1a8fb65e55d787308bab0"
+                "_id": "690de2659a569a4eb2d7221c"
               },
               {
                 "coordx": 44,
@@ -3956,7 +3956,7 @@
                 "lat": 32.56408745803142,
                 "lon": 75.03899344440543,
                 "indexNode": "2592",
-                "_id": "67e1a8fb65e55d787308bab1"
+                "_id": "690de2659a569a4eb2d7221d"
               }
             ],
             "centroid": [],
@@ -3968,7 +3968,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308baad"
+            "_id": "690de2659a569a4eb2d72219"
           },
           {
             "contact": "undefined",
@@ -3986,7 +3986,7 @@
                 "lat": 32.56408745803142,
                 "lon": 75.03899344440543,
                 "indexNode": "2592",
-                "_id": "67e1a8fb65e55d787308bab3"
+                "_id": "690de2659a569a4eb2d7221f"
               },
               {
                 "coordx": 44,
@@ -3994,7 +3994,7 @@
                 "lat": 32.564094776827375,
                 "lon": 75.038997869409,
                 "indexNode": "2004",
-                "_id": "67e1a8fb65e55d787308bab4"
+                "_id": "690de2659a569a4eb2d72220"
               },
               {
                 "coordx": 44,
@@ -4002,7 +4002,7 @@
                 "lat": 32.564094776827375,
                 "lon": 75.038997869409,
                 "indexNode": "2004",
-                "_id": "67e1a8fb65e55d787308bab5"
+                "_id": "690de2659a569a4eb2d72221"
               }
             ],
             "centroid": [],
@@ -4014,7 +4014,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308bab2"
+            "_id": "690de2659a569a4eb2d7221e"
           },
           {
             "contact": "undefined",
@@ -4032,7 +4032,7 @@
                 "lat": 32.563654419735904,
                 "lon": 75.03911448257857,
                 "indexNode": "27001",
-                "_id": "67e1a8fb65e55d787308bab7"
+                "_id": "690de2659a569a4eb2d72223"
               },
               {
                 "coordx": 149,
@@ -4040,7 +4040,7 @@
                 "lat": 32.56370321170889,
                 "lon": 75.03914398260233,
                 "indexNode": "23081",
-                "_id": "67e1a8fb65e55d787308bab8"
+                "_id": "690de2659a569a4eb2d72224"
               },
               {
                 "coordx": 149,
@@ -4048,7 +4048,7 @@
                 "lat": 32.56370321170889,
                 "lon": 75.03914398260233,
                 "indexNode": "23081",
-                "_id": "67e1a8fb65e55d787308bab9"
+                "_id": "690de2659a569a4eb2d72225"
               }
             ],
             "centroid": [],
@@ -4060,7 +4060,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308bab6"
+            "_id": "690de2659a569a4eb2d72222"
           },
           {
             "contact": "undefined",
@@ -4078,7 +4078,7 @@
                 "lat": 32.5639657113498,
                 "lon": 75.03888337283338,
                 "indexNode": "13362",
-                "_id": "67e1a8fb65e55d787308babb"
+                "_id": "690de2659a569a4eb2d72227"
               },
               {
                 "coordx": 34,
@@ -4086,7 +4086,7 @@
                 "lat": 32.56381201663489,
                 "lon": 75.03879044775854,
                 "indexNode": "25710",
-                "_id": "67e1a8fb65e55d787308babc"
+                "_id": "690de2659a569a4eb2d72228"
               },
               {
                 "coordx": 34,
@@ -4094,7 +4094,7 @@
                 "lat": 32.56381201663489,
                 "lon": 75.03879044775854,
                 "indexNode": "25710",
-                "_id": "67e1a8fb65e55d787308babd"
+                "_id": "690de2659a569a4eb2d72229"
               }
             ],
             "centroid": [],
@@ -4106,7 +4106,7 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308baba"
+            "_id": "690de2659a569a4eb2d72226"
           },
           {
             "contact": "undefined",
@@ -4124,7 +4124,7 @@
                 "lat": 32.56389740258762,
                 "lon": 75.03884207280012,
                 "indexNode": "18850",
-                "_id": "67e1a8fb65e55d787308babf"
+                "_id": "690de2659a569a4eb2d7222b"
               },
               {
                 "coordx": 45,
@@ -4132,7 +4132,7 @@
                 "lat": 32.56388372821912,
                 "lon": 75.0388739139575,
                 "indexNode": "18861",
-                "_id": "67e1a8fb65e55d787308bac0"
+                "_id": "690de2659a569a4eb2d7222c"
               },
               {
                 "coordx": 45,
@@ -4140,7 +4140,7 @@
                 "lat": 32.56388372821912,
                 "lon": 75.0388739139575,
                 "indexNode": "18861",
-                "_id": "67e1a8fb65e55d787308bac1"
+                "_id": "690de2659a569a4eb2d7222d"
               }
             ],
             "centroid": [],
@@ -4152,14 +4152,14 @@
             "visibilityType": "visible",
             "directionType": "bidirectional",
             "tactileAvailibility": "not available",
-            "_id": "67e1a8fb65e55d787308babe"
+            "_id": "690de2659a569a4eb2d7222a"
           }
         ],
-        "_id": "67e1a8fb65e55d787308b93c"
+        "_id": "690de2659a569a4eb2d720a8"
       }
     ],
     "createdAt": "2025-03-24T17:47:07.573Z",
-    "updatedAt": "2025-03-24T18:48:27.616Z",
+    "updatedAt": "2025-11-07T12:13:25.876Z",
     "__v": 0
   }
 }

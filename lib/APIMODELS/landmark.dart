@@ -399,6 +399,7 @@ class Properties {
   List<String>? frConn;
   List<String>? clickedPoints;
   int? floorAngle;
+  String? doorNumber;
   List<String>? polygonId;
 
   Properties(
@@ -467,6 +468,7 @@ class Properties {
         this.frConn,
         this.clickedPoints,
         this.floorAngle,
+        this.doorNumber,
         this.polygonId});
 
   Properties.fromJson(Map<dynamic, dynamic> json) {
@@ -484,6 +486,7 @@ class Properties {
     motion = json['motion'];
     node = json['node'];
     nodeId = json['nodeId'];
+
     openingMechanism = json['openingMechanism'];
     protocol = json['protocol'];
     startTime = json['startTime'];
@@ -535,6 +538,7 @@ class Properties {
     frConn = json['frConn']?.cast<String>();
     clickedPoints = json['clickedPoints']?.cast<String>();
     floorAngle = json['floorAngle'];
+    doorNumber = json['doorNumber'];
     polygonId = json['polygonId']?.cast<String>();
   }
 
@@ -605,6 +609,7 @@ class Properties {
     data['frConn'] = this.frConn;
     data['clickedPoints'] = this.clickedPoints;
     data['floorAngle'] = this.floorAngle;
+    data['doorNumber'] = this.doorNumber;
     data['polygonId'] = this.polygonId;
     return data;
   }

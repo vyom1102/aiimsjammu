@@ -81,11 +81,14 @@ class DataBaseManager implements DBManager {
   Future<String> getAccessToken() async {
     // await UserBox.getAccessToken();
     var signInBox = Hive.box('SignInDatabase');
-    return await UserBox.getAccessToken()??"";
+    String accessToken = signInBox.get("accessToken");
+    print("accessToken from manager ${accessToken}");
+    return accessToken;
   }
 
   @override
   void updateAccessToken(String newAccessToken) {
+    print("updateAccessToken ${StackTrace.current}");
     var signInBox = Hive.box('SignInDatabase');
     signInBox.put("accessToken", newAccessToken);
   }
@@ -98,13 +101,13 @@ class DataBaseManager implements DBManager {
 
   @override
   void updateRefreshToken(String newRefreshToken) {
+    print("updateRefreshToken ${StackTrace.current}");
     var signInBox = Hive.box('SignInDatabase');
     signInBox.put("refreshToken", newRefreshToken);
   }
 
   @override
   void delete(Detail details, String bID) {
-    // TODO: implement delete
     final databaseBox = details.dataBaseGetData!();
     databaseBox.clear();
     return;
