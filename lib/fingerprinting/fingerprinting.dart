@@ -560,7 +560,7 @@ class Fingerprinting{
       // Optional: Handle scan termination
       print("${data!=null && data!.sensorFingerprint!=null && data!.sensorFingerprint!.isNotEmpty}");
        if(data!=null && data!.sensorFingerprint!=null && data!.sensorFingerprint!.isNotEmpty){
-         if(SingletonFunctionController.currentBeacon.isNotEmpty && bleManager.finalName.isNotEmpty){
+         if(SingletonFunctionController.currentBeacon!.isNotEmpty && bleManager.finalName.isNotEmpty){
           String prevBeacon=bleManager.finalName;
           // print("the distaces between the ${SingletonFunctionController.currentBeacon} ${prevBeacon} two:${ tools.calculateDistance(
           //     [
@@ -572,8 +572,8 @@ class Fingerprinting{
           //       SingletonFunctionController.apibeaconmap[prevBeacon]!.coordinateY!
           //     ]
           // )}");
-          if (
-          SingletonFunctionController.currentBeacon.isNotEmpty &&
+          if (SingletonFunctionController.currentBeacon!=null &&
+             SingletonFunctionController.currentBeacon!.isNotEmpty &&
               tools.calculateDistance(
                   [
                     SingletonFunctionController.apibeaconmap[SingletonFunctionController.currentBeacon]!.coordinateX!,
@@ -595,7 +595,7 @@ class Fingerprinting{
             }
           }
          }
-         else if(SingletonFunctionController.currentBeacon.isEmpty){
+         else if(SingletonFunctionController.currentBeacon==null || SingletonFunctionController.currentBeacon!.isEmpty){
            // print("got inside this first time");
            SingletonFunctionController.currentBeacon=bleManager.finalName;
            // print("SingletonFunctionController.currentBeacon:${SingletonFunctionController.currentBeacon}");

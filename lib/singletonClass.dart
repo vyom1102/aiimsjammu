@@ -33,7 +33,7 @@ class SingletonFunctionController {
   static HashMap<String, beacon> apibeaconmap = HashMap();
   static Building building = Building(floor: Map(), numberOfFloors: Map());
   static Future<void>? timer;
-  static String currentBeacon = "";
+  static String? currentBeacon = "";
   static double currentRssi = double.infinity;
   static String SC_LOCALIZED_BEACON = "";
   static String fingerprintingPoint="";
