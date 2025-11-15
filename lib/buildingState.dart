@@ -36,6 +36,7 @@ class Building{
   static Map<String,g.LatLng> allBuildingID = {
   };
   Map<String,Map<int, g.LatLng>> ARCoordinates = {};
+  static String realtimeLocalisationThreshold = "";
   Building({required this.floor,required this.numberOfFloors});
 
 
