@@ -1811,10 +1811,10 @@ class _NavigationState extends State<Navigation>
           speakTTS, render, providePinSelection);
     }
 
-    if (!providePinSelection)
-  {
-    continuousGPSLocalisation();
-  }
+  //   if (!providePinSelection)
+  // {
+  //   continuousGPSLocalisation();
+  // }
     // Reset direct source ID and Land ID
     widget.directLandID = '';
     widget.directsourceID = '';
@@ -1827,120 +1827,120 @@ class _NavigationState extends State<Navigation>
     print("paintuser:${showClassB}");
   }
 
-  Timer? continuousGPSLocalisationTimer = null;
-  Animation<LatLng>? _initialMarkerAnimation;
-  AnimationController? _initialiMarkerAnimationController;
+  // Timer? continuousGPSLocalisationTimer = null;
+  // Animation<LatLng>? _initialMarkerAnimation;
+  // AnimationController? _initialiMarkerAnimationController;
+  //
+  // void continuousGPSLocalisation(){
+  //   print("continuousGPSLocalisation ${StackTrace.current}");
+  //   if(gpsSubscription != null){
+  //     return;
+  //   }
+  //   gpsSubscription = GPSService.locationStream.listen((Location location) {
+  //     gpsBuffer.add(location.latitude, location.longitude);
+  //   }, onError: (error) {
+  //     print("Error receiving GPS data: $error");
+  //   });
+  //   //start beacon scanning
+  //   _initialiMarkerAnimationController!.addListener(_onMarkerAnimationUpdate);
+  //   bluetoothScanAndroidClass.listenToScanUpdates(Building.apibeaconmap);
+  //   continuousGPSLocalisationTimer = Timer.periodic(Duration(seconds: 5), (timer){
+  //     //get beacon here
+  //     String? currentBeacon=SingletonFunctionController.currentBeacon;
+  //     SingletonFunctionController.currentBeacon = null;
+  //     print("currentBeacon:${currentBeacon}");
+  //     print("SingletonFunctionController.current:${SingletonFunctionController.currentBeacon}");
+  //     if(currentBeacon!=null && currentBeacon!="")
+  //     {
+  //       //if(tools.calculateAerialDist(UserState.geoLat!, UserState.geoLng!,Building.apibeaconmap[SingletonFunctionController.currentBeacon]!.properties!.latitude!,Building.apibeaconmap[SingletonFunctionController.currentBeacon].properties.latitude) > 10)
+  //       _handleBeaconLocalization(currentBeacon,false, true,false);
+  //     }else{
+  //       var location = gpsBuffer.getRobustPosition();
+  //       print("location $location");
+  //       //  print("SingletonFunctionController.current location:${location![0]} ${location![1]}");
+  //       if(location != null){
+  //         if(UserState.geoLat == null || UserState.geoLng == null){
+  //           UserState.geoLat = location[0];
+  //           UserState.geoLng = location[1];
+  //         }
+  //         else{
+  //           // if(UserState.geoLat!=location[0] && UserState.geoLng!=location[1] && markers[user.bid]!=null){
+  //           //   _googleMapController.animateCamera(CameraUpdate.zoomTo(19));
+  //           //   onGPSUpdate(location[0],location[1]);
+  //           // }
+  //           _handleGlobalCoordinatesLocalization(false, true, false);
+  //           UserState.geoLat=location[0];
+  //           UserState.geoLng=location[1];
+  //         }
+  //       }
+  //     }
+  //
+  //     // check if beacon is not null then localise on beacon otherwise gps
+  //
+  //   });
+  // }
+  //
+  // void stopContinuousGPSLocalisation(){
+  //   // stop beacon scanning
+  //   bluetoothScanAndroidClass.stopScan();
+  //   continuousGPSLocalisationTimer?.cancel();
+  //   continuousGPSLocalisationTimer = null;
+  //   gpsSubscription?.cancel(); // <-- This triggers native onCancel()
+  //   gpsSubscription = null;
+  //   // GPSService.dispose();
+  //   _initialiMarkerAnimationController?.dispose();
+  // }
 
-  void continuousGPSLocalisation(){
-    print("continuousGPSLocalisation ${StackTrace.current}");
-    if(gpsSubscription != null){
-      return;
-    }
-    gpsSubscription = GPSService.locationStream.listen((Location location) {
-      gpsBuffer.add(location.latitude, location.longitude);
-    }, onError: (error) {
-      print("Error receiving GPS data: $error");
-    });
-    //start beacon scanning
-    _initialiMarkerAnimationController!.addListener(_onMarkerAnimationUpdate);
-    bluetoothScanAndroidClass.listenToScanUpdates(Building.apibeaconmap);
-    continuousGPSLocalisationTimer = Timer.periodic(Duration(seconds: 5), (timer){
-      //get beacon here
-      String? currentBeacon=SingletonFunctionController.currentBeacon;
-      SingletonFunctionController.currentBeacon = null;
-      print("currentBeacon:${currentBeacon}");
-      print("SingletonFunctionController.current:${SingletonFunctionController.currentBeacon}");
-      if(currentBeacon!=null && currentBeacon!="")
-      {
-        //if(tools.calculateAerialDist(UserState.geoLat!, UserState.geoLng!,Building.apibeaconmap[SingletonFunctionController.currentBeacon]!.properties!.latitude!,Building.apibeaconmap[SingletonFunctionController.currentBeacon].properties.latitude) > 10)
-        _handleBeaconLocalization(currentBeacon,false, true,false);
-      }else{
-        var location = gpsBuffer.getRobustPosition();
-        print("location $location");
-        //  print("SingletonFunctionController.current location:${location![0]} ${location![1]}");
-        if(location != null){
-          if(UserState.geoLat == null || UserState.geoLng == null){
-            UserState.geoLat = location[0];
-            UserState.geoLng = location[1];
-          }
-          else{
-            // if(UserState.geoLat!=location[0] && UserState.geoLng!=location[1] && markers[user.bid]!=null){
-            //   _googleMapController.animateCamera(CameraUpdate.zoomTo(19));
-            //   onGPSUpdate(location[0],location[1]);
-            // }
-            _handleGlobalCoordinatesLocalization(false, true, false);
-            UserState.geoLat=location[0];
-            UserState.geoLng=location[1];
-          }
-        }
-      }
-
-      // check if beacon is not null then localise on beacon otherwise gps
-
-    });
-  }
-
-  void stopContinuousGPSLocalisation(){
-    // stop beacon scanning
-    bluetoothScanAndroidClass.stopScan();
-    continuousGPSLocalisationTimer?.cancel();
-    continuousGPSLocalisationTimer = null;
-    gpsSubscription?.cancel(); // <-- This triggers native onCancel()
-    gpsSubscription = null;
-    // GPSService.dispose();
-    _initialiMarkerAnimationController?.dispose();
-  }
-
-  void _onMarkerAnimationUpdate() {
-    if (!mounted || _initialMarkerAnimation == null) return;
-    setState(() {
-      LatLng animatedPosition = _initialMarkerAnimation!.value;
-      markers[user.bid]![0] = customMarker.move(animatedPosition, markers[user.bid]![0]);
-      // if (kDebugMode) {
-      //   markers[user.bid]?.add(Marker(
-      //     markerId: MarkerId("debug"),
-      //     position: animatedPosition,
-      //     icon: BitmapDescriptor.fromBytes(userlocdebug),
-      //     anchor: Offset(0.5, 0.829),
-      //   ));
-      // }
-
-      circles.clear();
-      circles.add(
-        Circle(
-            circleId: CircleId("circle"),
-            center: animatedPosition,
-            radius: _animation.value,
-            strokeWidth: 1,
-            strokeColor: Colors.blue,
-            fillColor: Colors.lightBlue.withOpacity(0.2),
-            zIndex: 2
-        ),
-      );
-    });
-  }
-
-  void onGPSUpdate(double newLat, double newLng) {
-
-    _initialiMarkerAnimationController!.duration = const Duration(seconds: 7);
-    // Step 1: Get the current marker position
-    LatLng currentPosition = markers[user.bid]?.isNotEmpty == true
-        ? markers[user.bid]![0].position
-        : LatLng(user.lat, user.lng);
-    LatLng newPosition = LatLng(newLat, newLng);
-    // Step 2: Reset the animation controller to start from 0
-    _initialiMarkerAnimationController!.reset();
-    // Step 3: Create a NEW animation with new begin/end positions
-    _initialMarkerAnimation = LatLngTween(
-      begin: currentPosition,   // Where marker currently is
-      end: newPosition,          // Where it should move to
-    ).animate(CurvedAnimation(
-      parent: _initialiMarkerAnimationController!,
-      curve: Curves.easeInOut,
-    ));
-    // Step 4: Start the animation - THIS TRIGGERS THE LISTENER
-    _initialiMarkerAnimationController!.forward();
-  }
+  // void _onMarkerAnimationUpdate() {
+  //   if (!mounted || _initialMarkerAnimation == null) return;
+  //   setState(() {
+  //     LatLng animatedPosition = _initialMarkerAnimation!.value;
+  //     markers[user.bid]![0] = customMarker.move(animatedPosition, markers[user.bid]![0]);
+  //     // if (kDebugMode) {
+  //     //   markers[user.bid]?.add(Marker(
+  //     //     markerId: MarkerId("debug"),
+  //     //     position: animatedPosition,
+  //     //     icon: BitmapDescriptor.fromBytes(userlocdebug),
+  //     //     anchor: Offset(0.5, 0.829),
+  //     //   ));
+  //     // }
+  //
+  //     circles.clear();
+  //     circles.add(
+  //       Circle(
+  //           circleId: CircleId("circle"),
+  //           center: animatedPosition,
+  //           radius: _animation.value,
+  //           strokeWidth: 1,
+  //           strokeColor: Colors.blue,
+  //           fillColor: Colors.lightBlue.withOpacity(0.2),
+  //           zIndex: 2
+  //       ),
+  //     );
+  //   });
+  // }
+  //
+  // void onGPSUpdate(double newLat, double newLng) {
+  //
+  //   _initialiMarkerAnimationController!.duration = const Duration(seconds: 7);
+  //   // Step 1: Get the current marker position
+  //   LatLng currentPosition = markers[user.bid]?.isNotEmpty == true
+  //       ? markers[user.bid]![0].position
+  //       : LatLng(user.lat, user.lng);
+  //   LatLng newPosition = LatLng(newLat, newLng);
+  //   // Step 2: Reset the animation controller to start from 0
+  //   _initialiMarkerAnimationController!.reset();
+  //   // Step 3: Create a NEW animation with new begin/end positions
+  //   _initialMarkerAnimation = LatLngTween(
+  //     begin: currentPosition,   // Where marker currently is
+  //     end: newPosition,          // Where it should move to
+  //   ).animate(CurvedAnimation(
+  //     parent: _initialiMarkerAnimationController!,
+  //     curve: Curves.easeInOut,
+  //   ));
+  //   // Step 4: Start the animation - THIS TRIGGERS THE LISTENER
+  //   _initialiMarkerAnimationController!.forward();
+  // }
 
   Future<void> _handleBeaconLocalization(String nearestBeacon, bool speakTTS,
       bool render, bool providePinSelection) async {
@@ -2352,31 +2352,66 @@ class _NavigationState extends State<Navigation>
       markers.clear();
       circles.clear();
       //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
-      if (render){
+      // if (render){
+      //   print("entered here");
+      //   if(markers[user.bid]!=null){
+      //     onGPSUpdate(user.lat,user.lng);
+      //   }else{
+      //     markers.clear();
+      //     markers.putIfAbsent(user.bid, ()=>[]);
+      //     markers[user.bid]?.add(Marker(
+      //       markerId: MarkerId("UserLocation"),
+      //       position: LatLng(user.lat, user.lng),
+      //       icon: BitmapDescriptor.fromBytes(userloc),
+      //       anchor: Offset(0.5, 0.829),
+      //     ));
+      //     if (!kIsWeb && kDebugMode) {
+      //       markers[user.bid]?.add(Marker(
+      //         markerId: MarkerId("debug"),
+      //         position: LatLng(user.lat, user.lng),
+      //         icon: BitmapDescriptor.fromBytes(userlocdebug),
+      //         anchor: Offset(0.5, 0.829),
+      //       ));
+      //     }
+      //   }
+      // }
+      // else {
+      //   user.moveToFloor(userSetLocation.floor!);
+      // }
+      if (render) {
         print("entered here");
-        if(markers[user.bid]!=null){
-          onGPSUpdate(user.lat,user.lng);
-        }else{
-          markers.clear();
-          markers.putIfAbsent(user.bid, ()=>[]);
-          markers[user.bid]?.add(Marker(
-            markerId: MarkerId("UserLocation"),
-            position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userloc),
-            anchor: Offset(0.5, 0.829),
-          ));
-          if (!kIsWeb && kDebugMode) {
-            markers[user.bid]?.add(Marker(
-              markerId: MarkerId("debug"),
-              position: LatLng(user.lat, user.lng),
-              icon: BitmapDescriptor.fromBytes(userlocdebug),
-              anchor: Offset(0.5, 0.829),
-            ));
-          }
-        }
-      } else {
+        markers.putIfAbsent(user.bid, () => []);
+        updateMarkerPosition(LatLng(user.lat, user.lng),user.bid,userloc);
+        // markers[user.bid]?.add(Marker(
+        //   markerId: MarkerId("UserLocation"),
+        //   position: LatLng(user.lat, user.lng),
+        //   icon: BitmapDescriptor.fromBytes(userloc),
+        //   anchor: Offset(0.5, 0.829),
+        //   ehfikr
+        // ));
+        // if (!kIsWeb && kDebugMode) {
+        //   markers[user.bid]?.add(Marker(
+        //     markerId: MarkerId("debug"),
+        //     position: LatLng(user.lat, user.lng),
+        //     icon: BitmapDescriptor.fromBytes(userlocdebug),
+        //     anchor: Offset(0.5, 0.829),
+        //   ));
+        // }
+        circles.add(
+          Circle(
+              circleId: CircleId("circle"),
+              center: LatLng(user.lat, user.lng),
+              radius: _animation.value,
+              strokeWidth: 1,
+              strokeColor: Colors.blue,
+              fillColor: Colors.lightBlue.withOpacity(0.2),
+              zIndex: 2
+          ),
+        );
+      }else{
         user.moveToFloor(userSetLocation.floor!);
       }
+
       if (widget.directLandID.length < 2 && speakTTS && isFromLocalize) {
         SingletonFunctionController.building
             .floor[userSetLocation.buildingID!] = userSetLocation.floor!;

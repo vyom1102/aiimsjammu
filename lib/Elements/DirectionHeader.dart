@@ -1718,9 +1718,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     ),
                   )
                 : Container(),
-            kDebugMode?IconButton(onPressed: (){
-              listenToBin(hardSwitch: true);
-            }, icon: Icon(Icons.escalator_warning)):Container(),
+            // kDebugMode?IconButton(onPressed: (){
+            //   listenToBin(hardSwitch: true);
+            // }, icon: Icon(Icons.escalator_warning)):Container(),
             // kDebugMode?Text(tools.AngleBetweenBuildingandGlobalNorth.toString()):Container(),
             // Text(bluetoothScanAndroidClass.logging.keys.toString())
           ],
