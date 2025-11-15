@@ -22,7 +22,6 @@ import 'package:iwaymaps/websocket/interactionManager.dart';
 import 'package:iwaymaps/websocket/navigationLogManager.dart';
 import 'package:iwaymaps/websocket/navigationLogModel.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:universal_ble/universal_ble.dart';
 import '/ELEMENTS/PickupLocationPin.dart';
 import '/pannels/PinLandmarkPannel.dart';
 import '/path.dart';
@@ -316,7 +315,7 @@ class _NavigationState extends State<Navigation>
     }, onError: (error) {
       print("Error receiving GPS data: $error");
     });
-    initBluetooth();
+    // initBluetooth();
 
     _initializeClustering();
     mapClustering = MapClustering(onMarkerTapCallback: (String sId) {
@@ -463,43 +462,43 @@ class _NavigationState extends State<Navigation>
     // filterItems();
   }
 
-  AvailabilityState? _currentState;
+  // AvailabilityState? _currentState;
 
   final gpsBuffer = GPSBuffer();
 
-  Future<void> initBluetooth() async {
-    // Check Bluetooth state
-    _currentState=await UniversalBle.getBluetoothAvailabilityState();
-    if(Platform.isAndroid){
-      final state = await UniversalBle.getBluetoothAvailabilityState();
-      if (state != AvailabilityState.poweredOn) {
-        print('initBluetooth${AvailabilityState.poweredOn} ${state}');
-        // try {
-        //   UniversalBle.availabilityStream.listen((state) {
-        //     if (state == AvailabilityState.poweredOn) {
-        //       print("state is powered on");
-        //       Navigator.push(context,MaterialPageRoute<void>(
-        //         builder: (BuildContext context) => MainScreen(),
-        //       ),);
-        //     }
-        //   });
-        // }catch(e){
-        //
-        // }
-        // This will show the system prompt on Android
-        // On iOS, nothing happens (must enable manually in Settings)
-        final success = await UniversalBle.enableBluetooth();
-        print('initBluetooth${success}');
-        if (success) {
-          print("Bluetooth enabled ✅");
-        } else {
-          print("Bluetooth not enabled ❌");
-        }
-      } else {
-        print("Bluetooth already ON ✅");
-      }
-    }
-  }
+  // Future<void> initBluetooth() async {
+  //   // Check Bluetooth state
+  //   _currentState=await UniversalBle.getBluetoothAvailabilityState();
+  //   if(Platform.isAndroid){
+  //     final state = await UniversalBle.getBluetoothAvailabilityState();
+  //     if (state != AvailabilityState.poweredOn) {
+  //       print('initBluetooth${AvailabilityState.poweredOn} ${state}');
+  //       // try {
+  //       //   UniversalBle.availabilityStream.listen((state) {
+  //       //     if (state == AvailabilityState.poweredOn) {
+  //       //       print("state is powered on");
+  //       //       Navigator.push(context,MaterialPageRoute<void>(
+  //       //         builder: (BuildContext context) => MainScreen(),
+  //       //       ),);
+  //       //     }
+  //       //   });
+  //       // }catch(e){
+  //       //
+  //       // }
+  //       // This will show the system prompt on Android
+  //       // On iOS, nothing happens (must enable manually in Settings)
+  //       final success = await UniversalBle.enableBluetooth();
+  //       print('initBluetooth${success}');
+  //       if (success) {
+  //         print("Bluetooth enabled ✅");
+  //       } else {
+  //         print("Bluetooth not enabled ❌");
+  //       }
+  //     } else {
+  //       print("Bluetooth already ON ✅");
+  //     }
+  //   }
+  // }
 
   void _initializeClustering() async {
     MapClustering(onMarkerTapCallback: (String sId) {
@@ -1505,9 +1504,7 @@ class _NavigationState extends State<Navigation>
   Future<void> addNearbyLandmarkMarkers(LatLng point,String id, String name, bool visible, {String? road}) async {
     final Uint8List iconMarker = await getImagesFromMarker('assets/OptionLandmark.png', 85);
     BitmapDescriptor optionLandmark = BitmapDescriptor.fromBytes(iconMarker);
-
     final markerId = MarkerId(id);
-
     setState(() {
       if(nearbyLandmarks[markerId] != null){
         print("already exists a landmark ${markerId.value}");
@@ -1523,25 +1520,20 @@ class _NavigationState extends State<Navigation>
     print("Added NearbyLandmark at $point with ID: $markerId");
   }
 
-  void selectPinLandmark(CameraPosition cameraposition) {
+  void selectPinLandmark(CameraPosition cameraposition){
     double distance = 5;
     MarkerId? id;
-    nearbyLandmarks.forEach((key, value) {
-      double d = tools.calculateAerialDist(
-          cameraposition.target.latitude,
-          cameraposition.target.longitude,
-          value.position.latitude,
-          value.position.longitude);
-      if (d < distance) {
+    nearbyLandmarks.forEach((key,value){
+      double d = tools.calculateAerialDist(cameraposition.target.latitude, cameraposition.target.longitude, value.position.latitude, value.position.longitude);
+      if(d<distance){
         distance = d;
-        updateNearbyLandmarkMarkers(id!);
         id = key;
       }
     });
-    if (id != null) {
+    if(id != null){
       updateNearbyLandmarkMarkers(id!);
     }else{
-      updateNearbyLandmarkMarkers(nearbyLandmarks.keys.first);
+      PinedLandmark = null;
     }
   }
 
@@ -1793,10 +1785,9 @@ class _NavigationState extends State<Navigation>
       {bool speakTTS = true,
         bool render = true,
         bool providePinSelection = false}) async {
-
     print(widget.directsourceID);
     setState(() {
-      showClassB=false;
+      showClassB = false;
     });
     print("paintuser $nearestBeacon $polyID $showClassB");
     // Handle direct source ID case
@@ -1819,6 +1810,11 @@ class _NavigationState extends State<Navigation>
       await _handleGlobalCoordinatesLocalization(
           speakTTS, render, providePinSelection);
     }
+
+    if (!providePinSelection)
+  {
+    continuousGPSLocalisation();
+  }
     // Reset direct source ID and Land ID
     widget.directLandID = '';
     widget.directsourceID = '';
@@ -1829,6 +1825,121 @@ class _NavigationState extends State<Navigation>
       showClassB=true;
     });
     print("paintuser:${showClassB}");
+  }
+
+  Timer? continuousGPSLocalisationTimer = null;
+  Animation<LatLng>? _initialMarkerAnimation;
+  AnimationController? _initialiMarkerAnimationController;
+
+  void continuousGPSLocalisation(){
+    print("continuousGPSLocalisation ${StackTrace.current}");
+    if(gpsSubscription != null){
+      return;
+    }
+    gpsSubscription = GPSService.locationStream.listen((Location location) {
+      gpsBuffer.add(location.latitude, location.longitude);
+    }, onError: (error) {
+      print("Error receiving GPS data: $error");
+    });
+    //start beacon scanning
+    _initialiMarkerAnimationController!.addListener(_onMarkerAnimationUpdate);
+    bluetoothScanAndroidClass.listenToScanUpdates(Building.apibeaconmap);
+    continuousGPSLocalisationTimer = Timer.periodic(Duration(seconds: 5), (timer){
+      //get beacon here
+      String? currentBeacon=SingletonFunctionController.currentBeacon;
+      SingletonFunctionController.currentBeacon = null;
+      print("currentBeacon:${currentBeacon}");
+      print("SingletonFunctionController.current:${SingletonFunctionController.currentBeacon}");
+      if(currentBeacon!=null && currentBeacon!="")
+      {
+        //if(tools.calculateAerialDist(UserState.geoLat!, UserState.geoLng!,Building.apibeaconmap[SingletonFunctionController.currentBeacon]!.properties!.latitude!,Building.apibeaconmap[SingletonFunctionController.currentBeacon].properties.latitude) > 10)
+        _handleBeaconLocalization(currentBeacon,false, true,false);
+      }else{
+        var location = gpsBuffer.getRobustPosition();
+        print("location $location");
+        //  print("SingletonFunctionController.current location:${location![0]} ${location![1]}");
+        if(location != null){
+          if(UserState.geoLat == null || UserState.geoLng == null){
+            UserState.geoLat = location[0];
+            UserState.geoLng = location[1];
+          }
+          else{
+            // if(UserState.geoLat!=location[0] && UserState.geoLng!=location[1] && markers[user.bid]!=null){
+            //   _googleMapController.animateCamera(CameraUpdate.zoomTo(19));
+            //   onGPSUpdate(location[0],location[1]);
+            // }
+            _handleGlobalCoordinatesLocalization(false, true, false);
+            UserState.geoLat=location[0];
+            UserState.geoLng=location[1];
+          }
+        }
+      }
+
+      // check if beacon is not null then localise on beacon otherwise gps
+
+    });
+  }
+
+  void stopContinuousGPSLocalisation(){
+    // stop beacon scanning
+    bluetoothScanAndroidClass.stopScan();
+    continuousGPSLocalisationTimer?.cancel();
+    continuousGPSLocalisationTimer = null;
+    gpsSubscription?.cancel(); // <-- This triggers native onCancel()
+    gpsSubscription = null;
+    // GPSService.dispose();
+    _initialiMarkerAnimationController?.dispose();
+  }
+
+  void _onMarkerAnimationUpdate() {
+    if (!mounted || _initialMarkerAnimation == null) return;
+    setState(() {
+      LatLng animatedPosition = _initialMarkerAnimation!.value;
+      markers[user.bid]![0] = customMarker.move(animatedPosition, markers[user.bid]![0]);
+      // if (kDebugMode) {
+      //   markers[user.bid]?.add(Marker(
+      //     markerId: MarkerId("debug"),
+      //     position: animatedPosition,
+      //     icon: BitmapDescriptor.fromBytes(userlocdebug),
+      //     anchor: Offset(0.5, 0.829),
+      //   ));
+      // }
+
+      circles.clear();
+      circles.add(
+        Circle(
+            circleId: CircleId("circle"),
+            center: animatedPosition,
+            radius: _animation.value,
+            strokeWidth: 1,
+            strokeColor: Colors.blue,
+            fillColor: Colors.lightBlue.withOpacity(0.2),
+            zIndex: 2
+        ),
+      );
+    });
+  }
+
+  void onGPSUpdate(double newLat, double newLng) {
+
+    _initialiMarkerAnimationController!.duration = const Duration(seconds: 7);
+    // Step 1: Get the current marker position
+    LatLng currentPosition = markers[user.bid]?.isNotEmpty == true
+        ? markers[user.bid]![0].position
+        : LatLng(user.lat, user.lng);
+    LatLng newPosition = LatLng(newLat, newLng);
+    // Step 2: Reset the animation controller to start from 0
+    _initialiMarkerAnimationController!.reset();
+    // Step 3: Create a NEW animation with new begin/end positions
+    _initialMarkerAnimation = LatLngTween(
+      begin: currentPosition,   // Where marker currently is
+      end: newPosition,          // Where it should move to
+    ).animate(CurvedAnimation(
+      parent: _initialiMarkerAnimationController!,
+      curve: Curves.easeInOut,
+    ));
+    // Step 4: Start the animation - THIS TRIGGERS THE LISTENER
+    _initialiMarkerAnimationController!.forward();
   }
 
   Future<void> _handleBeaconLocalization(String nearestBeacon, bool speakTTS,
@@ -1926,14 +2037,12 @@ class _NavigationState extends State<Navigation>
       } else {
         if (speakTTS) unableToFindLocation();
       }
-    } catch (e) {
+    } catch(e){
       print("Error during polygon localization: $e");
       if (speakTTS) unableToFindLocation();
     }
   }
-
   StreamSubscription? gpsSubscription;
-
   Future<void> _handleGlobalCoordinatesLocalization(
       bool speakTTS, bool render, bool providePinSelection) async {
     print("got into GPS localization $speakTTS $render $providePinSelection");
@@ -1969,10 +2078,9 @@ class _NavigationState extends State<Navigation>
       if (speakTTS) unableToFindLocation();
     }
   }
-
   void unableToFindLocation(){
     if(!Platform.isAndroid){
-      if(_currentState==AvailabilityState.poweredOn){
+      // if(_currentState==AvailabilityState.poweredOn){
         final stackTrace = StackTrace.current;
         print("unableToFindLocation Stack: \n$stackTrace");
         speak("Unable to find your location. Search nearby landmark to find your location",
@@ -1980,9 +2088,9 @@ class _NavigationState extends State<Navigation>
         showClassB=true;
         showLocationDialog(context);
         SingletonFunctionController.building.qrOpened = true;
-      }else{
-        _showBluetoothDialog();
-      }
+      // }else{
+      //   _showBluetoothDialog();
+      // }
     }else{
       final stackTrace = StackTrace.current;
       print("unableToFindLocation Stack: \n$stackTrace");
@@ -2240,39 +2348,32 @@ class _NavigationState extends State<Navigation>
     });
     // Create the animation
     await initializeMarkers();
-    setState(() {
+    setState((){
       markers.clear();
       circles.clear();
       //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
-      if (render) {
+      if (render){
         print("entered here");
-        markers.putIfAbsent(user.bid, () => []);
-        updateMarkerPosition(LatLng(user.lat, user.lng), user.bid, userloc);
-        // markers[user.bid]?.add(Marker(
-        //   markerId: MarkerId("UserLocation"),
-        //   position: LatLng(user.lat, user.lng),
-        //   icon: BitmapDescriptor.fromBytes(userloc),
-        //   anchor: Offset(0.5, 0.829),
-        //   ehfikr
-        // ));
-        // if (!kIsWeb && kDebugMode) {
-        //   markers[user.bid]?.add(Marker(
-        //     markerId: MarkerId("debug"),
-        //     position: LatLng(user.lat, user.lng),
-        //     icon: BitmapDescriptor.fromBytes(userlocdebug),
-        //     anchor: Offset(0.5, 0.829),
-        //   ));
-        // }
-        circles.add(
-          Circle(
-              circleId: CircleId("circle"),
-              center: LatLng(user.lat, user.lng),
-              radius: _animation.value,
-              strokeWidth: 1,
-              strokeColor: Colors.blue,
-              fillColor: Colors.lightBlue.withOpacity(0.2),
-              zIndex: 2),
-        );
+        if(markers[user.bid]!=null){
+          onGPSUpdate(user.lat,user.lng);
+        }else{
+          markers.clear();
+          markers.putIfAbsent(user.bid, ()=>[]);
+          markers[user.bid]?.add(Marker(
+            markerId: MarkerId("UserLocation"),
+            position: LatLng(user.lat, user.lng),
+            icon: BitmapDescriptor.fromBytes(userloc),
+            anchor: Offset(0.5, 0.829),
+          ));
+          if (!kIsWeb && kDebugMode) {
+            markers[user.bid]?.add(Marker(
+              markerId: MarkerId("debug"),
+              position: LatLng(user.lat, user.lng),
+              icon: BitmapDescriptor.fromBytes(userlocdebug),
+              anchor: Offset(0.5, 0.829),
+            ));
+          }
+        }
       } else {
         user.moveToFloor(userSetLocation.floor!);
       }
@@ -3645,7 +3746,7 @@ class _NavigationState extends State<Navigation>
           nearestBeacon = bleManager.finalName;
           beaconWeight = bleManager.finalweight;
         } else {
-          nearestBeacon = SingletonFunctionController.currentBeacon;
+          nearestBeacon = SingletonFunctionController.currentBeacon??'';
           beaconWeight = SingletonFunctionController.currentRssi;
         }
       } else {
@@ -13783,7 +13884,10 @@ class _NavigationState extends State<Navigation>
                     }
                   },
                   onCameraIdle: () {
-
+                    print("PinLandmarkPannel.isPanelOpened() ${PinLandmarkPannel.isPanelOpened()}");
+                    if(PinLandmarkPannel.isPanelOpened()){
+                      selectPinLandmark(mapState.cameraposition!);
+                    }
                     // setState(() {
                     //   landmarkMarkers = outdoorBlockMarkersset;
                     // });
@@ -13829,10 +13933,6 @@ class _NavigationState extends State<Navigation>
                       landmarkMarkers = landmarkMarkers.union(updatedMarkers);
                     });
 
-
-                    if(PinLandmarkPannel.isPanelOpened()){
-                      selectPinLandmark(mapState.cameraposition!);
-                    }
                     if (!mapState.interaction) {
                       mapState.interaction2 = true;
                     }
@@ -14193,7 +14293,7 @@ class _NavigationState extends State<Navigation>
                           debugMarker.clear();
                           if (!user.isnavigating) {
                             if (SingletonFunctionController
-                                .currentBeacon.isNotEmpty &&
+                                .currentBeacon!.isNotEmpty &&
                                 bleManager.trimBufferTimer !=
                                     null &&
                                 await FlutterBluePlus.isOn) {
@@ -14204,7 +14304,7 @@ class _NavigationState extends State<Navigation>
                               print(
                                   "SingletonFunctionController.currentBeacon:${SingletonFunctionController.currentBeacon}");
                               if (SingletonFunctionController
-                                  .currentBeacon.isEmpty){
+                                  .currentBeacon!.isEmpty){
                                 _localizeTimer!.cancel();
                               }
                               paintUser(

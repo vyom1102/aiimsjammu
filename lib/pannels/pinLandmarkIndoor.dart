@@ -48,7 +48,6 @@ class _pinLandmarkIndoorState extends State<pinLandmarkIndoor> {
   @override
   void didUpdateWidget(covariant pinLandmarkIndoor oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     // Check if pinedLandmark has changed
     if (widget.pinedLandmark != oldWidget.pinedLandmark) {
       _previousPinedLandmark = oldWidget.pinedLandmark;
