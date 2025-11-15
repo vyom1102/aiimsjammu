@@ -1,8 +1,11 @@
 import 'dart:core';
 
+import 'APIMODELS/Building.dart';
 import 'BluetoothManager/BeaconValueInjector.dart';
 
 class PeakValley {
+  String realtimeThreshold;
+  PeakValley({required this.realtimeThreshold});
   // Internal beacon history: only tracks one beacon at a time
   Map<String, List<BeaconReading>> _beaconHistory = {};
 
@@ -128,7 +131,8 @@ class PeakValley {
 
       // Pattern: Peak → Valley → Valley (a > b, a > c, b >= c)
 
-      if (b.value > -87 && a.value < b.value && b.value > c.value && peakGreaterThanPrevious && !matchesPattern(a, b, c, d)) {
+      print("int.parse(realtimeThreshold) ${int.parse(realtimeThreshold)}");
+      if (b.value > int.parse(realtimeThreshold) && a.value < b.value && b.value > c.value && peakGreaterThanPrevious && !matchesPattern(a, b, c, d)) {
         Duration duration = history[0].time.difference(flagTime).abs();
         int roundedSeconds = (duration.inMilliseconds / 1000).round();
         int stepsToBeMoved = (roundedSeconds / 2).round();

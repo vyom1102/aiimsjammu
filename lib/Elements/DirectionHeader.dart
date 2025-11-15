@@ -351,7 +351,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   }
 
   KeyCounter selectedBeaconCounter = KeyCounter();
-  PeakValley peakValley = PeakValley();
+  PeakValley peakValley = PeakValley(realtimeThreshold: Building.realtimeLocalisationThreshold);
 
 
   Future<bool> listenToBin({bool hardSwitch = false}) async {
