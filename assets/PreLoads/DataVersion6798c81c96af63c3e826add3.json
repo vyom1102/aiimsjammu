@@ -6,10 +6,10 @@
     "building_ID": "6798c81c96af63c3e826add3",
     "buildingDataVersion": 3,
     "patchDataVersion": 7,
-    "polylineDataVersion": 20,
-    "landmarksDataVersion": 23,
+    "polylineDataVersion": 23,
+    "landmarksDataVersion": 25,
     "createdAt": "2025-01-28T12:05:48.495Z",
-    "updatedAt": "2025-04-15T06:42:15.810Z",
+    "updatedAt": "2025-11-11T11:39:33.255Z",
     "__v": 0
   }
 }

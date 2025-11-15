@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
@@ -11,6 +12,7 @@ class RefreshTokenAPI {
   static String baseUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
   static Future<String> refresh() async {
+    print("refresh ${StackTrace.current}");
     var signInBox = Hive.box('SignInDatabase');
     String refreshToken = signInBox.get("refreshToken");
     print("refreshToken");
@@ -31,6 +33,8 @@ class RefreshTokenAPI {
       Map<String, dynamic> responseBody = json.decode(response.body);
       final newAccessToken = responseBody["accessToken"];
       final newRefreshToken = responseBody["refreshToken"];
+      print("old access token${signInBox.get("accessToken")}");
+      print("old refresh token${signInBox.get("refreshToken")}");
       signInBox.delete("accessToken");
       signInBox.put("accessToken", newAccessToken);
       print("New access token: ${signInBox.get("accessToken")}");

@@ -232,23 +232,29 @@ class MapClustering {
               landmarks[i].element!.subType != "Entrance Only" &&
               landmarks[i].coordinateX != null) {
 
-            try {
+            // try {
               if(landmarks[i].wasPolyIdNull == false){
                 String? code;
-                if(landmarks[i].name!.contains(" - ") || landmarks[i].name!.contains("-")){
-                  code = landmarks[i].name!.split("-")[0];
+                if(landmarks[i].properties?.doorNumber == null){
+                  if(landmarks[i].name!.contains(" - ") || landmarks[i].name!.contains("-")){
+                    code = landmarks[i].name!.split("-")[0];
+                  }else{
+                    code = landmarks[i].name??"";
+                  }
                 }else{
-                  code = landmarks[i].name??"";
+                  code = landmarks[i].properties?.doorNumber;
                 }
+                // print("landmarks[i].properties.doorNumber $code -- ${landmarks[i].properties?.doorNumber} ${landmarks[i].name} ${landmarks[i].buildingName}");
+
                 // bitMapMarkers[landmarks[i].properties!.polyId!] = MarkerIconWithAnchor(icon, Offset(0,0));
-                bitMapMarkers[landmarks[i].properties!.polyId!] = await HelperClass().bitmapDescriptorFromCenteredTextFormatEDName(code);
+                bitMapMarkers[landmarks[i].properties!.polyId!] = await HelperClass().bitmapDescriptorFromCenteredTextFormatEDName(code??"");
               }else{
                 bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.blueDotMarker;
               }
 
-            }catch(e){
-              
-            }
+            // }catch(e){
+            //   print()
+            // }
           }
           else if (landmarks[i].element != null &&
               landmarks[i].element!.subType != null &&

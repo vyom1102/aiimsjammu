@@ -199,12 +199,21 @@ class RepositoryManager{
         // }
 
         for (var building in SwitchDataBase().newDataBuildings) {
+            print("running for ${building}");
+            print("running 1 ${DateTime.now()}");
             await RepositoryManager().runAPICallPatchData(building);
+            print("running 2 ${DateTime.now()}");
             await RepositoryManager().runAPICallPolylineData(building);
+            print("running 3 ${DateTime.now()}");
             await RepositoryManager().runAPICallLandmarkData(building);
+            print("running 4 ${DateTime.now()}");
             await RepositoryManager().runAPICallBeaconData(building);
+            print("running 5 ${DateTime.now()}");
             await RepositoryManager().runAPICallWaypointData(building);
+            print("running 6 ${DateTime.now()}");
             await RepositoryManager().runAPICallGlobalAnnotationData(building);
+            print("running 7 ${DateTime.now()}");
+
             // Space optimization CODE for FUTURE
             // if(VersionInfo.buildingPatchDataVersionUpdate.containsKey(building.sId) && VersionInfo.buildingPatchDataVersionUpdate[building.sId]==true){
             //   RepositoryManager().savePatchDataForDB2(building.sId!);
@@ -220,7 +229,7 @@ class RepositoryManager{
         // await RepositoryManager().runAPICallGlobalAnnotationData(VenueManager().buildings!.campus!.id);
     }
 
-    Future<dynamic> runAPICallDataVersion(String bID,{bool generateJSON = false, Response? dataVersionDataFromAPI})async{
+    Future<dynamic> runAPICallDataVersion(String bID, {bool generateJSON = false, Response? dataVersionDataFromAPI})async{
         print("runAPICallDataVersion $bID $dataVersionDataFromAPI");
         Detail dataVersionDetails = await apiDetails.dataVersion(await dataBaseManager!.getAccessToken()!, bID);
         dataVersionDataFromAPI ??= await networkManager.api.request(dataVersionDetails);
@@ -504,7 +513,10 @@ class RepositoryManager{
     //Purpose of either Generating JSON or API Call and Storing into Respected DB
     Future<dynamic> runAPICallLandmarkData(String bID,{bool generateJSON = false}) async {
         Detail landmarkDetail = apiDetails.landmark(await dataBaseManager.getAccessToken(), bID);
+        print("dataFromAPI.data.runtimeType initial${bID}");
+
         Response dataFromAPI = await networkManager.api.request(landmarkDetail);
+
         print("dataFromAPI.data.runtimeType");
         print(dataFromAPI.data.runtimeType);
         if(generateJSON){

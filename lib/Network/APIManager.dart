@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
+import 'package:iwaymaps/API/RefreshTokenAPI.dart';
 import 'package:iwaymaps/APIMODELS/response.dart';
 
 import '../DatabaseManager/DataBaseManager.dart';
@@ -39,6 +41,7 @@ class Apimanager{
         print("dataversion versionsss from api for ${apiDetail.body} ===> ${response.body}");
       }
       if(response.statusCode == 200){
+        print("API MANAGER 200 STATUS CODE");
         String responseBody = response.body;
         dynamic decryptedBody = json.decode(responseBody);
         if(apiDetail.encryption){
@@ -49,12 +52,20 @@ class Apimanager{
 
         return responseObject;
       }else if(response.statusCode == 403){
-        Response refreshResponse = await request(Apidetails.refreshToken());
-        print("Apidetails.refreshToken().conversionFunction(refreshResponse.data)");
-        print(refreshResponse.data);
-        apiDetail.updateAccessToken(Apidetails.refreshToken().conversionFunction(refreshResponse.data).accessToken);
-        DataBaseManager().updateAccessToken(Apidetails.refreshToken().conversionFunction(refreshResponse.data).accessToken);
-        DataBaseManager().updateRefreshToken(Apidetails.refreshToken().conversionFunction(refreshResponse.data).refreshToken);
+        print("came 430");
+        // Response refreshResponse = await request(Apidetails.refreshToken());
+        // print("check ${refreshResponse.data}");
+        // print("check ${refreshResponse.statusCode}");
+        print("old was ${DataBaseManager().getAccessToken().toString()}");
+        print("old was ${DataBaseManager().getRefreshToken()}");
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        apiDetail.updateAccessToken(newAccessToken);
+        var signInBox = Hive.box('SignInDatabase');
+        String newRefreshToken = signInBox.get("refreshToken");
+        DataBaseManager().updateAccessToken(newAccessToken);
+        DataBaseManager().updateRefreshToken(newRefreshToken);
+        print("After update was ${DataBaseManager().getAccessToken()}");
+        print("After update was ${DataBaseManager().getRefreshToken()}");
         return await request(apiDetail);
       }else{
         print("response code ${response.statusCode} ${apiDetail.body} ${response.body}");

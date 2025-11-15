@@ -83,6 +83,8 @@ import '../Widgets/ImageCarouse.dart';
 import '../Data/ServicesDemoData.dart';
 import 'PharmacyScreen.dart';
 
+
+
 //hospital id = 6673e7a3b92e69bc7f4b40ae
 class HomePage extends StatefulWidget {
   @override
@@ -152,7 +154,7 @@ class _HomePageState extends State<HomePage> {
     getDriverDetail();
     mapDataVersionCycle();
     NotificationSocket.receiveMessage();
-    // checkForUpdate();
+    checkForUpdate();
     _pageController = PageController(initialPage: _currentPage);
     getLocs();
     wsocket.message["AppInitialization"]["BID"]=buildingAllApi.selectedBuildingID;
@@ -160,41 +162,42 @@ class _HomePageState extends State<HomePage> {
     versionApiCheck();
     checkForReload();
     versionApiCall();
-    // fetchAllLandmarkData();
+    fetchAllLandmarkData();
     isUserValid();
     callbackFunc();
     requestNotificationPermission();
-    // dataDownload();
+    dataDownload();
     SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID);
     SingletonFunctionController().mapCLustring.initMarkers();
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
-
+    loadData();
   }
+
 
   Future<void> mapDataVersionCycle() async {
     print("mapDataVersionCycle");
     VenueManager().runDataVersionCycle();
   }
-  // Future<void> loadData() async {
-  //   await RepositoryManager().loadBuildings().then((value) async {
-  //     var buildings = VenueManager().buildings?.buildings;
-  //     if(buildings != null) {
-  //       for (var building in buildings) {
-  //         // await RepositoryManager().runAPICallDataVersion(building.id,generateJSON: true);
-  //         await RepositoryManager().runAPICallBeaconData(building.id,generateJSON: true);
-  //         await RepositoryManager().runAPICallLandmarkData(building.id,generateJSON: true);
-  //         await RepositoryManager().runAPICallWaypointData(building.id,generateJSON: true);
-  //         await RepositoryManager().runAPICallGlobalAnnotationData(building.id,generateJSON: true);
-  //         await RepositoryManager().runAPICallPatchData(building.id,generateJSON: true);
-  //         await RepositoryManager().runAPICallPolylineData(building.id,generateJSON: true);
-  //         // await RepositoryManager().runAPIcallBuildingByVenue(building.id,generateJSON: true);
-  //       }
-  //     }
-  //
-  //   });
-  //
-  // }
+  Future<void> loadData() async {
+    await RepositoryManager().loadBuildings().then((value) async {
+      var buildings = VenueManager().buildings?.buildings;
+      if(buildings != null) {
+        for (var building in buildings) {
+          await RepositoryManager().runAPICallDataVersion(building.id,generateJSON: true);
+          await RepositoryManager().runAPICallBeaconData(building.id,generateJSON: true);
+          await RepositoryManager().runAPICallLandmarkData(building.id,generateJSON: true);
+          await RepositoryManager().runAPICallWaypointData(building.id,generateJSON: true);
+          await RepositoryManager().runAPICallGlobalAnnotationData(building.id,generateJSON: true);
+          await RepositoryManager().runAPICallPatchData(building.id,generateJSON: true);
+          await RepositoryManager().runAPICallPolylineData(building.id,generateJSON: true);
+          // await RepositoryManager().runAPIcallBuildingByVenue(building.id,generateJSON: true);
+        }
+      }
+
+    });
+
+  }
   Future<void> fetchAllLandmarkData() async {
     if (globalBuildingIds.isEmpty) {
       await fetchAndStoreBuildingIds();
@@ -1412,57 +1415,57 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _refresh() async {
     mapDataVersionCycle();
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    print("Connectivity Result: $connectivityResult");
-
-    // Check if the result contains wifi or mobile connectivity
-    if (connectivityResult.contains(ConnectivityResult.mobile) || connectivityResult.contains(ConnectivityResult.wifi)) {
-      Buildingbyvenueapi.findBuildings();
-      setState(() {
-        carouselImages.clear();
-        _services.clear();
-        _filteredServices.clear();
-        announcements.clear();
-        // news.clear();
-        DashboardListBox.clear();
-      });
-
-      final BeaconBox = BeaconAPIModelBOX.getData();
-      final DataBox = DataVersionLocalModelBOX.getData();
-      final BuildingAllBox = BuildingAllAPIModelBOX.getData();
-      final buildingData = BuildingAPIModelBox.getData();
-      final LandMarkBox = LandMarkApiModelBox.getData();
-      final PatchBox = PatchAPIModelBox.getData();
-      final PolyLineBox = PolylineAPIModelBOX.getData();
-      final WayPointBox = WayPointModeBOX.getData();
-      final OutBuildingBox = OutDoorModeBOX.getData();
-
-      BeaconBox.clear();
-      BuildingAllBox.clear();
-      buildingData.clear();
-      LandMarkBox.clear();
-      PatchBox.clear();
-      PolyLineBox.clear();
-      WayPointBox.clear();
-      OutBuildingBox.clear();
-      DataBox.clear();
-
-      print("Refreshed");
-
-      await _loadImageCorousalFromAPI();
-      await _loadServicesFromAPI();
-      await _loadAnnouncementsFromAPI();
-      // await _loadNewsFromAPI();
-      versionApiCall();
-      checkForReload();
-    } else {
-      QuickAlert.show(
-        context: context,
-        type: QuickAlertType.error,
-        title: 'No Internet Connection',
-        text: 'Please check your internet connection and try again.',
-      );
-    }
+    // var connectivityResult = await (Connectivity().checkConnectivity());
+    // print("Connectivity Result: $connectivityResult");
+    //
+    // // Check if the result contains wifi or mobile connectivity
+    // if (connectivityResult.contains(ConnectivityResult.mobile) || connectivityResult.contains(ConnectivityResult.wifi)) {
+    //   Buildingbyvenueapi.findBuildings();
+    //   setState(() {
+    //     carouselImages.clear();
+    //     _services.clear();
+    //     _filteredServices.clear();
+    //     announcements.clear();
+    //     // news.clear();
+    //     DashboardListBox.clear();
+    //   });
+    //
+    //   final BeaconBox = BeaconAPIModelBOX.getData();
+    //   final DataBox = DataVersionLocalModelBOX.getData();
+    //   final BuildingAllBox = BuildingAllAPIModelBOX.getData();
+    //   final buildingData = BuildingAPIModelBox.getData();
+    //   final LandMarkBox = LandMarkApiModelBox.getData();
+    //   final PatchBox = PatchAPIModelBox.getData();
+    //   final PolyLineBox = PolylineAPIModelBOX.getData();
+    //   final WayPointBox = WayPointModeBOX.getData();
+    //   final OutBuildingBox = OutDoorModeBOX.getData();
+    //
+    //   BeaconBox.clear();
+    //   BuildingAllBox.clear();
+    //   buildingData.clear();
+    //   LandMarkBox.clear();
+    //   PatchBox.clear();
+    //   PolyLineBox.clear();
+    //   WayPointBox.clear();
+    //   OutBuildingBox.clear();
+    //   DataBox.clear();
+    //
+    //   print("Refreshed");
+    //
+    //   await _loadImageCorousalFromAPI();
+    //   await _loadServicesFromAPI();
+    //   await _loadAnnouncementsFromAPI();
+    //   // await _loadNewsFromAPI();
+    //   versionApiCall();
+    //   checkForReload();
+    // } else {
+    //   QuickAlert.show(
+    //     context: context,
+    //     type: QuickAlertType.error,
+    //     title: 'No Internet Connection',
+    //     text: 'Please check your internet connection and try again.',
+    //   );
+    // }
   }
 
 

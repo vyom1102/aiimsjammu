@@ -186,4 +186,22 @@ class VenueManager extends BuildingStore{
     }
   }
 
+  // Future<void> runDataVersionCycle() async {
+  //   print("runDataVersionCycle $buildings");
+  //   if(buildings?.buildings == null || buildings!.buildings!.isEmpty){
+  //     await RepositoryManager().loadBuildings().then((_) async {
+  //       print("Buildign was empty");
+  //       for (var building in buildings!.buildings!) {
+  //         await RepositoryManager().runAPICallDataVersion(building.id);
+  //       }
+  //       RepositoryManager().startDataFechFromServerCycle();
+  //     });
+  //   }else {
+  //     for (var building in buildings!.buildings!) {
+  //       await RepositoryManager().runAPICallDataVersion(building.id);
+  //     }
+  //     RepositoryManager().startDataFechFromServerCycle();
+  //   }
+  // }
+
 }
