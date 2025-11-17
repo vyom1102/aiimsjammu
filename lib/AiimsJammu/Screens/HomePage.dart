@@ -172,7 +172,7 @@ class _HomePageState extends State<HomePage> {
     SingletonFunctionController().mapCLustring.initMarkers();
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
-    // requestStoragePermission();
+    requestStoragePermission();
   }
 
   Future<void> requestStoragePermission() async {
