@@ -1,5 +1,8 @@
 import 'dart:core';
 
+import 'package:iwaymaps/singletonClass.dart';
+
+import 'API/buildingAllApi.dart';
 import 'APIMODELS/Building.dart';
 import 'BluetoothManager/BeaconValueInjector.dart';
 
@@ -98,6 +101,15 @@ class PeakValley {
     return result;
   }
 
+  double peakThresh=-87;
+  double getPeakValleyThreshold(){
+    if(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!=null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.realtimeLocalisationThreshold != null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.realtimeLocalisationThreshold!.isNotEmpty){
+      peakThresh = double.parse(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.realtimeLocalisationThreshold!);
+    }
+    print("peakThresh:${peakThresh}");
+    return peakThresh;
+  }
+
   MapEntry<String, int>? _checkBeaconPattern(
       String beaconId, DateTime flagTime) {
     List<BeaconReading> history = _beaconHistory[beaconId]!;
@@ -132,7 +144,7 @@ class PeakValley {
       // Pattern: Peak → Valley → Valley (a > b, a > c, b >= c)
 
       print("int.parse(realtimeThreshold) ${int.parse(realtimeThreshold)}");
-      if (b.value > int.parse(realtimeThreshold) && a.value < b.value && b.value > c.value && peakGreaterThanPrevious && !matchesPattern(a, b, c, d)) {
+      if (b.value > getPeakValleyThreshold() && a.value < b.value && b.value > c.value && peakGreaterThanPrevious && !matchesPattern(a, b, c, d)) {
         Duration duration = history[0].time.difference(flagTime).abs();
         int roundedSeconds = (duration.inMilliseconds / 1000).round();
         int stepsToBeMoved = (roundedSeconds / 2).round();
