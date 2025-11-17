@@ -14397,17 +14397,17 @@ class _NavigationState extends State<Navigation>
                     //
                     //   });
                     // },child: Icon(Icons.add_location_alt),),
-                    // FloatingActionButton(onPressed: (){
-                    //   Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //       builder: (context) => LoggingScreen(
-                    //         logging: bluetoothScanAndroidClass.logging,
-                    //         loggingTaps: bluetoothScanAndroidClass.loggingTaps,
-                    //       ),
-                    //     ),
-                    //   );
-                    // },child: Icon(Icons.bluetooth_audio),)
+                    FloatingActionButton(onPressed: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => LoggingScreen(
+                            logging: bluetoothScanAndroidClass.logging,
+                            loggingTaps: bluetoothScanAndroidClass.loggingTaps,
+                          ),
+                        ),
+                      );
+                    },child: Icon(Icons.bluetooth_audio),)
                   ],
                 ),
               ),
