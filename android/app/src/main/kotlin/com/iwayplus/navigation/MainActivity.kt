@@ -64,36 +64,38 @@ class MainActivity : FlutterActivity() {
             }
 
             // Extract device name
-            if (device.name != null && device.name.contains("IW")) {
-//                Log.d("BluetoothScan","Device Info $result");
-                val scanRecord = result.scanRecord
+            val deviceName = device.name
+            if (deviceName != null) {
+                if(deviceName.contains("IW")){
+                    Log.d("BluetoothScan","Device Info $result");
+                    val scanRecord = result.scanRecord
 
-                val scanRecord1 = result.scanRecord
-                val deviceName1 = device.name ?: scanRecord1?.deviceName ?: "Unknown"
-                val address = device.address
-                val timestampNanos = result.timestampNanos
-                val advBytes = scanRecord1?.bytes
-                val manufacturerData1 = scanRecord1?.manufacturerSpecificData
+                    val scanRecord1 = result.scanRecord
+                    val deviceName1 = device.name ?: scanRecord1?.deviceName ?: "Unknown"
+                    val address = device.address
+                    val timestampNanos = result.timestampNanos
+                    val advBytes = scanRecord1?.bytes
+                    val manufacturerData1 = scanRecord1?.manufacturerSpecificData
 
 //                Log.d("BluetoothScan", "Device Name: $deviceName1")
 //                Log.d("BluetoothScan", "Address: $address")
 //                Log.d("BluetoothScan", "RSSI: $rssi dBm")
 //                Log.d("BluetoothScan", "Timestamp: $timestampNanos") // You can convert it to time if needed
 
-                // Extract Manufacturer ID and Data
-                for (i in 0 until (manufacturerData1?.size() ?: 0)) {
-                    val id = manufacturerData1?.keyAt(i)
-                    val data = id?.let { manufacturerData1?.get(it) }
-                    val hexData = data?.joinToString("-") { "%02X".format(it) }
-                    //Log.d("BluetoothScan", "Manufacturer ID: ${String.format("%04X", id)}")
-                    //Log.d("BluetoothScan", "Manufacturer Data: $hexData")
-                }
+                    // Extract Manufacturer ID and Data
+                    for (i in 0 until (manufacturerData1?.size() ?: 0)) {
+                        val id = manufacturerData1?.keyAt(i)
+                        val data = id?.let { manufacturerData1?.get(it) }
+                        val hexData = data?.joinToString("-") { "%02X".format(it) }
+                        //Log.d("BluetoothScan", "Manufacturer ID: ${String.format("%04X", id)}")
+                        //Log.d("BluetoothScan", "Manufacturer Data: $hexData")
+                    }
 
-                // Get Raw Bytes
-                val rawData = advBytes?.joinToString("-") { String.format("%02X", it) }
-                //Log.d("BluetoothScan", "Raw Data: $rawData")
+                    // Get Raw Bytes
+                    val rawData = advBytes?.joinToString("-") { String.format("%02X", it) }
+                    //Log.d("BluetoothScan", "Raw Data: $rawData")
 
-                val deviceDetails = """
+                    val deviceDetails = """
                 Device Name: $deviceName1
                 Address: ${address}
                 RSSI: $rssi
@@ -102,7 +104,8 @@ class MainActivity : FlutterActivity() {
 
 
 //                Log.d("BluetoothScan--", "New Device Found: $deviceDetails")
-                eventSink?.success(deviceDetails)
+                    eventSink?.success(deviceDetails)
+                }
             }
         }
 
