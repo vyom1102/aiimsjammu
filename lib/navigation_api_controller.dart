@@ -47,7 +47,7 @@ class NavigationAPIController {
     Building.buildingData![patchData.patchData!.buildingID!] =
         patchData.patchData!.buildingName;
     Building.realtimeLocalisationThreshold = patchData.patchData!.realtimeLocalisationThreshold??"";
-    print("realtimeLocalisationThreshold of ${patchData.patchData!.buildingName} is ${Building.realtimeLocalisationThreshold}");
+    print("realtimeLocalisationThreshold of ${patchData.patchData!.buildingName} is ${Building.realtimeLocalisationThreshold} ${patchData.patchData!.realtimeLocalisationThreshold??""}");
     SingletonFunctionController
         .building.patchData[patchData.patchData!.buildingID!] = patchData;
     if (selected) {
