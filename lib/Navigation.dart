@@ -14325,25 +14325,25 @@ class _NavigationState extends State<Navigation>
                           InteractionManager().logInteraction("Relocalization Button");
                           debugMarker.clear();
                           if (!user.isnavigating) {
-                            if (false) {
-                              setState(() {
-                                isFromLocalize = true;
-                              });
-                              // _localizeTimer=Timer.periodic(Duration(seconds: 5), (_){
-                              print(
-                                  "SingletonFunctionController.currentBeacon:${SingletonFunctionController.currentBeacon}");
-                              if (SingletonFunctionController
-                                  .currentBeacon!.isEmpty){
-                                _localizeTimer!.cancel();
-                              }
-                              paintUser(
-                                  SingletonFunctionController
-                                      .currentBeacon,
-                                  null,
-                                  render: true,
-                                  speakTTS: true,
-                                  providePinSelection: false);
-                            } else {
+                            // if (false) {
+                            //   setState(() {
+                            //     isFromLocalize = true;
+                            //   });
+                            //   // _localizeTimer=Timer.periodic(Duration(seconds: 5), (_){
+                            //   print(
+                            //       "SingletonFunctionController.currentBeacon:${SingletonFunctionController.currentBeacon}");
+                            //   if (SingletonFunctionController
+                            //       .currentBeacon!.isEmpty){
+                            //     _localizeTimer!.cancel();
+                            //   }
+                            //   paintUser(
+                            //       SingletonFunctionController
+                            //           .currentBeacon,
+                            //       null,
+                            //       render: true,
+                            //       speakTTS: true,
+                            //       providePinSelection: false);
+                            // } else {
                               if(isLocalized)return;
                               setState(() {
                                 isLocalized = true;
@@ -14373,7 +14373,7 @@ class _NavigationState extends State<Navigation>
 
                                     _timer.cancel();
                                   });
-                            }
+                            // }
                           } else {
                             recenterMap();
                           }
