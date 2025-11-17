@@ -85,6 +85,7 @@ import 'GPSBuffer.dart';
 import 'GPSService.dart';
 import 'GlobalAnnotation/global_annotation_controller.dart';
 import 'GlobalAnnotation/global_rendering.dart';
+import 'LogginhScreen.dart';
 import 'MODELS/MarkerIconWithAnchor.dart';
 import 'MapMarkerCluster/MarkerClustering.dart';
 import 'MapMarkerCluster/PointForCenter.dart';
@@ -14432,17 +14433,17 @@ class _NavigationState extends State<Navigation>
                     //
                     //   });
                     // },child: Icon(Icons.add_location_alt),),
-                    // FloatingActionButton(onPressed: (){
-                    //   Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //       builder: (context) => LoggingScreen(
-                    //         logging: bluetoothScanAndroidClass.logging,
-                    //         loggingTaps: bluetoothScanAndroidClass.loggingTaps,
-                    //       ),
-                    //     ),
-                    //   );
-                    // },child: Icon(Icons.bluetooth_audio),)
+                    FloatingActionButton(onPressed: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => LoggingScreen(
+                            logging: bluetoothScanAndroidClass.logging,
+                            loggingTaps: bluetoothScanAndroidClass.loggingTaps,
+                          ),
+                        ),
+                      );
+                    },child: Icon(Icons.bluetooth_audio),)
                   ],
                 ),
               ),
