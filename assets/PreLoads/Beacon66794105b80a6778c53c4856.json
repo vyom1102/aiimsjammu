@@ -33,7 +33,7 @@
     "priority": 1,
     "others": [],
     "createdAt": "2025-03-08T08:50:26.637Z",
-    "updatedAt": "2025-09-11T09:30:54.013Z",
+    "updatedAt": "2025-11-12T07:11:31.350Z",
     "__v": 0
   },
   {
@@ -68,7 +68,7 @@
     "escalators": [],
     "others": [],
     "createdAt": "2025-03-25T09:35:24.213Z",
-    "updatedAt": "2025-09-11T09:30:54.055Z",
+    "updatedAt": "2025-11-12T07:11:31.393Z",
     "__v": 0,
     "priority": 0
   },
@@ -104,7 +104,7 @@
     "escalators": [],
     "others": [],
     "createdAt": "2025-03-25T09:35:24.312Z",
-    "updatedAt": "2025-09-11T09:30:54.050Z",
+    "updatedAt": "2025-11-12T07:11:31.359Z",
     "__v": 0,
     "priority": 0
   },
@@ -140,7 +140,7 @@
     "escalators": [],
     "others": [],
     "createdAt": "2025-03-25T09:35:24.528Z",
-    "updatedAt": "2025-09-11T09:30:54.055Z",
+    "updatedAt": "2025-11-12T07:11:31.392Z",
     "__v": 0,
     "priority": 0
   },
@@ -176,7 +176,7 @@
     "escalators": [],
     "others": [],
     "createdAt": "2025-03-25T09:35:24.043Z",
-    "updatedAt": "2025-09-11T09:30:54.054Z",
+    "updatedAt": "2025-11-12T07:11:31.392Z",
     "__v": 0,
     "priority": 0
   },
@@ -212,7 +212,7 @@
     "escalators": [],
     "others": [],
     "createdAt": "2025-03-25T09:35:24.251Z",
-    "updatedAt": "2025-09-11T09:30:54.048Z",
+    "updatedAt": "2025-11-12T07:11:31.358Z",
     "__v": 0,
     "priority": 0
   },
@@ -248,7 +248,7 @@
     "escalators": [],
     "others": [],
     "createdAt": "2025-03-25T09:35:24.270Z",
-    "updatedAt": "2025-09-11T09:30:54.015Z",
+    "updatedAt": "2025-11-12T07:11:31.353Z",
     "__v": 0,
     "priority": 0
   },
@@ -284,7 +284,7 @@
     "escalators": [],
     "others": [],
     "createdAt": "2025-03-25T09:35:24.275Z",
-    "updatedAt": "2025-09-11T09:30:54.051Z",
+    "updatedAt": "2025-11-12T07:11:31.402Z",
     "__v": 0,
     "priority": 0
   },
@@ -320,7 +320,7 @@
     "escalators": [],
     "others": [],
     "createdAt": "2025-03-25T09:35:24.278Z",
-    "updatedAt": "2025-09-11T09:30:54.053Z",
+    "updatedAt": "2025-11-12T07:11:31.403Z",
     "__v": 0,
     "priority": 0
   },
@@ -356,79 +356,9 @@
     "escalators": [],
     "others": [],
     "createdAt": "2025-03-25T09:35:24.313Z",
-    "updatedAt": "2025-09-11T09:30:54.053Z",
+    "updatedAt": "2025-11-12T07:11:31.391Z",
     "__v": 0,
     "priority": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.56379925122736",
-      "longitude": "75.03649945647616",
-      "node": "1209",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d2e",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 64,
-    "coordinateY": 5,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 3,
-    "geometryType": "NODE",
-    "name": "IW25030870",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.344Z",
-    "updatedAt": "2025-09-11T09:30:53.344Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.5635807601897",
-      "longitude": "75.03646502220883",
-      "node": "9525",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d2f",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 136,
-    "coordinateY": 41,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 3,
-    "geometryType": "NODE",
-    "name": "IW25030863",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.344Z",
-    "updatedAt": "2025-09-11T09:30:53.344Z",
-    "__v": 0
   },
   {
     "element": {
@@ -445,7 +375,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d2a",
+    "_id": "69143322271f346effa90d95",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 46,
     "coordinateY": 29,
@@ -461,8 +391,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.344Z",
-    "updatedAt": "2025-09-11T09:30:53.344Z",
+    "createdAt": "2025-11-12T07:11:30.965Z",
+    "updatedAt": "2025-11-12T07:11:30.965Z",
     "__v": 0
   },
   {
@@ -480,7 +410,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d2b",
+    "_id": "69143322271f346effa90d96",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 101,
     "coordinateY": 133,
@@ -496,8 +426,218 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.344Z",
-    "updatedAt": "2025-09-11T09:30:53.344Z",
+    "createdAt": "2025-11-12T07:11:30.965Z",
+    "updatedAt": "2025-11-12T07:11:30.965Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.56343968790484",
+      "longitude": "75.03657762981292",
+      "node": "5921",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90d97",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 196,
+    "coordinateY": 25,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 3,
+    "geometryType": "NODE",
+    "name": "IW25030856",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.965Z",
+    "updatedAt": "2025-11-12T07:11:30.965Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.56354812728135",
+      "longitude": "75.03660204819434",
+      "node": "1306",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90d98",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 161,
+    "coordinateY": 5,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 3,
+    "geometryType": "NODE",
+    "name": "IW25030860",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.965Z",
+    "updatedAt": "2025-11-12T07:11:30.965Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.56379925122736",
+      "longitude": "75.03649945647616",
+      "node": "1209",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90d99",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 64,
+    "coordinateY": 5,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 3,
+    "geometryType": "NODE",
+    "name": "IW25030870",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.5635807601897",
+      "longitude": "75.03646502220883",
+      "node": "9525",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90d9a",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 136,
+    "coordinateY": 41,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 3,
+    "geometryType": "NODE",
+    "name": "IW25030863",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.56351344861655",
+      "longitude": "75.0364925210199",
+      "node": "9551",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90d9b",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 162,
+    "coordinateY": 41,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 3,
+    "geometryType": "NODE",
+    "name": "IW25030862",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.56382793866397",
+      "longitude": "75.03640870977773",
+      "node": "6457",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90da1",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 45,
+    "coordinateY": 28,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 1,
+    "geometryType": "NODE",
+    "name": "IW25030818",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -516,7 +656,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d37",
+    "_id": "69143322271f346effa90da2",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 195,
     "coordinateY": 25,
@@ -532,148 +672,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.344Z",
-    "updatedAt": "2025-09-11T09:30:53.344Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.56382793866397",
-      "longitude": "75.03640870977773",
-      "node": "6457",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d36",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 45,
-    "coordinateY": 28,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 1,
-    "geometryType": "NODE",
-    "name": "IW25030818",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.344Z",
-    "updatedAt": "2025-09-11T09:30:53.344Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.56343968790484",
-      "longitude": "75.03657762981292",
-      "node": "5921",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d2c",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 196,
-    "coordinateY": 25,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 3,
-    "geometryType": "NODE",
-    "name": "IW25030856",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.344Z",
-    "updatedAt": "2025-09-11T09:30:53.344Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.56354812728135",
-      "longitude": "75.03660204819434",
-      "node": "1306",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d2d",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 161,
-    "coordinateY": 5,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 3,
-    "geometryType": "NODE",
-    "name": "IW25030860",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.344Z",
-    "updatedAt": "2025-09-11T09:30:53.344Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.56351344861655",
-      "longitude": "75.0364925210199",
-      "node": "9551",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d30",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 162,
-    "coordinateY": 41,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 3,
-    "geometryType": "NODE",
-    "name": "IW25030862",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.344Z",
-    "updatedAt": "2025-09-11T09:30:53.344Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -691,7 +691,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d44",
+    "_id": "69143322271f346effa90daf",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 191,
     "coordinateY": 72,
@@ -707,8 +707,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -726,7 +726,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d45",
+    "_id": "69143322271f346effa90db0",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 168,
     "coordinateY": 77,
@@ -742,8 +742,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -761,7 +761,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d46",
+    "_id": "69143322271f346effa90db1",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 130,
     "coordinateY": 79,
@@ -777,8 +777,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -796,7 +796,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d47",
+    "_id": "69143322271f346effa90db2",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 136,
     "coordinateY": 41,
@@ -812,8 +812,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -831,7 +831,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d48",
+    "_id": "69143322271f346effa90db3",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 162,
     "coordinateY": 41,
@@ -847,8 +847,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -867,7 +867,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d4c",
+    "_id": "69143322271f346effa90db7",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 84,
     "coordinateY": 99,
@@ -883,8 +883,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -903,7 +903,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d4e",
+    "_id": "69143322271f346effa90db9",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 223,
     "coordinateY": 71,
@@ -919,8 +919,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -938,7 +938,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d4f",
+    "_id": "69143322271f346effa90dba",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 190,
     "coordinateY": 70,
@@ -954,8 +954,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -973,7 +973,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d50",
+    "_id": "69143322271f346effa90dbb",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 101,
     "coordinateY": 132,
@@ -989,8 +989,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1009,7 +1009,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d51",
+    "_id": "69143322271f346effa90dbc",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 68,
     "coordinateY": 132,
@@ -1025,8 +1025,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1045,7 +1045,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d52",
+    "_id": "69143322271f346effa90dbd",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 189,
     "coordinateY": 127,
@@ -1061,8 +1061,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1080,7 +1080,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d53",
+    "_id": "69143322271f346effa90dbe",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 149,
     "coordinateY": 132,
@@ -1096,8 +1096,78 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.56386902021112",
+      "longitude": "75.03635069523914",
+      "node": "8956",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90dbf",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 25,
+    "coordinateY": 39,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 0,
+    "geometryType": "NODE",
+    "name": "IW25030816",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.56374814774043",
+      "longitude": "75.03639320338061",
+      "node": "9460",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90dc0",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 71,
+    "coordinateY": 41,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 0,
+    "geometryType": "NODE",
+    "name": "IW25030806",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1115,7 +1185,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d56",
+    "_id": "69143322271f346effa90dc1",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 97,
     "coordinateY": 41,
@@ -1131,8 +1201,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1150,7 +1220,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d57",
+    "_id": "69143322271f346effa90dc2",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 44,
     "coordinateY": 28,
@@ -1166,8 +1236,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1185,7 +1255,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d58",
+    "_id": "69143322271f346effa90dc3",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 51,
     "coordinateY": 70,
@@ -1201,78 +1271,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.563530462845094",
-      "longitude": "75.03635156786552",
-      "node": "18233",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d59",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 142,
-    "coordinateY": 79,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 0,
-    "geometryType": "NODE",
-    "name": "IW25030799",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.563790593125205",
-      "longitude": "75.03649955761531",
-      "node": "1212",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d5a",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 67,
-    "coordinateY": 5,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 0,
-    "geometryType": "NODE",
-    "name": "IW25030801",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1290,7 +1290,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d5b",
+    "_id": "69143322271f346effa90dc6",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 99,
     "coordinateY": 5,
@@ -1306,8 +1306,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1325,7 +1325,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d5c",
+    "_id": "69143322271f346effa90dc7",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 150,
     "coordinateY": 5,
@@ -1341,8 +1341,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1360,7 +1360,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d5d",
+    "_id": "69143322271f346effa90dc8",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 198,
     "coordinateY": 24,
@@ -1376,8 +1376,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1395,7 +1395,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d5e",
+    "_id": "69143322271f346effa90dc9",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 133,
     "coordinateY": 133,
@@ -1411,8 +1411,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1430,7 +1430,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d5f",
+    "_id": "69143322271f346effa90dca",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 165,
     "coordinateY": 133,
@@ -1446,8 +1446,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1465,7 +1465,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d60",
+    "_id": "69143322271f346effa90dcb",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 101,
     "coordinateY": 132,
@@ -1481,8 +1481,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1500,7 +1500,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d61",
+    "_id": "69143322271f346effa90dcc",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 68,
     "coordinateY": 132,
@@ -1516,8 +1516,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1535,7 +1535,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d62",
+    "_id": "69143322271f346effa90dcd",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 98,
     "coordinateY": 76,
@@ -1551,8 +1551,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1570,7 +1570,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d63",
+    "_id": "69143322271f346effa90dce",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 65,
     "coordinateY": 76,
@@ -1586,8 +1586,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1605,7 +1605,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d64",
+    "_id": "69143322271f346effa90dcf",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 51,
     "coordinateY": 70,
@@ -1621,8 +1621,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1640,7 +1640,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d65",
+    "_id": "69143322271f346effa90dd0",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 97,
     "coordinateY": 5,
@@ -1656,8 +1656,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1675,7 +1675,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d66",
+    "_id": "69143322271f346effa90dd1",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 98,
     "coordinateY": 41,
@@ -1691,8 +1691,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1710,7 +1710,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d67",
+    "_id": "69143322271f346effa90dd2",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 72,
     "coordinateY": 41,
@@ -1726,8 +1726,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1745,7 +1745,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d68",
+    "_id": "69143322271f346effa90dd3",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 67,
     "coordinateY": 5,
@@ -1761,8 +1761,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1780,7 +1780,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d69",
+    "_id": "69143322271f346effa90dd4",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 99,
     "coordinateY": 5,
@@ -1796,8 +1796,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1815,7 +1815,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d6a",
+    "_id": "69143322271f346effa90dd5",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 131,
     "coordinateY": 5,
@@ -1831,8 +1831,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1850,7 +1850,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d6b",
+    "_id": "69143322271f346effa90dd6",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 165,
     "coordinateY": 5,
@@ -1866,8 +1866,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1886,7 +1886,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d6c",
+    "_id": "69143322271f346effa90dd7",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 66,
     "coordinateY": 82,
@@ -1902,8 +1902,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1922,7 +1922,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d6d",
+    "_id": "69143322271f346effa90dd8",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 137,
     "coordinateY": 41,
@@ -1937,8 +1937,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1957,7 +1957,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d6e",
+    "_id": "69143322271f346effa90dd9",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 97,
     "coordinateY": 5,
@@ -1973,8 +1973,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -1993,7 +1993,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d6f",
+    "_id": "69143322271f346effa90dda",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 65,
     "coordinateY": 5,
@@ -2009,8 +2009,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -2028,7 +2028,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d70",
+    "_id": "69143322271f346effa90ddb",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 130,
     "coordinateY": 80,
@@ -2044,8 +2044,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -2063,7 +2063,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d71",
+    "_id": "69143322271f346effa90ddc",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 98,
     "coordinateY": 9,
@@ -2079,8 +2079,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -2098,7 +2098,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d72",
+    "_id": "69143322271f346effa90ddd",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 129,
     "coordinateY": 9,
@@ -2114,8 +2114,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -2133,7 +2133,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d73",
+    "_id": "69143322271f346effa90dde",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 162,
     "coordinateY": 9,
@@ -2149,8 +2149,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -2168,7 +2168,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d74",
+    "_id": "69143322271f346effa90ddf",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 196,
     "coordinateY": 28,
@@ -2184,8 +2184,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -2204,7 +2204,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d75",
+    "_id": "69143322271f346effa90de0",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 193,
     "coordinateY": 71,
@@ -2220,8 +2220,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -2240,7 +2240,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d76",
+    "_id": "69143322271f346effa90de1",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 168,
     "coordinateY": 132,
@@ -2256,8 +2256,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
     "__v": 0
   },
   {
@@ -2276,7 +2276,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d77",
+    "_id": "69143322271f346effa90de2",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 68,
     "coordinateY": 132,
@@ -2292,8 +2292,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2312,7 +2312,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d78",
+    "_id": "69143322271f346effa90de3",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 197,
     "coordinateY": 24,
@@ -2328,8 +2328,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2348,7 +2348,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d79",
+    "_id": "69143322271f346effa90de4",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 135,
     "coordinateY": 132,
@@ -2364,8 +2364,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2384,7 +2384,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d7a",
+    "_id": "69143322271f346effa90de5",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 101,
     "coordinateY": 132,
@@ -2400,8 +2400,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2420,7 +2420,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d7b",
+    "_id": "69143322271f346effa90de6",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 98,
     "coordinateY": 77,
@@ -2436,8 +2436,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2456,7 +2456,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d7c",
+    "_id": "69143322271f346effa90de7",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 51,
     "coordinateY": 69,
@@ -2472,8 +2472,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2492,7 +2492,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d7d",
+    "_id": "69143322271f346effa90de8",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 47,
     "coordinateY": 29,
@@ -2508,8 +2508,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2528,7 +2528,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d7e",
+    "_id": "69143322271f346effa90de9",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 72,
     "coordinateY": 41,
@@ -2544,8 +2544,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2564,7 +2564,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d7f",
+    "_id": "69143322271f346effa90dea",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 98,
     "coordinateY": 41,
@@ -2580,8 +2580,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2600,7 +2600,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d80",
+    "_id": "69143322271f346effa90deb",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 163,
     "coordinateY": 41,
@@ -2616,8 +2616,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2636,7 +2636,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d81",
+    "_id": "69143322271f346effa90dec",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 163,
     "coordinateY": 5,
@@ -2652,8 +2652,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.346Z",
-    "updatedAt": "2025-09-11T09:30:53.346Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2672,7 +2672,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d82",
+    "_id": "69143322271f346effa90ded",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 130,
     "coordinateY": 5,
@@ -2688,8 +2688,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2707,7 +2707,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d83",
+    "_id": "69143322271f346effa90dee",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 50,
     "coordinateY": 70,
@@ -2723,8 +2723,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2742,7 +2742,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d84",
+    "_id": "69143322271f346effa90def",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 68,
     "coordinateY": 133,
@@ -2758,8 +2758,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2777,7 +2777,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d85",
+    "_id": "69143322271f346effa90df0",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 133,
     "coordinateY": 133,
@@ -2793,8 +2793,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2812,7 +2812,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d86",
+    "_id": "69143322271f346effa90df1",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 162,
     "coordinateY": 133,
@@ -2828,8 +2828,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2847,7 +2847,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d87",
+    "_id": "69143322271f346effa90df2",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 191,
     "coordinateY": 72,
@@ -2863,8 +2863,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2882,7 +2882,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d88",
+    "_id": "69143322271f346effa90df3",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 129,
     "coordinateY": 5,
@@ -2898,8 +2898,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2918,7 +2918,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d89",
+    "_id": "69143322271f346effa90df4",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 169,
     "coordinateY": 76,
@@ -2934,8 +2934,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2954,7 +2954,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d8a",
+    "_id": "69143322271f346effa90df5",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 131,
     "coordinateY": 80,
@@ -2970,8 +2970,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -2989,7 +2989,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d8b",
+    "_id": "69143322271f346effa90df6",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 71,
     "coordinateY": 41,
@@ -3005,8 +3005,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -3024,7 +3024,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d8c",
+    "_id": "69143322271f346effa90df7",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 97,
     "coordinateY": 41,
@@ -3040,8 +3040,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -3059,7 +3059,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d8d",
+    "_id": "69143322271f346effa90df8",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 168,
     "coordinateY": 77,
@@ -3075,8 +3075,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -3094,7 +3094,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d8e",
+    "_id": "69143322271f346effa90df9",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 65,
     "coordinateY": 78,
@@ -3110,8 +3110,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -3129,7 +3129,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d8f",
+    "_id": "69143322271f346effa90dfa",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 187,
     "coordinateY": 75,
@@ -3145,8 +3145,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -3164,7 +3164,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d90",
+    "_id": "69143322271f346effa90dfb",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 165,
     "coordinateY": 133,
@@ -3179,8 +3179,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -3198,7 +3198,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d91",
+    "_id": "69143322271f346effa90dfc",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 133,
     "coordinateY": 133,
@@ -3214,498 +3214,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.56386902021112",
-      "longitude": "75.03635069523914",
-      "node": "8956",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d54",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 25,
-    "coordinateY": 39,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 0,
-    "geometryType": "NODE",
-    "name": "IW25030816",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.56374814774043",
-      "longitude": "75.03639320338061",
-      "node": "9460",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d55",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 71,
-    "coordinateY": 41,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 0,
-    "geometryType": "NODE",
-    "name": "IW25030806",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.345Z",
-    "updatedAt": "2025-09-11T09:30:53.345Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.56349710903427",
-      "longitude": "75.03650606814712",
-      "node": "9786",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d94",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 168,
-    "coordinateY": 42,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 2,
-    "geometryType": "NODE",
-    "name": "IW25030836",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.56346501927613",
-      "longitude": "75.03639548332607",
-      "node": "18030",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d95",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 168,
-    "coordinateY": 78,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 2,
-    "geometryType": "NODE",
-    "name": "IW25030843",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.56356072358269",
-      "longitude": "75.03634607735432",
-      "node": "18679",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d96",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 130,
-    "coordinateY": 81,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 2,
-    "geometryType": "NODE",
-    "name": "IW25030838",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.56372819637326",
-      "longitude": "75.03628453157442",
-      "node": "18157",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d97",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 66,
-    "coordinateY": 79,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 2,
-    "geometryType": "NODE",
-    "name": "IW25030854",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.56364874640913",
-      "longitude": "75.03631011737063",
-      "node": "17959",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d98",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 97,
-    "coordinateY": 78,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 3,
-    "geometryType": "NODE",
-    "name": "IW25030867",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.56382543499716",
-      "longitude": "75.03642004047263",
-      "node": "6458",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d99",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 46,
-    "coordinateY": 28,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 2,
-    "geometryType": "NODE",
-    "name": "IW25030855",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.563790593125205",
-      "longitude": "75.03649955761531",
-      "node": "2127",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d9a",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 66,
-    "coordinateY": 9,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 2,
-    "geometryType": "NODE",
-    "name": "IW25030847",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.56359203890961",
-      "longitude": "75.03615461432658",
-      "node": "30557",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d9b",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 100,
-    "coordinateY": 133,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 2,
-    "geometryType": "NODE",
-    "name": "IW25030837",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.56377157212386",
-      "longitude": "75.03629429892699",
-      "node": "16311",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d9c",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 52,
-    "coordinateY": 71,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 2,
-    "geometryType": "NODE",
-    "name": "IW25030851",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.56375850336706",
-      "longitude": "75.03638897279428",
-      "node": "10371",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d9d",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 66,
-    "coordinateY": 45,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 2,
-    "geometryType": "NODE",
-    "name": "IW25030850",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.56359281334083",
-      "longitude": "75.03645666217535",
-      "node": "10435",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d9e",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 130,
-    "coordinateY": 45,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 2,
-    "geometryType": "NODE",
-    "name": "IW25030844",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
-    "__v": 0
-  },
-  {
-    "element": {
-      "type": "Services",
-      "subType": "beacons"
-    },
-    "properties": {
-      "latitude": "32.563645351360144",
-      "longitude": "75.03631837626496",
-      "node": "18189",
-      "nonWalkableGrids": [],
-      "flr_dist_matrix": [],
-      "frConn": [],
-      "clickedPoints": [],
-      "polygonId": []
-    },
-    "_id": "68c296cd92c9f638c0111d9f",
-    "building_ID": "66794105b80a6778c53c4856",
-    "coordinateX": 98,
-    "coordinateY": 79,
-    "feature_type": "unit",
-    "type": "Feature",
-    "floor": 2,
-    "geometryType": "NODE",
-    "name": "IW25030849",
-    "lifts": [],
-    "stairs": [],
-    "entries": [],
-    "ramps": [],
-    "escalators": [],
-    "priority": 0,
-    "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -3723,7 +3233,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d92",
+    "_id": "69143322271f346effa90dfd",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 69,
     "coordinateY": 133,
@@ -3739,8 +3249,8 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   },
   {
@@ -3758,7 +3268,7 @@
       "clickedPoints": [],
       "polygonId": []
     },
-    "_id": "68c296cd92c9f638c0111d93",
+    "_id": "69143322271f346effa90dfe",
     "building_ID": "66794105b80a6778c53c4856",
     "coordinateX": 104,
     "coordinateY": 45,
@@ -3774,8 +3284,498 @@
     "escalators": [],
     "priority": 0,
     "others": [],
-    "createdAt": "2025-09-11T09:30:53.347Z",
-    "updatedAt": "2025-09-11T09:30:53.347Z",
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.56349710903427",
+      "longitude": "75.03650606814712",
+      "node": "9786",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90dff",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 168,
+    "coordinateY": 42,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 2,
+    "geometryType": "NODE",
+    "name": "IW25030836",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.56346501927613",
+      "longitude": "75.03639548332607",
+      "node": "18030",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90e00",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 168,
+    "coordinateY": 78,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 2,
+    "geometryType": "NODE",
+    "name": "IW25030843",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.56356072358269",
+      "longitude": "75.03634607735432",
+      "node": "18679",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90e01",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 130,
+    "coordinateY": 81,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 2,
+    "geometryType": "NODE",
+    "name": "IW25030838",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.563530462845094",
+      "longitude": "75.03635156786552",
+      "node": "18233",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90dc4",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 142,
+    "coordinateY": 79,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 0,
+    "geometryType": "NODE",
+    "name": "IW25030799",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.563790593125205",
+      "longitude": "75.03649955761531",
+      "node": "1212",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90dc5",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 67,
+    "coordinateY": 5,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 0,
+    "geometryType": "NODE",
+    "name": "IW25030801",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.966Z",
+    "updatedAt": "2025-11-12T07:11:30.966Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.56382543499716",
+      "longitude": "75.03642004047263",
+      "node": "6458",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90e04",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 46,
+    "coordinateY": 28,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 2,
+    "geometryType": "NODE",
+    "name": "IW25030855",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.563790593125205",
+      "longitude": "75.03649955761531",
+      "node": "2127",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90e05",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 66,
+    "coordinateY": 9,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 2,
+    "geometryType": "NODE",
+    "name": "IW25030847",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.56359203890961",
+      "longitude": "75.03615461432658",
+      "node": "30557",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90e06",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 100,
+    "coordinateY": 133,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 2,
+    "geometryType": "NODE",
+    "name": "IW25030837",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.56377157212386",
+      "longitude": "75.03629429892699",
+      "node": "16311",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90e07",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 52,
+    "coordinateY": 71,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 2,
+    "geometryType": "NODE",
+    "name": "IW25030851",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.56375850336706",
+      "longitude": "75.03638897279428",
+      "node": "10371",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90e08",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 66,
+    "coordinateY": 45,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 2,
+    "geometryType": "NODE",
+    "name": "IW25030850",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.56359281334083",
+      "longitude": "75.03645666217535",
+      "node": "10435",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90e09",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 130,
+    "coordinateY": 45,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 2,
+    "geometryType": "NODE",
+    "name": "IW25030844",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.563645351360144",
+      "longitude": "75.03631837626496",
+      "node": "18189",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90e0a",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 98,
+    "coordinateY": 79,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 2,
+    "geometryType": "NODE",
+    "name": "IW25030849",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.56372819637326",
+      "longitude": "75.03628453157442",
+      "node": "18157",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90e02",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 66,
+    "coordinateY": 79,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 2,
+    "geometryType": "NODE",
+    "name": "IW25030854",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
+    "__v": 0
+  },
+  {
+    "element": {
+      "type": "Services",
+      "subType": "beacons"
+    },
+    "properties": {
+      "latitude": "32.56364874640913",
+      "longitude": "75.03631011737063",
+      "node": "17959",
+      "nonWalkableGrids": [],
+      "flr_dist_matrix": [],
+      "frConn": [],
+      "clickedPoints": [],
+      "polygonId": []
+    },
+    "_id": "69143322271f346effa90e03",
+    "building_ID": "66794105b80a6778c53c4856",
+    "coordinateX": 97,
+    "coordinateY": 78,
+    "feature_type": "unit",
+    "type": "Feature",
+    "floor": 3,
+    "geometryType": "NODE",
+    "name": "IW25030867",
+    "lifts": [],
+    "stairs": [],
+    "entries": [],
+    "ramps": [],
+    "escalators": [],
+    "priority": 0,
+    "others": [],
+    "createdAt": "2025-11-12T07:11:30.967Z",
+    "updatedAt": "2025-11-12T07:11:30.967Z",
     "__v": 0
   }
 ]
