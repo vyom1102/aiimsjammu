@@ -106,6 +106,7 @@ dependencies:
   ml_linalg: ^13.12.6
   device_meta: ^1.1.31
   app_settings: ^5.1.1
+  csv:
 
 dev_dependencies:
   build_runner: ^2.4.8
