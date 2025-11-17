@@ -153,6 +153,7 @@ class _HomePageState extends State<HomePage> {
     fetchAndStoreBuildingIds();
     getDriverDetail();
     mapDataVersionCycle();
+    // loadData();
     NotificationSocket.receiveMessage();
     checkForUpdate();
     _pageController = PageController(initialPage: _currentPage);
@@ -171,6 +172,22 @@ class _HomePageState extends State<HomePage> {
     SingletonFunctionController().mapCLustring.initMarkers();
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
+    requestStoragePermission();
+  }
+
+  Future<void> requestStoragePermission() async {
+    // Ask for regular storage permission (Android <11)
+    var status = await Permission.manageExternalStorage.request();
+
+    if (status.isGranted) {
+      print("✅ Storage permission granted");
+    } else if (status.isDenied) {
+      print("❌ Storage permission denied");
+    } else if (status.isPermanentlyDenied) {
+      print("❌ Permission permanently denied, please enable from settings");
+      await openAppSettings();
+    }
+    return;
   }
 
 

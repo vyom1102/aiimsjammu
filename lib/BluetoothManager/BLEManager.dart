@@ -155,43 +155,40 @@ class BLEManager{
         beacons[beaconName]!.add(double.parse(rSSI).abs());
       });
       //
-
-
       beaconResponseValues.forEach((dateTime,rSSI){
         totalWeight+= int.parse(rSSI).abs();
         divideBySize+=1;
       });
       weightAvg[beaconName] = totalWeight/divideBySize;
     });
-    var result = BluetoothKalmanFilter().getNearestBeacon(beacons);
-
-    // 
-    String? nearest = result.key;
-    String finalBeacon = "";
-    var finalAverageVariable = 1000.0;
-    var allBeacons = result.value;
-
-    allBeacons.forEach((id, data) {
-      var totalWeight = 0.0;
-      var finalAverage = 0.0;
-
-      List<double> smoothed = data['smoothed'];
-      smoothed.forEach((rssi){
-        totalWeight+=rssi.toInt();
-      });
-      finalAverage = totalWeight/smoothed.length;
-      if(finalAverage<finalAverageVariable){
-        finalAverageVariable = finalAverage;
-        finalBeacon = id;
-      }
-      double avg = data['weightedAvg'];
-      // 
-      // 
-      // 
-      // 
-      // 
-
-    });
+    // var result = BluetoothKalmanFilter().getNearestBeacon(beacons);
+    //
+    // String? nearest = result.key;
+    // String finalBeacon = "";
+    // var finalAverageVariable = 1000.0;
+    // var allBeacons = result.value;
+    //
+    // allBeacons.forEach((id, data) {
+    //   var totalWeight = 0.0;
+    //   var finalAverage = 0.0;
+    //
+    //   List<double> smoothed = data['smoothed'];
+    //   smoothed.forEach((rssi){
+    //     totalWeight+=rssi.toInt();
+    //   });
+    //   finalAverage = totalWeight/smoothed.length;
+    //   if(finalAverage<finalAverageVariable){
+    //     finalAverageVariable = finalAverage;
+    //     finalBeacon = id;
+    //   }
+    //   double avg = data['weightedAvg'];
+    //   //
+    //   //
+    //   //
+    //   //
+    //   //
+    //
+    // });
     double finalWeight = double.negativeInfinity;
     String localName = "";
     weightAvg.forEach((name,weight){
@@ -200,7 +197,7 @@ class BLEManager{
         localName = name;
       }
     });
-    finalName = finalBeacon;
+    finalName = localName;
     finalweight = finalWeight;
 
     // if (!finalWeight.isNaN){

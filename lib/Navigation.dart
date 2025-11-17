@@ -8791,10 +8791,8 @@ class _NavigationState extends State<Navigation>
       }
       getPoints.add([destinationX, destinationY]);
     }
-
     Set<Marker> innerMarker = {};
     PathState.path[floor] = path;
-
     List<Cell> Cellpath = findCorridorSegments(
         path,
         render,
@@ -8805,7 +8803,6 @@ class _NavigationState extends State<Navigation>
         SingletonFunctionController.building.patchData,
         masterGraph);
     PathState.Cellpath[floor] = Cellpath;
-
     List<double> svalue = [];
     List<double> dvalue = [];
 
@@ -14328,11 +14325,7 @@ class _NavigationState extends State<Navigation>
                           InteractionManager().logInteraction("Relocalization Button");
                           debugMarker.clear();
                           if (!user.isnavigating) {
-                            if (SingletonFunctionController
-                                .currentBeacon!.isNotEmpty &&
-                                bleManager.trimBufferTimer !=
-                                    null &&
-                                await FlutterBluePlus.isOn) {
+                            if (false) {
                               setState(() {
                                 isFromLocalize = true;
                               });
