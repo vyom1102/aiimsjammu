@@ -7416,7 +7416,7 @@ class _NavigationState extends State<Navigation>
                                     pow(userY! - pinnedY, 2));
                             print(
                                 "Skipping initializeUser due to short distance ${pinnedX} ${pinnedY} ${userX} ${userY} ($distance)");
-                            if (distance < 40) {
+                            if (distance < double.infinity) {
                               initFuture = Future.value(); // dummy future
                             } else {
                               initFuture = initializeUser(userSetLocation,

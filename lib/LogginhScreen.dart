@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -63,7 +64,15 @@ class LoggingScreen extends StatelessWidget {
 
     // Write CSV to file
     await file.writeAsString(csvData);
-    HelperClass.showToast('CSV saved at: ${file.path}');
+    Fluttertoast.showToast(
+      msg: 'CSV saved at: ${file.path}',
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.grey,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
 
     print('CSV saved at: ${file.path}');
   }

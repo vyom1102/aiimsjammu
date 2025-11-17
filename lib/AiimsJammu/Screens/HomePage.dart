@@ -178,7 +178,6 @@ class _HomePageState extends State<HomePage> {
   Future<void> requestStoragePermission() async {
     // Ask for regular storage permission (Android <11)
     var status = await Permission.manageExternalStorage.request();
-
     if (status.isGranted) {
       print("✅ Storage permission granted");
     } else if (status.isDenied) {

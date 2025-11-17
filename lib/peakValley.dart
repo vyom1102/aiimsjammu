@@ -101,7 +101,7 @@ class PeakValley {
     return result;
   }
 
-  double peakThresh=-87;
+  double peakThresh=-80;
   double getPeakValleyThreshold(){
     if(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!=null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.realtimeLocalisationThreshold != null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.realtimeLocalisationThreshold!.isNotEmpty){
       peakThresh = double.parse(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.realtimeLocalisationThreshold!);
@@ -142,7 +142,6 @@ class PeakValley {
           _beaconPeakMap[beaconId] == null || b.value > _beaconPeakMap[beaconId]!;
 
       // Pattern: Peak → Valley → Valley (a > b, a > c, b >= c)
-
       print("int.parse(realtimeThreshold) ${int.parse(realtimeThreshold)}");
       if (b.value > getPeakValleyThreshold() && a.value < b.value && b.value > c.value && peakGreaterThanPrevious && !matchesPattern(a, b, c, d)) {
         Duration duration = history[0].time.difference(flagTime).abs();
