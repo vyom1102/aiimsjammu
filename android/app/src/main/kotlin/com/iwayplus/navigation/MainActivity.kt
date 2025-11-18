@@ -345,7 +345,7 @@ class MainActivity : FlutterActivity() {
     // Persistent LocationListener to prevent garbage collection
     private val locationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
-            Log.d("GPS", "New location received: $location")
+//            Log.d("GPS", "New location received: $location")
             val data = mapOf(
                 "latitude" to location.latitude,
                 "longitude" to location.longitude,

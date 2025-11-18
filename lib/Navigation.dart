@@ -311,13 +311,7 @@ class _NavigationState extends State<Navigation>
   @override
   void initState() {
     super.initState();
-    gpsSubscription = GPSService.locationStream.listen((Location location) {
-      gpsBuffer.add(location.latitude, location.longitude);
-    }, onError: (error) {
-      print("Error receiving GPS data: $error");
-    });
     // initBluetooth();
-
     _initializeClustering();
     mapClustering = MapClustering(onMarkerTapCallback: (String sId) {
       print("sId $sId");
@@ -386,6 +380,9 @@ class _NavigationState extends State<Navigation>
     _animationController1 = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 5), // Adjust as needed
+    );
+    _initialiMarkerAnimationController=AnimationController(vsync: this,
+        duration: const Duration(milliseconds: 7000)
     );
     _zoomAnimation = CurvedAnimation(
       parent: _animationController1!,
@@ -464,8 +461,6 @@ class _NavigationState extends State<Navigation>
   }
 
   // AvailabilityState? _currentState;
-
-  final gpsBuffer = GPSBuffer();
 
   // Future<void> initBluetooth() async {
   //   // Check Bluetooth state
@@ -1320,6 +1315,7 @@ class _NavigationState extends State<Navigation>
   late Animation<double> _animation;
   // land userSetLandmarkMap = land().landmarksMap;
   Future<Landmarks?> getGlobalCoords(LatLng coordinates) async {
+    debugMarker.clear();
     Landmarks? closestLandmark;
     double minDistance = 150;
 
@@ -1385,7 +1381,7 @@ class _NavigationState extends State<Navigation>
       sortedEntries.sort((a, b) => a.key.compareTo(b.key)); // Sort in-place
 
       return sortedEntries
-          .take(3) // Take the first 3 entries
+          .take(10) // Take the first 3 entries
           .map((e) => e.value) // Extract Cell objects
           .toList(); // Convert to List<Cell>
     }
@@ -1397,6 +1393,7 @@ class _NavigationState extends State<Navigation>
     if (waypoints.isNotEmpty) {
       Map<Nodes, ClosestPointResult> result = {};
       for (var waypoint in nearestWaypoints) {
+        addDebugMarkers(LatLng(waypoint.lat!, waypoint.lon!), hue: BitmapDescriptor.hueMagenta);
         List<dynamic>? adjList = adj["${waypoint?.coordx},${waypoint?.coordy}"];
         List<dynamic>? adjGlobalList =
         adjGlobal["${waypoint?.lat},${waypoint?.lon}"];
@@ -1415,8 +1412,7 @@ class _NavigationState extends State<Navigation>
 
           List<LatLng> latLngPoints = tools.convertToLatLngList(adjGlobalList);
           List<IntPoint> intPoints = tools.convertToIntPointList(adjList);
-          closestPoint = shortestPoint(coordinates, closestPoint.latLngPoint,
-              closestPoint.intPoint, latLngPoints, intPoints);
+          closestPoint = shortestPoint(coordinates, closestPoint.latLngPoint, closestPoint.intPoint, latLngPoints, intPoints);
           result[waypoint] = closestPoint;
         }
       }
@@ -1425,14 +1421,7 @@ class _NavigationState extends State<Navigation>
           .reduce(
               (a, b) => a.value.projectLength < b.value.projectLength ? a : b);
       ClosestPointResult closestPoint = shortestProjection.value;
-      if (tools.calculateDistance([
-        shortestProjection.value.intPoint.x,
-        shortestProjection.value.intPoint.y
-      ], [
-        shortestProjection.key!.coordx!,
-        shortestProjection.key!.coordy!
-      ]) <=
-          10) {
+      if (tools.calculateDistance([shortestProjection.value.intPoint.x, shortestProjection.value.intPoint.y], [shortestProjection.key!.coordx!, shortestProjection.key!.coordy!]) <= 10) {
         closestPoint = ClosestPointResult(
             LatLng(shortestProjection.key!.lat!, shortestProjection.key!.lon!),
             IntPoint(shortestProjection.key!.coordx!,
@@ -1609,7 +1598,6 @@ class _NavigationState extends State<Navigation>
       IntPoint targetintPoint,
       List<LatLng> latLngPoints,
       List<IntPoint> intPoints) {
-    addDebugMarkers(targetLatLng, hue: BitmapDescriptor.hueMagenta);
     double distanceBetweenLatLng(LatLng a, LatLng b) {
       return sqrt(
           pow(a.latitude - b.latitude, 2) + pow(a.longitude - b.longitude, 2));
@@ -1645,7 +1633,7 @@ class _NavigationState extends State<Navigation>
       LatLng? projectedLatLng =
       projectLatLngIfWithinSegment(userLatLng, targetLatLng, latLngPoint);
       print("projectedLatLng $projectedLatLng $latLngPoint");
-      addDebugMarkers(latLngPoint, hue: BitmapDescriptor.hueOrange);
+      // addDebugMarkers(latLngPoint, hue: BitmapDescriptor.hueOrange);
 
       if (projectedLatLng != null) {
         // addDebugMarkers(latLngPoint,hue:BitmapDescriptor.hueOrange);
@@ -1800,7 +1788,7 @@ class _NavigationState extends State<Navigation>
     // If nearestBeacon is provided, localize the user to it
     if (nearestBeacon != null && nearestBeacon.isNotEmpty) {
       await _handleBeaconLocalization(
-          nearestBeacon!, speakTTS, render, providePinSelection);
+          nearestBeacon!, speakTTS, render, false);
     }
     // If polyID is provided, localize the user to the polygon
     else if (polyID != null && polyID.isNotEmpty) {
@@ -1809,12 +1797,12 @@ class _NavigationState extends State<Navigation>
     // Fallback to global coordinates if neither nearestBeacon nor polyID is available
     else {
       await _handleGlobalCoordinatesLocalization(
-          speakTTS, render, providePinSelection);
+          speakTTS, render);
     }
 
   //   if (!providePinSelection)
   // {
-  //   continuousGPSLocalisation();
+    continuousGPSLocalisation();
   // }
     // Reset direct source ID and Land ID
     widget.directLandID = '';
@@ -1828,120 +1816,122 @@ class _NavigationState extends State<Navigation>
     print("paintuser:${showClassB}");
   }
 
-  // Timer? continuousGPSLocalisationTimer = null;
-  // Animation<LatLng>? _initialMarkerAnimation;
-  // AnimationController? _initialiMarkerAnimationController;
-  //
-  // void continuousGPSLocalisation(){
-  //   print("continuousGPSLocalisation ${StackTrace.current}");
-  //   if(gpsSubscription != null){
-  //     return;
-  //   }
-  //   gpsSubscription = GPSService.locationStream.listen((Location location) {
-  //     gpsBuffer.add(location.latitude, location.longitude);
-  //   }, onError: (error) {
-  //     print("Error receiving GPS data: $error");
-  //   });
-  //   //start beacon scanning
-  //   _initialiMarkerAnimationController!.addListener(_onMarkerAnimationUpdate);
-  //   bluetoothScanAndroidClass.listenToScanUpdates(Building.apibeaconmap);
-  //   continuousGPSLocalisationTimer = Timer.periodic(Duration(seconds: 5), (timer){
-  //     //get beacon here
-  //     String? currentBeacon=SingletonFunctionController.currentBeacon;
-  //     SingletonFunctionController.currentBeacon = null;
-  //     print("currentBeacon:${currentBeacon}");
-  //     print("SingletonFunctionController.current:${SingletonFunctionController.currentBeacon}");
-  //     if(currentBeacon!=null && currentBeacon!="")
-  //     {
-  //       //if(tools.calculateAerialDist(UserState.geoLat!, UserState.geoLng!,Building.apibeaconmap[SingletonFunctionController.currentBeacon]!.properties!.latitude!,Building.apibeaconmap[SingletonFunctionController.currentBeacon].properties.latitude) > 10)
-  //       _handleBeaconLocalization(currentBeacon,false, true,false);
-  //     }else{
-  //       var location = gpsBuffer.getRobustPosition();
-  //       print("location $location");
-  //       //  print("SingletonFunctionController.current location:${location![0]} ${location![1]}");
-  //       if(location != null){
-  //         if(UserState.geoLat == null || UserState.geoLng == null){
-  //           UserState.geoLat = location[0];
-  //           UserState.geoLng = location[1];
-  //         }
-  //         else{
-  //           // if(UserState.geoLat!=location[0] && UserState.geoLng!=location[1] && markers[user.bid]!=null){
-  //           //   _googleMapController.animateCamera(CameraUpdate.zoomTo(19));
-  //           //   onGPSUpdate(location[0],location[1]);
-  //           // }
-  //           _handleGlobalCoordinatesLocalization(false, true, false);
-  //           UserState.geoLat=location[0];
-  //           UserState.geoLng=location[1];
-  //         }
-  //       }
-  //     }
-  //
-  //     // check if beacon is not null then localise on beacon otherwise gps
-  //
-  //   });
-  // }
-  //
-  // void stopContinuousGPSLocalisation(){
-  //   // stop beacon scanning
-  //   bluetoothScanAndroidClass.stopScan();
-  //   continuousGPSLocalisationTimer?.cancel();
-  //   continuousGPSLocalisationTimer = null;
-  //   gpsSubscription?.cancel(); // <-- This triggers native onCancel()
-  //   gpsSubscription = null;
-  //   // GPSService.dispose();
-  //   _initialiMarkerAnimationController?.dispose();
-  // }
+  Timer? continuousGPSLocalisationTimer = null;
+  Animation<LatLng>? _initialMarkerAnimation;
+  AnimationController? _initialiMarkerAnimationController;
 
-  // void _onMarkerAnimationUpdate() {
-  //   if (!mounted || _initialMarkerAnimation == null) return;
-  //   setState(() {
-  //     LatLng animatedPosition = _initialMarkerAnimation!.value;
-  //     markers[user.bid]![0] = customMarker.move(animatedPosition, markers[user.bid]![0]);
-  //     // if (kDebugMode) {
-  //     //   markers[user.bid]?.add(Marker(
-  //     //     markerId: MarkerId("debug"),
-  //     //     position: animatedPosition,
-  //     //     icon: BitmapDescriptor.fromBytes(userlocdebug),
-  //     //     anchor: Offset(0.5, 0.829),
-  //     //   ));
-  //     // }
+  void continuousGPSLocalisation(){
+    print("continuousGPSLocalisation ${StackTrace.current}");
+    if(gpsSubscription != null){
+      return;
+    }
+    gpsSubscription = GPSService.locationStream.listen((Location location) {
+      gpsBuffer.add(location.latitude, location.longitude);
+    }, onError: (error) {
+      print("Error receiving GPS data: $error");
+    });
+    //start beacon scanning
+    _initialiMarkerAnimationController!.addListener(_onMarkerAnimationUpdate);
+    bluetoothScanAndroidClass.listenToScanUpdates(Building.apibeaconmap);
+    continuousGPSLocalisationTimer = Timer.periodic(Duration(seconds: 5), (timer){
+      //get beacon here
+      String? currentBeacon=bluetoothScanAndroidClass.closestBeaconName;
+      bluetoothScanAndroidClass.closestBeaconName = "";
+      print("currentBeacon:${currentBeacon}");
+      print("SingletonFunctionController.current:${SingletonFunctionController.currentBeacon}");
+      if(currentBeacon.isNotEmpty && Building.apibeaconmap[currentBeacon] != null && false)
+      {
+        //if(tools.calculateAerialDist(UserState.geoLat!, UserState.geoLng!,Building.apibeaconmap[SingletonFunctionController.currentBeacon]!.properties!.latitude!,Building.apibeaconmap[SingletonFunctionController.currentBeacon].properties.latitude) > 10)
+        _handleBeaconLocalization(currentBeacon,false, true,false);
+      }else{
+        gpsBuffer.Print();
+        var location = gpsBuffer.getRobustPosition();
+        print("location $location");
+        //  print("SingletonFunctionController.current location:${location![0]} ${location![1]}");
+        if(location != null){
+          if(UserState.geoLat == null || UserState.geoLng == null){
+            UserState.geoLat = location[0];
+            UserState.geoLng = location[1];
+          }
+          else{
+            // if(UserState.geoLat!=location[0] && UserState.geoLng!=location[1] && markers[user.bid]!=null){
+            //   _googleMapController.animateCamera(CameraUpdate.zoomTo(19));
+            //   onGPSUpdate(location[0],location[1]);
+            // }
+            _handleGlobalCoordinatesLocalization(false, true, location: location);
+            UserState.geoLat=location[0];
+            UserState.geoLng=location[1];
+          }
+        }
+      }
+
+      // check if beacon is not null then localise on beacon otherwise gps
+
+    });
+  }
   //
-  //     circles.clear();
-  //     circles.add(
-  //       Circle(
-  //           circleId: CircleId("circle"),
-  //           center: animatedPosition,
-  //           radius: _animation.value,
-  //           strokeWidth: 1,
-  //           strokeColor: Colors.blue,
-  //           fillColor: Colors.lightBlue.withOpacity(0.2),
-  //           zIndex: 2
-  //       ),
-  //     );
-  //   });
-  // }
+  void stopContinuousGPSLocalisation(){
+    // stop beacon scanning
+    bluetoothScanAndroidClass.stopScan();
+    continuousGPSLocalisationTimer?.cancel();
+    continuousGPSLocalisationTimer = null;
+    gpsSubscription?.cancel(); // <-- This triggers native onCancel()
+    gpsSubscription = null;
+    // GPSService.dispose();
+    _initialiMarkerAnimationController?.dispose();
+  }
+
+  void _onMarkerAnimationUpdate() {
+    if (!mounted || _initialMarkerAnimation == null) return;
+    setState(() {
+      LatLng animatedPosition = _initialMarkerAnimation!.value;
+      markers[user.bid]![0] = customMarker.move(animatedPosition, markers[user.bid]![0]);
+      // print("animatedPosition${animatedPosition}");
+      // if (kDebugMode) {
+      //   markers[user.bid]?.add(Marker(
+      //     markerId: MarkerId("debug"),
+      //     position: animatedPosition,
+      //     icon: BitmapDescriptor.fromBytes(userlocdebug),
+      //     anchor: Offset(0.5, 0.829),
+      //   ));
+      // }
+
+      circles.clear();
+      circles.add(
+        Circle(
+            circleId: CircleId("circle"),
+            center: animatedPosition,
+            radius: _animation.value,
+            strokeWidth: 1,
+            strokeColor: Colors.blue,
+            fillColor: Colors.lightBlue.withOpacity(0.2),
+            zIndex: 2
+        ),
+      );
+    });
+  }
   //
-  // void onGPSUpdate(double newLat, double newLng) {
-  //
-  //   _initialiMarkerAnimationController!.duration = const Duration(seconds: 7);
-  //   // Step 1: Get the current marker position
-  //   LatLng currentPosition = markers[user.bid]?.isNotEmpty == true
-  //       ? markers[user.bid]![0].position
-  //       : LatLng(user.lat, user.lng);
-  //   LatLng newPosition = LatLng(newLat, newLng);
-  //   // Step 2: Reset the animation controller to start from 0
-  //   _initialiMarkerAnimationController!.reset();
-  //   // Step 3: Create a NEW animation with new begin/end positions
-  //   _initialMarkerAnimation = LatLngTween(
-  //     begin: currentPosition,   // Where marker currently is
-  //     end: newPosition,          // Where it should move to
-  //   ).animate(CurvedAnimation(
-  //     parent: _initialiMarkerAnimationController!,
-  //     curve: Curves.easeInOut,
-  //   ));
-  //   // Step 4: Start the animation - THIS TRIGGERS THE LISTENER
-  //   _initialiMarkerAnimationController!.forward();
-  // }
+  void onGPSUpdate(double newLat, double newLng) {
+    print("onGPSUpdate $onGPSUpdate");
+    _initialiMarkerAnimationController!.duration = const Duration(seconds: 7);
+    // Step 1: Get the current marker position
+    LatLng currentPosition = markers[user.bid]?.isNotEmpty == true
+        ? markers[user.bid]![0].position
+        : LatLng(user.lat, user.lng);
+    LatLng newPosition = LatLng(newLat, newLng);
+    // Step 2: Reset the animation controller to start from 0
+    _initialiMarkerAnimationController!.reset();
+    // Step 3: Create a NEW animation with new begin/end positions
+    _initialMarkerAnimation = LatLngTween(
+      begin: currentPosition,   // Where marker currently is
+      end: newPosition,          // Where it should move to
+    ).animate(CurvedAnimation(
+      parent: _initialiMarkerAnimationController!,
+      curve: Curves.easeInOut,
+    ));
+    // Step 4: Start the animation - THIS TRIGGERS THE LISTENER
+    _initialiMarkerAnimationController!.forward();
+  }
 
   Future<void> _handleBeaconLocalization(String nearestBeacon, bool speakTTS,
       bool render, bool providePinSelection) async {
@@ -2044,23 +2034,24 @@ class _NavigationState extends State<Navigation>
     }
   }
   StreamSubscription? gpsSubscription;
+  final gpsBuffer = GPSBuffer();
   Future<void> _handleGlobalCoordinatesLocalization(
-      bool speakTTS, bool render, bool providePinSelection) async {
-    print("got into GPS localization $speakTTS $render $providePinSelection");
+      bool speakTTS, bool render, {List<double>? location}) async {
+    print("got into GPS localization $speakTTS $render");
     if (kIsWeb) {
-      if (speakTTS) unableToFindLocation();
       return;
     }
-    List<double>? location;
-    gpsBuffer.Print();
-    try {
-      location = gpsBuffer.getRobustPosition();
-    } catch (e) {
-      if (widget.directLandID.length <= 2) {
-        if (speakTTS) unableToFindLocation();
+    if(location == null){
+      try {
+        location = gpsBuffer.getRobustPosition();
+      } catch (e) {
+        if (widget.directLandID.length <= 2) {
+          if (speakTTS) unableToFindLocation();
+        }
+        return;
       }
-      return;
     }
+
     if (location != null && location.isNotEmpty) {
       UserState.geoLat = location[0];
       UserState.geoLng = location[1];
@@ -2185,8 +2176,6 @@ class _NavigationState extends State<Navigation>
   bool showClassB = false;
   Future<void> initializeUser(Landmarks userSetLocation,
       {bool speakTTS = true, bool render = true}) async {
-    gpsSubscription?.cancel(); // <-- This triggers native onCancel()
-    gpsSubscription = null;
     print("from direction header:${isFromLocalize}");
     Homepage.homePageKey.currentState?.locationDetected(userSetLocation);
     tools.setBuildingAngle(SingletonFunctionController.building
@@ -2350,68 +2339,68 @@ class _NavigationState extends State<Navigation>
     // Create the animation
     await initializeMarkers();
     setState((){
-      markers.clear();
-      circles.clear();
+      // markers.clear();
+      // circles.clear();
       //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
-      // if (render){
-      //   print("entered here");
-      //   if(markers[user.bid]!=null){
-      //     onGPSUpdate(user.lat,user.lng);
-      //   }else{
-      //     markers.clear();
-      //     markers.putIfAbsent(user.bid, ()=>[]);
-      //     markers[user.bid]?.add(Marker(
-      //       markerId: MarkerId("UserLocation"),
-      //       position: LatLng(user.lat, user.lng),
-      //       icon: BitmapDescriptor.fromBytes(userloc),
-      //       anchor: Offset(0.5, 0.829),
-      //     ));
-      //     if (!kIsWeb && kDebugMode) {
-      //       markers[user.bid]?.add(Marker(
-      //         markerId: MarkerId("debug"),
-      //         position: LatLng(user.lat, user.lng),
-      //         icon: BitmapDescriptor.fromBytes(userlocdebug),
-      //         anchor: Offset(0.5, 0.829),
-      //       ));
-      //     }
-      //   }
-      // }
-      // else {
-      //   user.moveToFloor(userSetLocation.floor!);
-      // }
-      if (render) {
-        print("entered here");
-        markers.putIfAbsent(user.bid, () => []);
-        updateMarkerPosition(LatLng(user.lat, user.lng),user.bid,userloc);
-        // markers[user.bid]?.add(Marker(
-        //   markerId: MarkerId("UserLocation"),
-        //   position: LatLng(user.lat, user.lng),
-        //   icon: BitmapDescriptor.fromBytes(userloc),
-        //   anchor: Offset(0.5, 0.829),
-        //   ehfikr
-        // ));
-        // if (!kIsWeb && kDebugMode) {
-        //   markers[user.bid]?.add(Marker(
-        //     markerId: MarkerId("debug"),
-        //     position: LatLng(user.lat, user.lng),
-        //     icon: BitmapDescriptor.fromBytes(userlocdebug),
-        //     anchor: Offset(0.5, 0.829),
-        //   ));
-        // }
-        circles.add(
-          Circle(
-              circleId: CircleId("circle"),
-              center: LatLng(user.lat, user.lng),
-              radius: _animation.value,
-              strokeWidth: 1,
-              strokeColor: Colors.blue,
-              fillColor: Colors.lightBlue.withOpacity(0.2),
-              zIndex: 2
-          ),
-        );
-      }else{
+      if (render){
+        print("entered here ${markers[user.bid]}");
+        if(markers[user.bid]!=null){
+          onGPSUpdate(user.lat,user.lng);
+        }else{
+          markers.clear();
+          markers.putIfAbsent(user.bid, ()=>[]);
+          markers[user.bid]?.add(Marker(
+            markerId: MarkerId("UserLocation"),
+            position: LatLng(user.lat, user.lng),
+            icon: BitmapDescriptor.fromBytes(userloc),
+            anchor: Offset(0.5, 0.829),
+          ));
+          if (!kIsWeb && kDebugMode) {
+            markers[user.bid]?.add(Marker(
+              markerId: MarkerId("debug"),
+              position: LatLng(user.lat, user.lng),
+              icon: BitmapDescriptor.fromBytes(userlocdebug),
+              anchor: Offset(0.5, 0.829),
+            ));
+          }
+        }
+      }
+      else {
         user.moveToFloor(userSetLocation.floor!);
       }
+      // if (render) {
+      //   print("entered here");
+      //   markers.putIfAbsent(user.bid, () => []);
+      //   updateMarkerPosition(LatLng(user.lat, user.lng),user.bid,userloc);
+      //   // markers[user.bid]?.add(Marker(
+      //   //   markerId: MarkerId("UserLocation"),
+      //   //   position: LatLng(user.lat, user.lng),
+      //   //   icon: BitmapDescriptor.fromBytes(userloc),
+      //   //   anchor: Offset(0.5, 0.829),
+      //   //   ehfikr
+      //   // ));
+      //   // if (!kIsWeb && kDebugMode) {
+      //   //   markers[user.bid]?.add(Marker(
+      //   //     markerId: MarkerId("debug"),
+      //   //     position: LatLng(user.lat, user.lng),
+      //   //     icon: BitmapDescriptor.fromBytes(userlocdebug),
+      //   //     anchor: Offset(0.5, 0.829),
+      //   //   ));
+      //   // }
+      //   circles.add(
+      //     Circle(
+      //         circleId: CircleId("circle"),
+      //         center: LatLng(user.lat, user.lng),
+      //         radius: _animation.value,
+      //         strokeWidth: 1,
+      //         strokeColor: Colors.blue,
+      //         fillColor: Colors.lightBlue.withOpacity(0.2),
+      //         zIndex: 2
+      //     ),
+      //   );
+      // }else{
+      //   user.moveToFloor(userSetLocation.floor!);
+      // }
 
       if (widget.directLandID.length < 2 && speakTTS && isFromLocalize) {
         SingletonFunctionController.building
@@ -13642,7 +13631,7 @@ class _NavigationState extends State<Navigation>
                   padding: EdgeInsets.only(left: 20), // <--- padding added here
                   initialCameraPosition: _initialCameraPosition,
                   myLocationButtonEnabled: false,
-                  myLocationEnabled: false,
+                  myLocationEnabled: true,
                   zoomControlsEnabled: false,
                   zoomGesturesEnabled: true,
                   mapToolbarEnabled: false,
@@ -13654,7 +13643,7 @@ class _NavigationState extends State<Navigation>
                       .union(outdoorBlockMarker)
                       .union(focusturnArrow).union(blockMarker)
                       .union(Markers).union(roomNameMarkers).union(blurPatchCampusMarker)
-                  // .union(debugMarker)
+                  .union(debugMarker)
                       .union(GpsMarker).union(nearbyLandmarks.values.toSet()).union(_exploreModeMarker)
                       .union(_exploreModeDebugBeaconMarker).union(fingerprinting.getMarkers()).union(landmarkMarkers),
                   buildingsEnabled: false,

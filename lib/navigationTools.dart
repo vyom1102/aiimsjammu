@@ -1113,6 +1113,79 @@ class tools {
     return null; // If the index is not part of any valid segment
   }
 
+  static List<Landmarks>? findListOfNearbyLandmarkGPS(Pinselectionlocationmodel location, Map<String, Landmarks> landmarksMap, {double maxDistance = 3.048}) {
+
+    List<Landmarks> nodesQueue = [];
+    Set<List<double>> visitedNodes = {}; // Stores visited coordinates
+
+    // Helper function to check if a node is already present
+    bool isAlreadyPresent(double x, double y) {
+      for (var node in visitedNodes) {
+        double distance = calculateAerialDist(x, y, node[0], node[1]);
+        if (distance < 10.0) return true;
+      }
+      return false;
+    }
+
+    // // If beacon is on floor 0, include "main entry" landmarks
+    // if (beacon.floor == 0) {
+    //   for (var landmark in landmarksMap.values) {
+    //     if (beacon.buildingID == landmark.buildingID &&
+    //         beacon.floor == landmark.floor &&
+    //         landmark.element?.subType?.toLowerCase() == "main entry") {
+    //       queue.add(landmark);
+    //     }
+    //   }
+    // }
+
+    // Process waypoints
+    Set<String> usedLandmarkIds = {};
+    var polylineData = SingletonFunctionController.building.polylinedatamap;
+    if (polylineData.containsKey(location.bid)) {
+      for (var floor in polylineData[location.bid]!.polyline!.floors!) {
+        for (var polyline in floor.polyArray!) {
+          if (polyline.polygonType == "Waypoints" &&
+              polyline.name != null &&
+              polyline.name!.isNotEmpty &&
+              polyline.name!.toLowerCase() != "undefined" &&
+              polyline.floor == tools.numericalToAlphabetical(location.floor ?? 0)) {
+
+            for (var node in polyline.nodes!) {
+              double distance = calculateAerialDist(location.lat, location.lng, node.lat!, node.lon!);
+              if (distance < maxDistance && !isAlreadyPresent(node.lat!, node.lon!)) {
+
+                print("Found waypoint close to beacon");
+
+                // Find the closest landmark
+                var availableLandmarks = landmarksMap.values.where((l) => !usedLandmarkIds.contains(l.sId) && l.element!.subType != "Alert" && l.element!.subType != "AR").toList();
+                var closestLandmark = availableLandmarks.reduce((a, b) =>
+                calculateDistance([node.coordx!, node.coordy!], [a.coordinateX!, a.coordinateY!]) <
+                    calculateDistance([node.coordx!, node.coordy!], [b.coordinateX!, b.coordinateY!])
+                    ? a
+                    : b);
+                usedLandmarkIds.add(closestLandmark.sId!);
+                // Create a duplicate landmark with waypoint coordinates
+                var duplicateLandmark = Landmarks.fromJson(closestLandmark.toJson());
+                duplicateLandmark
+                  ..coordinateX = node.coordx
+                  ..coordinateY = node.coordy
+                  ..doorX = node.coordx
+                  ..doorY = node.coordy
+                  ..properties!.latitude = node.lat.toString()
+                  ..properties!.longitude = node.lon.toString()
+                  ..roadName = polyline.name
+                  ..properties!.isWaypoint = false;
+                nodesQueue.add(duplicateLandmark);
+                visitedNodes.add([node.lat!,node.lon!]);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return nodesQueue.isNotEmpty ? nodesQueue : null;
+  }
 
   static List<Cell> findAllPointsOfSegment(List<Cell> path, List<Cell> segment){
     List<Cell> points = [];
