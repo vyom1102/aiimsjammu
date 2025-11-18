@@ -1878,7 +1878,11 @@ class _NavigationState extends State<Navigation>
     gpsSubscription?.cancel(); // <-- This triggers native onCancel()
     gpsSubscription = null;
     // GPSService.dispose();
-    _initialiMarkerAnimationController?.dispose();
+    try{
+      _initialiMarkerAnimationController?.dispose();
+    }catch(e){
+      print(e);
+    }
   }
 
   void _onMarkerAnimationUpdate() {
@@ -2155,6 +2159,7 @@ class _NavigationState extends State<Navigation>
     } else {
       unableToFindLocation();
     }
+    continuousGPSLocalisation();
     PinLandmarkPannel.hidePanel();
     setState(() {
       nearbyLandmarks.clear();
@@ -3003,78 +3008,81 @@ class _NavigationState extends State<Navigation>
               accessibleby: acc ?? PathState.accessiblePath,
               autoStart: true)
               .then((value) {
-            print("autoreroute ${PathState.path}");
-            if (PathState.path.isNotEmpty) {
-              user.pathobj = PathState;
-              user.path = [
-                ...PathState.path[PathState.sourceFloor]!,
-                ...PathState.path[PathState.destinationFloor]!,
-              ];
-              user.cellPath = PathState.singleCellListPath;
-              user.pathobj.index = 0;
-              user.isnavigating = true;
-              user.temporaryExit = false;
-              user.moveToStartofPath(context).then((value) {
-                setState(() {
-                  if (markers.length > 0) {
-                    markers[user.bid]?[0] = customMarker.move(
-                        LatLng(
-                            tools.localtoglobal(
-                                user.showcoordX.toInt(),
-                                user.showcoordY.toInt(),
-                                SingletonFunctionController
-                                    .building.patchData[user.bid])[0],
-                            tools.localtoglobal(
-                                user.showcoordX.toInt(),
-                                user.showcoordY.toInt(),
-                                SingletonFunctionController
-                                    .building.patchData[user.bid])[1]),
-                        markers[user.bid]![0]);
-                  }
-                });
-              });
-              _isRoutePanelOpen = false;
-              SingletonFunctionController.building.selectedLandmarkID = null;
-              _isnavigationPannelOpen = true;
-              _isreroutePannelOpen = false;
-              int numCols = SingletonFunctionController
-                  .building.floorDimenssion[PathState.sourceBid]![
-              PathState.sourceFloor]![0]; //floor length
-              double angle = tools.calculateAngleBWUserandPath(
-                  user, PathState.path[PathState.sourceFloor]![1], numCols);
-              if (angle != 0) {
-                speak(
-                    "${LocaleData.turn.getString(context)} " +
-                        LocaleData.getProperty5(
-                            tools.angleToClocks(angle, context), context),
-                    _currentLocale);
-              } else {}
-
-              mapState.tilt = 50;
-
-              mapState.bearing = tools.calculateBearing([
-                user.lat,
-                user.lng
-              ], [
-                PathState.singleCellListPath[user.pathobj.index + 1].lat,
-                PathState.singleCellListPath[user.pathobj.index + 1].lng
-              ]);
-              _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
-                CameraPosition(
-                    target: mapState.target,
-                    zoom: mapState.zoom,
-                    bearing: mapState.bearing!,
-                    tilt: mapState.tilt),
-              ));
-            } else {
-              print("autostarting");
-              setState(() {
-                //_isreroutePannelOpen = false;
-                _isLandmarkPanelOpen = false;
-                _isBuildingPannelOpen = false;
-                // _isRoutePanelOpen = true;
-              });
-            }
+            // print("autoreroute ${PathState.path}");
+            // if (PathState.path.isNotEmpty) {
+            //   user.pathobj = PathState;
+            //   user.path = [
+            //     ...PathState.path[PathState.sourceFloor]!,
+            //     ...PathState.path[PathState.destinationFloor]!,
+            //   ];
+            //   user.cellPath = PathState.singleCellListPath;
+            //   user.pathobj.index = 0;
+            //   user.isnavigating = true;
+            //   user.temporaryExit = false;
+            //   user.moveToStartofPath(context).then((value) {
+            //     setState(() {
+            //       if (markers.length > 0) {
+            //         markers[user.bid]?[0] = customMarker.move(
+            //             LatLng(
+            //                 tools.localtoglobal(
+            //                     user.showcoordX.toInt(),
+            //                     user.showcoordY.toInt(),
+            //                     SingletonFunctionController
+            //                         .building.patchData[user.bid])[0],
+            //                 tools.localtoglobal(
+            //                     user.showcoordX.toInt(),
+            //                     user.showcoordY.toInt(),
+            //                     SingletonFunctionController
+            //                         .building.patchData[user.bid])[1]),
+            //             markers[user.bid]![0]);
+            //       }
+            //     });
+            //   });
+            //   _isRoutePanelOpen = false;
+            //   SingletonFunctionController.building.selectedLandmarkID = null;
+            //   _isnavigationPannelOpen = true;
+            setState(() {
+                _isreroutePannelOpen = false;
+            });
+            startNavigation();
+            //   int numCols = SingletonFunctionController
+            //       .building.floorDimenssion[PathState.sourceBid]![
+            //   PathState.sourceFloor]![0]; //floor length
+            //   double angle = tools.calculateAngleBWUserandPath(
+            //       user, PathState.path[PathState.sourceFloor]![1], numCols);
+            //   if (angle != 0) {
+            //     speak(
+            //         "${LocaleData.turn.getString(context)} " +
+            //             LocaleData.getProperty5(
+            //                 tools.angleToClocks(angle, context), context),
+            //         _currentLocale);
+            //   } else {}
+            //
+            //   mapState.tilt = 50;
+            //
+            //   mapState.bearing = tools.calculateBearing([
+            //     user.lat,
+            //     user.lng
+            //   ], [
+            //     PathState.singleCellListPath[user.pathobj.index + 1].lat,
+            //     PathState.singleCellListPath[user.pathobj.index + 1].lng
+            //   ]);
+            //   _googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+            //     CameraPosition(
+            //         target: mapState.target,
+            //         zoom: mapState.zoom,
+            //         bearing: mapState.bearing!,
+            //         tilt: mapState.tilt),
+            //   ));
+            // } else {
+            //   print("autostarting");
+            //   setState(() {
+            //     //_isreroutePannelOpen = false;
+            //     _isLandmarkPanelOpen = false;
+            //     _isBuildingPannelOpen = false;
+            //     // _isRoutePanelOpen = true;
+            //   });
+            // }
           });
         });
         rerouting = false;
@@ -7363,6 +7371,7 @@ class _NavigationState extends State<Navigation>
                       onPressed: calculatingPath
                           ? null
                           : () async {
+                        stopContinuousGPSLocalisation();
                         hasPressedButton = true;
                         // landmarkMarkers.forEach((it) {
                         //   it.visible = false;
@@ -7765,7 +7774,7 @@ class _NavigationState extends State<Navigation>
         PathState.singleCellListPath.insertAll(0, data["CellPath"]);
         lifts.add(data["lift"]);
         print(
-            "PathState.singleCellListPath ${PathState.singleCellListPath.length}");
+            "PathState.singleCellListPath ${PathState.singleCellListPath.length} ${PathState.singleCellListPath}");
       }
 
       PathState.directions =
@@ -7828,6 +7837,8 @@ class _NavigationState extends State<Navigation>
                 _currentLocale);
           }
         }
+      }else{
+        print("PathState.singleCellListPath is empty");
       }
     } else {
       print("starting calc not happening");
@@ -10059,6 +10070,7 @@ class _NavigationState extends State<Navigation>
           onStart = false;
           startingNavigation = false;
         });
+        continuousGPSLocalisation();
       },
       child: Semantics(
         label: "Close route preview",
@@ -13391,6 +13403,7 @@ class _NavigationState extends State<Navigation>
 
   @override
   void dispose() {
+    stopContinuousGPSLocalisation();
     _messageTimer?.cancel();
     _landmarks.clear();
     gpsSubscription?.cancel(); // <-- This triggers native onCancel()

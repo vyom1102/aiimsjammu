@@ -1359,7 +1359,7 @@ bool isWithinRange(List<int> target, List<int> p1, List<int> p2, double range) {
 
 List<Cell> findCorridorSegments(
     List<int> path, List<List<double>>? render, List<int> nonWalkable, int numCols,String? bid, int floor,Map<String,patchDataModel> patchData, bool masterGraph) {
-  int? coorridorWidth=(patchData[bid]!.patchData!.corridorWidth!=null)?int.parse(patchData[bid]!.patchData!.corridorWidth!):10;
+  int? coorridorWidth=(patchData[bid]!.patchData!.corridorWidth!=null && patchData[bid]!.patchData!.corridorWidth!.isNotEmpty)?int.parse(patchData[bid]!.patchData!.corridorWidth!):10;
   print("coorirdor width");
   print(coorridorWidth);
   List<Cell> single = [];
