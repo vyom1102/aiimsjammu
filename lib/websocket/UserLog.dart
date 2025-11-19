@@ -134,7 +134,6 @@ class wsocket{
     channel.on('error', (data) {
       print("WebSocket error: $data");
     });
-
     channel.connect();
   }
 }

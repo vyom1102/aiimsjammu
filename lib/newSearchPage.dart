@@ -112,7 +112,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
           } else if (subType == "Drinking Water") {
             tempOptionSet.add("Drinking Water");
           }
-          print("available subtypes:${subType} ${optionListForUI} ${widget.user.bid}");
+          //print("available subtypes:${subType} ${optionListForUI} ${widget.user.bid}");
           if (widget.user.bid == buildingAllApi.outdoorID) return;
           // Conditional based on selected building ID
           if (buildingID == widget.user.bid) {
@@ -581,7 +581,6 @@ class _NewsearchpageState extends State<NewSearchPage> {
     setState((){
       // Update the current search keyword
       currentSearchKeyword = searchText;
-
       if (searchText.isEmpty){
         searchResults = [];
         searcCategoryhResults = [];
@@ -835,9 +834,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
       String searchedtext) {
 
     bool added = false;
-
     // Check if the value should be included
-
     if (value.name!.toLowerCase().contains(searchedtext.toLowerCase()) &&
         value.floor == userFloor) {
       // Check if already added based on unique ID (polyId)

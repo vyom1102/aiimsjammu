@@ -401,12 +401,10 @@ class _NavigationState extends State<Navigation>
     setState(() {
       isLoading = true;
     });
-
     PB_controller = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 5000),
     );
-
     // Define a Tween to animate the progress from 0.0 to 1.0
     PBanimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -14345,12 +14343,12 @@ class _NavigationState extends State<Navigation>
                             //       providePinSelection: false);
                             // } else {
                               if(isLocalized)return;
-                              setState(() {
+                              setState((){
                                 isLocalized = true;
                               });
                               gpsSubscription = GPSService.locationStream.listen((Location location) {
                                 gpsBuffer.add(location.latitude, location.longitude);
-                              }, onError: (error) {
+                              }, onError: (error){
                                 print("Error receiving GPS data: $error");
                               });
                               if(Platform.isAndroid){
@@ -14370,7 +14368,6 @@ class _NavigationState extends State<Navigation>
                                         isLocalized = false;
                                       })
                                     });
-
                                     _timer.cancel();
                                   });
                             // }

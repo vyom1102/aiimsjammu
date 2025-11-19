@@ -73,7 +73,6 @@ class LoggingScreen extends StatelessWidget {
       textColor: Colors.white,
       fontSize: 16.0,
     );
-
     print('CSV saved at: ${file.path}');
   }
 
