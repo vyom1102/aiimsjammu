@@ -82,7 +82,6 @@ class DataBaseManager implements DBManager {
     // await UserBox.getAccessToken();
     var signInBox = Hive.box('SignInDatabase');
     String accessToken = signInBox.get("accessToken");
-    print("accessToken from manager ${accessToken}");
     return accessToken;
   }
 

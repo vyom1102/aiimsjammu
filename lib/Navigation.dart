@@ -8634,7 +8634,6 @@ class _NavigationState extends State<Navigation>
     // }
 
     List<Map<String, dynamic>> result = [];
-
     for (var step in path) {
       String buildingID = step.key;
       print("buildingfloors ${step.value.keys}");
@@ -8650,7 +8649,7 @@ class _NavigationState extends State<Navigation>
         PathState.numCols![buildingID] = PathState.numCols![buildingID] ?? {};
         PathState.numCols![buildingID]![floor] = SingletonFunctionController
             .building.floorDimenssion[buildingID]![floor]![0];
-        print("buildingID path $buildingID");
+        print("buildingID path $buildingID $render");
         // print("Building.GlobalAnnotation!.liftNodes ${Building.GlobalAnnotation!.liftNodes}");
         var lift;
         if (Building.GlobalAnnotation?.liftNodes != null &&

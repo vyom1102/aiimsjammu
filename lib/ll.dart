@@ -61,12 +61,10 @@ class ApiDataFetcher {
   Future<BuildingData> fetchBuildingIDS(String venueName) async {
     print('\nFetching Patch data...');
     final data = await makeApiCall(
-      endpoint: '$baseUrl/secured/building/get/venue',
+      endpoint: '$baseUrl/secured/building/get/venue?api_key=${accessToken}',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': accessToken,
-
       },
       body: {
         "venueName": venueName,
@@ -81,12 +79,10 @@ class ApiDataFetcher {
   Future<void> fetchLandmark(String buildingId) async {
     print('\nFetching Landmark data...');
     final data = await makeApiCall(
-      endpoint: '$baseUrl/secured/landmarks?format=v2',
+      endpoint: '$baseUrl/secured/landmarks?format=v2&api_key=${accessToken}',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': accessToken,
-        
       },
       body: {'id': buildingId},
     );
@@ -100,12 +96,10 @@ class ApiDataFetcher {
   Future<void> fetchBuildingBeacons(String buildingId) async {
     print('\nFetching Building Beacons...');
     final data = await makeApiCall(
-      endpoint: '$baseUrl/secured/building/beacons',
+      endpoint: '$baseUrl/secured/building/beacons?api_key=${accessToken}',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': accessToken,
-        
       },
       body: {'buildingId': buildingId},
     );
@@ -121,11 +115,10 @@ class ApiDataFetcher {
   Future<void> fetchDataVersion(String buildingId) async {
     print('\nFetching Data Version...');
     final data = await makeApiCall(
-      endpoint: '$baseUrl/secured/data-version',
+      endpoint: '$baseUrl/secured/data-version?api_key=${accessToken}',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': accessToken,
       },
       body: {'building_ID': buildingId},
     );
@@ -139,11 +132,10 @@ class ApiDataFetcher {
   Future<void> fetchGlobalAnnotation(String id) async {
     print('\nFetching Global Annotation...');
     final data = await makeApiCall(
-      endpoint: '$baseUrl/secured/get-global-annotation/$id',
+      endpoint: '$baseUrl/secured/get-global-annotation/$id?api_key=${accessToken}',
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': accessToken,
       },
     );
 
@@ -156,12 +148,11 @@ class ApiDataFetcher {
   Future<void> fetchPatch(String buildingId, {String manufacturer = 'Generic', String deviceModel = 'Generic'}) async {
     print('\nFetching Patch data...');
     final data = await makeApiCall(
-      endpoint: '$baseUrl/secured/patch/get?format=v2',
+      endpoint: '$baseUrl/secured/patch/get?format=v2&api_key=${accessToken}',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': accessToken,
-        
+
       },
       body: {
         'id': buildingId,
@@ -179,12 +170,10 @@ class ApiDataFetcher {
   Future<void> fetchPolyline(String buildingId) async {
     print('\nFetching Polyline data...');
     final data = await makeApiCall(
-      endpoint: '$baseUrl/secured/polyline?format=v2',
+      endpoint: '$baseUrl/secured/polyline?format=v2&api_key=${accessToken}',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': accessToken,
-        
       },
       body: {'id': buildingId},
     );
@@ -198,12 +187,10 @@ class ApiDataFetcher {
   Future<void> fetchWaypoint(String buildingId, {bool outdoor = false}) async {
     print('\nFetching Waypoint data...');
     final data = await makeApiCall(
-      endpoint: '$baseUrl/secured/indoor-path-network',
+      endpoint: '$baseUrl/secured/indoor-path-network?api_key=${accessToken}',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': accessToken,
-        
       },
       body: {
         'building_ID': buildingId,
@@ -240,7 +227,7 @@ class ApiDataFetcher {
 void main() async {
   // Configuration - REPLACE WITH YOUR ACTUAL VALUES
   final fetcher = ApiDataFetcher(
-    accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NmI1ZWY2NGI2ZDc1MDIzZDg5YWY3NjYiLCJyb2xlcyI6WyJ1c2VyIiwiYWRtaW4iXSwiaWF0IjoxNzYzNDY4Mzc3LCJleHAiOjE3NjM0NzAxNzd9.eG6-ODtFOcMVJLTrDMWH6tFStbsnB5uZVd7k4JcqPd8',
+    accessToken: '7caabf90-c517-11f0-b412-a52d7d953b2c',
     baseUrl: 'https://maps.iwayplus.in',  // e.g., 'https://api.example.com'
   );
   var buildingData = await fetcher.fetchBuildingIDS("AIIMSJAMMU");
@@ -249,4 +236,7 @@ void main() async {
       buildingId: building.id,
     );
   });
+  await fetcher.fetchAllData(
+    buildingId: buildingData.campus!.id,
+  );
 }
