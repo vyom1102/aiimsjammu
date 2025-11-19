@@ -121,6 +121,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
     if (widget.previousFilter != "") {
       setState(() {
         _controller.text = widget.previousFilter;
+        currentSearchKeyword = widget.previousFilter;
       });
     }
     setState(() {
@@ -303,6 +304,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
 
       setState(() {
         _controller.text = result.recognizedWords;
+        currentSearchKeyword = result.recognizedWords;
         search(result.recognizedWords);
         // print(_controller.text);
       });
@@ -590,7 +592,16 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
 
   void search(String searchText) {
 
+
     setState(() {
+      if (searchText.isEmpty){
+        searchResults = [];
+        searcCategoryhResults = [];
+        currentSearchKeyword = ""; // Clear keyword when search is empty
+        return;
+      }
+
+      currentSearchKeyword = searchText;
       if (searchText.isNotEmpty) {
         print("Searching for: $searchText");
         Map<String, List<String>> relatedTerms = {
@@ -600,7 +611,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
           'atm': ['cash ', 'bank ','money'],
           'entry': ['entrance', 'doorway', 'gateway','gate'],
         };
-
+        // currentSearchKeyword = "";
         topCategory = false;
         searchResults.clear();
         int locationCount = 0, courseCount = 0, serviceCount = 0,tenantCount =0 , eventCount =0,artworkCount=0;
@@ -625,7 +636,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
           final result = fuse.search(normalizedSearchText);
           print("result:${result} ${normalizedSearchText}  ${fuse}");
           result.sort((a, b) {
-            print("${normalizedSearchText.toLowerCase()} a.item.toLowerCase().split(' ') ${a.item.name!.toLowerCase().split(' ')}");
+           // print("${normalizedSearchText.toLowerCase()} a.item.toLowerCase().split(' ') ${a.item.name!.toLowerCase().split(' ')}");
             final aHasExact = a.item.name!.toLowerCase().split(' ').contains(normalizedSearchText.toLowerCase());
             final bHasExact = b.item.name!.toLowerCase().split(' ').contains(normalizedSearchText.toLowerCase());
             if (aHasExact && !bHasExact) return -1;
@@ -635,24 +646,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
           for (var fuseResult in result) {
             if (fuseResult.score < 0.5 && searchResults.length < 10) {
               final Landmarks landmark = fuseResult.item;
-              searchResults.add(SearchpageResults(
-                name: landmark.renderDetail.name,
-                location: landmark.buildingID == buildingAllApi.outdoorID
-                    ? "${landmark.venueName}"
-                    : "Floor ${landmark.floor}, ${landmark.venueName}",
-                onClicked: onVenueClicked,
-                ID: landmark.properties!.polyId!,
-                bid: landmark.buildingID!,
-                floor: landmark.floor!,
-                coordX: landmark.coordinateX!,
-                coordY: landmark.coordinateY!,
-                accessible: landmark.element!.subType == "restRoom" &&
-                    landmark.properties!.washroomType == "Handicapped"
-                    ? "true"
-                    : "false",
-                distance: 10000,
-              ));
-
+              searchResults.add(createHighlightedSearchResult(landmark));
               // Optional: if you want to keep reversing and limiting like before
               List<dynamic> reversed = searchResults.reversed.toList();
               setState(() {
@@ -772,6 +766,29 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
           searcCategoryhResults = [];
         }
       }});
+  }
+
+  String currentSearchKeyword = "";
+
+  HighlightedSearchResult createHighlightedSearchResult(Landmarks landmark) {
+    return HighlightedSearchResult(
+      name: landmark.renderDetail?.name??landmark.name ?? landmark.element?.subType ?? landmark.element!.type!,
+      location: landmark.buildingID == buildingAllApi.outdoorID
+          ? "${landmark.venueName}"
+          : "Floor ${landmark.floor}, ${landmark.buildingName}, ${landmark.venueName}",
+      onClicked: onVenueClicked,
+      ID: landmark.properties!.polyId!,
+      bid: landmark.buildingID!,
+      floor: landmark.floor!,
+      coordX: landmark.coordinateX!,
+      coordY: landmark.coordinateY!,
+      accessible: landmark.element!.subType == "restRoom" &&
+          landmark.properties!.washroomType == "Handicapped"
+          ? "true"
+          : "false",
+      distance: 10000,
+      searchKeyword: currentSearchKeyword,
+    );
   }
 
 
@@ -1377,6 +1394,188 @@ class ClassroomCourseResult extends StatelessWidget {
 
   }
 }
+
+class HighlightedSearchResult extends StatelessWidget {
+  final String name;
+  final String location;
+  final Function(String name, String location, String ID, String bid) onClicked;
+  final String ID;
+  final String bid;
+  final int floor;
+  final int coordX;
+  final int coordY;
+  final String accessible;
+  final int distance;
+  final String searchKeyword;
+  final Icon? icon;
+  final double? coordGlobalX;
+  final double? coordGlobalY;
+
+  HighlightedSearchResult({
+    required this.name,
+    required this.location,
+    required this.onClicked,
+    required this.ID,
+    required this.bid,
+    required this.floor,
+    required this.coordX,
+    required this.coordY,
+    required this.accessible,
+    required this.distance,
+    required this.searchKeyword,
+    this.icon,
+    this.coordGlobalX,
+    this.coordGlobalY,
+  });
+
+  // Function to create highlighted text widget
+  Widget _buildHighlightedText(String text, String keyword, TextStyle baseStyle) {
+    if (keyword.isEmpty) {
+      return Text(text, style: baseStyle);
+    }
+
+    List<TextSpan> spans = [];
+    String lowerText = text.toLowerCase();
+    String lowerKeyword = keyword.toLowerCase();
+
+    int start = 0;
+    int index = lowerText.indexOf(lowerKeyword);
+
+    while (index != -1) {
+      // Add text before the match
+      if (index > start) {
+        spans.add(TextSpan(
+          text: text.substring(start, index),
+          style: baseStyle,
+        ));
+      }
+
+      // Add highlighted match
+      spans.add(TextSpan(
+        text: text.substring(index, index + keyword.length),
+        style: baseStyle.copyWith(
+          backgroundColor: Colors.yellow,
+          color: Colors.black,
+          fontWeight: FontWeight.bold,
+        ),
+      ));
+
+      start = index + keyword.length;
+      index = lowerText.indexOf(lowerKeyword, start);
+    }
+
+    // Add remaining text
+    if (start < text.length) {
+      spans.add(TextSpan(
+        text: text.substring(start),
+        style: baseStyle,
+      ));
+    }
+
+    return RichText(text: TextSpan(children: spans));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        onClicked(name, location, ID, bid);
+      },
+      child: Container(
+        margin: EdgeInsets.only(top: 10, left: 16, right: 16),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(
+              color: Color(0xffEBEBEB),
+            ),
+            borderRadius: BorderRadius.all(Radius.circular(8))),
+        child: Row(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(
+                    left: 8,
+                  ),
+                  padding: EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xffF5F5F5),
+                  ),
+                  child: icon ?? Icon(
+                    Icons.place,
+                    color: Color(0xff000000),
+                    size: 25,
+                  ),
+                ),
+                if (distance < 10000)
+                  Container(
+                    margin: EdgeInsets.only(top: 4, left: 11),
+                    child: Text(
+                      "${distance}m",
+                      style: const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xff8d8c8c),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(top: 12, left: 18),
+                    alignment: Alignment.topLeft,
+                    child: _buildHighlightedText(
+                      HelperClass.truncateString(name, 36),
+                      searchKeyword,
+                      const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xff000000),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 3, bottom: 14, left: 18),
+                    alignment: Alignment.topLeft,
+                    child: _buildHighlightedText(
+                      HelperClass.truncateString(location, 36),
+                      searchKeyword,
+                      const TextStyle(
+                        fontFamily: "Roboto",
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xff8d8c8c),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (accessible == "true")
+              Container(
+                margin: EdgeInsets.only(right: 16),
+                child: Icon(
+                  Icons.accessible,
+                  color: Colors.blue,
+                  size: 20,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
 class ServiceResult extends StatelessWidget {
   final String serviceName;
   final String serviceLocation;
