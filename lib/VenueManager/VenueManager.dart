@@ -22,7 +22,7 @@ class VenueManager extends BuildingStore{
     return _instance;
   }
 
-  String _venueName = "AIIMSJAMMU";
+  String _venueName = "KEM Hospital";
   BuildingData? _buildings;
 
   String get venueName => _venueName;

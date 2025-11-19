@@ -230,7 +230,7 @@ void main() async {
     accessToken: '7caabf90-c517-11f0-b412-a52d7d953b2c',
     baseUrl: 'https://maps.iwayplus.in',  // e.g., 'https://api.example.com'
   );
-  var buildingData = await fetcher.fetchBuildingIDS("AIIMSJAMMU");
+  var buildingData = await fetcher.fetchBuildingIDS("KEM Hospital");
   buildingData.buildings?.forEach((building) async {
     await fetcher.fetchAllData(
       buildingId: building.id,
