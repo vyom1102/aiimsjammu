@@ -173,6 +173,16 @@ class _HomePageState extends State<HomePage> {
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
     requestStoragePermission();
+    requestMicPermission();
+  }
+  Future<bool> requestMicPermission() async {
+    var status = await Permission.microphone.status;
+
+    if (status.isDenied) {
+      status = await Permission.microphone.request();
+    }
+
+    return status.isGranted;
   }
 
   Future<void> requestStoragePermission() async {

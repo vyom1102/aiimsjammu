@@ -24,6 +24,37 @@ subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
 subprojects {
+    afterEvaluate { project ->
+
+        // Force Java toolchain to 17 everywhere
+        if (project.plugins.hasPlugin("java") ||
+                project.plugins.hasPlugin("com.android.application") ||
+                project.plugins.hasPlugin("com.android.library")) {
+
+            project.extensions.configure(com.android.build.gradle.BaseExtension) { ext ->
+                ext.compileOptions {
+                    sourceCompatibility = JavaVersion.VERSION_17
+                    targetCompatibility = JavaVersion.VERSION_17
+                }
+            }
+        }
+
+        // Force Kotlin to use JVM 17
+        if (project.plugins.hasPlugin("kotlin-android") ||
+                project.plugins.hasPlugin("org.jetbrains.kotlin.android") ||
+                project.plugins.hasPlugin("kotlin")) {
+
+            project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach { task ->
+                task.kotlinOptions {
+                    jvmTarget = "17"
+                }
+            }
+        }
+    }
+}
+
+
+subprojects {
     project.evaluationDependsOn(':app')
 }
 

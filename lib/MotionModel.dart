@@ -64,11 +64,11 @@ class MotionModel{
       print("motion model ${[user.coordX,user.coordY]} <> ${[user.showcoordX,user.showcoordY]}");
       if(user.cellPath[user.pathobj.index+1].move == tools.twocelltransitionhorizontal || user.cellPath[user.pathobj.index+1].move == tools.twocelltransitionvertical){
         if(tools.calculateDistance([user.coordX,user.coordY], [user.showcoordX,user.showcoordY])>(user.bid==buildingAllApi.outdoorID?40:20)){
-          // reroute();
+          reroute();
         }
       }else{
         if(tools.calculateDistance([user.coordX,user.coordY], [user.showcoordX,user.showcoordY])>(user.bid==buildingAllApi.outdoorID?40:20)){
-          // reroute();
+          reroute();
         }
       }
     }catch(e){}

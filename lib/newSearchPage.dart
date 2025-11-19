@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/singletonClass.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'API/RefreshTokenAPI.dart';
@@ -180,6 +181,8 @@ class _NewsearchpageState extends State<NewSearchPage> {
       // });
     }
     //pushToFloorSelection();
+    requestMicPermission();
+
     super.initState();
   }
 
@@ -519,9 +522,19 @@ class _NewsearchpageState extends State<NewSearchPage> {
     speechEnabled = await speetchText.initialize();
     setState(() {});
   }
+  Future<bool> requestMicPermission() async {
+    var status = await Permission.microphone.status;
+
+    if (status.isDenied) {
+      status = await Permission.microphone.request();
+    }
+
+    return status.isGranted;
+  }
 
   void startListening() async {
     if (await speetchText.hasPermission == false) {
+      await requestMicPermission();
       HelperClass.showToast("Permission not allowed");
       return;
     }
