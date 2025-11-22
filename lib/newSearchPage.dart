@@ -513,7 +513,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
     return text.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toLowerCase();
   }
   Future<void> onVenueClicked(String name, String location, String ID, String bid) async {
-    print("IDDDDD $ID");
+    print("onVenueClicked IDDDDD $ID");
     await StringStorage.addString(ID);
     Navigator.pop(context, ID);
   }
@@ -541,7 +541,8 @@ class _NewsearchpageState extends State<NewSearchPage> {
     setState(() {
       searchHintString = "";
     });
-    await speetchText.listen(onResult: onSpeechResult);
+    SpeechListenOptions speechListenOptions = SpeechListenOptions();
+    await speetchText.listen(onResult: onSpeechResult, listenOptions: SpeechListenOptions(partialResults: false));
     if (speetchText.isNotListening) {
       setState(() {
         searchHintString = widget.hintText;
@@ -560,7 +561,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
       setState(() {
         _controller.text = result.recognizedWords;
         currentSearchKeyword = result.recognizedWords; // Update search keyword
-        search(result.recognizedWords);
+        search(result.recognizedWords, direct: true);
         // print(_controller.text);
       });
       wordsSpoken = "${result.recognizedWords}";
@@ -587,10 +588,33 @@ class _NewsearchpageState extends State<NewSearchPage> {
     }
   }
 
+  int compareNatural(String a, String b) {
+    final regExp = RegExp(r'(\d+|\D+)');
+    final aParts = regExp.allMatches(a).map((m) => m.group(0)!).toList();
+    final bParts = regExp.allMatches(b).map((m) => m.group(0)!).toList();
+
+    for (int i = 0; i < aParts.length && i < bParts.length; i++) {
+      final aPart = aParts[i];
+      final bPart = bParts[i];
+
+      final aNum = int.tryParse(aPart);
+      final bNum = int.tryParse(bPart);
+
+      if (aNum != null && bNum != null) {
+        // Both are numbers, compare numerically
+        if (aNum != bNum) return aNum.compareTo(bNum);
+      } else {
+        // At least one is text, compare as strings
+        final comparison = aPart.compareTo(bPart);
+        if (comparison != 0) return comparison;
+      }
+    }
+
+    return aParts.length.compareTo(bParts.length);
+  }
 
 
-
-  void search(String searchText, {String wantToFilter = ''}) {
+  void search(String searchText, {String wantToFilter = '', bool direct = false}) {
     setState((){
       // Update the current search keyword
       currentSearchKeyword = searchText;
@@ -665,13 +689,17 @@ class _NewsearchpageState extends State<NewSearchPage> {
           final bHasExact = bName.toLowerCase().split(' ').contains(searchText);
           if (aHasExact && !bHasExact) return -1;
           if (!aHasExact && bHasExact) return 1;
+          if(a.score == b.score){
+            return compareNatural(aName, bName);
+          }
           return a.score!.compareTo(b.score!);
         });
         print("landmark in search ${result}");
         for (var fuseResult in result) {
           final landmark = fuseResult.item;
           if (fuseResult.score < 0.5 && searchResults.length < 10) {
-            searchResults.add(createHighlightedSearchResult(landmark));
+            HighlightedSearchResult item = createHighlightedSearchResult(landmark, fuseResult.score);
+            searchResults.add(item);
           }
         }
       }
@@ -682,11 +710,14 @@ class _NewsearchpageState extends State<NewSearchPage> {
       }
       return list;
     });
+    if(direct && uniqueResults.first.score <= 0.2){
+      uniqueResults.first.invokeTap();
+    }
     searchResults = uniqueResults;
   }
 
   // Updated method to create highlighted search results
-  HighlightedSearchResult createHighlightedSearchResult(Landmarks landmark) {
+  HighlightedSearchResult createHighlightedSearchResult(Landmarks landmark, double score) {
     return HighlightedSearchResult(
       name: landmark.renderDetail?.name??landmark.name ?? landmark.element?.subType ?? landmark.element!.type!,
       location: landmark.buildingID == buildingAllApi.outdoorID
@@ -704,6 +735,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
           : "false",
       distance: 10000,
       searchKeyword: currentSearchKeyword,
+      score: score,
     );
   }
 
@@ -1219,6 +1251,7 @@ class HighlightedSearchResult extends StatelessWidget {
   final Icon? icon;
   final double? coordGlobalX;
   final double? coordGlobalY;
+  final double score;
 
   HighlightedSearchResult({
     required this.name,
@@ -1235,6 +1268,7 @@ class HighlightedSearchResult extends StatelessWidget {
     this.icon,
     this.coordGlobalX,
     this.coordGlobalY,
+    this.score = 1.0
   });
 
   // Function to create highlighted text widget
@@ -1284,12 +1318,14 @@ class HighlightedSearchResult extends StatelessWidget {
     return RichText(text: TextSpan(children: spans));
   }
 
+  void invokeTap(){
+    onClicked(name, location, ID, bid);
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        onClicked(name, location, ID, bid);
-      },
+      onTap: invokeTap,
       child: Container(
         margin: EdgeInsets.only(top: 10, left: 16, right: 16),
         decoration: BoxDecoration(

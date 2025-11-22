@@ -317,6 +317,11 @@ class _NavigationState extends State<Navigation>
       print("sId $sId");
       onLandmarkVenueClicked(sId);
     });
+    gpsSubscription = GPSService.locationStream.listen((Location location) {
+      gpsBuffer.add(location.latitude, location.longitude);
+    }, onError: (error){
+      print("Error receiving GPS data: $error");
+    });
     Homepage.relocalize = relocalizeUser;
     Homepage.onVenueClicked = onLandmarkVenueClicked;
     initializeMarkers();
@@ -1379,7 +1384,7 @@ class _NavigationState extends State<Navigation>
       sortedEntries.sort((a, b) => a.key.compareTo(b.key)); // Sort in-place
 
       return sortedEntries
-          .take(10) // Take the first 3 entries
+          .take(3) // Take the first 3 entries
           .map((e) => e.value) // Extract Cell objects
           .toList(); // Convert to List<Cell>
     }
@@ -1590,15 +1595,11 @@ class _NavigationState extends State<Navigation>
         "Updated NearbyLandmark with ID: ${nearbyLandmarks[id]!.markerId.value}  now the list is $nearbyLandmarks");
   }
 
-  ClosestPointResult shortestPoint(
-      LatLng userLatLng,
-      LatLng targetLatLng,
-      IntPoint targetintPoint,
-      List<LatLng> latLngPoints,
-      List<IntPoint> intPoints) {
+  ClosestPointResult shortestPoint(LatLng userLatLng, LatLng targetLatLng, IntPoint targetintPoint, List<LatLng> latLngPoints, List<IntPoint> intPoints) {
+
+    addDebugMarkers(targetLatLng,hue:BitmapDescriptor.hueMagenta);
     double distanceBetweenLatLng(LatLng a, LatLng b) {
-      return sqrt(
-          pow(a.latitude - b.latitude, 2) + pow(a.longitude - b.longitude, 2));
+      return sqrt(pow(a.latitude - b.latitude, 2) + pow(a.longitude - b.longitude, 2));
     }
 
     LatLng? projectLatLngIfWithinSegment(
@@ -1615,8 +1616,7 @@ class _NavigationState extends State<Navigation>
         return null; // Outside the segment
       }
 
-      print(
-          "latlng projected are ${start.latitude + t * bx},${start.longitude + t * by}");
+      print("latlng projected are ${start.latitude + t * bx},${start.longitude + t * by}");
       return LatLng(start.latitude + t * bx, start.longitude + t * by);
     }
 
@@ -1625,18 +1625,22 @@ class _NavigationState extends State<Navigation>
     LatLng? xPoint;
     LatLng? yPoint;
     navPoints? closestIntPoint;
+    IntPoint? xintegerpoint;
+    IntPoint? yintegerpoint;
 
     for (int i = 0; i < latLngPoints.length; i++) {
       LatLng latLngPoint = latLngPoints[i];
-      LatLng? projectedLatLng =
-      projectLatLngIfWithinSegment(userLatLng, targetLatLng, latLngPoint);
-      print("projectedLatLng $projectedLatLng $latLngPoint");
-      // addDebugMarkers(latLngPoint, hue: BitmapDescriptor.hueOrange);
+      if(latLngPoint.latitude == targetLatLng.latitude && latLngPoint.longitude == targetLatLng.longitude) continue;
+
+      LatLng? projectedLatLng = projectLatLngIfWithinSegment(userLatLng, targetLatLng, latLngPoint);
 
       if (projectedLatLng != null) {
-        // addDebugMarkers(latLngPoint,hue:BitmapDescriptor.hueOrange);
+        addDebugMarkers(latLngPoint,hue:BitmapDescriptor.hueOrange);
         double distance = distanceBetweenLatLng(userLatLng, projectedLatLng);
         if (distance < minDistanceLatLng) {
+          xintegerpoint = tools.findCoordinatesOfWaypoint(targetLatLng);
+          yintegerpoint = tools.findCoordinatesOfWaypoint(latLngPoint);
+          if(xintegerpoint == null || yintegerpoint == null) continue;
           minDistanceLatLng = distance;
           closestLatLngPoint = projectedLatLng;
           xPoint = targetLatLng;
@@ -1646,41 +1650,26 @@ class _NavigationState extends State<Navigation>
     }
 
     // Check if the direct distance to the target is shorter
-    double distanceToTargetLatLng =
-    distanceBetweenLatLng(userLatLng, targetLatLng);
+    double distanceToTargetLatLng = distanceBetweenLatLng(userLatLng, targetLatLng);
     if (distanceToTargetLatLng < minDistanceLatLng) {
-      return ClosestPointResult(
-          targetLatLng,
-          targetintPoint!,
-          tools.calculateAerialDist(
-              userLatLng.latitude,
-              userLatLng.longitude,
-              targetLatLng.latitude,
-              targetLatLng.longitude)); // Return target for both formats
+      return ClosestPointResult(targetLatLng, targetintPoint!, tools.calculateAerialDist(userLatLng.latitude, userLatLng.longitude, targetLatLng.latitude, targetLatLng.longitude)); // Return target for both formats
     }
 
-    if (closestLatLngPoint != null && xPoint != null && yPoint != null) {
-      IntPoint xintegerpoint = tools.findCoordinatesOfWaypoint(xPoint);
-      IntPoint yintegerpoint = tools.findCoordinatesOfWaypoint(yPoint);
-      navPoints X = navPoints(
-          xPoint.latitude, xPoint.longitude, xintegerpoint.x, xintegerpoint.y);
-      navPoints Y = navPoints(
-          yPoint.latitude, yPoint.longitude, yintegerpoint.x, yintegerpoint.y);
-      navPoints Z = navPoints(
-          closestLatLngPoint.latitude, closestLatLngPoint.longitude, 0, 0);
+    if(closestLatLngPoint != null && xPoint!= null && yPoint != null && xintegerpoint != null && yintegerpoint != null){
+
+
+      navPoints X = navPoints(xPoint.latitude,xPoint.longitude,xintegerpoint.x,xintegerpoint.y);
+      navPoints Y = navPoints(yPoint.latitude,yPoint.longitude,yintegerpoint.x,yintegerpoint.y);
+      navPoints Z = navPoints(closestLatLngPoint.latitude,closestLatLngPoint.longitude,0,0);
       closestIntPoint = tools.findCartesianCoordinates(X, Y, Z);
+      // print("closestIntPoint ${X.x} ${X.y} , ${Y.x} ${Y.y} , ${closestIntPoint.x} ${closestIntPoint.y} ${closestIntPoint.latitude} ${closestIntPoint.longitude}");
+
     }
 
-    return ClosestPointResult(
-        closestLatLngPoint ?? targetLatLng,
-        closestIntPoint != null
-            ? IntPoint(closestIntPoint.x, closestIntPoint.y)
-            : targetintPoint,
-        tools.calculateAerialDist(
-            userLatLng.latitude,
-            userLatLng.longitude,
-            (closestLatLngPoint ?? targetLatLng).latitude,
-            (closestLatLngPoint ?? targetLatLng).longitude));
+
+    return ClosestPointResult(closestLatLngPoint ?? targetLatLng, closestIntPoint!=null?IntPoint(closestIntPoint.x, closestIntPoint.y):targetintPoint,
+        tools.calculateAerialDist(userLatLng.latitude, userLatLng.longitude, (closestLatLngPoint ?? targetLatLng).latitude, (closestLatLngPoint ?? targetLatLng).longitude)
+    );
   }
 
   double currentHeading = 10.0; // Example current heading
@@ -1800,7 +1789,7 @@ class _NavigationState extends State<Navigation>
 
   //   if (!providePinSelection)
   // {
-    continuousGPSLocalisation();
+  //   continuousGPSLocalisation();
   // }
     // Reset direct source ID and Land ID
     widget.directLandID = '';
@@ -1921,6 +1910,7 @@ class _NavigationState extends State<Navigation>
         ? markers[user.bid]![0].position
         : LatLng(user.lat, user.lng);
     LatLng newPosition = LatLng(newLat, newLng);
+    print("currentPosition $currentPosition newPosition $newPosition");
     // Step 2: Reset the animation controller to start from 0
     _initialiMarkerAnimationController!.reset();
     // Step 3: Create a NEW animation with new begin/end positions
@@ -2044,14 +2034,14 @@ class _NavigationState extends State<Navigation>
       return;
     }
     if(location == null){
-      try {
         location = gpsBuffer.getRobustPosition();
-      } catch (e) {
-        if (widget.directLandID.length <= 2) {
-          if (speakTTS) unableToFindLocation();
-        }
-        return;
-      }
+        gpsSubscription?.cancel();
+      // } catch (e) {
+      //   if (widget.directLandID.length <= 2) {
+      //     if (speakTTS) unableToFindLocation();
+      //   }
+      //   return;
+      // }
     }
 
     if (location != null && location.isNotEmpty) {
@@ -2157,7 +2147,7 @@ class _NavigationState extends State<Navigation>
     } else {
       unableToFindLocation();
     }
-    continuousGPSLocalisation();
+    // continuousGPSLocalisation();
     PinLandmarkPannel.hidePanel();
     setState(() {
       nearbyLandmarks.clear();
@@ -2347,9 +2337,9 @@ class _NavigationState extends State<Navigation>
       //List<double> ls=tools.localtoglobal(user.coordX, user.coordY,patchData: SingletonFunctionController.building.patchData[SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID]);
       if (render){
         print("entered here ${markers[user.bid]}");
-        if(markers[user.bid]!=null){
-          onGPSUpdate(user.lat,user.lng);
-        }else{
+        // if(markers[user.bid]!=null){
+        //   onGPSUpdate(user.lat,user.lng);
+        // }else{
           markers.clear();
           markers.putIfAbsent(user.bid, ()=>[]);
           markers[user.bid]?.add(Marker(
@@ -2366,7 +2356,7 @@ class _NavigationState extends State<Navigation>
               anchor: Offset(0.5, 0.829),
             ));
           }
-        }
+        // }
       }
       else {
         user.moveToFloor(userSetLocation.floor!);
@@ -3219,10 +3209,10 @@ class _NavigationState extends State<Navigation>
 
   SingletonFunctionController controller = SingletonFunctionController();
   void apiCalls(context) async {
-    var exhibitors = await eventsState.fetchExhibitors();
-    var categories = await eventsState.fetchCategory();
-    var sessions = await eventsState.fetchSession();
-    var subEvents = await eventsState.fetchSubEvents();
+    var exhibitors;
+    var categories;
+    var sessions;
+    var subEvents;
     List<String> itterated = [];
     NavigationAPIController apiController = NavigationAPIController(
         createPatch: createPatch,
@@ -4395,8 +4385,9 @@ class _NavigationState extends State<Navigation>
                 polygonId: PolygonId('patch${points}'),
                 points: points,
                 strokeWidth: 1,
-                strokeColor: Colors.black.withOpacity(0.5),
-                fillColor: Color(0xfff0e6d1).withOpacity(1.0),
+                strokeColor: Colors.black,
+                visible: false,
+                fillColor: Color(0xfff9e9e6).withOpacity(1.0),
                 geodesic: false,
                 consumeTapEvents: false,
                 zIndex: 5,
@@ -4428,6 +4419,7 @@ class _NavigationState extends State<Navigation>
                   position: Value,
                   icon: iconMarker,
                   anchor: anchor,
+                  visible: false,
                   onTap: (){
                     _googleMapController.animateCamera(
                       CameraUpdate.newCameraPosition(
@@ -6021,6 +6013,64 @@ class _NavigationState extends State<Navigation>
     return;
   }
 
+  void _createCurvedPolyline(String bid, int floor, LatLng pt1, LatLng pt2) {
+    // Generate curved path points
+    List<LatLng> curvedPoints = _generateCurvedPoints(pt1, pt2);
+    singleroute.putIfAbsent(bid, ()=>Map());
+    singleroute[bid]!.putIfAbsent(floor, ()=>Set());
+    singleroute[bid]![floor]!.add(
+      gmap.Polyline(
+        polylineId: PolylineId('curved_line $pt1 & $pt2'),
+        points: curvedPoints,
+        color: Colors.blue,
+        width: 5,
+        // This creates the dotted pattern
+        patterns: [
+          PatternItem.dot,
+          PatternItem.gap(10),
+        ],
+      ),
+    );
+  }
+
+  // Generate curved points using quadratic Bezier curve
+  List<LatLng> _generateCurvedPoints(LatLng start, LatLng end, {int segments = 50}) {
+    List<LatLng> points = [];
+
+    // Calculate the control point for the curve (midpoint with offset)
+    double midLat = (start.latitude + end.latitude) / 2;
+    double midLng = (start.longitude + end.longitude) / 2;
+
+    // Calculate perpendicular offset for curve height
+    double dx = end.longitude - start.longitude;
+    double dy = end.latitude - start.latitude;
+    double distance = math.sqrt(dx * dx + dy * dy);
+
+    // Adjust curve height based on distance (20% of distance)
+    double curveHeight = distance * 0.4;
+
+    // Create control point perpendicular to the line
+    LatLng controlPoint = LatLng(
+      midLat - curveHeight * (dx / distance),
+      midLng + curveHeight * (dy / distance),
+    );
+
+    // Generate points along the quadratic Bezier curve
+    for (int i = 0; i <= segments; i++) {
+      double t = i / segments;
+      double lat = math.pow(1 - t, 2) * start.latitude +
+          2 * (1 - t) * t * controlPoint.latitude +
+          math.pow(t, 2) * end.latitude;
+      double lng = math.pow(1 - t, 2) * start.longitude +
+          2 * (1 - t) * t * controlPoint.longitude +
+          math.pow(t, 2) * end.longitude;
+
+      points.add(LatLng(lat, lng));
+    }
+
+    return points;
+  }
+
   // void addRoadMarker(){
   //   print("roadPointMarkerList${roadPointMarkerList.length}");
   //   roadPointMarkerList.forEach((element) async {
@@ -7369,7 +7419,7 @@ class _NavigationState extends State<Navigation>
                       onPressed: calculatingPath
                           ? null
                           : () async {
-                        stopContinuousGPSLocalisation();
+                        // stopContinuousGPSLocalisation();
                         hasPressedButton = true;
                         // landmarkMarkers.forEach((it) {
                         //   it.visible = false;
@@ -8914,10 +8964,25 @@ class _NavigationState extends State<Navigation>
         imageSize: const Size(95, 95),
         color: Colors.black,
       );
-
+      land? landmarks = await SingletonFunctionController.building.landmarkdata;
       setState(() {
         if (renderDestination) {
-          if(render != null){
+          if(landmarks != null && landmarks.landmarksMap != null && landmarks.landmarksMap![PathState.destinationPolyID] != null){
+            LatLng landmarkCenter = LatLng(double.parse(landmarks.landmarksMap![PathState.destinationPolyID]!.properties!.latitude!), double.parse(landmarks.landmarksMap![PathState.destinationPolyID]!.properties!.longitude!));
+            innerMarker.add(
+              Marker(
+                markerId: MarkerId('destination$Bid'),
+                position: landmarkCenter,
+                icon: textMarker,
+              ),
+            );
+            print("PathState.destinationLat ${PathState.destinationLat}, ${PathState.destinationLng}");
+              double offSet = tools.calculateAerialDist(landmarkCenter.latitude, landmarkCenter.longitude,render!.last[0], render.last[1]);
+              print("offset $offSet");
+              if(offSet >= 5 || true){
+                _createCurvedPolyline(Bid, floor, landmarkCenter, LatLng(render.last[0], render.last[1]));
+              }
+          }else if(render != null){
             innerMarker.add(
               Marker(
                 markerId: MarkerId('destination$Bid'),
@@ -8925,6 +8990,13 @@ class _NavigationState extends State<Navigation>
                 icon: textMarker,
               ),
             );
+
+            if(PathState.destinationLat != 0.0 && PathState.destinationLng != 0.0){
+              double offSet = tools.calculateAerialDist(render.last[0], render.last[1], PathState.destinationLat, PathState.destinationLng);
+              if(offSet >= 9 || true){
+                _createCurvedPolyline(Bid, floor, LatLng(render.last[0], render.last[1]), LatLng(PathState.destinationLat, PathState.destinationLng));
+              }
+            }
           }else{
             innerMarker.add(
               Marker(
@@ -8933,6 +9005,13 @@ class _NavigationState extends State<Navigation>
                 icon: textMarker,
               ),
             );
+
+            if(PathState.destinationLat != 0.0 && PathState.destinationLng != 0.0){
+              double offSet = tools.calculateAerialDist(dvalue[0], dvalue[1], PathState.destinationLat, PathState.destinationLng);
+              if(offSet >= 9 || true){
+                _createCurvedPolyline(Bid, floor, LatLng(dvalue[0], dvalue[1]), LatLng(PathState.destinationLat, PathState.destinationLng));
+              }
+            }
           }
         }
 
@@ -10067,7 +10146,7 @@ class _NavigationState extends State<Navigation>
           onStart = false;
           startingNavigation = false;
         });
-        continuousGPSLocalisation();
+        // continuousGPSLocalisation();
       },
       child: Semantics(
         label: "Close route preview",
@@ -12823,7 +12902,7 @@ class _NavigationState extends State<Navigation>
       poly = poly.union(value).union(focusturn);
     });
 
-    if (mapState.zoom > 20.8) {
+    if (mapState.zoom > 15) {
       dottedPath.forEach((key, value) {
         poly = poly.union(value);
       });
@@ -13400,7 +13479,7 @@ class _NavigationState extends State<Navigation>
 
   @override
   void dispose() {
-    stopContinuousGPSLocalisation();
+    // stopContinuousGPSLocalisation();
     _messageTimer?.cancel();
     _landmarks.clear();
     gpsSubscription?.cancel(); // <-- This triggers native onCancel()
@@ -13618,6 +13697,7 @@ class _NavigationState extends State<Navigation>
     PopScope(
       canPop:(Platform.isIOS)?true:false,
       onPopInvoked:(didpop) async {
+        print(StackTrace.current);
         if(Platform.isAndroid) {
           print("didpop:${didpop}");
           if(didpop==false){
@@ -14424,17 +14504,17 @@ class _NavigationState extends State<Navigation>
                     //
                     //   });
                     // },child: Icon(Icons.add_location_alt),),
-                    FloatingActionButton(onPressed: (){
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => LoggingScreen(
-                            logging: bluetoothScanAndroidClass.logging,
-                            loggingTaps: bluetoothScanAndroidClass.loggingTaps,
-                          ),
-                        ),
-                      );
-                    },child: Icon(Icons.bluetooth_audio),)
+                    // FloatingActionButton(onPressed: (){
+                    //   Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //       builder: (context) => LoggingScreen(
+                    //         logging: bluetoothScanAndroidClass.logging,
+                    //         loggingTaps: bluetoothScanAndroidClass.loggingTaps,
+                    //       ),
+                    //     ),
+                    //   );
+                    // },child: Icon(Icons.bluetooth_audio),)
                   ],
                 ),
               ),

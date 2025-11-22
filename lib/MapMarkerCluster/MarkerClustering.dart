@@ -52,7 +52,7 @@ class MapClustering {
     stageMarker = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor("", 'assets/MapStage.png',imageSize: const Size(85, 85),color: Color(0xff544551));
     counter = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor("", 'assets/Counter.png',imageSize: const Size(60, 60),color: Color(0xff544551), offset: Offset(0.5, 0.5));
     dotMarker = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor("", 'assets/dot.png',imageSize: const Size(25, 25),color: Color(0xff544551));
-    blueDotMarker = await bitmapDescriptorFromImageWithCenterAnchor('assets/bluedot.png',imageSize: Size(95,95));
+    blueDotMarker = await bitmapDescriptorFromImageWithCenterAnchor('assets/greendot.png',imageSize: Size(95,95));
     insideEntryMarker = await bitmapDescriptorFromImageWithCenterAnchor('assets/insideEntry.png',imageSize: Size(45,45));
     greenDotMarker = await bitmapDescriptorFromImageWithCenterAnchor('assets/greendot.png',imageSize: Size(95,95));
 
@@ -504,9 +504,9 @@ class MapClustering {
 
 
   Marker _createMarker(Landmarks landmark, double zoomLevel, double theta){
-    if(landmark.element!.subType?.toLowerCase() == "booth"){
-      // print("_createMarker ${landmark.name} ${bitMapMarkers.containsKey(landmark.properties!.polyId)} ${landmark.element!.subType}");
-    }
+    // if(landmark.element!.subType?.toLowerCase() == "booth"){
+      print("_createMarker ${landmark.name} ${bitMapMarkers.containsKey(landmark.properties!.polyId)} ${landmark.element!.subType}");
+    // }
     if(bitMapMarkers.containsKey(landmark.properties!.polyId) && landmark.element != null && landmark.element!.subType != null){
 
       MarkerIconWithAnchor dotIcon;
@@ -919,7 +919,7 @@ class MapClustering {
             }
         );
       }catch(e){
-        print("landmark error ${landmark.sId} ${landmark.coordinateX} ${landmark.coordinateY} ${landmark.name} ${landmark.properties!.latitude} ${landmark.properties!.longitude}");
+        // print("landmark error ${landmark.sId} ${landmark.coordinateX} ${landmark.coordinateY} ${landmark.name} ${landmark.properties!.latitude} ${landmark.properties!.longitude}");
         return Marker(
             icon: assignMarker.icon,
             markerId: MarkerId("polyId-${landmark.properties!.polyId})}landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name}sId-${landmark.sId}"),

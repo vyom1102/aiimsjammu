@@ -430,8 +430,10 @@ List<String> masterFindNearestAndSecondNearestVertices(Map<String, dynamic> path
     }
   });
 
-  print("tools.extractCoordinates(nearestToCoord1) $nearestToCoord1 ${tools.extractCoordinates(nearestToCoord1)}");
-  print("tools.extractCoordinates(nearestToCoord2) $nearestToCoord2 ${tools.extractCoordinates(nearestToCoord2)}");
+  print("tools.extractCoordinates(nearestToCoord1) $nearestToCoord1 ");
+  print("tools.extractCoordinates(nearestToCoord1)  ${tools.extractCoordinates(nearestToCoord1)}");
+  print("tools.extractCoordinates(nearestToCoord2) $nearestToCoord2 ");
+  print("tools.extractCoordinates(nearestToCoord2)  ${tools.extractCoordinates(nearestToCoord2)}");
 
   return [
     nearestToCoord1,

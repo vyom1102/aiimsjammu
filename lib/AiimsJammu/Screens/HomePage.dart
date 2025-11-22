@@ -1297,7 +1297,7 @@ class _HomePageState extends State<HomePage> {
                   Column(
                     children: [
                       Text(
-                        'AIIMS JAMMU',
+                        'KEM Hospital',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Color(0xFF003666),

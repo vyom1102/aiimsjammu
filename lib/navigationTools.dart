@@ -88,6 +88,8 @@ class tools {
         return 'ninth';
       case 10:
         return 'tenth';
+      case 13:
+        return 'thirteenth';
       default:
         return 'Invalid number';
     }
@@ -117,6 +119,8 @@ class tools {
         return 9;
       case 'tenth':
         return 10;
+      case 'thirteenth':
+        return 13;
       default:
         return -1; // Using -1 to indicate an invalid input
     }
@@ -1845,13 +1849,14 @@ class tools {
   }
 
   static navPoints findCartesianCoordinates(navPoints pointX, navPoints pointY, navPoints pointZ) {
+    print("pointX ${pointX.toString()} pointY ${pointY.toString()} pointZ ${pointZ.toString()}");
     // Calculate the transformation parameters (slopes)
     double slopeX = (pointY.x - pointX.x) / (pointY.latitude - pointX.latitude);
-    double slopeY = (pointY.y - pointX.y) / (pointY.latitude - pointX.latitude);
+    double slopeY = (pointY.y - pointX.y) / (pointY.longitude - pointX.longitude);
 
     // Apply the transformation to point Z
     int xZ = pointX.x + (slopeX * (pointZ.latitude - pointX.latitude)).round();
-    int yZ = pointX.y + (slopeY * (pointZ.latitude - pointX.latitude)).round();
+    int yZ = pointX.y + (slopeY * (pointZ.longitude - pointX.longitude)).round();
 
     // Return the Cartesian coordinates of point Z
     return navPoints(pointZ.latitude, pointZ.longitude, xZ, yZ);
@@ -1882,9 +1887,9 @@ class tools {
     return [firstPoint, ...remainingPoints];
   }
 
-  static IntPoint findCoordinatesOfWaypoint(LatLng waypoint){
+  static IntPoint? findCoordinatesOfWaypoint(LatLng waypoint){
     final polylineData = SingletonFunctionController.building.polylinedatamap;
-    IntPoint point = IntPoint(0, 0);
+    IntPoint? point;
     polylineData.forEach((key,value){
       if(key == buildingAllApi.outdoorID ){
         for (var floor in value.polyline!.floors!) {
@@ -1892,8 +1897,7 @@ class tools {
             if(polyline.polygonType == "Waypoints" && polyline.floor == tools.numericalToAlphabetical(0)){
               for (var node in polyline.nodes!) {
                 if(node.lat == waypoint.latitude && node.lon == waypoint.longitude){
-                  point.x = node.coordx!;
-                  point.y = node.coordy!;
+                  point = IntPoint(node.coordx!, node.coordy!);
                   continue;
                 }
               }
