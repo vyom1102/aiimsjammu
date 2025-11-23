@@ -331,14 +331,14 @@ class MainActivity : FlutterActivity() {
             )
         }
 
-        if (isNetworkEnabled) {
-            locationManager?.requestLocationUpdates(
-                LocationManager.NETWORK_PROVIDER,
-                1000,
-                0f,
-                locationListener
-            )
-        }
+//        if (isNetworkEnabled) {
+//            locationManager?.requestLocationUpdates(
+//                LocationManager.NETWORK_PROVIDER,
+//                1000,
+//                0f,
+//                locationListener
+//            )
+//        }
     }
 
 

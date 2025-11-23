@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
@@ -7,6 +8,7 @@ import 'package:ml_linalg/matrix.dart';
 import 'package:iwaymaps/pathState.dart';
 import 'package:iwaymaps/path_snapper.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'API/buildingAllApi.dart';
 import 'Cell.dart';
 import 'Elements/locales.dart';
@@ -71,13 +73,14 @@ class UserState {
   static Function closeNavigation = ({bool force = false}) {};
   static Function speak = (String lngcode) {};
   static Function alignMapToPath = () {};
+  static Function clearDebugMarkers = () {};
   static Function changeBuilding = () {};
   static Function startOnPath = () {};
   static Function renderHere = () {};
   static Function recenterMap = () {};
   static Function paintMarker = (geo.LatLng location) {};
   static Function createCircle = (double lat, double lng) {};
-  static Function addDebugMarkers = (geo.LatLng point, {double? hue,int? id}){};
+  static Function addDebugMarkers = (geo.LatLng point, {double? hue,int? id, bool clear = false}){};
   PathSnapper snapper = PathSnapper();
 
 
@@ -224,7 +227,7 @@ class UserState {
               // if(DebugToggle.kalman){
 
               if(d>26){
-                addDebugMarkers(geo.LatLng(cell.lat,cell.lng));
+                addDebugMarkers(geo.LatLng(cell.lat, cell.lng,),hue: geo.BitmapDescriptor.hueGreen);
                 List<Cell>? points = tools.findSegmentContainingPoint(cellPath, pathobj.index);
                 List<Cell> allPointsofSegment = tools.findAllPointsOfSegment(cellPath, points!);
                 allPointsofSegment.add(cell);
@@ -245,6 +248,41 @@ class UserState {
         }
       }
     });
+  }
+
+  List<Cell> kalmanShiftCell = [];
+  void kalmanShift(Cell optionalCell, BuildContext context){
+
+    if(kalmanShiftCell.isEmpty || kalmanShiftCell.length <5){
+      // addDebugMarkers(geo.LatLng(optionalCell.lat, optionalCell.lng));
+      addDebugMarkers(geo.LatLng(optionalCell.position!.latitude, optionalCell.position!.longitude,),hue: geo.BitmapDescriptor.hueMagenta);
+      kalmanShiftCell.add(optionalCell);
+      return;
+    }
+    double minDistance = double.infinity;
+    Cell cell = optionalCell;
+    for (var kCell in kalmanShiftCell) {
+      double distance = tools.calculateAerialDist(kCell.lat, kCell.lng, lat, lng);
+      if(distance<minDistance){
+        minDistance = distance;
+        cell = kCell;
+      }
+    }
+    clearDebugMarkers();
+    addDebugMarkers(geo.LatLng(optionalCell.lat, optionalCell.lng,),hue: geo.BitmapDescriptor.hueGreen);
+      List<Cell>? points = tools.findSegmentContainingPoint(cellPath, pathobj.index);
+      List<Cell> allPointsofSegment = tools.findAllPointsOfSegment(cellPath, points!);
+      allPointsofSegment.add(cell);
+      List<Cell> sorted = tools.sortCollinearPoints(allPointsofSegment);
+      int index = sorted.indexWhere((node)=>node.x == cell.x && node.y == cell.y);
+      index = index + cellPath.indexWhere((node)=>node.x == points[0].x && node.y == points[0].y);
+      path.insert(index, (cell.y*cell.numCols)+cell.x);
+      cellPath.insert(index, cell);
+      moveToPointOnPath(index, context, flying: true);
+      pathobj.index = index;
+      renderHere();
+    kalmanShiftCell.clear();
+    return;
   }
 
 
@@ -614,6 +652,7 @@ class UserState {
         element.doorX ?? element.coordinateX!,
         element.doorY ?? element.coordinateY!
       ]);
+      print("element distance near ${element.name} $distance");
       if (element.element!.subType == "room door" && element.properties!.polygonExist != true) {
         if (distance <= 2 && distancebetweenSegments>16){
           print("passing by condition with ${distancebetweenSegments}");
@@ -628,7 +667,10 @@ class UserState {
           _speakAlert(context, element.properties!.alertName);
           return false;
         }
-      }else if (distance <= 6 && distancebetweenSegments>16){
+      }else if (bid == buildingAllApi.outdoorID && distance <= 20 && distancebetweenSegments>16){
+        _speakElementDirection(context, element, transitionValue);
+        return false;
+      }else if (bid != buildingAllApi.outdoorID && distance <= 6 && distancebetweenSegments>16){
         _speakElementDirection(context, element, transitionValue);
         return false;
       }
@@ -895,18 +937,24 @@ class UserState {
 
   }
 
-  Future<void> moveToFloor(int fl) async {
+  Future<void> moveToFloor(String buildingID, int fl) async {
     floor = fl;
-    if (pathobj.Cellpath[fl] != null) {
-      coordX = pathobj.Cellpath[fl]![0].x;
-      coordY = pathobj.Cellpath[fl]![0].y;
-      List<double> values = tools.localtoglobal(coordX, coordY, building!.patchData[bid]);
-      lat = pathobj.Cellpath[fl]![0].lat;
-      lng = pathobj.Cellpath[fl]![0].lng;
-      showcoordX = coordX;
-      showcoordY = coordY;
-      pathobj.index = cellPath.indexOf(pathobj.Cellpath[fl]![0]);
-      paintMarker(geo.LatLng(lat, lng));
+    bid = buildingID;
+    if (pathobj.Cellpath[fl] != null && cellPath.isNotEmpty) {
+      for(int i = 0; i < cellPath.length; i++){
+        Cell cell = cellPath[i];
+        if(cell.bid == buildingID && cell.floor == fl){
+          coordX = cell.x;
+          coordY = cell.y;
+          lat = cell.lat;
+          lng = cell.lng;
+          showcoordX = coordX;
+          showcoordY = coordY;
+          pathobj.index = i;
+          paintMarker(geo.LatLng(lat, lng));
+          return;
+        }
+      }
     }
   }
 

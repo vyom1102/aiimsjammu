@@ -38,7 +38,7 @@
 
     <application
         android:enableOnBackInvokedCallback="true"
-        android:label="AIIMS Jammu Navigation"
+        android:label="KEM Disha"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

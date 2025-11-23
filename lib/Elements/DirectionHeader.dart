@@ -241,6 +241,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         null) {
       turnPoints = tools.getTurnpoints_inCell(widget.user.cellPath);
       turnPoints.add(widget.user.cellPath.last);
+      turnPoints.add(widget.user.cellPath.first);
 
       (widget.user.cellPath.length % 2 == 0)
           ? turnPoints
@@ -411,7 +412,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       beaconWeight = beaconWeight * -1;
     }
 
-    if (nearestBeacon != "" && widget.user.key != SingletonFunctionController.apibeaconmap[nearestBeacon]!.sId && widget.user.bid != buildingAllApi.outdoorID && SingletonFunctionController.apibeaconmap[nearestBeacon]?.buildingID != buildingAllApi.outdoorID) {
+    if (nearestBeacon != "" && widget.user.key != SingletonFunctionController.apibeaconmap[nearestBeacon]!.sId) {
         if (widget.user.floor != widget.user.pathobj.destinationFloor &&
             widget.user.pathobj.destinationFloor != widget.user.pathobj.sourceFloor &&
             widget.user.pathobj.destinationFloor == SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor) {
@@ -516,7 +517,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         "${StackTrace.current}");
     widget.user.key = SingletonFunctionController.apibeaconmap[nearestBeacon]!.sId!;
     widget.user.moveToPointOnPath(index, context);
-    widget.user.moveToPointOnPathOnPath(context, stepsToBeMoved);
+    if(SingletonFunctionController.apibeaconmap[nearestBeacon]!.buildingID != buildingAllApi.outdoorID){
+      widget.user.moveToPointOnPathOnPath(context, stepsToBeMoved);
+    }
     widget.moveUser();
     DirectionIndex = nextTurnIndex;
     return true;
@@ -859,6 +862,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
   // Timer? _speakTimer;
   // bool _turnSpoken = true;
   Map<Cell, String> takeNextInstruction = {};
+  Map<int, bool> turnInstruction = {};
   bool isTalkBackOn() {
     return SemanticsBinding.instance.accessibilityFeatures.accessibleNavigation;
   }
@@ -1047,11 +1051,35 @@ class _DirectionHeaderState extends State<DirectionHeader> {
           return;
         }
       } catch (e) {
-        print("Error in turn announcement: $e"); // At least log the error
+        // print("Error in turn announcement: $e"); // At least log the error
       }
       // print("widget.direction ${widget.direction}");
-      if (oldWidget.direction != widget.direction &&
-          !widget.direction.toLowerCase().contains("next")) {
+      print("entereddd ${oldWidget.direction} ${widget.direction} ${turnInstruction[prevTurn]} ${prevTurn.node}");
+      if((turnInstruction[prevTurn.node] == null || turnInstruction[prevTurn.node] == false) && !widget.direction.toLowerCase().contains("next")){
+        print("inside force");
+        turnInstruction[prevTurn.node] = true;
+        Vibration.vibrate();
+        if(widget.direction == "Straight"){
+          speak(
+            "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context)}",
+            _currentLocale,
+            prevpause: true,
+          );
+        }else{
+          speak(
+              convertTolng(
+                  "Turn ${LocaleData.getProperty5(widget.direction, context)}",
+                  _currentLocale,
+                  widget.direction,
+                  "",
+                  0,
+                  ""),
+              _currentLocale,
+              prevpause: true);
+        }
+      }
+      if (oldWidget.direction != widget.direction && !widget.direction.toLowerCase().contains("next")) {
+        print("entered in first ${oldWidget.direction} ${widget.direction}");
         if (oldWidget.direction == "Straight") {
           // _speakTimer?.cancel(); // Cancel any previous timer
           // _turnSpoken = false; // Reset flag
@@ -1114,12 +1142,22 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               prevpause: true,
             );
           // }
-        } else if (oldWidget.direction.contains("next")) {
+        } else if (oldWidget.direction.toLowerCase().contains("next")) {
+          Vibration.vibrate();
+          speak(
+              convertTolng(
+                  "Turn ${LocaleData.getProperty5(widget.direction, context)}",
+                  _currentLocale,
+                  widget.direction,
+                  "",
+                  0,
+                  ""),
+              _currentLocale,
+              prevpause: true);
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _announceDirection(
                 '${LocaleData.getProperty6('Go Straight', context)}');
           });
-          Vibration.vibrate();
         }
       }
       try {

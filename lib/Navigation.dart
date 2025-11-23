@@ -355,6 +355,13 @@ class _NavigationState extends State<Navigation>
       UserState.ttsAllStop = false;
     }
 
+    setState(() {
+      _mainIcon = Icons.volume_up_outlined;
+      _mainColor = Colors.green;
+    });
+    UserState.ttsAllStop = false;
+    UserState.ttsOnlyTurns = false;
+
     _messageTimer = Timer.periodic(Duration(milliseconds: 5000), (timer) {
       wsocket.sendmessg();
     });
@@ -1463,8 +1470,17 @@ class _NavigationState extends State<Navigation>
     return closestLandmark;
   }
 
+  void cleardebugMarkers(){
+    setState(() {
+      debugMarker.clear();
+    });
+  }
+
   Set<Marker> debugMarker = Set();
-  void addDebugMarkers(LatLng point, {double? hue, int? id}) {
+  void addDebugMarkers(LatLng point, {double? hue, int? id, bool clear = false}) {
+    if(clear){
+      debugMarker.clear();
+    }
     if (!kIsWeb && kDebugMode) {
       print("adding marker at $point");
       setState(() {
@@ -2324,6 +2340,7 @@ class _NavigationState extends State<Navigation>
     UserState.createCircle = updateCircle;
     UserState.autoRecenter = recenterMap;
     UserState.addDebugMarkers = addDebugMarkers;
+    UserState.clearDebugMarkers = cleardebugMarkers;
     UserState.renderHere = renderHere;
     UserState.recenterMap = recenterMap;
     List<int> userCords = [];
@@ -2376,7 +2393,7 @@ class _NavigationState extends State<Navigation>
         // }
       }
       else {
-        user.moveToFloor(userSetLocation.floor!);
+        user.moveToFloor(userSetLocation.buildingID!, userSetLocation.floor!);
       }
       // if (render) {
       //   print("entered here");
@@ -9127,11 +9144,14 @@ class _NavigationState extends State<Navigation>
       }) async {
     final value = await SingletonFunctionController.building.landmarkdata!;
     List<Landmarks> nearbyLandmarks =
-    tools.findNearbyLandmark(path, value.landmarksMap!, 5);
+    tools.findNearbyLandmark(path, value.landmarksMap!, 16);
     pathState.nearbyLandmarks = nearbyLandmarks;
     print("pathState.nearbyLandmarks:${nearbyLandmarks}");
     final associatedTurns =
     await tools.associateTurnWithLandmark(path, nearbyLandmarks);
+    associatedTurns.forEach((turn, landmark){
+      print("associateTurnWithLandmark ${landmark.name}");
+    });
     PathState.associateTurnWithLandmark = associatedTurns;
     PathState.associateTurnWithLandmark.removeWhere((key, value) =>
     value.properties!.polyId == PathState.destinationPolyID);
@@ -10804,8 +10824,6 @@ class _NavigationState extends State<Navigation>
   double smoothingFactor = 0.05; // keep camera fixed until a turn
 
   Future<void> alignMapToPath(List<double> A, List<double> B,{bool isTurn=false, bool animate = false}) async {
-    print("enteredddd");
-    print(onStart);
     mapState.tilt = 52.5;
     mapState.target = LatLng(A[0], A[1]);
     mapState.bearing = tools.calculateBearing(A, B);
