@@ -187,6 +187,23 @@ class MapClustering {
                 imageSize: const Size(85, 85), color: Color(0xfffb8c00));
           }
           else if (landmarks[i].element!.type == "Rooms" &&
+              (landmarks[i].element!.subType == "Sample Collection Room" || landmarks[i].element!.subType == "Reception"|| landmarks[i].element!.subType == "Cash Counter") &&
+              landmarks[i].coordinateX != null) {
+            print("landmarks[i] ${landmarks[i].name} landmarks[i].element!.subType ${landmarks[i].element!.subType}");
+            bitMapMarkers[landmarks[i].properties!.polyId!] =
+            await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
+                "", 'assets/Counter.png',
+                imageSize: const Size(85, 85), color: Color(0xfffb8c00), offset: Offset(0.5, 0.5));
+          }
+          else if (landmarks[i].element!.type == "Rooms" &&
+              (landmarks[i].element!.subType == "Sitting Area") &&
+              landmarks[i].coordinateX != null) {
+            bitMapMarkers[landmarks[i].properties!.polyId!] =
+            await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
+                "", 'assets/Depth 3, Frame 1-3.png',
+                imageSize: const Size(65, 65), color: Color(0xfffb8c00), offset: Offset(0.5, 0.5));
+          }
+          else if (landmarks[i].element!.type == "Rooms" &&
               landmarks[i].element!.subType == "ATM" &&
               landmarks[i].coordinateX != null &&
               !landmarks[i].wasPolyIdNull!) {
@@ -523,7 +540,7 @@ class MapClustering {
       }else{
         dotIcon = SingletonFunctionController().mapCLustring.blueDotMarker;
       }
-      if(landmark.element!.subType == "room door" || landmark.element!.subType == "Reception"){
+      if(landmark.element!.subType == "room door" || landmark.element!.subType == "Reception"|| landmark.element!.subType == "Blood Bank"|| landmark.element!.subType == "Library"){
         if(zoomLevel < 20.8) {
           List<LatLng>? calculatedPoints = polygonCalculations.landmarkWithLatLng[landmark.properties!.polyId];
           // print("calculatedPoints check ${calculatedPoints} ${polygonCalculations.landmarkWithLatLng.containsKey(landmark.properties!.polyId)}");

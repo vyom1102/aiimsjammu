@@ -151,6 +151,7 @@ class BLEManager{
       int divideBySize = 0;
 
       beaconResponseValues.forEach((dateTime,rSSI){
+        // print("beaconResponseValues $beaconName $rSSI");
         beacons.putIfAbsent(beaconName, ()=>[]);
         beacons[beaconName]!.add(double.parse(rSSI).abs());
       });
@@ -189,10 +190,11 @@ class BLEManager{
     //   //
     //
     // });
-    double finalWeight = double.negativeInfinity;
+    double finalWeight = double.infinity;
     String localName = "";
     weightAvg.forEach((name,weight){
-      if(weight>finalWeight){
+      print("beaconName $name weight $weight");
+      if(weight<finalWeight){
         finalWeight = weight;
         localName = name;
       }

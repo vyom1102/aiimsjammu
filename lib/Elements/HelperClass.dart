@@ -610,27 +610,81 @@ class HelperClass{
     // 🔹 Split words
     final words = text.trim().split(RegExp(r'\s+'));
 
-    String line1 = "";
-    String line2 = "";
+    List<String> lines = [];
+    int index = 0;
 
-    if (words.length == 1) {
-      // Only one word
-      line1 = words[0];
-    } else {
-      if (words[0].length < 4 && words.length > 1) {
-        // First word short → put first two words together
-        line1 = "${words[0]} ${words[1]}";
-        if (words.length > 2) {
-          line2 = words.sublist(2).join(" ");
+// Check if first word is a number (with optional /)
+    bool isFirstWordNumber = RegExp(r'^\d+(/\d+)?$').hasMatch(words[0]);
+
+// If first word is a number, put it on its own line
+    if (isFirstWordNumber) {
+      lines.add(words[0]);
+      index = 1;
+    }
+
+// Calculate remaining words count
+    int remainingCount = words.length - index;
+
+// If odd number of remaining words, first line gets 1 word
+    if (remainingCount % 2 == 1 && index < words.length) {
+      lines.add(words[index]);
+      index++;
+    }
+
+// Remaining words go in pairs (2 words per line)
+    while (index < words.length) {
+      if (index + 1 < words.length) {
+        String firstWord = words[index];
+        String secondWord = words[index + 1];
+
+        // Check if pair exceeds 20 characters
+        String pair = "$firstWord $secondWord";
+        if (pair.length > 20) {
+          // Put first word alone, second word will be processed next
+          lines.add(firstWord);
+          index++;
+        } else {
+          lines.add(pair);
+          index += 2;
         }
       } else {
-        // Normal split → first word, rest
-        line1 = words[0];
-        line2 = words.sublist(1).join(" ");
+        lines.add(words[index]);
+        index++;
       }
     }
 
-    final processedText = line2.isNotEmpty ? "$line1\n$line2" : line1;
+// Post-process: merge 2-char words at end of lines with next line's first word
+    List<String> finalLines = [];
+    for (int i = 0; i < lines.length; i++) {
+      String line = lines[i];
+      List<String> lineWords = line.split(' ');
+
+      // If last word in line is ≤2 chars and there's a next line
+      if (lineWords.last.length <= 2 && i + 1 < lines.length) {
+        String shortWord = lineWords.last;
+        String restOfLine = lineWords.sublist(0, lineWords.length - 1).join(' ');
+
+        // Check if merging short word with next line stays under 20 chars
+        String nextLineWithShort = "$shortWord ${lines[i + 1]}";
+
+        if (nextLineWithShort.length <= 20) {
+          if (restOfLine.isNotEmpty) {
+            finalLines.add(restOfLine);
+          }
+          // Prepend short word to next line
+          lines[i + 1] = nextLineWithShort;
+        } else {
+          // Can't merge, keep line as is
+          finalLines.add(line);
+        }
+      } else {
+        finalLines.add(line);
+      }
+    }
+
+    final processedText = finalLines.join("\n");
+
+    print("processedText $text  $processedText");
 
     // Scale text size for screen DPI
     final double fontSize = fontSizee * (devicePixelRatio / 2.5);

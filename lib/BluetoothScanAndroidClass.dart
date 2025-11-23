@@ -47,7 +47,9 @@ class BluetoothScanAndroidClass{
   Future<void> startScan() async {
     print("startScan stacktrace");
     print(StackTrace.current);
-    if(isScanning) return;
+    if(isScanning){
+      await stopScan();
+    }
     try{
       await methodChannel.invokeMethod('startScan');
       isScanning = true;
@@ -166,7 +168,7 @@ class BluetoothScanAndroidClass{
     _scanSubscription = eventChannel.receiveBroadcastStream().listen((deviceDetail) {
 
       BluetoothDevice deviceDetails = HelperClass().parseDeviceDetails(deviceDetail);
-
+      // print("deviceDetails ${deviceDetails.DeviceName} ${deviceDetails.DeviceRssi}");
       if(apibeaconmap.containsKey(deviceDetails.DeviceName)) {
         buffer.putIfAbsent(deviceDetails.DeviceName, () => <DateTime, String>{});
         buffer[deviceDetails.DeviceName]![DateTime.now()] = deviceDetails.DeviceRssi;

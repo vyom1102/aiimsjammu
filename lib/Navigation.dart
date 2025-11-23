@@ -828,6 +828,32 @@ class _NavigationState extends State<Navigation>
   // bool disposed = false;
   // final List<_TtsItem> _ttsQueue = [];
   // bool _isSpeaking = false;
+
+  Future<void> setFemaleIndianVoice() async {
+    List<dynamic> voices = await flutterTts.getVoices;
+    // print("voices $voices");
+
+    // Filter Indian English voices
+    var indianVoices = voices.where((voice) =>
+        voice["locale"].toString().contains("hi-IN")
+    ).toList();
+
+    // Try to find female voice
+    var femaleVoice = indianVoices.firstWhere(
+            (voice) => voice["name"].toString().toLowerCase().contains("female"),
+        orElse: () => indianVoices.isNotEmpty ? indianVoices[0] : null
+    );
+
+    if (femaleVoice != null) {
+      await flutterTts.setVoice({
+        "name": femaleVoice["name"],
+        "locale": femaleVoice["locale"]
+      });
+    } else {
+      await flutterTts.setLanguage("en-IN");
+    }
+  }
+
   Future<void> speak(String msg, String lngcode,
       {bool prevpause = false}) async {
     final stackTrace = StackTrace.current;
@@ -836,21 +862,11 @@ class _NavigationState extends State<Navigation>
       if (disposed) return;
 
       try {
-        if (lngcode == "hi") {
-          if (Platform.isAndroid) {
-            await flutterTts
-                .setVoice({"name": "hi-in-x-hia-local", "locale": "hi-IN"});
-          } else {
-            await flutterTts.setVoice({"name": "Lekha", "locale": "hi-IN"});
-          }
-        } else {
-          await flutterTts
-              .setVoice({"name": "en-US-language", "locale": "en-US"});
-        }
+        setFemaleIndianVoice();
 
         await flutterTts.stop();
         if (Platform.isAndroid) {
-          await flutterTts.setSpeechRate(0.7);
+          await flutterTts.setSpeechRate(0.55);
         } else {
           await flutterTts.setSpeechRate(0.55);
         }
@@ -1066,6 +1082,7 @@ class _NavigationState extends State<Navigation>
   }
 
   Future<void> paintMarker(LatLng Location) async {
+    markers.clear();
     if (markers.containsKey(user.bid)) {
       markers[user.bid]?.add(Marker(
         markerId: MarkerId("UserLocation"),
@@ -1775,7 +1792,7 @@ class _NavigationState extends State<Navigation>
     // If nearestBeacon is provided, localize the user to it
     if (nearestBeacon != null && nearestBeacon.isNotEmpty) {
       await _handleBeaconLocalization(
-          nearestBeacon!, speakTTS, render, false);
+          nearestBeacon!, speakTTS, render, providePinSelection);
     }
     // If polyID is provided, localize the user to the polygon
     else if (polyID != null && polyID.isNotEmpty) {
@@ -1963,12 +1980,12 @@ class _NavigationState extends State<Navigation>
       if (providePinSelection) {
         print("in pinselectionStatus$providePinSelection");
         Pinselectionlocationmodel pinLocation = Pinselectionlocationmodel(floor: beaconData.floor!, bid: beaconData.buildingID!, lat: double.parse(beaconData.properties!.latitude!), lng: double.parse(beaconData.properties!.longitude!), coordX: beaconData.coordinateX, coordY: beaconData.coordinateY);
-        SingletonFunctionController.building.listOfNearbyLandmarksToLocalize = tools.findListOfNearbyLandmarkBLE(pinLocation, landmarkData!.landmarksMap!);
+        SingletonFunctionController.building.listOfNearbyLandmarksToLocalize = tools.findListOfNearbyLandmarkBLE(pinLocation, landmarkData!.landmarksMap!, maxDistance: 5);
         print("list of nearby landmarks::${SingletonFunctionController.building.listOfNearbyLandmarksToLocalize} ${beaconData} ${landmarkData!.landmarksMap!}");
         if (SingletonFunctionController.building.listOfNearbyLandmarksToLocalize != null){
           detected = false;
           print("got inside this");
-
+          print("${SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!.where((test)=>test.properties!.isWaypoint == false).length}");
           if(SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!.where((test)=>test.properties!.isWaypoint == false).length>1){
             showListOfNearbyLandmarks(SingletonFunctionController.building.listOfNearbyLandmarksToLocalize!);
           }else{
@@ -10796,7 +10813,7 @@ class _NavigationState extends State<Navigation>
       _googleMapController.animateCamera(CameraUpdate.zoomTo(21));
       return;
     }
-    print("mapState.bearing ${mapState.bearing} ${mapState.tilt} ${mapState.zoom} ${mapState.target}");
+    print("mapState.bearing ${mapState.bearing} ${mapState.tilt} ${mapState.zoom} ${mapState.target} ");
 // if(isTurn) {
     setState(() {
       if (animate) {

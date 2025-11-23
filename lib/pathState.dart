@@ -54,7 +54,7 @@ class pathState {
   int get index => _index;
 
   set index(int value) {
-    print("index changed to $value ${StackTrace.current}");
+    // print("index changed to $value ${StackTrace.current}");
     _index = value;
   }
 

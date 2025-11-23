@@ -44,7 +44,7 @@ class MotionModel{
       print("isValid false due to building boundary ${user.bid} ${StackTrace.current}");
       // return false;
     }
-    if(nonWalkable != null && nonWalkable.contains((newY*cols)+newX)){
+    if(nonWalkable != null && nonWalkable.contains((newY*cols)+newX) && false){
       print("motionmodel $newY $newX $cols ${(newY*cols)+newX}");
       stuckCount++;
       if(stuckCount==5){

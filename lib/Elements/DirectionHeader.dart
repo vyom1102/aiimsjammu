@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
+import 'package:iwaymaps/APIMODELS/buildingAll.dart';
 import 'package:vibration/vibration.dart';
 
 import '../API/buildingAllApi.dart';
@@ -38,8 +39,7 @@ class DirectionHeader extends StatefulWidget {
   UserState user;
   String getSemanticValue;
   BuildContext context;
-  final Function(String? nearestBeacon, String? polyID,
-      {bool speakTTS, bool render}) paint;
+  final Function(String? nearestBeacon,   String? polyID, {   bool speakTTS ,   bool render,   bool providePinSelection, }) paint;
   final Function(String nearestBeacon) repaint;
   final Function() reroute;
   final Function() moveUser;
@@ -112,7 +112,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
 
   void setTTSParams(String lngcode) async {
     try {
-      print("get ios voices ${await flutterTts.getVoices}");
+      // print("get ios voices ${await flutterTts.getVoices}");
       if (lngcode == "hi") {
         if (Platform.isAndroid) {
           await flutterTts
@@ -411,7 +411,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       beaconWeight = beaconWeight * -1;
     }
 
-    if (nearestBeacon != "" && widget.user.key != SingletonFunctionController.apibeaconmap[nearestBeacon]!.sId && widget.user.bid != buildingAllApi.outdoorID) {
+    if (nearestBeacon != "" && widget.user.key != SingletonFunctionController.apibeaconmap[nearestBeacon]!.sId && widget.user.bid != buildingAllApi.outdoorID && SingletonFunctionController.apibeaconmap[nearestBeacon]?.buildingID != buildingAllApi.outdoorID) {
         if (widget.user.floor != widget.user.pathobj.destinationFloor &&
             widget.user.pathobj.destinationFloor != widget.user.pathobj.sourceFloor &&
             widget.user.pathobj.destinationFloor == SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor) {
@@ -1123,6 +1123,10 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         }
       }
       try {
+        double takeNextInstructionDistance = 15;
+        if(widget.user.bid != buildingAllApi.outdoorID){
+          takeNextInstructionDistance = 10;
+        }
         if (!direc.toLowerCase().contains("next")) {
           if (turnPoints.isNotEmpty &&
               nextTurn == turnPoints.last &&
@@ -1153,7 +1157,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                       ?[widget.user.floor] !=
                   nextTurn.node &&
 
-              (widget.distance / UserState.stepSize).ceil() == 10) {
+              ((widget.distance / UserState.stepSize).ceil() == takeNextInstructionDistance)) {
             // print("!direc.toLowerCase().contains ${!direc.toLowerCase().contains("slight")} ,${!direc.toLowerCase().contains("straight")} widget.user.pathobj.index ${widget.user.pathobj.index}  ${widget.user.pathobj.associateTurnWithLandmark[nextTurn.node]} ${[nextTurn]}");
             if ((!direc.toLowerCase().contains("slight") &&
                     !direc.toLowerCase().contains("straight")) &&
@@ -1718,9 +1722,9 @@ class _DirectionHeaderState extends State<DirectionHeader> {
                     ),
                   )
                 : Container(),
-            // kDebugMode?IconButton(onPressed: (){
-            //   listenToBin(hardSwitch: true);
-            // }, icon: Icon(Icons.escalator_warning)):Container(),
+            kDebugMode?IconButton(onPressed: (){
+              listenToBin(hardSwitch: true);
+            }, icon: Icon(Icons.escalator_warning)):Container(),
             // kDebugMode?Text(tools.AngleBetweenBuildingandGlobalNorth.toString()):Container(),
             // Text(bluetoothScanAndroidClass.logging.keys.toString())
           ],

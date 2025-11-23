@@ -105,7 +105,7 @@ class SingletonFunctionController {
         print("again got called inside singleton");
         if(!kIsWeb){
           if(Platform.isAndroid){
-            BLEManager().startScanning(bufferSize: 5, streamFrequency: 5,duration: 10);
+            BLEManager().startScanning(bufferSize: 5, streamFrequency: 5,duration: 5);
           }else{
             BluetoothScanIOSClass.startScan();
           }

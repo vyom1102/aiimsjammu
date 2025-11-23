@@ -262,11 +262,9 @@ mixin LocaleData {
 
 
   static String getProperty5(String propertyName,context) {
-
-
-
+    print(StackTrace.current);
     if(properties5[propertyName]!=null){
-      print("property5 ${properties5[propertyName]!.getString(context)}");
+      print("property52 ${properties5[propertyName]!.getString(context)}");
       return properties5[propertyName]!.getString(context);
     }
     return propertyName;

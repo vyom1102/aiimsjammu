@@ -157,6 +157,7 @@ class _NewsearchpageState extends State<NewSearchPage> {
     "reception": "Help Desk | Reception",
   };
 
+  bool poped = false;
 
   @override
   void initState() {
@@ -512,7 +513,10 @@ class _NewsearchpageState extends State<NewSearchPage> {
   String normalizeText(String text) {
     return text.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toLowerCase();
   }
+
   Future<void> onVenueClicked(String name, String location, String ID, String bid) async {
+    if(poped == true) return;
+    poped = false;
     print("onVenueClicked IDDDDD $ID");
     await StringStorage.addString(ID);
     Navigator.pop(context, ID);

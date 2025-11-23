@@ -134,7 +134,7 @@ class UserState {
 
       //print("points we got:${prevCell.x} ${prevCell.y} || ${cellPath[pathobj.index].x} ${cellPath[pathobj.index].y} || ${nextCell.x} ${nextCell.y} ${angle}");
       if (angle > 46) {
-        print('Turn check true. $angle');
+        // print('Turn check true. $angle');
         return true;
       }
     } else if (tools
@@ -372,8 +372,8 @@ class UserState {
       if (isTurnCheck(prevCell, nextCell)){
         UserState.isTurn = true;
         if (cellPath[pathobj.index + 1].bid == cellPath[pathobj.index].bid) {
-          alignMapToPath([lat, lng],
-              tools.localtoglobal(nextCell.x, nextCell.y, building!.patchData[bid]));
+          // alignMapToPath([lat, lng],
+          //     tools.localtoglobal(nextCell.x, nextCell.y, building!.patchData[bid]));
         }
       }
 
@@ -743,16 +743,16 @@ class UserState {
 
   void speakExitDirection(
       BuildContext context, String previousBuilding, String nextBuilding) {
-    speak(
-        convertTolng(
-            "Exiting $previousBuilding. Continue along the path towards $nextBuilding.",
-            "",
-            0.0,
-            context,
-            0.0,
-            nextBuilding,
-            previousBuilding),
-        lngCode);
+    // speak(
+    //     convertTolng(
+    //         "Exiting $previousBuilding. Continue along the path towards $nextBuilding.",
+    //         "",
+    //         0.0,
+    //         context,
+    //         0.0,
+    //         nextBuilding,
+    //         previousBuilding),
+    //     lngCode);
   }
 
   void speakEntryDirection(BuildContext context, String nextBuildingName) {

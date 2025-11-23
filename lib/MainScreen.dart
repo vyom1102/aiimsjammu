@@ -8,6 +8,7 @@ import 'package:hive/hive.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/GlobalSearch.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/UserState.dart';
+import 'package:iwaymaps/singletonClass.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:iwaymaps/websocket/interactionManager.dart';
 import 'package:lottie/lottie.dart';
@@ -23,6 +24,7 @@ import '/VenueSelectionScreen.dart';
 import '/Navigation.dart';
 
 import './AiimsJammu/Screens/HomePage.dart';
+import 'API/buildingAllApi.dart';
 import 'AiimsJammu/Screens/ProfilePage.dart';
 import 'AiimsJammu/Widgets/upgradeAlert.dart';
 import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
@@ -233,7 +235,11 @@ class _MainScreenState extends State<MainScreen> {
                     MaterialPageRoute(
                       builder: (context) => Navigation(),
                     ),
-                  );
+                  ).then((value){
+                    SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID).then((_){
+                      SingletonFunctionController.timer?.whenComplete((){});
+                    });
+                  });
                 // }else{
                 //   HelperClass.showToast("Not at the current venue");
                 // }

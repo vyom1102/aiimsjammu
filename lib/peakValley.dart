@@ -8,7 +8,11 @@ import 'BluetoothManager/BeaconValueInjector.dart';
 
 class PeakValley {
   String realtimeThreshold;
-  PeakValley({required this.realtimeThreshold});
+  PeakValley({required this.realtimeThreshold}){
+    if(realtimeThreshold.isEmpty){
+      realtimeThreshold = "-85";
+    }
+  }
   // Internal beacon history: only tracks one beacon at a time
   Map<String, List<BeaconReading>> _beaconHistory = {};
 
@@ -101,7 +105,7 @@ class PeakValley {
     return result;
   }
 
-  double peakThresh=-80;
+  double peakThresh=-85;
   double getPeakValleyThreshold(){
     if(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!=null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.realtimeLocalisationThreshold != null && SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.realtimeLocalisationThreshold!.isNotEmpty){
       peakThresh = double.parse(SingletonFunctionController.building.patchData[buildingAllApi.selectedBuildingID]!.patchData!.realtimeLocalisationThreshold!);

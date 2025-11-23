@@ -305,7 +305,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
       print("Android");
     }
     requestLocationPermission();
-    return MaterialApp(
+    return
+      MaterialApp(
       title: "IWAYPLUS",
       theme: ThemeData(
         primarySwatch: Colors.blue,

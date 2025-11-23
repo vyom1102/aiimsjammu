@@ -2040,7 +2040,7 @@ print("priority queuee:${priorityQueue}");
           double distance = calculateAerialDist(location.lat, location.lng, double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!));
           print("distance for ${landmark.name} is $distance");
 
-          if (distance < 5) {
+          if (distance < 10) {
             print("adding ${landmark.name} in queue");
             queue.add(landmark);
           }
@@ -2818,7 +2818,7 @@ print("priority queuee:${priorityQueue}");
     List<Cell> res=[];
 
     for(int i=1;i<pathNodes.length-1;i++){
-      if(tools.angle(pathNodes[i-1], pathNodes[i], pathNodes[i+1]) > 46){
+      if(tools.angle(pathNodes[i-1], pathNodes[i], pathNodes[i+1]) > 35){
         res.add(pathNodes[i]);
       }
     }
