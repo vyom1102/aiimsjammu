@@ -684,7 +684,7 @@ class HelperClass{
 
     final processedText = finalLines.join("\n");
 
-    print("processedText $text  $processedText");
+    // print("processedText $text  $processedText");
 
     // Scale text size for screen DPI
     final double fontSize = fontSizee * (devicePixelRatio / 2.5);
