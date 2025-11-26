@@ -52,7 +52,7 @@ class Cell{
         latitude: json['position']['latitude'],
         longitude: json['position']['longitude'],
         accuracy: json['position']['accuracy'],
-        timeStamp: DateTime.parse(json['position']['timeStamp']),
+        timeStamp: DateTime.parse(json['position']['timeStamp']), bearing: json['position']['bearing'],
       );
     }
 

@@ -350,6 +350,7 @@ class MainActivity : FlutterActivity() {
                 "latitude" to location.latitude,
                 "longitude" to location.longitude,
                 "accuracy" to location.accuracy,
+                "bearing" to location.bearing,
             )
             GpseventSink?.success(data)
         }

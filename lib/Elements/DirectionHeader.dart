@@ -1054,7 +1054,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
         // print("Error in turn announcement: $e"); // At least log the error
       }
       // print("widget.direction ${widget.direction}");
-      print("entereddd ${oldWidget.direction} ${widget.direction} ${turnInstruction[prevTurn]} ${prevTurn.node}");
+      // print("entereddd ${oldWidget.direction} ${widget.direction} ${turnInstruction[prevTurn]} ${prevTurn.node}");
       if((turnInstruction[prevTurn.node] == null || turnInstruction[prevTurn.node] == false) && !widget.direction.toLowerCase().contains("next")){
         print("inside force");
         turnInstruction[prevTurn.node] = true;

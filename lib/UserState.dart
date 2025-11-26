@@ -14,6 +14,7 @@ import 'Cell.dart';
 import 'Elements/locales.dart';
 import 'GPSService.dart';
 import 'GPSStreamHandler.dart';
+import 'GpsTracker.dart';
 import 'MotionModel.dart';
 import 'Network/NetworkManager.dart';
 import 'buildingState.dart' as b;
@@ -30,7 +31,8 @@ class UserState {
   double lat;
   double lng;
   String key;
-  double theta;
+  double _theta = 0.0;
+  double? gpsTheta;
   String? locationName;
   bool isnavigating;
   int showcoordX;
@@ -81,8 +83,38 @@ class UserState {
   static Function paintMarker = (geo.LatLng location) {};
   static Function createCircle = (double lat, double lng) {};
   static Function addDebugMarkers = (geo.LatLng point, {double? hue,int? id, bool clear = false}){};
-  PathSnapper snapper = PathSnapper();
+  PathSnapper? snapper;
+  List<Cell> currentSegment = [];
 
+
+  double get theta {
+    // if(isnavigating && gpsTheta != null) return gpsTheta!;
+    return _theta;
+    if(cellPath.isEmpty || currentSegment.isEmpty || gpsTheta == null) return _theta;
+    if(_theta < 0){
+      _theta += 360;
+    }
+    double angleBetweenGpsAndSegment = AngleDeviationCalculator.calculateDeviation(currentSegment, gpsTheta!).abs();
+    double angleBetweenMagnetoAndSegment = AngleDeviationCalculator.calculateDeviation(currentSegment, _theta).abs();
+
+    if(angleBetweenGpsAndSegment < angleBetweenMagnetoAndSegment){
+      if(gpsTheta! > 180){
+        return gpsTheta! - 360;
+      }else{
+        return gpsTheta!;
+      }
+    }else{
+      if(gpsTheta! > 180){
+        return gpsTheta! - 360;
+      }else{
+        return gpsTheta!;
+      }
+    }
+  }
+
+  set theta(double value) {
+    _theta = value;
+  }
 
   UserState(
       {required this.floor,
@@ -90,14 +122,15 @@ class UserState {
         required this.coordY,
         required this.lat,
         required this.lng,
-        required this.theta,
         this.key = "",
         this.bid = "",
         this.showcoordX = 0,
         this.showcoordY = 0,
         this.isnavigating = false,
         this.coordXf = 0.0,
-        this.coordYf = 0.0});
+        this.coordYf = 0.0}){
+    snapper = PathSnapper(this);
+  }
 
   Future<void> move(BuildContext context, {int? steps, bool isFlying = false}) async {
     List<Cell> turnPoints = [];
@@ -186,7 +219,7 @@ class UserState {
 
 
     print("handleGPS invoked");
-    snapper.snappedCellStream.listen((snapped) {
+    snapper?.snappedCellStream.listen((snapped) {
       var cell = snapped["cell"];
       var pos = snapped["position"];
       print("userbid is $bid ${bid == buildingAllApi.outdoorID} ${buildingAllApi.outdoorID}");
@@ -214,7 +247,7 @@ class UserState {
         X_pred = X_pred + K * (Z - H * X_pred);
         P = (Matrix.identity(4) - K * H) * P_pred;
         if(lastPosition != null){
-          var kalmanCell = snapper.snapToPathKalman(lastPosition!,X_pred[0][0],X_pred[1][0], pathobj.index, cellPath);
+          var kalmanCell = snapper?.snapToPathKalman(lastPosition!,X_pred[0][0],X_pred[1][0], pathobj.index, cellPath);
           if(kalmanCell != null){
             snapped["cell"] = kalmanCell;
             cell = kalmanCell;
@@ -306,6 +339,9 @@ class UserState {
         }
 
         Cell previousPoint = tools.findingprevpoint(cellPath, pathobj.index);
+        currentSegment.clear();
+        currentSegment.add(previousPoint);
+        currentSegment.add(cellPath[pathobj.index]);
         print("next cell ${cellPath[pathobj.index].x},${cellPath[pathobj.index].y}");
         double angleToNextCell = tools.calculateBearing([lat, lng],
             [cellPath[pathobj.index].lat, cellPath[pathobj.index].lng]);
@@ -652,7 +688,7 @@ class UserState {
         element.doorX ?? element.coordinateX!,
         element.doorY ?? element.coordinateY!
       ]);
-      print("element distance near ${element.name} $distance");
+      print("element distance near ${element.name} $distance ${element.element!.subType} ${element.properties!.polygonExist}");
       if (element.element!.subType == "room door" && element.properties!.polygonExist != true) {
         if (distance <= 2 && distancebetweenSegments>16){
           print("passing by condition with ${distancebetweenSegments}");

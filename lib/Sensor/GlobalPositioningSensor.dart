@@ -16,7 +16,7 @@ class GpsSensor extends BaseSensor{
     return _eventChannel.receiveBroadcastStream().map((event) {
       final Map<dynamic, dynamic> location = event;
       print("sending gps location");
-      return Location(latitude: location["latitude"], longitude: location["longitude"], accuracy: location["accuracy"], timeStamp: DateTime.now());
+      return Location(latitude: location["latitude"], longitude: location["longitude"], accuracy: location["accuracy"], timeStamp: DateTime.now(), bearing: location["bearing"]);
     });
   }
 

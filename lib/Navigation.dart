@@ -253,7 +253,7 @@ class _NavigationState extends State<Navigation>
   double mapbearing = 0.0;
   //UserState user = UserState(floor: 0, coordX: 154, coordY: 94, lat: 28.543406741799892, lng: 77.18761156074972, key: "659001d7e6c204e1eec13e26");
   UserState user = UserState(
-      floor: 0, coordX: 0, coordY: 0, lat: 0.0, lng: 0.0, key: "", theta: 0.0);
+      floor: 0, coordX: 0, coordY: 0, lat: 0.0, lng: 0.0, key: "");
   pathState PathState = pathState.withValues(-1, -1, -1, -1, -1, -1, null, 0);
 
   late String manufacturer;
@@ -10491,8 +10491,8 @@ class _NavigationState extends State<Navigation>
         speak(convertTolng("Turn $direction", _currentLocale, direction),
             _currentLocale);
       }
-      user.snapper.setPath(user.cellPath);
-      await user.snapper.startGpsUpdates();
+      user.snapper?.setPath(user.cellPath);
+      await user.snapper?.startGpsUpdates();
       user.handleGPS(context);
     }
   }

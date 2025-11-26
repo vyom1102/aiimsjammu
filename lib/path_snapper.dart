@@ -6,6 +6,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as geo;
 import 'Cell.dart';
 import 'GPS.dart';
 import 'GPSService.dart';
+import 'GpsTracker.dart';
+import 'UserState.dart';
 import 'navigationTools.dart';
 
 class KalmanFilter {
@@ -40,6 +42,8 @@ class KalmanFilter {
 class PathSnapper {
   late List<Cell> path;
   final KalmanFilter _kalmanFilter = KalmanFilter();
+  final UserState user;
+  final GPSTracker gpsTracker = GPSTracker();
 
   void setPath(List<Cell> singleCellListPath) {
     path = singleCellListPath;
@@ -48,7 +52,7 @@ class PathSnapper {
   final _snappedCellController = StreamController<Map<String,dynamic>>();
   GPS gps = GPS();
 
-  PathSnapper();
+  PathSnapper(this.user);
 
   // Stream of snapped cells
   Stream<Map<String,dynamic>> get snappedCellStream => _snappedCellController.stream;
@@ -83,6 +87,8 @@ class PathSnapper {
     // var snapped = _snapToPath(
     //     _kalmanFilter.latitudeEstimate ?? lat,
     //     _kalmanFilter.longitudeEstimate ?? lng);
+    user.gpsTheta = position.bearing;
+    print("position.bearing ${position.bearing}");
     var snapped = _snapToPath(position);
       print("_snapToPath distance second $snapped");
       _snappedCellController.add(snapped);

@@ -10,7 +10,7 @@ class GPSService {
     return _eventChannel.receiveBroadcastStream().map((event) {
       final Map<dynamic, dynamic> location = event;
       print("sending gps location");
-      return Location(latitude: location["latitude"], longitude: location["longitude"], accuracy: location["accuracy"], timeStamp: DateTime.now());
+      return Location(latitude: location["latitude"], longitude: location["longitude"], accuracy: location["accuracy"], timeStamp: DateTime.now(), bearing: location["bearing"]);
     });
   }
 
@@ -40,14 +40,16 @@ class Location{
   double longitude;
   double accuracy;
   DateTime timeStamp;
+  double? bearing;
 
-  Location({required this.latitude,required this.longitude,required this.accuracy, required this.timeStamp});
+  Location({required this.latitude,required this.longitude,required this.accuracy, required this.timeStamp, required this.bearing});
   Map<String, dynamic> toJson() {
     return {
       'latitude': latitude,
       'longitude': longitude,
       'accuracy': accuracy,
       'timeStamp': timeStamp.toIso8601String(), // Serializing DateTime to string
+      'bearing': bearing
     };
   }
 }
