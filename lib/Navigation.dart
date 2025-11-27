@@ -10409,7 +10409,6 @@ class _NavigationState extends State<Navigation>
                   .building.patchData[PathState.destinationBid]);
           PathState.destinationLat = destination[0];
           PathState.destinationLng = destination[1];
-          user.pathobj = PathState;
           if (!kIsWeb && kDebugMode) {
             markers[user.bid]?.add(Marker(
               markerId: MarkerId("debug"),

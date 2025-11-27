@@ -1912,50 +1912,67 @@ class tools {
   static List<Landmarks> findNearbyLandmark(
       List<Cell> path,
       Map<String, Landmarks> landmarksMap,
-      int distance) {
-    List<Cell> turnPoints = tools.getTurnpoints_inCell(path);
+      int distance,
+      ) {
     List<Landmarks> nearbyLandmarks = [];
 
     for (Cell node in path) {
-      landmarksMap.forEach((key, value) {
+      for (var value in landmarksMap.values) {
         if (node.floor == value.floor &&
             value.name != null &&
             value.buildingID == node.bid &&
             value.element!.subType != "beacons" &&
             value.element!.subType != "lift") {
-          List<int> pCoord = [node.x, node.y];
-          double d = 0.0;
 
-          if (value.doorX == null) {
-            d = calculateDistance(pCoord, [value.coordinateX!, value.coordinateY!]);
-          } else {
-            d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
-          }
+          final pCoord = [node.x, node.y];
+          double d = (value.doorX == null)
+              ? calculateDistance(pCoord, [value.coordinateX!, value.coordinateY!])
+              : calculateDistance(pCoord, [value.doorX!, value.doorY!]);
 
           if (d < distance) {
-            // ✅ Extra check: ensure landmark is not within 10 feet of any turn point
-            bool tooCloseToTurnPoint = turnPoints.any((tp) {
-              double turnDist;
-              if (value.doorX == null) {
-                turnDist = calculateDistance(
-                    [tp.x, tp.y], [value.coordinateX!, value.coordinateY!]);
-              } else {
-                turnDist = calculateDistance(
-                    [tp.x, tp.y], [value.doorX!, value.doorY!]);
-              }
-              return turnDist <= 10; // 10 feet threshold
-            });
+            bool shouldAdd = true;
 
-            if (!tooCloseToTurnPoint &&
-                !nearbyLandmarks.contains(value)) {
+            // Check conflicts: existing same-subType landmarks within 15 ft
+            for (var existing in nearbyLandmarks) {
+                double distBetween = calculateDistance(
+                  [existing.doorX??existing.coordinateX!, existing.doorY??existing.coordinateY!],
+                  [value.doorX??value.coordinateX!, value.doorY??value.coordinateY!],
+                );
+                if (distBetween <= 15) {
+                  // ---- RULE: if one is Door, keep Door ----
+                  if (existing.element!.subType == "Door Only" ||
+                      value.element!.subType == "Door Only") {
+
+                    // Keep Door. Remove existing if it is NOT door.
+                    if (existing.element!.subType != "Door Only" &&
+                        value.element!.subType == "Door Only") {
+                      nearbyLandmarks.remove(existing);
+                      break; // allow adding Door
+                    }
+
+                    // If existing is Door and value is not → skip value
+                    shouldAdd = false;
+                    break;
+                  }
+
+                  // Otherwise → skip new one (keep first)
+                  shouldAdd = false;
+                  break;
+                }
+
+            }
+
+            if (shouldAdd) {
               nearbyLandmarks.add(value);
             }
           }
         }
-      });
+      }
     }
+
     return nearbyLandmarks;
   }
+
 
 
   static Landmarks? localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
@@ -2681,34 +2698,9 @@ print("priority queuee:${priorityQueue}");
 
   static Future<Map<int,Landmarks>> associateTurnWithLandmark(List<Cell> path, List<Landmarks> landmarks)async{
     Map<int,Landmarks> ls = {};
-    List<Cell> turns = [];
-    for(int i = 1 ; i<path.length-1 ; i++){
-      Cell prevPos = path[i-1];
-      Cell currPos = path[i];
-      Cell nextPos = path[i+1];
+    List<Cell> turns = getTurnpoints_inCell(path);
 
-      int currentX = (currPos.x);
-      int currentY = (currPos.y);
-
-      int nextX = (nextPos.x);
-      int nextY = (nextPos.y);
-
-      int prevX = (prevPos.x);
-      int prevY = (prevPos.y);
-
-      int vector1X = currentX - prevX;
-      int vector1Y = currentY - prevY;
-      int vector2X = nextX - currentX;
-      int vector2Y = nextY - currentY;
-
-      // Calculate the cross product of vector1 and vector2
-      int dotProduct = vector1X * vector2X + vector1Y * vector2Y;
-      if(dotProduct == 0){
-        turns.add(currPos);
-      }
-    }
-
-    turns.forEach((turn) {
+    for (var turn in turns) {
       double d = 6.5;
       Landmarks? land;
       landmarks.forEach((element) {
@@ -2721,8 +2713,7 @@ print("priority queuee:${priorityQueue}");
       if(land != null){
         ls[turn.node] = land!;
       }
-    });
-
+    }
     return ls;
   }
 

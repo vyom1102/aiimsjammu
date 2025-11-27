@@ -1078,86 +1078,98 @@ class _DirectionHeaderState extends State<DirectionHeader> {
               prevpause: true);
         }
       }
-      if (oldWidget.direction != widget.direction && !widget.direction.toLowerCase().contains("next")) {
-        print("entered in first ${oldWidget.direction} ${widget.direction}");
-        if (oldWidget.direction == "Straight") {
-          // _speakTimer?.cancel(); // Cancel any previous timer
-          // _turnSpoken = false; // Reset flag
-          if (turnPoints
-              .contains(widget.user.cellPath[widget.user.pathobj.index])) {
-            print("widget.direction ${widget.direction}");
-            Vibration.vibrate();
-            speak(
-                convertTolng(
-                    "Turn ${LocaleData.getProperty5(widget.direction, context)}",
-                    _currentLocale,
-                    widget.direction,
-                    "",
-                    0,
-                    ""),
-                _currentLocale,
-                prevpause: true);
-          } else {
-            if (widget.direction.toLowerCase().contains("slight") && !isTalkBackOn()) {
-              widget.direction = "Straight";
-              return;
-            }
-            // _speakTimer = Timer(Duration(seconds: 2), () {
-            //   if (mounted && oldWidget.direction == widget.direction) {
-            //     return; // Direction changed back, do not proceed
-            //   }
-            //   _turnSpoken = true; // Mark that turn instruction was spoken
 
+      if (oldWidget.direction != widget.direction && !widget.direction.toLowerCase().contains("next")) {
+        if(!widget.direction.toLowerCase().contains("next")){
+          print("entered in first ${oldWidget.direction} ${widget.direction}");
+          if (oldWidget.direction == "Straight") {
+            // _speakTimer?.cancel(); // Cancel any previous timer
+            // _turnSpoken = false; // Reset flag
+            if (turnPoints
+                .contains(widget.user.cellPath[widget.user.pathobj.index])) {
+              print("widget.direction ${widget.direction}");
+              Vibration.vibrate();
+              speak(
+                  convertTolng(
+                      "Turn ${LocaleData.getProperty5(widget.direction, context)}",
+                      _currentLocale,
+                      widget.direction,
+                      "",
+                      0,
+                      ""),
+                  _currentLocale,
+                  prevpause: true);
+            } else {
+              if (widget.direction.toLowerCase().contains("slight") && !isTalkBackOn()) {
+                widget.direction = "Straight";
+                return;
+              }
+              // _speakTimer = Timer(Duration(seconds: 2), () {
+              //   if (mounted && oldWidget.direction == widget.direction) {
+              //     return; // Direction changed back, do not proceed
+              //   }
+              //   _turnSpoken = true; // Mark that turn instruction was spoken
+
+              Vibration.vibrate();
+              speak(
+                  convertTolng(
+                      "Turn ${LocaleData.getProperty5(widget.direction, context)}",
+                      _currentLocale,
+                      widget.direction,
+                      "",
+                      0,
+                      ""),
+                  _currentLocale,
+                  prevpause: true);
+              // });
+            }
+          } else if (widget.direction == "Straight") {
+            print(
+                "!turnPoints.contains(widget.user.cellPath[widget.user.pathobj.index])  ${!turnPoints.contains(widget.user.cellPath[widget.user.pathobj.index])} _turnSpoken");
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _announceDirection(
+                  '${LocaleData.getProperty6('Go Straight', context)}');
+            });
+            if (!turnPoints
+                .contains(widget.user.cellPath[widget.user.pathobj.index])){
+              print("returning due to turn");
+              return; // Skip "Straight" if "Turn" was never spoken
+            }
             Vibration.vibrate();
-            speak(
-                convertTolng(
-                    "Turn ${LocaleData.getProperty5(widget.direction, context)}",
-                    _currentLocale,
-                    widget.direction,
-                    "",
-                    0,
-                    ""),
-                _currentLocale,
-                prevpause: true);
-            // });
-          }
-        } else if (widget.direction == "Straight") {
-          print(
-              "!turnPoints.contains(widget.user.cellPath[widget.user.pathobj.index])  ${!turnPoints.contains(widget.user.cellPath[widget.user.pathobj.index])} _turnSpoken");
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _announceDirection(
-                '${LocaleData.getProperty6('Go Straight', context)}');
-          });
-          if (!turnPoints
-              .contains(widget.user.cellPath[widget.user.pathobj.index])){
-            print("returning due to turn");
-            return; // Skip "Straight" if "Turn" was never spoken
-          }
-          Vibration.vibrate();
-          UserState.isTurn = false;
-          // if (!UserState.ttsOnlyTurns) {
+            UserState.isTurn = false;
+            // if (!UserState.ttsOnlyTurns) {
             speak(
               "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context)}",
               _currentLocale,
               prevpause: true,
             );
-          // }
-        } else if (oldWidget.direction.toLowerCase().contains("next")) {
-          Vibration.vibrate();
-          speak(
-              convertTolng(
-                  "Turn ${LocaleData.getProperty5(widget.direction, context)}",
-                  _currentLocale,
-                  widget.direction,
-                  "",
-                  0,
-                  ""),
+            // }
+          } else if (oldWidget.direction.toLowerCase().contains("next")) {
+            Vibration.vibrate();
+            speak(
+                convertTolng(
+                    "Turn ${LocaleData.getProperty5(widget.direction, context)}",
+                    _currentLocale,
+                    widget.direction,
+                    "",
+                    0,
+                    ""),
+                _currentLocale,
+                prevpause: true);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _announceDirection(
+                  '${LocaleData.getProperty6('Go Straight', context)}');
+            });
+          }
+        }else{
+          if(widget.direction == "Straight"){
+            Vibration.vibrate();
+            speak(
+              "${LocaleData.getProperty6('Go Straight', context)} ${tools.convertFeet(widget.distance, context)}",
               _currentLocale,
-              prevpause: true);
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _announceDirection(
-                '${LocaleData.getProperty6('Go Straight', context)}');
-          });
+              prevpause: true,
+            );
+          }
         }
       }
       try {
