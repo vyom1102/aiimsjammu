@@ -241,7 +241,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     ):Container(
                       height: 200,
                       width: 200,
-                      child: Image.asset('assets/images/dashboardlogo.png'),
+                      child: Image.asset('assets/images/SplashLogo.png'),
                     ),
                   ],
                 ),

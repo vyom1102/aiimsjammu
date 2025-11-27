@@ -83,8 +83,6 @@ import '../Widgets/ImageCarouse.dart';
 import '../Data/ServicesDemoData.dart';
 import 'PharmacyScreen.dart';
 
-
-
 //hospital id = 6673e7a3b92e69bc7f4b40ae
 class HomePage extends StatefulWidget {
   @override
@@ -182,19 +180,19 @@ class _HomePageState extends State<HomePage> {
     return status.isGranted;
   }
 
-  Future<void> requestStoragePermission() async {
-    // Ask for regular storage permission (Android <11)
-    var status = await Permission.manageExternalStorage.request();
-    if (status.isGranted) {
-      print("✅ Storage permission granted");
-    } else if (status.isDenied) {
-      print("❌ Storage permission denied");
-    } else if (status.isPermanentlyDenied) {
-      print("❌ Permission permanently denied, please enable from settings");
-      await openAppSettings();
-    }
-    return;
-  }
+  // Future<void> requestStoragePermission() async {
+  //   // Ask for regular storage permission (Android <11)
+  //   var status = await Permission.manageExternalStorage.request();
+  //   if (status.isGranted) {
+  //     print("✅ Storage permission granted");
+  //   } else if (status.isDenied) {
+  //     print("❌ Storage permission denied");
+  //   } else if (status.isPermanentlyDenied) {
+  //     print("❌ Permission permanently denied, please enable from settings");
+  //     await openAppSettings();
+  //   }
+  //   return;
+  // }
 
 
   Future<void> mapDataVersionCycle() async {
@@ -1245,831 +1243,831 @@ class _HomePageState extends State<HomePage> {
       onRefresh: _refresh,
 
       child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          toolbarHeight: 120,
-          automaticallyImplyLeading: false,
           backgroundColor: Colors.white,
-          scrolledUnderElevation: 0,
-          elevation: 0,
-          title: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Column(
-                  //   mainAxisAlignment: MainAxisAlignment.start,
-                  //   crossAxisAlignment: CrossAxisAlignment.start,
-                  //   children: [
-                  //     Row(
-                  //           children: [
-                  //             TranslatorWidget("Hello, "),
-                  //             nameLoading
-                  //                 ? CircularProgressIndicator()
-                  //                 : TranslatorWidget(
-                  //                                   "$userName",
-                  //                                   style: const TextStyle(
-                  //             fontFamily: "Roboto",
-                  //             fontSize: 20,
-                  //             fontWeight: FontWeight.w700,
-                  //             color: Color(0xff18181b),
-                  //             height: 26 / 20,
-                  //                                   ),
-                  //                                   textAlign: TextAlign.left,
-                  //                                 ),
-                  //           ],
-                  //         ),
-                  //     TranslatorWidget(
-                  //       "How can we help you today?",
-                  //       style: TextStyle(
-                  //         fontFamily: "Roboto",
-                  //         fontSize: 14,
-                  //         fontWeight: FontWeight.w400,
-                  //         color: Color(0xff5e5e5f),
-                  //         height: 20 / 14,
-                  //       ),
-                  //       textAlign: TextAlign.left,
-                  //     )
-                  //   ],
-                  // ),
-                  // SvgPicture.asset('assets/images/dashboardlogo.svg',height: 40,width: 40,),
-                  Image.asset('assets/images/dashboardlogo.png',height: 50,width: 50,),
-                  Column(
-                    children: [
-                      Text(
-                        'KEM Hospital',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFF003666),
-                          fontSize: 24,
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w700,
-                          height: 1.20,
-                          letterSpacing: 0.24,
+          appBar: AppBar(
+            toolbarHeight: 120,
+            automaticallyImplyLeading: false,
+            backgroundColor: Colors.white,
+            scrolledUnderElevation: 0,
+            elevation: 0,
+            title: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Column(
+                    //   mainAxisAlignment: MainAxisAlignment.start,
+                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                    //   children: [
+                    //     Row(
+                    //           children: [
+                    //             TranslatorWidget("Hello, "),
+                    //             nameLoading
+                    //                 ? CircularProgressIndicator()
+                    //                 : TranslatorWidget(
+                    //                                   "$userName",
+                    //                                   style: const TextStyle(
+                    //             fontFamily: "Roboto",
+                    //             fontSize: 20,
+                    //             fontWeight: FontWeight.w700,
+                    //             color: Color(0xff18181b),
+                    //             height: 26 / 20,
+                    //                                   ),
+                    //                                   textAlign: TextAlign.left,
+                    //                                 ),
+                    //           ],
+                    //         ),
+                    //     TranslatorWidget(
+                    //       "How can we help you today?",
+                    //       style: TextStyle(
+                    //         fontFamily: "Roboto",
+                    //         fontSize: 14,
+                    //         fontWeight: FontWeight.w400,
+                    //         color: Color(0xff5e5e5f),
+                    //         height: 20 / 14,
+                    //       ),
+                    //       textAlign: TextAlign.left,
+                    //     )
+                    //   ],
+                    // ),
+                    //SvgPicture.asset('assets/images/dashboardlogo.svg',height: 40,width: 40,),
+                    Image.asset('assets/images/dashboardlogo.png',height: 50,width: 50,),
+                    Column(
+                      children: [
+                        Text(
+                          'AIIMS JAMMU',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Color(0xFF003666),
+                            fontSize: 24,
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w700,
+                            height: 1.20,
+                            letterSpacing: 0.24,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Navigation for All',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFF333333),
-                          fontSize: 14,
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w400,
-                          height: 1.50,
-                          letterSpacing: 0.01,
-                        ),
-                      )
-                    ],
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.notifications_none_outlined),
-                    color: Color(0xff18181b),
-                    onPressed: () {
-                      // loadData();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => NotificationScreen(),
-                          // builder: (context) => Navigation(),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              SizedBox(height: 10,),
-              GestureDetector(
-                onTap: () {
-                  InteractionManager().logInteraction('Search Bar');
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => GlobalSearchPage(voiceInputEnabled: false),
+                        Text(
+                          'Navigation for All',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Color(0xFF333333),
+                            fontSize: 14,
+                            fontFamily: 'Roboto',
+                            fontWeight: FontWeight.w400,
+                            height: 1.50,
+                            letterSpacing: 0.01,
+                          ),
+                        )
+                      ],
                     ),
-                  ).then((value) => PassLocationId(context, value));
-                },
-                child: Container(
-                  padding: EdgeInsets.only(left: 16, right: 8),
-                  decoration: BoxDecoration(
-                    // color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(10),
-                    border:
-                    Border.all(color: Color(0xFFE0E0E0), width: 1),
-                  ),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        child: SvgPicture.asset(
-                            'assets/images/searchicon.svg'),
+                    IconButton(
+                      icon: Icon(Icons.notifications_none_outlined),
+                      color: Color(0xff18181b),
+                      onPressed: () {
+                        // loadData();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => NotificationScreen(),
+                            // builder: (context) => Navigation(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10,),
+                GestureDetector(
+                  onTap: () {
+                    InteractionManager().logInteraction('Search Bar');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => GlobalSearchPage(voiceInputEnabled: false),
                       ),
-                      // Icon(Icons.search),
-                      SizedBox(width: 16),
-
-                      Semantics(
-                        header: true,
-                        // label: "Search Bar",
-                        child: Container(
-                            padding: EdgeInsets.only(top: 8),
-                            width: MediaQuery.of(context).size.width * 0.67,
-                            height: 40,
-                            child: TranslatorWidget(
-                              "Where do you want to go?",
-                              style: const TextStyle(
-                                fontFamily: "Roboto",
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xff535353),
-
-                              ),
-                              textAlign: TextAlign.left,
-                            )
+                    ).then((value) => PassLocationId(context, value));
+                  },
+                  child: Container(
+                    padding: EdgeInsets.only(left: 16, right: 8),
+                    decoration: BoxDecoration(
+                      // color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(10),
+                      border:
+                      Border.all(color: Color(0xFFE0E0E0), width: 1),
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          child: SvgPicture.asset(
+                              'assets/images/searchicon.svg'),
                         ),
-                      ),
+                        // Icon(Icons.search),
+                        SizedBox(width: 16),
 
-                      // SizedBox(width: 26,),
-                      // Spacer(),
-                      // Semantics(
-                      //   label: "Microphone",
-                      //   child: Icon(
-                      //     Icons.mic_none_outlined,
-                      //     color: Color(0xff8E8C8C),
-                      //   ),
-                      // ),
-                    ],
+                        Semantics(
+                          header: true,
+                          // label: "Search Bar",
+                          child: Container(
+                              padding: EdgeInsets.only(top: 8),
+                              width: MediaQuery.of(context).size.width * 0.67,
+                              height: 40,
+                              child: TranslatorWidget(
+                                "Where do you want to go?",
+                                style: const TextStyle(
+                                  fontFamily: "Roboto",
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xff535353),
+
+                                ),
+                                textAlign: TextAlign.left,
+                              )
+                          ),
+                        ),
+
+                        // SizedBox(width: 26,),
+                        // Spacer(),
+                        // Semantics(
+                        //   label: "Microphone",
+                        //   child: Icon(
+                        //     Icons.mic_none_outlined,
+                        //     color: Color(0xff8E8C8C),
+                        //   ),
+                        // ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 10,),
+                SizedBox(height: 10,),
 
-            ],
+              ],
+            ),
           ),
-        ),
-        body:SingleChildScrollView(
-          child: Column(
-            children: [
+          body:SingleChildScrollView(
+            child: Column(
+              children: [
 
-              Column(
-                children: [
+                Column(
+                  children: [
 
-                  // Padding(
-                  //   padding: const EdgeInsets.symmetric(
-                  //       vertical: 8.0, horizontal: 16),
-                  //   child:ImageCarouselWidget(
-                  //     imagesWithText: carouselImages.map((item) => ImageTextPair(
-                  //       webUrl: item['webUrl'],
-                  //       image: item['image'],
-                  //       text: item['text'],
-                  //       subText: item['subText'],
-                  //     )).toList(),
-                  //   ),
-                  //       // ImageCarouselWidget(imagesWithText: carouselImages),
-                  //
-                  // ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 16),
-                    child: _buildMainServices(),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16.0, bottom: 12),
-                    child: Row(
-                      children: [
-                        Semantics(
-                          header: true,
-                          child: TranslatorWidget(
-                            "Nearby Amenities",
-                            style: TextStyle(
-                              fontFamily: "Roboto",
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xff18181b),
-                              height: 23 / 16,
+                    // Padding(
+                    //   padding: const EdgeInsets.symmetric(
+                    //       vertical: 8.0, horizontal: 16),
+                    //   child:ImageCarouselWidget(
+                    //     imagesWithText: carouselImages.map((item) => ImageTextPair(
+                    //       webUrl: item['webUrl'],
+                    //       image: item['image'],
+                    //       text: item['text'],
+                    //       subText: item['subText'],
+                    //     )).toList(),
+                    //   ),
+                    //       // ImageCarouselWidget(imagesWithText: carouselImages),
+                    //
+                    // ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 16),
+                      child: _buildMainServices(),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16.0, bottom: 12),
+                      child: Row(
+                        children: [
+                          Semantics(
+                            header: true,
+                            child: TranslatorWidget(
+                              "Nearby Amenities",
+                              style: TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xff18181b),
+                                height: 23 / 16,
+                              ),
+                              textAlign: TextAlign.left,
                             ),
-                            textAlign: TextAlign.left,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16.0,right: 16),
-                    child: _buildAmenities(),
-                  ),
-                  SizedBox(
-                    height: 16,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16.0),
-                    child: Row(
-                      children: [
-                        Semantics(
-                          header: true,
-                          child: TranslatorWidget(
-                            "Hospital Services",
-                            style: TextStyle(
-                              fontFamily: "Roboto",
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xff18181b),
-                              height: 23 / 16,
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16.0,right: 16),
+                      child: _buildAmenities(),
+                    ),
+                    SizedBox(
+                      height: 16,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16.0),
+                      child: Row(
+                        children: [
+                          Semantics(
+                            header: true,
+                            child: TranslatorWidget(
+                              "Hospital Services",
+                              style: TextStyle(
+                                fontFamily: "Roboto",
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xff18181b),
+                                height: 23 / 16,
+                              ),
+                              textAlign: TextAlign.left,
                             ),
-                            textAlign: TextAlign.left,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    height: 100,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        SizedBox(
-                          width: 16,
-                        ),
-                        GestureDetector(
-                            onTap: () {
-                              InteractionManager().logInteraction('Doctor Category');
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => DoctorListScreen()),
-                              );
-                            },
-                            child: _buildCard(
-                                'assets/images/Doctor.svg', 'Doctor')),
-                        GestureDetector(
-                            onTap: () {
-                              InteractionManager().logInteraction('Directrory Category');
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => HospitalDirectory()),
-                              );
-                            },
-                            child: _buildCard(
-                                'assets/images/Directory.svg', 'Directory')),
-                        if(_pharmacyfilteredServices.isNotEmpty)
-                          SizedBox(width: 12),
-
-                        if(_pharmacyfilteredServices.isNotEmpty)
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      height: 100,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          SizedBox(
+                            width: 16,
+                          ),
                           GestureDetector(
                               onTap: () {
-                                InteractionManager().logInteraction('Pharmacy Category');
+                                InteractionManager().logInteraction('Doctor Category');
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => PharmacyScreen()),
-                                );
-                              },child: _buildCard('assets/images/Pharmacy.svg', 'Pharmacy')),
-
-                        if(_emergencyfilteredService.isNotEmpty)
-                          SizedBox(width: 12),
-                        if(_emergencyfilteredService.isNotEmpty)
-                          GestureDetector(
-                            onTap: () {
-                              InteractionManager().logInteraction('Emergency Category');
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => EmergencyScreen()),
-                              );
-                            },
-                            child: _buildCard(
-                                'assets/images/Doctor (1).svg', 'Emergency'),
-                          ),
-                        if(_atmfilteredServices.isNotEmpty)
-                          SizedBox(width: 12),
-                        if(_atmfilteredServices.isNotEmpty)
-                          GestureDetector(
-                            onTap: () {
-                              InteractionManager().logInteraction('ATM Category');
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ATMScreen()),
-                              );
-                            },
-                            child: _buildCard(
-                                'assets/images/Atm.svg', 'ATM'),
-                          ),
-                        if(_cafeteriafilteredServices.isNotEmpty)
-                          SizedBox(width: 12),
-                        if(_cafeteriafilteredServices.isNotEmpty)
-                          GestureDetector(
-                            onTap: () {
-                              InteractionManager().logInteraction('Cafeteria Category');
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => CafeteriaScreen()),
-                              );
-                            },
-                            child: _buildCard(
-                                'assets/images/Cafetaria.svg', 'Cafeteria'),
-                          ),
-                        if(_countersfilteredServices.isNotEmpty)
-                          SizedBox(width: 12),
-                        if(_countersfilteredServices.isNotEmpty)
-                          GestureDetector(
-                              onTap: () {
-                                InteractionManager().logInteraction('Counters Category');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => CountersScreen()),
+                                      builder: (context) => DoctorListScreen()),
                                 );
                               },
-
-                              child: _buildCard('assets/images/counter.svg', 'Counters')),
-                        if(_otherfilteredServices.isNotEmpty)
-                          SizedBox(width: 12),
-                        if(_otherfilteredServices.isNotEmpty)
+                              child: _buildCard(
+                                  'assets/images/Doctor.svg', 'Doctor')),
                           GestureDetector(
                               onTap: () {
-                                InteractionManager().logInteraction('Others Category');
+                                InteractionManager().logInteraction('Directrory Category');
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => OtherServiceScreen()),
+                                      builder: (context) => HospitalDirectory()),
                                 );
                               },
+                              child: _buildCard(
+                                  'assets/images/Directory.svg', 'Directory')),
+                          if(_pharmacyfilteredServices.isNotEmpty)
+                            SizedBox(width: 12),
 
-                              child: _buildCard('assets/images/cat.svg', 'Others')),
-                        SizedBox(
-                          width: 12,
-                        ),
-                      ],
+                          if(_pharmacyfilteredServices.isNotEmpty)
+                            GestureDetector(
+                                onTap: () {
+                                  InteractionManager().logInteraction('Pharmacy Category');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => PharmacyScreen()),
+                                  );
+                                },child: _buildCard('assets/images/Pharmacy.svg', 'Pharmacy')),
+
+                          if(_emergencyfilteredService.isNotEmpty)
+                            SizedBox(width: 12),
+                          if(_emergencyfilteredService.isNotEmpty)
+                            GestureDetector(
+                              onTap: () {
+                                InteractionManager().logInteraction('Emergency Category');
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => EmergencyScreen()),
+                                );
+                              },
+                              child: _buildCard(
+                                  'assets/images/Doctor (1).svg', 'Emergency'),
+                            ),
+                          if(_atmfilteredServices.isNotEmpty)
+                            SizedBox(width: 12),
+                          if(_atmfilteredServices.isNotEmpty)
+                            GestureDetector(
+                              onTap: () {
+                                InteractionManager().logInteraction('ATM Category');
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ATMScreen()),
+                                );
+                              },
+                              child: _buildCard(
+                                  'assets/images/Atm.svg', 'ATM'),
+                            ),
+                          if(_cafeteriafilteredServices.isNotEmpty)
+                            SizedBox(width: 12),
+                          if(_cafeteriafilteredServices.isNotEmpty)
+                            GestureDetector(
+                              onTap: () {
+                                InteractionManager().logInteraction('Cafeteria Category');
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => CafeteriaScreen()),
+                                );
+                              },
+                              child: _buildCard(
+                                  'assets/images/Cafetaria.svg', 'Cafeteria'),
+                            ),
+                          if(_countersfilteredServices.isNotEmpty)
+                            SizedBox(width: 12),
+                          if(_countersfilteredServices.isNotEmpty)
+                            GestureDetector(
+                                onTap: () {
+                                  InteractionManager().logInteraction('Counters Category');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => CountersScreen()),
+                                  );
+                                },
+
+                                child: _buildCard('assets/images/counter.svg', 'Counters')),
+                          if(_otherfilteredServices.isNotEmpty)
+                            SizedBox(width: 12),
+                          if(_otherfilteredServices.isNotEmpty)
+                            GestureDetector(
+                                onTap: () {
+                                  InteractionManager().logInteraction('Others Category');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => OtherServiceScreen()),
+                                  );
+                                },
+
+                                child: _buildCard('assets/images/cat.svg', 'Others')),
+                          SizedBox(
+                            width: 12,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  // Padding(
-                  //   padding: const EdgeInsets.only(left: 16.0, bottom: 12),
-                  //   child: Row(
-                  //     children: [
-                  //       Semantics(
-                  //         header: true,
-                  //         child: TranslatorWidget(
-                  //           "Hospital Navigation",
-                  //           style: TextStyle(
-                  //             fontFamily: "Roboto",
-                  //             fontSize: 16,
-                  //             fontWeight: FontWeight.w500,
-                  //             color: Color(0xff18181b),
-                  //             height: 23 / 16,
-                  //           ),
-                  //           textAlign: TextAlign.left,
-                  //         ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  // Semantics(
-                  //   onTap: (){
-                  //     InteractionManager().logInteraction('Map');
-                  //     Navigator.push(
-                  //       context,
-                  //       MaterialPageRoute(
-                  //         builder: (context) => Navigation(),
-                  //       ),
-                  //     );
-                  //   },
-                  //   header: true,
-                  //   label: "Map",
-                  //   child: Padding(
-                  //     padding: const EdgeInsets.all(16.0),
-                  //     child: GestureDetector(
-                  //       onPanStart: (details) {
-                  //         showDialog(
-                  //           context: context,
-                  //           barrierColor: Colors.black.withOpacity(0.5),
-                  //           builder: (BuildContext context) {
-                  //             return GestureDetector(
-                  //               onTap: () {
-                  //                 Navigator.pop(context);
-                  //               },
-                  //               child: Stack(
-                  //                 children: [
-                  //                   BackdropFilter(
-                  //                     filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                  //                     child: Container(
-                  //                       color: Colors.black.withOpacity(0),
-                  //                     ),
-                  //                   ),
-                  //                   Center(
-                  //                     child: GestureDetector(
-                  //                       onTap: () {
-                  //
-                  //                       },
-                  //                       child: Dialog(
-                  //                         insetPadding: EdgeInsets.zero,
-                  //                         backgroundColor: Colors.transparent,
-                  //                         child: Container(
-                  //                           width: MediaQuery.sizeOf(context).width * 0.7,
-                  //                           height: MediaQuery.sizeOf(context).height * 0.45,
-                  //                           child: mapPreview ?? defaultMap(),
-                  //                         ),
-                  //                       ),
-                  //                     ),
-                  //                   ),
-                  //                 ],
-                  //               ),
-                  //             );
-                  //           },
-                  //         );
-                  //       },
-                  //       onLongPress: () {
-                  //         showDialog(
-                  //           context: context,
-                  //           barrierColor: Colors.black.withOpacity(0.5),
-                  //           builder: (BuildContext context) {
-                  //             return GestureDetector(
-                  //               onTap: () {
-                  //                 Navigator.pop(context);
-                  //               },
-                  //               child: Stack(
-                  //                 children: [
-                  //                   BackdropFilter(
-                  //                     filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                  //                     child: Container(
-                  //                       color: Colors.black.withOpacity(0),
-                  //                     ),
-                  //                   ),
-                  //                   Center(
-                  //                     child: GestureDetector(
-                  //                       onTap: () {
-                  //                       },
-                  //                       child: Dialog(
-                  //                         insetPadding: EdgeInsets.zero,
-                  //                         backgroundColor: Colors.transparent,
-                  //                         child: Container(
-                  //                           width: MediaQuery.sizeOf(context).width * 0.7,
-                  //                           height: MediaQuery.sizeOf(context).height * 0.5,
-                  //                           child: mapPreview ?? defaultMap(),
-                  //                         ),
-                  //                       ),
-                  //                     ),
-                  //                   ),
-                  //                 ],
-                  //               ),
-                  //             );
-                  //           },
-                  //         );
-                  //       },
-                  //       child: Container(
-                  //         decoration: BoxDecoration(
-                  //           borderRadius: BorderRadius.circular(12),
-                  //         ),
-                  //         height: 160,
-                  //         child: mapPreview ?? defaultMap(),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 16),
-                    child:ImageCarouselWidget(
-                      imagesWithText: carouselImages.map((item) => ImageTextPair(
-                        webUrl: item['webUrl'],
-                        image: item['image'],
-                        text: item['text'],
-                        subText: item['subText'],
-                      )).toList(),
+                    SizedBox(
+                      height: 10,
                     ),
-                    // ImageCarouselWidget(imagesWithText: carouselImages),
+                    // Padding(
+                    //   padding: const EdgeInsets.only(left: 16.0, bottom: 12),
+                    //   child: Row(
+                    //     children: [
+                    //       Semantics(
+                    //         header: true,
+                    //         child: TranslatorWidget(
+                    //           "Hospital Navigation",
+                    //           style: TextStyle(
+                    //             fontFamily: "Roboto",
+                    //             fontSize: 16,
+                    //             fontWeight: FontWeight.w500,
+                    //             color: Color(0xff18181b),
+                    //             height: 23 / 16,
+                    //           ),
+                    //           textAlign: TextAlign.left,
+                    //         ),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    // Semantics(
+                    //   onTap: (){
+                    //     InteractionManager().logInteraction('Map');
+                    //     Navigator.push(
+                    //       context,
+                    //       MaterialPageRoute(
+                    //         builder: (context) => Navigation(),
+                    //       ),
+                    //     );
+                    //   },
+                    //   header: true,
+                    //   label: "Map",
+                    //   child: Padding(
+                    //     padding: const EdgeInsets.all(16.0),
+                    //     child: GestureDetector(
+                    //       onPanStart: (details) {
+                    //         showDialog(
+                    //           context: context,
+                    //           barrierColor: Colors.black.withOpacity(0.5),
+                    //           builder: (BuildContext context) {
+                    //             return GestureDetector(
+                    //               onTap: () {
+                    //                 Navigator.pop(context);
+                    //               },
+                    //               child: Stack(
+                    //                 children: [
+                    //                   BackdropFilter(
+                    //                     filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                    //                     child: Container(
+                    //                       color: Colors.black.withOpacity(0),
+                    //                     ),
+                    //                   ),
+                    //                   Center(
+                    //                     child: GestureDetector(
+                    //                       onTap: () {
+                    //
+                    //                       },
+                    //                       child: Dialog(
+                    //                         insetPadding: EdgeInsets.zero,
+                    //                         backgroundColor: Colors.transparent,
+                    //                         child: Container(
+                    //                           width: MediaQuery.sizeOf(context).width * 0.7,
+                    //                           height: MediaQuery.sizeOf(context).height * 0.45,
+                    //                           child: mapPreview ?? defaultMap(),
+                    //                         ),
+                    //                       ),
+                    //                     ),
+                    //                   ),
+                    //                 ],
+                    //               ),
+                    //             );
+                    //           },
+                    //         );
+                    //       },
+                    //       onLongPress: () {
+                    //         showDialog(
+                    //           context: context,
+                    //           barrierColor: Colors.black.withOpacity(0.5),
+                    //           builder: (BuildContext context) {
+                    //             return GestureDetector(
+                    //               onTap: () {
+                    //                 Navigator.pop(context);
+                    //               },
+                    //               child: Stack(
+                    //                 children: [
+                    //                   BackdropFilter(
+                    //                     filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                    //                     child: Container(
+                    //                       color: Colors.black.withOpacity(0),
+                    //                     ),
+                    //                   ),
+                    //                   Center(
+                    //                     child: GestureDetector(
+                    //                       onTap: () {
+                    //                       },
+                    //                       child: Dialog(
+                    //                         insetPadding: EdgeInsets.zero,
+                    //                         backgroundColor: Colors.transparent,
+                    //                         child: Container(
+                    //                           width: MediaQuery.sizeOf(context).width * 0.7,
+                    //                           height: MediaQuery.sizeOf(context).height * 0.5,
+                    //                           child: mapPreview ?? defaultMap(),
+                    //                         ),
+                    //                       ),
+                    //                     ),
+                    //                   ),
+                    //                 ],
+                    //               ),
+                    //             );
+                    //           },
+                    //         );
+                    //       },
+                    //       child: Container(
+                    //         decoration: BoxDecoration(
+                    //           borderRadius: BorderRadius.circular(12),
+                    //         ),
+                    //         height: 160,
+                    //         child: mapPreview ?? defaultMap(),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
 
-                  ),
-                  // Padding(
-                  //   padding: const EdgeInsets.symmetric(
-                  //       horizontal: 16.0, vertical: 16),
-                  //   child: Row(
-                  //     children: [
-                  //       Semantics(
-                  //         header: true,
-                  //         child: TranslatorWidget(
-                  //           "Nearby Services",
-                  //           style: TextStyle(
-                  //             fontFamily: "Roboto",
-                  //             fontSize: 16,
-                  //             fontWeight: FontWeight.w500,
-                  //             color: Color(0xff18181b),
-                  //             height: 23 / 16,
-                  //           ),
-                  //           textAlign: TextAlign.left,
-                  //         ),
-                  //       ),
-                  //       Spacer(),
-                  //       GestureDetector(
-                  //         onTap: () {
-                  //           Navigator.push(
-                  //             context,
-                  //             MaterialPageRoute(
-                  //                 builder: (context) => ServiceListScreen()),
-                  //           );
-                  //         },
-                  //         child: TranslatorWidget(
-                  //           "View all",
-                  //           style: TextStyle(
-                  //             fontFamily: "Roboto",
-                  //             fontSize: 14,
-                  //             fontWeight: FontWeight.w500,
-                  //             color: Color(0xff000000),
-                  //             height: 20 / 14,
-                  //           ),
-                  //           textAlign: TextAlign.left,
-                  //         ),
-                  //       )
-                  //     ],
-                  //   ),
-                  // ),
-                  //
-                  // Container(
-                  //   decoration: BoxDecoration(
-                  //     borderRadius: BorderRadius.circular(20),
-                  //   ),
-                  //   height: 270,
-                  //   child: ListView(
-                  //     scrollDirection: Axis.horizontal,
-                  //     children: _services.map<Widget>((service) {
-                  //       return Padding(
-                  //         padding: const EdgeInsets.only(left: 12.0),
-                  //         child: GestureDetector(
-                  //           onTap: () {
-                  //             Navigator.push(
-                  //               context,
-                  //               MaterialPageRoute(
-                  //                 builder: (context) => ServiceInfo(
-                  //                   imagePath:  '${service['image']}',
-                  //                   name: '${service['name']}',
-                  //                   location: '${service['locationName']}',
-                  //                   accessibility: '${service['accessibility']}',
-                  //                   locationId: '${service['locationId']}',
-                  //                   type: '${service['type']}',
-                  //                   startTime: '${service['startTime']}',
-                  //                   endTime: '${service['endTime']}',
-                  //                   contact: '${service['contact']}',
-                  //                   about: '${service['about']}',
-                  //                   id: '${service['_id']}',
-                  //                   longitude: '${service['longitude']}',
-                  //                   latitude: '${service['latitude']}',
-                  //                 ),
-                  //               ),
-                  //             );
-                  //           },
-                  //           child: SizedBox(
-                  //             child: NearbyServiceWidget(
-                  //               id: '${service['_id']}',
-                  //               imagePath:
-                  //               '${service['image']}',
-                  //               name:
-                  //               '${service['name']}',
-                  //               location:
-                  //               '${service['locationName']}',
-                  //               locationId:
-                  //               '${service['locationId']}',
-                  //               type:
-                  //               '${service['type']}',
-                  //               startTime:
-                  //               '${service['startTime']}',
-                  //               endTime:
-                  //               '${service['endTime']}',
-                  //               accessibility:
-                  //               '${service['accessibility']}',
-                  //               contact: '${service['contact']}',
-                  //               about: '${service['about']}',
-                  //               weekDays:
-                  //               List<String>.from(service['weekDays']),
-                  //               longitude: '${service['longitude']}',
-                  //               latitude: '${service['latitude']}',
-                  //               // '${service['locationId']}',
-                  //             ),
-                  //           ),
-                  //         ),
-                  //       );
-                  //     }).toList(),
-                  //   ),
-                  // ),
-                  //
-                  //
-                  // Padding(
-                  //   padding: const EdgeInsets.only(left: 16,right: 16,top: 16,bottom: 8),
-                  //   child: Row(
-                  //     children: [
-                  //       Semantics(
-                  //         header:true,
-                  //         child: TranslatorWidget(
-                  //           "Announcements",
-                  //           style: TextStyle(
-                  //             fontFamily: "Roboto",
-                  //             fontSize: 16,
-                  //             fontWeight: FontWeight.w500,
-                  //             color: Color(0xff18181b),
-                  //           ),
-                  //           textAlign: TextAlign.left,
-                  //         ),
-                  //       ),
-                  //       Spacer(),
-                  //       GestureDetector(
-                  //         onTap: () {
-                  //           Navigator.push(
-                  //             context,
-                  //             MaterialPageRoute(
-                  //                 builder: (context) => AllAnnouncementScreen()),
-                  //           );
-                  //         },
-                  //         child: TranslatorWidget(
-                  //           "View all",
-                  //           style: TextStyle(
-                  //             fontFamily: "Roboto",
-                  //             fontSize: 14,
-                  //             fontWeight: FontWeight.w500,
-                  //             color: Color(0xff000000),
-                  //
-                  //           ),
-                  //           textAlign: TextAlign.left,
-                  //         ),
-                  //       )
-                  //     ],
-                  //   ),
-                  // ),
-                  //
-                  // Container(
-                  //   height: 140,
-                  //   child: ListView.builder(
-                  //     controller: _scrollController,
-                  //     scrollDirection: Axis.vertical,
-                  //     itemCount: announcements.length,
-                  //     itemBuilder: (BuildContext context, int index) {
-                  //        final announcement = announcements[index];
-                  //       return AnnouncementCard(
-                  //         image: announcement['image']??"",
-                  //         title: announcement['title']??"",
-                  //         department: announcement['department']?? "",
-                  //         dateTime: announcement['dateTime']??"",
-                  //         article: announcement['article']??"",
-                  //
-                  //       );
-                  //     },
-                  //   ),
-                  // ),
-                  // SizedBox(
-                  //   height: 16,
-                  // ),
-                  // Padding(
-                  //   padding:
-                  //   const EdgeInsets.only(left: 16, right: 16, bottom: 8),
-                  //   child: Row(
-                  //     children: [
-                  //       TranslatorWidget(
-                  //         'Connect with us',
-                  //         style: TextStyle(
-                  //           fontSize: 16,
-                  //           fontWeight: FontWeight.w500,
-                  //         ),
-                  //
-                  //       ),
-                  //
-                  //     ],
-                  //   ),
-                  // ),
-                  //
-                  // Row(
-                  //   children: [
-                  //     SizedBox(
-                  //       width: 16,
-                  //     ),
-                  //     InkWell(
-                  //       onTap: () {
-                  //         _launchInWebView(Uri.parse(twitter));
-                  //       },
-                  //       child: Container(
-                  //         height: 40,
-                  //         width: 40,
-                  //         child: Padding(
-                  //           padding: const EdgeInsets.all(6.0),
-                  //           child: Container(
-                  //             height: 24,
-                  //             width: 24,
-                  //             child: SvgPicture.asset(
-                  //                 "assets/images/twitter.svg"),
-                  //           ),
-                  //         ),
-                  //       ),
-                  //     ),
-                  //     SizedBox(
-                  //       width: 8,
-                  //     ),
-                  //     InkWell(
-                  //       onTap: () {
-                  //         _launchInWebView(Uri.parse(youtube));
-                  //       },
-                  //       child: Container(
-                  //         height: 40,
-                  //         width: 40,
-                  //         child: Padding(
-                  //           padding: const EdgeInsets.all(6.0),
-                  //           child: Container(
-                  //               height: 24,
-                  //               width: 24,
-                  //               child: SvgPicture.asset(
-                  //                   "assets/images/youtube.svg")),
-                  //         ),
-                  //       ),
-                  //     ),
-                  //
-                  //     SizedBox(
-                  //       width: 8,
-                  //     ),
-                  //     InkWell(
-                  //       onTap: () {
-                  //         _launchInWebView(Uri.parse(facebook));
-                  //       },
-                  //       child: Container(
-                  //         height: 40,
-                  //         width: 40,
-                  //         child: Padding(
-                  //           padding: const EdgeInsets.all(6.0),
-                  //           child: Container(
-                  //             height: 24,
-                  //             width: 24,
-                  //             child: SvgPicture.asset(
-                  //                 "assets/images/facebook.svg"),
-                  //           ),
-                  //         ),
-                  //       ),
-                  //     ),
-                  //
-                  //     SizedBox(
-                  //       width: 8,
-                  //     ),
-                  //     InkWell(
-                  //       onTap: () {
-                  //         _launchInWebView(Uri.parse(instagram));
-                  //       },
-                  //       child: Container(
-                  //         height: 40,
-                  //         width: 40,
-                  //         child: Padding(
-                  //           padding: const EdgeInsets.all(6.0),
-                  //           child: Container(
-                  //               height: 24,
-                  //               width: 24,
-                  //               child: SvgPicture.asset(
-                  //                   "assets/images/instagram.svg")),
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16),
+                      child:ImageCarouselWidget(
+                        imagesWithText: carouselImages.map((item) => ImageTextPair(
+                          webUrl: item['webUrl'],
+                          image: item['image'],
+                          text: item['text'],
+                          subText: item['subText'],
+                        )).toList(),
+                      ),
+                      // ImageCarouselWidget(imagesWithText: carouselImages),
+
+                    ),
+                    // Padding(
+                    //   padding: const EdgeInsets.symmetric(
+                    //       horizontal: 16.0, vertical: 16),
+                    //   child: Row(
+                    //     children: [
+                    //       Semantics(
+                    //         header: true,
+                    //         child: TranslatorWidget(
+                    //           "Nearby Services",
+                    //           style: TextStyle(
+                    //             fontFamily: "Roboto",
+                    //             fontSize: 16,
+                    //             fontWeight: FontWeight.w500,
+                    //             color: Color(0xff18181b),
+                    //             height: 23 / 16,
+                    //           ),
+                    //           textAlign: TextAlign.left,
+                    //         ),
+                    //       ),
+                    //       Spacer(),
+                    //       GestureDetector(
+                    //         onTap: () {
+                    //           Navigator.push(
+                    //             context,
+                    //             MaterialPageRoute(
+                    //                 builder: (context) => ServiceListScreen()),
+                    //           );
+                    //         },
+                    //         child: TranslatorWidget(
+                    //           "View all",
+                    //           style: TextStyle(
+                    //             fontFamily: "Roboto",
+                    //             fontSize: 14,
+                    //             fontWeight: FontWeight.w500,
+                    //             color: Color(0xff000000),
+                    //             height: 20 / 14,
+                    //           ),
+                    //           textAlign: TextAlign.left,
+                    //         ),
+                    //       )
+                    //     ],
+                    //   ),
+                    // ),
+                    //
+                    // Container(
+                    //   decoration: BoxDecoration(
+                    //     borderRadius: BorderRadius.circular(20),
+                    //   ),
+                    //   height: 270,
+                    //   child: ListView(
+                    //     scrollDirection: Axis.horizontal,
+                    //     children: _services.map<Widget>((service) {
+                    //       return Padding(
+                    //         padding: const EdgeInsets.only(left: 12.0),
+                    //         child: GestureDetector(
+                    //           onTap: () {
+                    //             Navigator.push(
+                    //               context,
+                    //               MaterialPageRoute(
+                    //                 builder: (context) => ServiceInfo(
+                    //                   imagePath:  '${service['image']}',
+                    //                   name: '${service['name']}',
+                    //                   location: '${service['locationName']}',
+                    //                   accessibility: '${service['accessibility']}',
+                    //                   locationId: '${service['locationId']}',
+                    //                   type: '${service['type']}',
+                    //                   startTime: '${service['startTime']}',
+                    //                   endTime: '${service['endTime']}',
+                    //                   contact: '${service['contact']}',
+                    //                   about: '${service['about']}',
+                    //                   id: '${service['_id']}',
+                    //                   longitude: '${service['longitude']}',
+                    //                   latitude: '${service['latitude']}',
+                    //                 ),
+                    //               ),
+                    //             );
+                    //           },
+                    //           child: SizedBox(
+                    //             child: NearbyServiceWidget(
+                    //               id: '${service['_id']}',
+                    //               imagePath:
+                    //               '${service['image']}',
+                    //               name:
+                    //               '${service['name']}',
+                    //               location:
+                    //               '${service['locationName']}',
+                    //               locationId:
+                    //               '${service['locationId']}',
+                    //               type:
+                    //               '${service['type']}',
+                    //               startTime:
+                    //               '${service['startTime']}',
+                    //               endTime:
+                    //               '${service['endTime']}',
+                    //               accessibility:
+                    //               '${service['accessibility']}',
+                    //               contact: '${service['contact']}',
+                    //               about: '${service['about']}',
+                    //               weekDays:
+                    //               List<String>.from(service['weekDays']),
+                    //               longitude: '${service['longitude']}',
+                    //               latitude: '${service['latitude']}',
+                    //               // '${service['locationId']}',
+                    //             ),
+                    //           ),
+                    //         ),
+                    //       );
+                    //     }).toList(),
+                    //   ),
+                    // ),
+                    //
+                    //
+                    // Padding(
+                    //   padding: const EdgeInsets.only(left: 16,right: 16,top: 16,bottom: 8),
+                    //   child: Row(
+                    //     children: [
+                    //       Semantics(
+                    //         header:true,
+                    //         child: TranslatorWidget(
+                    //           "Announcements",
+                    //           style: TextStyle(
+                    //             fontFamily: "Roboto",
+                    //             fontSize: 16,
+                    //             fontWeight: FontWeight.w500,
+                    //             color: Color(0xff18181b),
+                    //           ),
+                    //           textAlign: TextAlign.left,
+                    //         ),
+                    //       ),
+                    //       Spacer(),
+                    //       GestureDetector(
+                    //         onTap: () {
+                    //           Navigator.push(
+                    //             context,
+                    //             MaterialPageRoute(
+                    //                 builder: (context) => AllAnnouncementScreen()),
+                    //           );
+                    //         },
+                    //         child: TranslatorWidget(
+                    //           "View all",
+                    //           style: TextStyle(
+                    //             fontFamily: "Roboto",
+                    //             fontSize: 14,
+                    //             fontWeight: FontWeight.w500,
+                    //             color: Color(0xff000000),
+                    //
+                    //           ),
+                    //           textAlign: TextAlign.left,
+                    //         ),
+                    //       )
+                    //     ],
+                    //   ),
+                    // ),
+                    //
+                    // Container(
+                    //   height: 140,
+                    //   child: ListView.builder(
+                    //     controller: _scrollController,
+                    //     scrollDirection: Axis.vertical,
+                    //     itemCount: announcements.length,
+                    //     itemBuilder: (BuildContext context, int index) {
+                    //        final announcement = announcements[index];
+                    //       return AnnouncementCard(
+                    //         image: announcement['image']??"",
+                    //         title: announcement['title']??"",
+                    //         department: announcement['department']?? "",
+                    //         dateTime: announcement['dateTime']??"",
+                    //         article: announcement['article']??"",
+                    //
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
+                    // SizedBox(
+                    //   height: 16,
+                    // ),
+                    // Padding(
+                    //   padding:
+                    //   const EdgeInsets.only(left: 16, right: 16, bottom: 8),
+                    //   child: Row(
+                    //     children: [
+                    //       TranslatorWidget(
+                    //         'Connect with us',
+                    //         style: TextStyle(
+                    //           fontSize: 16,
+                    //           fontWeight: FontWeight.w500,
+                    //         ),
+                    //
+                    //       ),
+                    //
+                    //     ],
+                    //   ),
+                    // ),
+                    //
+                    // Row(
+                    //   children: [
+                    //     SizedBox(
+                    //       width: 16,
+                    //     ),
+                    //     InkWell(
+                    //       onTap: () {
+                    //         _launchInWebView(Uri.parse(twitter));
+                    //       },
+                    //       child: Container(
+                    //         height: 40,
+                    //         width: 40,
+                    //         child: Padding(
+                    //           padding: const EdgeInsets.all(6.0),
+                    //           child: Container(
+                    //             height: 24,
+                    //             width: 24,
+                    //             child: SvgPicture.asset(
+                    //                 "assets/images/twitter.svg"),
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //     SizedBox(
+                    //       width: 8,
+                    //     ),
+                    //     InkWell(
+                    //       onTap: () {
+                    //         _launchInWebView(Uri.parse(youtube));
+                    //       },
+                    //       child: Container(
+                    //         height: 40,
+                    //         width: 40,
+                    //         child: Padding(
+                    //           padding: const EdgeInsets.all(6.0),
+                    //           child: Container(
+                    //               height: 24,
+                    //               width: 24,
+                    //               child: SvgPicture.asset(
+                    //                   "assets/images/youtube.svg")),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //
+                    //     SizedBox(
+                    //       width: 8,
+                    //     ),
+                    //     InkWell(
+                    //       onTap: () {
+                    //         _launchInWebView(Uri.parse(facebook));
+                    //       },
+                    //       child: Container(
+                    //         height: 40,
+                    //         width: 40,
+                    //         child: Padding(
+                    //           padding: const EdgeInsets.all(6.0),
+                    //           child: Container(
+                    //             height: 24,
+                    //             width: 24,
+                    //             child: SvgPicture.asset(
+                    //                 "assets/images/facebook.svg"),
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //
+                    //     SizedBox(
+                    //       width: 8,
+                    //     ),
+                    //     InkWell(
+                    //       onTap: () {
+                    //         _launchInWebView(Uri.parse(instagram));
+                    //       },
+                    //       child: Container(
+                    //         height: 40,
+                    //         width: 40,
+                    //         child: Padding(
+                    //           padding: const EdgeInsets.all(6.0),
+                    //           child: Container(
+                    //               height: 24,
+                    //               width: 24,
+                    //               child: SvgPicture.asset(
+                    //                   "assets/images/instagram.svg")),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
 
 
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
-        // floatingActionButton: FloatingActionButton(
-        //   heroTag: 'homepage',
-        //   onPressed: (){
-        //     print("Navigation");
-        //
-        //     Navigator.push(
-        //       context,
-        //       MaterialPageRoute(
-        //         builder: (context) => Navigation(),
-        //       ),
-        //     );
-        //   },
-        //   backgroundColor: Color(0xFFFEAB01),
-        //   shape: CircleBorder(),
-        //   child: Semantics(
-        //       label: "Map",
-        //       child: Lottie.asset('assets/images/floatingmap.json')),
-        // ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: (){
-            Navigator.pop(context);
-            Navigator.pop(
-              context,
-              MaterialPageRoute(
-                builder: (context) => Navigation(),
-              ),
-            );
-          },
-          backgroundColor: Color(0xFFFEAB01),
-          shape: CircleBorder(),
-          child: Lottie.asset('assets/images/floatingmap.json'),
-        )
+          // floatingActionButton: FloatingActionButton(
+          //   heroTag: 'homepage',
+          //   onPressed: (){
+          //     print("Navigation");
+          //
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (context) => Navigation(),
+          //       ),
+          //     );
+          //   },
+          //   backgroundColor: Color(0xFFFEAB01),
+          //   shape: CircleBorder(),
+          //   child: Semantics(
+          //       label: "Map",
+          //       child: Lottie.asset('assets/images/floatingmap.json')),
+          // ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: (){
+              Navigator.pop(context);
+              Navigator.pop(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Navigation(),
+                ),
+              );
+            },
+            backgroundColor: Color(0xFFFEAB01),
+            shape: CircleBorder(),
+            child: Lottie.asset('assets/images/floatingmap.json'),
+          )
 
       ),
     );

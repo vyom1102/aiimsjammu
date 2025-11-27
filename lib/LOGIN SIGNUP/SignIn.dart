@@ -47,15 +47,11 @@ class _SignInState extends State<SignIn> {
   Color outlineTextColorForPass = new Color(0xff49454f);
   bool loginclickable = false;
   Color buttonBGColor =  Color(0xff0B6B94);
-bool isLoading = false;
+  bool isLoading = false;
   @override
   void initState() {
     super.initState();
-    setState(() {
-      mailEditingController.text = "mailtohimanshu100@gmail.com";
-      passEditingController.text = "BlackWater4232";
-      passwordFieldListner();
-    });
+
 
 
     // Initialize the fields with provided parameters if available
@@ -212,7 +208,7 @@ bool isLoading = false;
                                       margin: EdgeInsets.fromLTRB(10, 20, 0, 0),
                                       child: Image.asset(
                                         // scale: 10,
-                                          'assets/images/dashboardlogo.png'),
+                                          'assets/images/signinlogo.png'),
                                     ),
                                   ],
                                 ),
@@ -261,7 +257,7 @@ bool isLoading = false;
                                                           fontSize: 14,
                                                           fontWeight: FontWeight.w400,
                                                           // color: Color(0xff0B6B94),
-                                                         color: Color(0xff49454f),
+                                                          color: Color(0xff49454f),
                                                           height: 16/12,
                                                         ),
                                                         floatingLabelStyle: TextStyle(
@@ -722,5 +718,3 @@ class _CountryCodeSelectorState extends State<CountryCodeSelector> {
     );
   }
 }
-
-
