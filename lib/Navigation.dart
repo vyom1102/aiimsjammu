@@ -1820,10 +1820,10 @@ class _NavigationState extends State<Navigation>
           speakTTS, render);
     }
 
-  //   if (!providePinSelection)
-  // {
-  //   continuousGPSLocalisation();
-  // }
+    //   if (!providePinSelection)
+    // {
+    //   continuousGPSLocalisation();
+    // }
     // Reset direct source ID and Land ID
     widget.directLandID = '';
     widget.directsourceID = '';
@@ -2067,8 +2067,8 @@ class _NavigationState extends State<Navigation>
       return;
     }
     if(location == null){
-        location = gpsBuffer.getRobustPosition();
-        gpsSubscription?.cancel();
+      location = gpsBuffer.getRobustPosition();
+      gpsSubscription?.cancel();
       // } catch (e) {
       //   if (widget.directLandID.length <= 2) {
       //     if (speakTTS) unableToFindLocation();
@@ -2098,13 +2098,13 @@ class _NavigationState extends State<Navigation>
   void unableToFindLocation(){
     if(!Platform.isAndroid){
       // if(_currentState==AvailabilityState.poweredOn){
-        final stackTrace = StackTrace.current;
-        print("unableToFindLocation Stack: \n$stackTrace");
-        speak("Unable to find your location. Search nearby landmark to find your location",
-            _currentLocale);
-        showClassB=true;
-        showLocationDialog(context);
-        SingletonFunctionController.building.qrOpened = true;
+      final stackTrace = StackTrace.current;
+      print("unableToFindLocation Stack: \n$stackTrace");
+      speak("Unable to find your location. Search nearby landmark to find your location",
+          _currentLocale);
+      showClassB=true;
+      showLocationDialog(context);
+      SingletonFunctionController.building.qrOpened = true;
       // }else{
       //   _showBluetoothDialog();
       // }
@@ -2374,22 +2374,22 @@ class _NavigationState extends State<Navigation>
         // if(markers[user.bid]!=null){
         //   onGPSUpdate(user.lat,user.lng);
         // }else{
-          markers.clear();
-          markers.putIfAbsent(user.bid, ()=>[]);
+        markers.clear();
+        markers.putIfAbsent(user.bid, ()=>[]);
+        markers[user.bid]?.add(Marker(
+          markerId: MarkerId("UserLocation"),
+          position: LatLng(user.lat, user.lng),
+          icon: BitmapDescriptor.fromBytes(userloc),
+          anchor: Offset(0.5, 0.829),
+        ));
+        if (!kIsWeb && kDebugMode) {
           markers[user.bid]?.add(Marker(
-            markerId: MarkerId("UserLocation"),
+            markerId: MarkerId("debug"),
             position: LatLng(user.lat, user.lng),
-            icon: BitmapDescriptor.fromBytes(userloc),
+            icon: BitmapDescriptor.fromBytes(userlocdebug),
             anchor: Offset(0.5, 0.829),
           ));
-          if (!kIsWeb && kDebugMode) {
-            markers[user.bid]?.add(Marker(
-              markerId: MarkerId("debug"),
-              position: LatLng(user.lat, user.lng),
-              icon: BitmapDescriptor.fromBytes(userlocdebug),
-              anchor: Offset(0.5, 0.829),
-            ));
-          }
+        }
         // }
       }
       else {
@@ -3064,7 +3064,7 @@ class _NavigationState extends State<Navigation>
             //   SingletonFunctionController.building.selectedLandmarkID = null;
             //   _isnavigationPannelOpen = true;
             setState(() {
-                _isreroutePannelOpen = false;
+              _isreroutePannelOpen = false;
             });
             startNavigation();
             //   int numCols = SingletonFunctionController
@@ -9011,11 +9011,11 @@ class _NavigationState extends State<Navigation>
               ),
             );
             print("PathState.destinationLat ${PathState.destinationLat}, ${PathState.destinationLng}");
-              double offSet = tools.calculateAerialDist(landmarkCenter.latitude, landmarkCenter.longitude,render!.last[0], render.last[1]);
-              print("offset $offSet");
-              if(offSet >= 5 || true){
-                _createCurvedPolyline(Bid, floor, landmarkCenter, LatLng(render.last[0], render.last[1]));
-              }
+            double offSet = tools.calculateAerialDist(landmarkCenter.latitude, landmarkCenter.longitude,render!.last[0], render.last[1]);
+            print("offset $offSet");
+            if(offSet >= 5 || true){
+              _createCurvedPolyline(Bid, floor, landmarkCenter, LatLng(render.last[0], render.last[1]));
+            }
           }else if(render != null){
             innerMarker.add(
               Marker(
@@ -10409,7 +10409,6 @@ class _NavigationState extends State<Navigation>
                   .building.patchData[PathState.destinationBid]);
           PathState.destinationLat = destination[0];
           PathState.destinationLng = destination[1];
-          user.pathobj = PathState;
           if (!kIsWeb && kDebugMode) {
             markers[user.bid]?.add(Marker(
               markerId: MarkerId("debug"),
@@ -13768,7 +13767,7 @@ class _NavigationState extends State<Navigation>
                       .union(outdoorBlockMarker)
                       .union(focusturnArrow).union(blockMarker)
                       .union(Markers).union(roomNameMarkers).union(blurPatchCampusMarker)
-                  .union(debugMarker)
+                      .union(debugMarker)
                       .union(GpsMarker).union(nearbyLandmarks.values.toSet()).union(_exploreModeMarker)
                       .union(_exploreModeDebugBeaconMarker).union(fingerprinting.getMarkers()).union(landmarkMarkers),
                   buildingsEnabled: false,
@@ -14458,34 +14457,34 @@ class _NavigationState extends State<Navigation>
                             //       speakTTS: true,
                             //       providePinSelection: false);
                             // } else {
-                              if(isLocalized)return;
-                              setState((){
-                                isLocalized = true;
-                              });
-                              gpsSubscription = GPSService.locationStream.listen((Location location) {
-                                gpsBuffer.add(location.latitude, location.longitude);
-                              }, onError: (error){
-                                print("Error receiving GPS data: $error");
-                              });
-                              if(Platform.isAndroid){
-                                bleManager.startScanning(
-                                    bufferSize: 5,
-                                    streamFrequency: 5,
-                                    duration: 5);
-                              }else{
-                                BluetoothScanIOSClass.startScan();
-                              }
-                              late Timer _timer;
-                              _timer = Timer.periodic(
-                                  Duration(milliseconds: 5000),
-                                      (timer) {
-                                    localizeUser().then((value) => {
-                                      setState(() {
-                                        isLocalized = false;
-                                      })
-                                    });
-                                    _timer.cancel();
+                            if(isLocalized)return;
+                            setState((){
+                              isLocalized = true;
+                            });
+                            gpsSubscription = GPSService.locationStream.listen((Location location) {
+                              gpsBuffer.add(location.latitude, location.longitude);
+                            }, onError: (error){
+                              print("Error receiving GPS data: $error");
+                            });
+                            if(Platform.isAndroid){
+                              bleManager.startScanning(
+                                  bufferSize: 5,
+                                  streamFrequency: 5,
+                                  duration: 5);
+                            }else{
+                              BluetoothScanIOSClass.startScan();
+                            }
+                            late Timer _timer;
+                            _timer = Timer.periodic(
+                                Duration(milliseconds: 5000),
+                                    (timer) {
+                                  localizeUser().then((value) => {
+                                    setState(() {
+                                      isLocalized = false;
+                                    })
                                   });
+                                  _timer.cancel();
+                                });
                             // }
                           } else {
                             recenterMap();

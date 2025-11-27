@@ -303,17 +303,17 @@ class UserState {
     }
     clearDebugMarkers();
     addDebugMarkers(geo.LatLng(optionalCell.lat, optionalCell.lng,),hue: geo.BitmapDescriptor.hueGreen);
-      List<Cell>? points = tools.findSegmentContainingPoint(cellPath, pathobj.index);
-      List<Cell> allPointsofSegment = tools.findAllPointsOfSegment(cellPath, points!);
-      allPointsofSegment.add(cell);
-      List<Cell> sorted = tools.sortCollinearPoints(allPointsofSegment);
-      int index = sorted.indexWhere((node)=>node.x == cell.x && node.y == cell.y);
-      index = index + cellPath.indexWhere((node)=>node.x == points[0].x && node.y == points[0].y);
-      path.insert(index, (cell.y*cell.numCols)+cell.x);
-      cellPath.insert(index, cell);
-      moveToPointOnPath(index, context, flying: true);
-      pathobj.index = index;
-      renderHere();
+    List<Cell>? points = tools.findSegmentContainingPoint(cellPath, pathobj.index);
+    List<Cell> allPointsofSegment = tools.findAllPointsOfSegment(cellPath, points!);
+    allPointsofSegment.add(cell);
+    List<Cell> sorted = tools.sortCollinearPoints(allPointsofSegment);
+    int index = sorted.indexWhere((node)=>node.x == cell.x && node.y == cell.y);
+    index = index + cellPath.indexWhere((node)=>node.x == points[0].x && node.y == points[0].y);
+    path.insert(index, (cell.y*cell.numCols)+cell.x);
+    cellPath.insert(index, cell);
+    moveToPointOnPath(index, context, flying: true);
+    pathobj.index = index;
+    renderHere();
     kalmanShiftCell.clear();
     return;
   }
@@ -689,7 +689,7 @@ class UserState {
         element.doorY ?? element.coordinateY!
       ]);
       print("element distance near ${element.name} $distance ${element.element!.subType} ${element.properties!.polygonExist}");
-      if (element.element!.subType == "room door" && element.properties!.polygonExist != true) {
+      if ((element.element!.subType == "room door" || element.element!.subType == "Door Only") && element.properties!.polygonExist != true) {
         if (distance <= 2 && distancebetweenSegments>16){
           print("passing by condition with ${distancebetweenSegments}");
           _speakPassingBy(context, element.name);
@@ -1103,7 +1103,8 @@ class UserState {
   Future<void> moveToStartofPath(BuildContext context) async {
     int i = 0;
     if(pathobj.sourceBid != pathobj.destinationBid){
-      int? index = changeBuildingIfNear(context);
+      // int? index = changeBuildingIfNear(context);
+      int? index;
       print("moveToStartofPath $index [${cellPath[pathobj.index].x},${cellPath[pathobj.index].y}] <> ${cellPath[pathobj.index].bid} <> ${cellPath[pathobj.index].floor}");
       if(index != null){
         i = index;

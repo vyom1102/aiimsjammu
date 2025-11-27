@@ -872,55 +872,55 @@ class tools {
   }
 
   static List<double> findGeoPoint(
-  double lat1, double lon1, double lat2, double lon2, double stepMeters) {
+      double lat1, double lon1, double lat2, double lon2, double stepMeters) {
     if(calculateAerialDist(lat1, lon1, lat2, lon2) < stepMeters) return [lat2, lon2];
-  const double earthRadius = 6371000; // meters
+    const double earthRadius = 6371000; // meters
 
-  // Convert to radians
-  double lat1Rad = lat1 * pi / 180;
-  double lon1Rad = lon1 * pi / 180;
-  double lat2Rad = lat2 * pi / 180;
-  double lon2Rad = lon2 * pi / 180;
+    // Convert to radians
+    double lat1Rad = lat1 * pi / 180;
+    double lon1Rad = lon1 * pi / 180;
+    double lat2Rad = lat2 * pi / 180;
+    double lon2Rad = lon2 * pi / 180;
 
-  // Calculate the angular distance using proper haversine formula
-  double deltaLat = lat2Rad - lat1Rad;
-  double deltaLon = lon2Rad - lon1Rad;
+    // Calculate the angular distance using proper haversine formula
+    double deltaLat = lat2Rad - lat1Rad;
+    double deltaLon = lon2Rad - lon1Rad;
 
-  double a = pow(sin(deltaLat / 2), 2) +
-  cos(lat1Rad) * cos(lat2Rad) * pow(sin(deltaLon / 2), 2);
-  double delta = 2 * asin(sqrt(a));
+    double a = pow(sin(deltaLat / 2), 2) +
+        cos(lat1Rad) * cos(lat2Rad) * pow(sin(deltaLon / 2), 2);
+    double delta = 2 * asin(sqrt(a));
 
-  // Handle edge case: same points
-  if (delta == 0 || delta.isNaN) return [lat1, lon1];
+    // Handle edge case: same points
+    if (delta == 0 || delta.isNaN) return [lat1, lon1];
 
-  // Calculate total distance in meters
-  double totalDistance = earthRadius * delta;
+    // Calculate total distance in meters
+    double totalDistance = earthRadius * delta;
 
-  // Handle edge case: step is larger than or equal to total distance
-  if (stepMeters >= totalDistance) return [lat2, lon2];
+    // Handle edge case: step is larger than or equal to total distance
+    if (stepMeters >= totalDistance) return [lat2, lon2];
 
-  // Fraction of total distance
-  double fraction = stepMeters / totalDistance;
+    // Fraction of total distance
+    double fraction = stepMeters / totalDistance;
 
-  // Handle edge case: very small distances (use linear interpolation)
-  if (delta < 1e-6) {
-  double newLat = lat1Rad + fraction * (lat2Rad - lat1Rad);
-  double newLon = lon1Rad + fraction * (lon2Rad - lon1Rad);
-  return [newLat * 180 / pi, newLon * 180 / pi];
-  }
+    // Handle edge case: very small distances (use linear interpolation)
+    if (delta < 1e-6) {
+      double newLat = lat1Rad + fraction * (lat2Rad - lat1Rad);
+      double newLon = lon1Rad + fraction * (lon2Rad - lon1Rad);
+      return [newLat * 180 / pi, newLon * 180 / pi];
+    }
 
-  // Spherical linear interpolation (SLERP)
-  double A = sin((1 - fraction) * delta) / sin(delta);
-  double B = sin(fraction * delta) / sin(delta);
+    // Spherical linear interpolation (SLERP)
+    double A = sin((1 - fraction) * delta) / sin(delta);
+    double B = sin(fraction * delta) / sin(delta);
 
-  double x = A * cos(lat1Rad) * cos(lon1Rad) + B * cos(lat2Rad) * cos(lon2Rad);
-  double y = A * cos(lat1Rad) * sin(lon1Rad) + B * cos(lat2Rad) * sin(lon2Rad);
-  double z = A * sin(lat1Rad) + B * sin(lat2Rad);
+    double x = A * cos(lat1Rad) * cos(lon1Rad) + B * cos(lat2Rad) * cos(lon2Rad);
+    double y = A * cos(lat1Rad) * sin(lon1Rad) + B * cos(lat2Rad) * sin(lon2Rad);
+    double z = A * sin(lat1Rad) + B * sin(lat2Rad);
 
-  double newLat = atan2(z, sqrt(x * x + y * y));
-  double newLon = atan2(y, x);
+    double newLat = atan2(z, sqrt(x * x + y * y));
+    double newLon = atan2(y, x);
 
-  return [newLat * 180 / pi, newLon * 180 / pi];
+    return [newLat * 180 / pi, newLon * 180 / pi];
   }
 
 
@@ -968,7 +968,7 @@ class tools {
     for(int i = index-1; i>=0; i--){
       if(!path[i].imaginedCell && path[i].floor == path[index].floor && path[i].bid == path[index].bid){
         print("found point without imagined Cell $i ${path[i].x},${path[i].y}");
-         return path[i];
+        return path[i];
       }
     }
     print("did not found and returning same point $index ");
@@ -1356,27 +1356,27 @@ class tools {
 
   static bool isNowBetween(String startTime, String endTime) {
     try{
-    // Get the current time
-    DateTime now = DateTime.now();
+      // Get the current time
+      DateTime now = DateTime.now();
 
-    // Define a format to parse the 12-hour time string
-    DateFormat format = DateFormat("hh:mm");
+      // Define a format to parse the 12-hour time string
+      DateFormat format = DateFormat("hh:mm");
 
-    // Parse the start time as AM
-    DateTime startDateTime = format.parse(startTime).add(Duration(hours: 0)); // AM is already correct
+      // Parse the start time as AM
+      DateTime startDateTime = format.parse(startTime).add(Duration(hours: 0)); // AM is already correct
 
-    // Parse the end time as PM
-    DateTime endDateTime = format.parse(endTime).add(Duration(hours: 24));
+      // Parse the end time as PM
+      DateTime endDateTime = format.parse(endTime).add(Duration(hours: 24));
 
-    // Extract the current date without time
-    DateTime today = DateTime(now.year, now.month, now.day);
+      // Extract the current date without time
+      DateTime today = DateTime(now.year, now.month, now.day);
 
-    // Adjust start and end times to today's date
-    startDateTime = DateTime(today.year, today.month, today.day, startDateTime.hour, startDateTime.minute);
-    endDateTime = DateTime(today.year, today.month, today.day, endDateTime.hour, endDateTime.minute);
+      // Adjust start and end times to today's date
+      startDateTime = DateTime(today.year, today.month, today.day, startDateTime.hour, startDateTime.minute);
+      endDateTime = DateTime(today.year, today.month, today.day, endDateTime.hour, endDateTime.minute);
 
-    // Check if now is between startTime and endTime
-    return now.isAfter(startDateTime) && now.isBefore(endDateTime);
+      // Check if now is between startTime and endTime
+      return now.isAfter(startDateTime) && now.isBefore(endDateTime);
     }catch(e){
       return false;
     }
@@ -1912,50 +1912,67 @@ class tools {
   static List<Landmarks> findNearbyLandmark(
       List<Cell> path,
       Map<String, Landmarks> landmarksMap,
-      int distance) {
-    List<Cell> turnPoints = tools.getTurnpoints_inCell(path);
+      int distance,
+      ) {
     List<Landmarks> nearbyLandmarks = [];
 
     for (Cell node in path) {
-      landmarksMap.forEach((key, value) {
+      for (var value in landmarksMap.values) {
         if (node.floor == value.floor &&
             value.name != null &&
             value.buildingID == node.bid &&
             value.element!.subType != "beacons" &&
             value.element!.subType != "lift") {
-          List<int> pCoord = [node.x, node.y];
-          double d = 0.0;
 
-          if (value.doorX == null) {
-            d = calculateDistance(pCoord, [value.coordinateX!, value.coordinateY!]);
-          } else {
-            d = calculateDistance(pCoord, [value.doorX!, value.doorY!]);
-          }
+          final pCoord = [node.x, node.y];
+          double d = (value.doorX == null)
+              ? calculateDistance(pCoord, [value.coordinateX!, value.coordinateY!])
+              : calculateDistance(pCoord, [value.doorX!, value.doorY!]);
 
           if (d < distance) {
-            // ✅ Extra check: ensure landmark is not within 10 feet of any turn point
-            bool tooCloseToTurnPoint = turnPoints.any((tp) {
-              double turnDist;
-              if (value.doorX == null) {
-                turnDist = calculateDistance(
-                    [tp.x, tp.y], [value.coordinateX!, value.coordinateY!]);
-              } else {
-                turnDist = calculateDistance(
-                    [tp.x, tp.y], [value.doorX!, value.doorY!]);
-              }
-              return turnDist <= 10; // 10 feet threshold
-            });
+            bool shouldAdd = true;
 
-            if (!tooCloseToTurnPoint &&
-                !nearbyLandmarks.contains(value)) {
+            // Check conflicts: existing same-subType landmarks within 15 ft
+            for (var existing in nearbyLandmarks) {
+              double distBetween = calculateDistance(
+                [existing.doorX??existing.coordinateX!, existing.doorY??existing.coordinateY!],
+                [value.doorX??value.coordinateX!, value.doorY??value.coordinateY!],
+              );
+              if (distBetween <= 15) {
+                // ---- RULE: if one is Door, keep Door ----
+                if (existing.element!.subType == "Door Only" ||
+                    value.element!.subType == "Door Only") {
+
+                  // Keep Door. Remove existing if it is NOT door.
+                  if (existing.element!.subType != "Door Only" &&
+                      value.element!.subType == "Door Only") {
+                    nearbyLandmarks.remove(existing);
+                    break; // allow adding Door
+                  }
+
+                  // If existing is Door and value is not → skip value
+                  shouldAdd = false;
+                  break;
+                }
+
+                // Otherwise → skip new one (keep first)
+                shouldAdd = false;
+                break;
+              }
+
+            }
+
+            if (shouldAdd) {
               nearbyLandmarks.add(value);
             }
           }
         }
-      });
+      }
     }
+
     return nearbyLandmarks;
   }
+
 
 
   static Landmarks? localizefindNearbyLandmark(beacon Beacon, Map<String, Landmarks> landmarksMap) {
@@ -1982,7 +1999,7 @@ class tools {
         }
       }
     });
-print("priority queuee:${priorityQueue}");
+    print("priority queuee:${priorityQueue}");
     Landmarks? nearestLandmark;
     if(priorityQueue.isNotEmpty){
       MapEntry<Landmarks, double> entry = priorityQueue.removeFirst();
@@ -2681,34 +2698,9 @@ print("priority queuee:${priorityQueue}");
 
   static Future<Map<int,Landmarks>> associateTurnWithLandmark(List<Cell> path, List<Landmarks> landmarks)async{
     Map<int,Landmarks> ls = {};
-    List<Cell> turns = [];
-    for(int i = 1 ; i<path.length-1 ; i++){
-      Cell prevPos = path[i-1];
-      Cell currPos = path[i];
-      Cell nextPos = path[i+1];
+    List<Cell> turns = getTurnpoints_inCell(path);
 
-      int currentX = (currPos.x);
-      int currentY = (currPos.y);
-
-      int nextX = (nextPos.x);
-      int nextY = (nextPos.y);
-
-      int prevX = (prevPos.x);
-      int prevY = (prevPos.y);
-
-      int vector1X = currentX - prevX;
-      int vector1Y = currentY - prevY;
-      int vector2X = nextX - currentX;
-      int vector2Y = nextY - currentY;
-
-      // Calculate the cross product of vector1 and vector2
-      int dotProduct = vector1X * vector2X + vector1Y * vector2Y;
-      if(dotProduct == 0){
-        turns.add(currPos);
-      }
-    }
-
-    turns.forEach((turn) {
+    for (var turn in turns) {
       double d = 6.5;
       Landmarks? land;
       landmarks.forEach((element) {
@@ -2721,8 +2713,7 @@ print("priority queuee:${priorityQueue}");
       if(land != null){
         ls[turn.node] = land!;
       }
-    });
-
+    }
     return ls;
   }
 
@@ -3072,7 +3063,7 @@ print("priority queuee:${priorityQueue}");
     return calculateDistanceInFeet(x1,y1,x2,y2).toInt();
   }
 
-   static double calculateDistanceInFeet(double lat1, double lon1, double lat2, double lon2) {
+  static double calculateDistanceInFeet(double lat1, double lon1, double lat2, double lon2) {
     const double radiusOfEarthInMiles = 3958.8; // Radius of Earth in miles
     const double feetPerMile = 5280; // Feet per mile
 
