@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
+import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
@@ -220,9 +221,13 @@ class _HomePageState extends State<HomePage> {
 
   }
 
-  checkPermission(){
-    requestLocationPermission();
-    requestBluetoothConnectPermission();
+  checkPermission()async{
+    await requestLocationPermission();
+    await requestBluetoothConnectPermission();
+    await enableBT();
+  }
+  Future<void> enableBT() async {
+    BluetoothEnable.enableBluetooth.then((value) {});
   }
 
   Future<void> requestBluetoothConnectPermission() async {
