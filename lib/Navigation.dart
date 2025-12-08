@@ -900,7 +900,7 @@ class _NavigationState extends State<Navigation>
   }
 
   Future<void> enableBT() async {
-    // BluetoothEnable.enableBluetooth.then((value) {});
+    BluetoothEnable.enableBluetooth.then((value) {});
   }
   bool isPdr = false;
   // Function to start the timer
@@ -8724,7 +8724,7 @@ class _NavigationState extends State<Navigation>
         List<int>? pathPoints = step.value[floor];
         if (pathPoints == null) continue;
         final targetEntry = renderPath.firstWhere(
-              (e) => e.key == buildingID && e.value[fl]!.length == pathPoints.length,);
+              (e) => e.key == buildingID && e.value[fl]!.length == pathPoints.length);
         List<List<double>>? render = targetEntry.value[fl];
         renderPath.remove(targetEntry);
         targetEntry.value.remove(fl);
