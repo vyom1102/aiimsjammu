@@ -23,13 +23,14 @@ class Deeplink{
   static Future<void> deeplinkConditions(Uri?uri,BuildContext context)async{
     if (uri != null) {
       print('Received deep link: ${uri.toString()}');
-      if (uri.toString().contains("rgci.com") && !gotDeepLink) {
-        gotDeepLink = true;
-        await rgciDeepLink(uri, context, "rgci.com");
-      }else if(uri.toString().contains("iwaymaps.com") && !gotDeepLink){
-        gotDeepLink = true;
-        await iwaymapsDeepLink(uri, context, "iwaymaps.com");
-      }else if (uri.toString().contains("aiimsj.com") && !gotDeepLink){
+      // if (uri.toString().contains("rgci.com") && !gotDeepLink) {
+      //   gotDeepLink = true;
+      //   await rgciDeepLink(uri, context, "rgci.com");
+      // }else if(uri.toString().contains("iwaymaps.com") && !gotDeepLink){
+      //   gotDeepLink = true;
+      //   await iwaymapsDeepLink(uri, context, "iwaymaps.com");
+      // }else
+        if (uri.toString().contains("aiimsj.com") && !gotDeepLink){
         gotDeepLink = true;
         await aiimsjDeepLink(uri, context, "aiimsj.com");
       }

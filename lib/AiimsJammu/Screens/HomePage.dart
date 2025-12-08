@@ -162,6 +162,7 @@ class _HomePageState extends State<HomePage> {
     versionApiCall();
     isUserValid();
     callbackFunc();
+    checkPermission();
     requestNotificationPermission();
     SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID);
     SingletonFunctionController().mapCLustring.initMarkers();
@@ -217,6 +218,30 @@ class _HomePageState extends State<HomePage> {
 
     });
 
+  }
+
+  checkPermission(){
+    requestLocationPermission();
+    requestBluetoothConnectPermission();
+  }
+
+  Future<void> requestBluetoothConnectPermission() async {
+    final PermissionStatus permissionStatus =
+    await Permission.bluetoothScan.request();
+    if (permissionStatus.isGranted) {
+      wsocket.message["deviceInfo"]["sensors"]["BLE"] = true;
+      wsocket.message["deviceInfo"]["permissions"]["BLE"] = true;
+      // networkManager.ws.updateSensorStatus(ble: true);
+      // networkManager.ws.updatePermissions(ble: true);
+      //widget.bluetoothGranted = true;
+      // Permission granted, you can now perform Bluetooth operations
+    } else {
+      wsocket.message["deviceInfo"]["sensors"]["BLE"] = false;
+      wsocket.message["deviceInfo"]["permissions"]["BLE"] = false;
+      // networkManager.ws.updateSensorStatus(ble: false);
+      // networkManager.ws.updatePermissions(ble: false);
+      // Permission denied, handle accordingly
+    }
   }
 
   Future<void> filterLandmarks(String? type, int floorInt,{String? washroomType}) async {

@@ -224,7 +224,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       // }
       speak(
           convertTolng(
-              "Use this lift and go to ${tools.numericalToAlphabetical(widget.user.pathobj.destinationFloor)} floor",
+              "Use this ${widget.user.pathobj.accessiblePath} and go to ${tools.numericalToAlphabetical(widget.user.pathobj.destinationFloor)} floor",
               _currentLocale,
               "",
               "",
@@ -1793,14 +1793,22 @@ class scrollableDirection extends StatelessWidget {
   List<direction> listOfDirections;
   UserState user;
   BuildContext context;
-
   scrollableDirection(this.Direction, this.steps, this.i, this.DirectionIndex,
       this.nextTurnIndex, this.listOfDirections, this.user, this.context);
-
   String chooseDirection() {
     try {
       if(user.onConnection && listOfDirections.isNotEmpty){
-        return listOfDirections.where((direction)=>direction.turnDirection != null && direction.turnDirection!.toLowerCase().contains("lift")).first.turnDirection!;
+        // print("user.onConnection ${listOfDirections
+        //     .where((direction) {
+        //   final turn = direction.turnDirection?.toLowerCase() ?? "";
+        //   return turn.contains("lift") || turn.contains("stairs");
+        // }).first.turnDirection!}");
+        return listOfDirections
+            .where((direction) {
+          final turn = direction.turnDirection?.toLowerCase() ?? "";
+          return turn.contains("lift") || turn.contains("stairs");
+        }).first.turnDirection!;
+
       }
       if (listOfDirections.isNotEmpty &&
           listOfDirections.length > DirectionIndex) {
@@ -1839,6 +1847,7 @@ class scrollableDirection extends StatelessWidget {
         return "${LocaleData.gostraight.getString(context)}";
       }
     } catch (e) {
+      print("error in choose direction:${e}");
       return "${LocaleData.gostraight.getString(context)}";
     }
   }

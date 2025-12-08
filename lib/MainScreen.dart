@@ -62,11 +62,51 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     index = widget.initialIndex;
+    checkPermission();
     setIDforWebSocket();
     print(index);
   }
 
 
+
+  void checkPermission()async{
+    await requestBluetoothConnectPermission();
+    await requestLocationPermission();
+  }
+
+  Future<void> requestBluetoothConnectPermission() async {
+    final PermissionStatus permissionStatus =
+    await Permission.bluetoothScan.request();
+    if (permissionStatus.isGranted) {
+      wsocket.message["deviceInfo"]["sensors"]["BLE"] = true;
+      wsocket.message["deviceInfo"]["permissions"]["BLE"] = true;
+      // networkManager.ws.updateSensorStatus(ble: true);
+      // networkManager.ws.updatePermissions(ble: true);
+      //widget.bluetoothGranted = true;
+      // Permission granted, you can now perform Bluetooth operations
+    } else {
+      wsocket.message["deviceInfo"]["sensors"]["BLE"] = false;
+      wsocket.message["deviceInfo"]["permissions"]["BLE"] = false;
+      // networkManager.ws.updateSensorStatus(ble: false);
+      // networkManager.ws.updatePermissions(ble: false);
+      // Permission denied, handle accordingly
+    }
+  }
+
+  Future<void> requestLocationPermission() async {
+    final status = await Permission.locationWhenInUse.request();
+    if (status.isGranted) {
+      wsocket.message["deviceInfo"]["sensors"]["location"] = true;
+      wsocket.message["deviceInfo"]["permissions"]["location"] = true;
+      // networkManager.ws.updateSensorStatus(location: true);
+      // networkManager.ws.updatePermissions(location: true);
+    } else {
+      wsocket.message["deviceInfo"]["sensors"]["location"] = false;
+      wsocket.message["deviceInfo"]["permissions"]["location"] = false;
+      // networkManager.ws.updateSensorStatus(location: false);
+      // networkManager.ws.updatePermissions(location: false);
+    }
+  }
 
   void setIDforWebSocket()async{
     final signInBox = await Hive.openBox('SignInDatabase');

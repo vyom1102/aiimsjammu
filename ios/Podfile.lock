@@ -82,9 +82,6 @@ PODS:
   - SwiftProtobuf (1.26.0)
   - Toast (4.1.1)
   - Try (2.1.1)
-  - universal_ble (0.0.1):
-    - Flutter
-    - FlutterMacOS
   - url_launcher_ios (0.0.1):
     - Flutter
   - vibration (1.7.5):
@@ -120,7 +117,6 @@ DEPENDENCIES:
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - speech_to_text (from `.symlinks/plugins/speech_to_text/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/darwin`)
-  - universal_ble (from `.symlinks/plugins/universal_ble/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - vibration (from `.symlinks/plugins/vibration/ios`)
   - wakelock_plus (from `.symlinks/plugins/wakelock_plus/ios`)
@@ -190,8 +186,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/speech_to_text/ios"
   sqflite:
     :path: ".symlinks/plugins/sqflite/darwin"
-  universal_ble:
-    :path: ".symlinks/plugins/universal_ble/darwin"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
   vibration:
@@ -200,44 +194,43 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/wakelock_plus/ios"
 
 SPEC CHECKSUMS:
-  app_links: 3da4c36b46cac3bf24eb897f1a6ce80bda109874
-  app_settings: 5127ae0678de1dcc19f2293271c51d37c89428b2
-  barcode_scan2: f80517f040989095c9b5067be77649bf6114442c
-  bluetooth_enable_fork: 8004b516c4d9987749b4c1820ecab1c1ee3375ba
-  connectivity_plus: 2256d3e20624a7749ed21653aafe291a46446fee
-  device_info_plus: 71ffc6ab7634ade6267c7a93088ed7e4f74e5896
+  app_links: e7a6750a915a9e161c58d91bc610e8cd1d4d0ad0
+  app_settings: 58017cd26b604ae98c3e65acbdd8ba173703cc82
+  barcode_scan2: 0af2bb63c81b4565aab6cd78278e4c0fa136dbb0
+  bluetooth_enable_fork: 73b8ca6e67230a9baa04010cd5c1e824e00d2797
+  connectivity_plus: 18382e7311ba19efcaee94442b23b32507b20695
+  device_info_plus: 97af1d7e84681a90d0693e63169a5d50e0839a0d
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_blue_plus_darwin: 09444a26fb6bdef523e55b68fc1c59af5a877ea6
-  flutter_compass: b236ab69b61545cce89fd58527f401a7587d5cc1
-  flutter_local_notifications: ad39620c743ea4c15127860f4b5641649a988100
-  flutter_localization: 72299fb6cb4e51cae587bd953ed0b958040b71e6
-  flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
-  flutter_tts: b88dbc8655d3dc961bc4a796e4e16a4cc1795833
-  fluttertoast: 76fea30fcf04176325f6864c87306927bd7d2038
-  geolocator_apple: 1560c3c875af2a412242c7a923e15d0d401966ff
+  flutter_blue_plus_darwin: 3ea4ec9133b377febcc8a70b28cd2d2dc9242bd9
+  flutter_compass: cbbd285cea1584c7ac9c4e0c3e1f17cbea55e855
+  flutter_local_notifications: 4cde75091f6327eb8517fa068a0a5950212d2086
+  flutter_localization: f43b18844a2b3d2c71fd64f04ffd6b1e64dd54d4
+  flutter_secure_storage: d33dac7ae2ea08509be337e775f6b59f1ff45f12
+  flutter_tts: 0f492aab6accf87059b72354fcb4ba934304771d
+  fluttertoast: e9a18c7be5413da53898f660530c56f35edfba9c
+  geolocator_apple: 9bcea1918ff7f0062d98345d238ae12718acfbc1
   Google-Maps-iOS-Utils: 66d6de12be1ce6d3742a54661e7a79cb317a9321
-  google_maps_flutter_ios: 0291eb2aa252298a769b04d075e4a9d747ff7264
+  google_maps_flutter_ios: e31555a04d1986ab130f2b9f24b6cdc861acc6d3
   GoogleMaps: 8939898920281c649150e0af74aa291c60f2e77d
-  image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
-  libphonenumber_plugin: d134f173b22bfa5ede50887071f087f309277f8c
+  image_picker_ios: c560581cceedb403a6ff17f2f816d7fea1421fc1
+  libphonenumber_plugin: 48bf4078546377eedaab4aa54978cd0f6fa23072
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
-  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
-  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
-  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
+  package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
   PhoneNumberKit: 3d9a20cfe8ee68f35c2a3ae9474093133f72a8a1
-  qr_code_scanner: d77f94ecc9abf96d9b9b8fc04ef13f611e5a147a
-  sensors_plus: 1c5f0a01ce21c609a4df404c4e6879d62bce287f
-  share_plus: 011d6fb4f9d2576b83179a3a5c5e323202cdabcf
-  shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
-  speech_to_text: ae2abc312e619ff1c53e675a9fc4d785a15c03bb
-  sqflite: c35dad70033b8862124f8337cc994a809fcd9fa3
+  qr_code_scanner: bb67d64904c3b9658ada8c402e8b4d406d5d796e
+  sensors_plus: 42b9de1b8237675fa8d8121e4bb93be0f79fa61d
+  share_plus: 8875f4f2500512ea181eef553c3e27dba5135aad
+  shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
+  speech_to_text: b43a7d99aef037bd758ed8e45d79bbac035d2dfe
+  sqflite: 673a0e54cc04b7d6dba8d24fb8095b31c3a99eec
   SwiftProtobuf: 5e8349171e7c2f88f5b9e683cb3cb79d1dc780b3
   Toast: 1f5ea13423a1e6674c4abdac5be53587ae481c4e
   Try: 5ef669ae832617b3cee58cb2c6f99fb767a4ff96
-  universal_ble: ff19787898040d721109c6324472e5dd4bc86adc
-  url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
-  vibration: 8e2f50fc35bb736f9eecb7dd9f7047fbb6a6e888
-  wakelock_plus: 04623e3f525556020ebd4034310f20fe7fda8b49
+  url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
+  vibration: 7d883d141656a1c1a6d8d238616b2042a51a1241
+  wakelock_plus: 373cfe59b235a6dd5837d0fb88791d2f13a90d56
 
 PODFILE CHECKSUM: a176e2e187df16cabfd52e549ea68dab4b5027ea
 
