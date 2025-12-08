@@ -189,7 +189,7 @@ class MapClustering {
           else if (landmarks[i].element!.type == "Rooms" &&
               (landmarks[i].element!.subType == "Sample Collection Room" || landmarks[i].element!.subType == "Reception"|| landmarks[i].element!.subType == "Cash Counter") &&
               landmarks[i].coordinateX != null) {
-            print("landmarks[i] ${landmarks[i].name} landmarks[i].element!.subType ${landmarks[i].element!.subType}");
+            // print("landmarks[i] ${landmarks[i].name} landmarks[i].element!.subType ${landmarks[i].element!.subType}");
             bitMapMarkers[landmarks[i].properties!.polyId!] =
             await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
                 "", 'assets/Counter.png',

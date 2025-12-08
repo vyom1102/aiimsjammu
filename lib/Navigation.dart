@@ -8724,10 +8724,11 @@ class _NavigationState extends State<Navigation>
         List<int>? pathPoints = step.value[floor];
         if (pathPoints == null) continue;
         final targetEntry = renderPath.firstWhere(
-              (e) => e.key == buildingID && e.value[fl]!.length == pathPoints.length,
-        );
+              (e) => e.key == buildingID && e.value[fl]!.length == pathPoints.length,);
         List<List<double>>? render = targetEntry.value[fl];
         renderPath.remove(targetEntry);
+        targetEntry.value.remove(fl);
+        renderPath.add(targetEntry);
         PathState.numCols ??= {};
         PathState.numCols![buildingID] = PathState.numCols![buildingID] ?? {};
         PathState.numCols![buildingID]![floor] = SingletonFunctionController
