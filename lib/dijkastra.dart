@@ -1,6 +1,7 @@
 // Function to calculate Euclidean distance between two points
 import 'dart:math';
 import 'package:collection/collection.dart';
+import 'package:iwaymaps/singletonClass.dart';
 import '/path.dart';
 import 'API/buildingAllApi.dart';
 import 'APIMODELS/GlobalAnnotationModel.dart';
@@ -715,8 +716,13 @@ paths convertPath(
     final floor = int.tryParse(parts[3]);
     final lat = double.tryParse(parts[5]);
     final lng = double.tryParse(parts[4]);
-    final cols = col[buildingID]?[floor]?[0];
-    print("floors $x,$y,$floor,$cols");
+    var cols = col[buildingID]?[floor]?[0];
+    if(buildingID == buildingAllApi.outdoorID && cols == null && col[buildingID]?[0] != null){
+      SingletonFunctionController.building.floorDimenssion[buildingID]![floor!] = col[buildingID]![0]!;
+      cols = col[buildingID]?[0]?[0];
+    }
+    print("floors $buildingID,$x,$y,$floor,$cols");
+
 
     if (x == null || y == null || floor == null || cols == null) continue;
 
