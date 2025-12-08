@@ -188,6 +188,8 @@ class _NewsearchpageState extends State<NewSearchPage> {
   }
 
 
+
+
   Future<void> getUserDataFromHive() async {
     final signInBox = await Hive.openBox('SignInDatabase');
     userId = signInBox.get("userId");

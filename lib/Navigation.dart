@@ -598,7 +598,7 @@ class _NavigationState extends State<Navigation>
           currentNavigationLog=null;
         });
       }
-    }else if (state == AppLifecycleState.paused) {
+    }else if(state == AppLifecycleState.paused) {
       // App went to background
       print("App is in the background");
       if (user.isnavigating) {
@@ -5336,7 +5336,6 @@ class _NavigationState extends State<Navigation>
         currMarker.visible = true;
       }
     });
-
     land? singletonData = await SingletonFunctionController.building.landmarkdata;
     print("called polygonTap $id ${path} ${singletonData!.landmarksMap![id]?.renderDetail?.boothType}");
     path = HelperClass().getCategoryAsset(singletonData!.landmarksMap![id]?.renderDetail?.boothType,path);
@@ -5363,7 +5362,7 @@ class _NavigationState extends State<Navigation>
         ),
       );
     }
-    setState(() {
+    setState((){
       if (SingletonFunctionController.building.selectedLandmarkID != id &&
           !user.isnavigating &&
           !_isRoutePanelOpen) {
@@ -6285,11 +6284,9 @@ class _NavigationState extends State<Navigation>
     // }
     doorMarkers.clear();
     _markers.clear();
-
     print("first");
     print("_landmarks ${_landmarks.length}");
     print("landmarkMarkers ${landmarkMarkers.length}");
-
     List<Landmarks> landmarks = _landData.landmarks!;
     if(forced){
       landmarks.forEach((value){
@@ -6300,7 +6297,7 @@ class _NavigationState extends State<Navigation>
             value.element?.subType != "BP" &&
             value.floor == 0 &&
             value.coordinateX != null &&
-            value.coordinateY != null) {
+            value.coordinateY != null){
           _landmarks.add(value);
         }
       });
@@ -8675,10 +8672,11 @@ class _NavigationState extends State<Navigation>
       renderPath = paths.globalPath;
       print("path from mastergraph $path");
       print("path from mastergraph $renderPath");
-    } else {
+    }
+    else {
       PathModel model = Building.waypoint[Bid]!
           .firstWhere((element) => element.floor == floor);
-      print("model.pathNetwork $Bid $model ${model.pathNetwork}");
+      print("model.pathNetwork for local $Bid $model ${model.pathNetwork}");
       adjList = model.pathNetwork ?? {};
       mastergraph = false;
       path = await findShortestPath(
@@ -8723,11 +8721,14 @@ class _NavigationState extends State<Navigation>
         int floor = fl;
         List<int>? pathPoints = step.value[floor];
         if (pathPoints == null) continue;
+        // print("rendered path:${renderPath[0].value[fl]!.length == pathPoints.length} ${renderPath[0].key == buildingID}");
         final targetEntry = renderPath.firstWhere(
               (e) => e.key == buildingID && e.value[fl]!.length == pathPoints.length,
         );
         List<List<double>>? render = targetEntry.value[fl];
-        renderPath.remove(targetEntry);
+        print("render path before for ${floor} is ${renderPath}");
+        // renderPath.remove(targetEntry);
+        print("render path after for ${floor} is ${renderPath}");
         PathState.numCols ??= {};
         PathState.numCols![buildingID] = PathState.numCols![buildingID] ?? {};
         PathState.numCols![buildingID]![floor] = SingletonFunctionController
@@ -8777,7 +8778,6 @@ class _NavigationState extends State<Navigation>
                 floor == PathState.destinationFloor &&
                 renderDestination),
             mastergraph);
-
         result.add(value);
       }
     }
@@ -10213,15 +10213,12 @@ class _NavigationState extends State<Navigation>
             onPressed: () async {
               InteractionManager().logInteraction("Start Navigation");
               print("landmarkMarkers.clear() ${landmarkMarkers.length} ${_landmarks.length}");
-
-
               landmarkMarkers.forEach((value){
                 print("value ${value.markerId.value}");
                 if(!value.markerId.value.toLowerCase().contains("main entry")){
                   value.visible = false;
                 }
               });
-
               // landmarkMarkers.clear();
               // _landmarks.clear();
               clustringOFF = true;
@@ -10475,14 +10472,15 @@ class _NavigationState extends State<Navigation>
           ? "Straight"
           : tools.angleToClocks(angle, context);
 
-      print("direction and angle we got :${direction}--${angle}");
+      print("direction and angle we got :${direction}--${angle} ${PathState.accessiblePath}");
       if (user.floor != user.pathobj.destinationFloor &&
           user.pathobj.connections[user.bid]?[user.floor] ==
               (user.showcoordY * UserState.cols + user.showcoordX)) {
-        speak(
-            "Use this lift and go to ${tools.numericalToAlphabetical(user.pathobj.destinationFloor)} floor",
-            _currentLocale,
-            prevpause: false);
+          speak(
+              "Use this ${PathState.accessiblePath} and go to ${tools.numericalToAlphabetical(user.pathobj.destinationFloor)} floor",
+              _currentLocale,
+              prevpause: false);
+
 
       } else if (direction == "Straight") {
         speak(convertTolng("Go Straight", _currentLocale, ''), _currentLocale);
@@ -10491,9 +10489,13 @@ class _NavigationState extends State<Navigation>
         speak(convertTolng("Turn $direction", _currentLocale, direction),
             _currentLocale);
       }
-      user.snapper?.setPath(user.cellPath);
-      await user.snapper?.startGpsUpdates();
-      user.handleGPS(context);
+      try {
+        user.snapper?.setPath(user.cellPath);
+        await user.snapper?.startGpsUpdates();
+        user.handleGPS(context);
+      }catch(e){
+        print("catch in user.handleGPS:${e}");
+      }
     }
   }
 

@@ -687,6 +687,7 @@ Future<paths> masterFindShortestPath (GlobalModel masterGraph, int sourceX, int 
       // var filled = tools.convertToFourPointerPath(tempFilled, currentBid, currentFloor);
       // fullPath.addAll(filled);
       fullPath.addAll(segment);
+      print("path on $currentFloor is $segment");
     }else{
       fullPath.addAll(segment);
     }
@@ -730,10 +731,11 @@ paths convertPath(
       globalResult.last.value[floor]!.add(globalCoordinate);
     }else{
       result.add(MapEntry(buildingID, {floor: [index]}));
-
       globalResult.add(MapEntry(buildingID, {floor: [globalCoordinate]}));
     }
   }
+
+  print("result:::${result}");
 
   return paths(result, globalResult);
 }

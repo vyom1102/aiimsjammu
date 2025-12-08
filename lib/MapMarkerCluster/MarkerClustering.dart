@@ -41,7 +41,6 @@ class MapClustering {
   PolygonCalculations polygonCalculations = PolygonCalculations();
 
   Future<void> initMarkers() async {
-
     liftMarker = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor("", 'assets/MapLift.png',imageSize: const Size(85, 85),color: Color(0xff544551), offset: Offset(0.5, 0.5));
     cafeteriaMarker = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor("", 'assets/cutlery.png',imageSize: const Size(85, 85),color: Color(0xff544551));
     femaleWashroomMarker = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor("", 'assets/MapFemaleWashroom.png',imageSize: const Size(85, 85),color: Color(0xff544551));
@@ -522,10 +521,9 @@ class MapClustering {
 
   Marker _createMarker(Landmarks landmark, double zoomLevel, double theta){
     // if(landmark.element!.subType?.toLowerCase() == "booth"){
-      print("_createMarker ${landmark.name} ${bitMapMarkers.containsKey(landmark.properties!.polyId)} ${landmark.element!.subType}");
+    //   print("_createMarker ${landmark.name} ${bitMapMarkers.containsKey(landmark.properties!.polyId)} ${landmark.element!.subType}");
     // }
     if(bitMapMarkers.containsKey(landmark.properties!.polyId) && landmark.element != null && landmark.element!.subType != null){
-
       MarkerIconWithAnchor dotIcon;
       if(landmark.renderDetail != null){
         // print("landmark.renderDetail!.color! ${landmark.renderDetail!.name!} ${landmark.renderDetail!.booth!} ${landmark.renderDetail!.color!}");
@@ -1206,3 +1204,4 @@ class MapClustering {
   }
 
 }
+
