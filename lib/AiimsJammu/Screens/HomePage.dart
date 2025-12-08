@@ -161,6 +161,7 @@ class _HomePageState extends State<HomePage> {
     versionApiCheck();
     checkForReload();
     versionApiCall();
+    setInitialLandmarkData();
     isUserValid();
     callbackFunc();
     checkPermission();
@@ -195,6 +196,18 @@ class _HomePageState extends State<HomePage> {
   //   }
   //   return;
   // }
+
+  Future<void> setInitialLandmarkData() async{
+    for(String buildingId in globalBuildingIds) {
+      var landmarkDataBox = await Hive.openBox('LandmarkDataBox');
+      var data = await landmarkDataBox.get('landmarkData_$buildingId');
+      setState(() {
+        allLandmarkData[buildingId] = data;
+      });
+
+      print("no data changed in landmark $buildingId");
+    }
+  }
 
 
   Future<void> mapDataVersionCycle() async {
@@ -974,7 +987,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _loadDoctorsFromAPI() async {
     try {
 
-      print('trying');
+      print('trying for doctor');
       final response = await http.get(
 
         Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-doctors/6673e7a3b92e69bc7f4b40ae"),
@@ -984,6 +997,7 @@ class _HomePageState extends State<HomePage> {
         },);
 
       if (response.statusCode == 200) {
+        print("response ${response.statusCode} ${response.body}");
         final responseData = jsonDecode(response.body);
         // print(responseData);
 

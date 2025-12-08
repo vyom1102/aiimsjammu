@@ -1992,6 +1992,7 @@ class tools {
             d = calculateDistance(
                 pCoord, [value.coordinateX!, value.coordinateY!]);
           }
+          print("distance of ${value.name} from ${Beacon.name} is $d");
           if (d<distance) {
             Landmarks currentLandInfo = value;
             priorityQueue.add(MapEntry(currentLandInfo, d));

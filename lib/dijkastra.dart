@@ -53,7 +53,7 @@ double euclideanDistance(String point1, String point2, {String? prevPoint}) {
 }
 
 
-double masterEuclideanDistance(String node1, String node2, {String? prevPoint, bool sameFloorDifferentBuilding = false}) {
+double masterEuclideanDistance(String node1, String node2, {String? prevPoint}) {
   List<String> parts1 = node1.split(',');
   List<String> parts2 = node2.split(',');
 
@@ -71,10 +71,6 @@ double masterEuclideanDistance(String node1, String node2, {String? prevPoint, b
 
   if (floor1 != floor2) {
     distance += 15; // Add floor change penalty
-  }
-
-  if(sameFloorDifferentBuilding){
-    distance += 100000;
   }
 
   // if (prevPoint != null) {
@@ -234,7 +230,7 @@ Future<List<String>> masterDijkstra(
         if(neighbor != null && !nonPreferableConnectors.contains(neighbor) && !visited.contains(neighbor)){
           String? prevNode = previous[currentNode];
           // Simple edge distance without angle dependency
-          var edgeDistance = masterEuclideanDistance(currentNode, neighbor, prevPoint: prevNode, sameFloorDifferentBuilding: sameFloorDifferentBuilding);
+          var edgeDistance = masterEuclideanDistance(currentNode, neighbor, prevPoint: prevNode);
           var newDist = distances[currentNode]! + edgeDistance;
 
           if (newDist < distances[neighbor]!) {
