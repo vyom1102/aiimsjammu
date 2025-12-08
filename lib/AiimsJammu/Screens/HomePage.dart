@@ -149,6 +149,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     getUserDataFromHive();
+    fetchAndStoreBuildingIds();
     getDriverDetail();
     mapDataVersionCycle();
     // loadData();
@@ -161,6 +162,7 @@ class _HomePageState extends State<HomePage> {
     versionApiCheck();
     checkForReload();
     versionApiCall();
+    fetchAllLandmarkData();
     setInitialLandmarkData();
     isUserValid();
     callbackFunc();
@@ -196,19 +198,6 @@ class _HomePageState extends State<HomePage> {
   //   }
   //   return;
   // }
-
-  Future<void> setInitialLandmarkData() async{
-    for(String buildingId in globalBuildingIds) {
-      var landmarkDataBox = await Hive.openBox('LandmarkDataBox');
-      var data = await landmarkDataBox.get('landmarkData_$buildingId');
-      setState(() {
-        allLandmarkData[buildingId] = data;
-      });
-
-      print("no data changed in landmark $buildingId");
-    }
-  }
-
 
   Future<void> mapDataVersionCycle() async {
     print("mapDataVersionCycle");
@@ -259,6 +248,237 @@ class _HomePageState extends State<HomePage> {
       // networkManager.ws.updateSensorStatus(ble: false);
       // networkManager.ws.updatePermissions(ble: false);
       // Permission denied, handle accordingly
+    }
+  }
+
+  Future<void> fetchAllLandmarkData() async {
+    if (globalBuildingIds.isEmpty) {
+      await fetchAndStoreBuildingIds();
+    }
+    for (var buildingId in globalBuildingIds) {
+      await fetchLandmarkData(buildingId);
+    }
+  }
+  Future<void> fetchAndStoreBuildingIds() async {
+    // Open the Hive box
+    var buildingIdsBox = await Hive.openBox('BuildingIds');
+    // Retrieve building IDs from the box
+    if (buildingIdsBox.containsKey("buildingId")) {
+      globalBuildingIds = List<String>.from(
+          buildingIdsBox.get('buildingId')
+      );
+    }else{
+      print("Aiims jammu ids");
+      setState(() {
+        globalBuildingIds = AiimsJammuBuildingIds;
+
+      });
+    }
+
+
+    setState(() {
+      _isLoading = true;
+    });
+    await setInitialLandmarkData();
+    await DataVersionCheckForLandmarks();
+    setState(() {
+      _isLoading = false;
+    });
+    print("Global Building IDs: $globalBuildingIds");
+  }
+  // Future<void> setInitialLandmarkData() async{
+  //   for(String buildingId in globalBuildingIds) {
+  //     var landmarkDataBox = await Hive.openBox('LandmarkDataBox');
+  //     var data = await landmarkDataBox.get('landmarkData_$buildingId');
+  //     setState(() {
+  //       allLandmarkData[buildingId] = data;
+  //     });
+  //
+  //     print("no data changed in landmark $buildingId");
+  //   }
+  // }
+  Future<void> setInitialLandmarkData() async {
+    bool shouldFetch = false;
+    var landmarkDataBox = await Hive.openBox('LandmarkDataBox');
+
+    for (String buildingId in globalBuildingIds) {
+      var data = await landmarkDataBox.get('landmarkData_$buildingId');
+
+      if (data != null) {
+        setState(() {
+          allLandmarkData[buildingId] = data;
+        });
+        print("Landmark data loaded from cache for $buildingId");
+      } else {
+        print("No data found for $buildingId, will fetch from API.");
+        shouldFetch = true;
+      }
+    }
+
+    if (shouldFetch) {
+      await fetchLandmarkDataAccToVenue("AIIMSJAMMU");
+    }
+  }
+
+  Future<void>DataVersionCheckForLandmarks() async {
+    print("in data version");
+    for(String buildingId in globalBuildingIds){
+      print("building data version for $buildingId");
+      await fetchDataVersion(buildingId: buildingId);
+    }
+  }
+  Future<Map<String, dynamic>> fetchDataVersion({
+    required String buildingId,
+  }) async {
+    try {
+      final Uri url = Uri.parse('${AppConfig.baseUrl}/secured/data-version');
+      final headers = {
+        'Content-Type': 'application/json',
+        'x-access-token': '$accessToken',
+      };
+      final body = json.encode({
+        "building_ID": buildingId,
+      });
+
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: body,
+      );
+      print("status code for data version ${response.statusCode}");
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        if (responseData["status"] == true) {
+          final versionData = responseData["versionData"];
+          final int polylineVersion = versionData["polylineDataVersion"];
+          final int landmarksVersion = versionData["landmarksDataVersion"];
+
+          var box = await Hive.openBox('DataVersion');
+          final storedPolylineVersion = box.get('${buildingId}_polylineVersion', defaultValue: -1);
+          final storedLandmarksVersion = box.get('${buildingId}_landmarksVersion', defaultValue: -1);
+          print("storedLandmarksVersion for $buildingId is $storedLandmarksVersion");
+          print("storedPolylineVersion for $buildingId is $storedPolylineVersion");
+
+          if ( landmarksVersion != storedLandmarksVersion) {
+            print("data changed for $buildingId");
+            await box.put('${buildingId}_landmarksVersion', landmarksVersion);
+            await fetchLandmarkData(buildingId);
+          }else{
+
+            var landmarkDataBox = await Hive.openBox('LandmarkDataBox');
+            var data = await landmarkDataBox.get('landmarkData_$buildingId');
+            setState(() {
+              allLandmarkData[buildingId] = data;
+            });
+            print("no data changed in landmark $buildingId");
+          }
+        }
+        return responseData;
+      }else if(response.statusCode == 403){
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        return fetchDataVersion(buildingId: buildingId);
+      } else {
+        var landmarkDataBox = await Hive.openBox('LandmarkDataBox');
+        var data = await landmarkDataBox.get('landmarkData_$buildingId');
+        setState(() {
+          allLandmarkData[buildingId] = data;
+        });
+        print("no data changed in landmark else $buildingId");
+        throw HttpException('Failed to fetch data version: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      var landmarkDataBox = await Hive.openBox('LandmarkDataBox');
+      var data = await landmarkDataBox.get('landmarkData_$buildingId');
+      setState(() {
+        allLandmarkData[buildingId] = data;
+      });
+      print("no data changed in landmark $buildingId");
+      throw Exception('Error fetching data version: $e');
+    }
+  }
+  Future<void> fetchLandmarkData(String buildingId) async {
+
+    var headers = {
+      'Content-Type': 'application/json',
+      'x-access-token': '$accessToken'
+    };
+
+    var request = http.Request(
+      'POST',
+      Uri.parse('${AppConfig.baseUrl}/secured/landmarks'),
+    );
+    request.body = json.encode({"id": buildingId});
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      String responseData = await response.stream.bytesToString();
+      var data = jsonDecode(responseData);
+
+      // Save data in Hive for caching
+      var landmarkDataBox = await Hive.openBox('LandmarkDataBox');
+      await landmarkDataBox.put('landmarkData_$buildingId', data);
+      print("Landmark data stored for building a $buildingId");
+
+      // Update state and store landmark data
+      setState(() {
+        allLandmarkData[buildingId] = data;
+        // landmarkData = data;
+      });
+
+
+    } else if (response.statusCode == 403) {
+      // Refresh the access token and retry the request
+      accessToken = await RefreshTokenAPI.refresh();
+      await fetchLandmarkData(buildingId);
+    } else {
+      print("Error: ${response.reasonPhrase}");
+    }
+
+    // Add landmarks for the specified floor
+    // await addLandmarksForFloor(buildingId, currentFloor);
+  }
+  Future<void> fetchLandmarkDataAccToVenue(String venueName) async {
+    var headers = {
+      'Content-Type': 'application/json',
+      'x-access-token': '$accessToken'
+    };
+
+    var request = http.Request(
+      'POST',
+      Uri.parse('${AppConfig.baseUrl}/secured/landmarks-venue'),
+    );
+    request.body = json.encode({"venueName": venueName});
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+    print("fetchLandmarkDataAccToVenue");
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      String responseData = await response.stream.bytesToString();
+      var data = jsonDecode(responseData);
+      print(data);
+      // Save each building's landmark data in Hive
+      var landmarkDataBox = await Hive.openBox('LandmarkDataBox');
+
+      data.forEach((buildingId, buildingData) async {
+        await landmarkDataBox.put('landmarkData_$buildingId', buildingData);
+        print("Landmarkvenue data stored for building $buildingId");
+        print(landmarkDataBox.get('landmarkData_$buildingId'));
+        // Update state with each building's data
+        setState(() {
+          allLandmarkData[buildingId] = buildingData;
+        });
+      });
+
+    } else if (response.statusCode == 403) {
+      // Refresh the access token and retry the request
+      accessToken = await RefreshTokenAPI.refresh();
+      await fetchLandmarkDataAccToVenue(venueName);
+    } else {
+      print("Error: ${response.reasonPhrase}");
     }
   }
 
