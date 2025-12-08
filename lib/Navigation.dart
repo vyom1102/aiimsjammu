@@ -900,7 +900,7 @@ class _NavigationState extends State<Navigation>
   }
 
   Future<void> enableBT() async {
-    // BluetoothEnable.enableBluetooth.then((value) {});
+    BluetoothEnable.enableBluetooth.then((value) {});
   }
   bool isPdr = false;
   // Function to start the timer

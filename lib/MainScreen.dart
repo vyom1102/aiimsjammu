@@ -1,3 +1,4 @@
+import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -58,6 +59,8 @@ class _MainScreenState extends State<MainScreen> {
     FavouriteRGCIScreen(),
     ProfilePage(),
   ];
+
+
   @override
   void initState() {
     super.initState();
@@ -72,8 +75,11 @@ class _MainScreenState extends State<MainScreen> {
   void checkPermission()async{
     await requestBluetoothConnectPermission();
     await requestLocationPermission();
+    await enableBT();
   }
-
+  Future<void> enableBT() async {
+    BluetoothEnable.enableBluetooth.then((value) {});
+  }
   Future<void> requestBluetoothConnectPermission() async {
     final PermissionStatus permissionStatus =
     await Permission.bluetoothScan.request();
