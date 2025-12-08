@@ -223,7 +223,7 @@ class UserState {
       var cell = snapped["cell"];
       var pos = snapped["position"];
       print("userbid is $bid ${bid == buildingAllApi.outdoorID} ${buildingAllApi.outdoorID}");
-      if(isnavigating && bid == buildingAllApi.outdoorID){
+      if(isnavigating && bid == buildingAllApi.outdoorID && floor == 0){
         Matrix X_pred = Matrix.fromList([
           [lat], [lng], [0], [0]
         ]);
@@ -347,7 +347,7 @@ class UserState {
             [cellPath[pathobj.index].lat, cellPath[pathobj.index].lng]);
         updateCoordinatesAndPath(previousPoint, angleToNextCell, isFlying: isFlying);
         //lift check
-        if (isLiftCheck() && floor != pathobj.destinationFloor) {
+        if (isLiftCheck() && (floor != pathobj.destinationFloor || bid != pathobj.destinationBid)) {
           coordX = showcoordX;
           coordY = showcoordY;
           announceLiftUsage(context);
@@ -452,7 +452,7 @@ class UserState {
       }
 
       //lift check
-      if (isLiftCheck() && floor != pathobj.destinationFloor) {
+      if (isLiftCheck() && (floor != pathobj.destinationFloor || bid != pathobj.destinationBid)) {
         announceLiftUsage(context);
       }
 

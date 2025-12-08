@@ -8736,8 +8736,7 @@ class _NavigationState extends State<Navigation>
         print("buildingID path $buildingID $render");
         // print("Building.GlobalAnnotation!.liftNodes ${Building.GlobalAnnotation!.liftNodes}");
         var lift;
-        if (Building.GlobalAnnotation?.liftNodes != null &&
-            PathState.sourceFloor != PathState.destinationFloor) {
+        if (Building.GlobalAnnotation?.liftNodes != null && (PathState.sourceFloor != PathState.destinationFloor || PathState.sourceBid != PathState.destinationBid)) {
           lift = getFirstMatchedLiftName(
               liftNodes: Building.GlobalAnnotation!.getNodesForOption(PathState.floorConnector),
               path: pathPoints,
@@ -8758,7 +8757,7 @@ class _NavigationState extends State<Navigation>
           if (currentFloorIndex != step.value.keys.length - 1) {
             nextFloor = step.value.keys.toList()[currentFloorIndex + 1];
           }
-          print("liftName $liftName");
+          print("liftName $liftName $lift");
         }
         Map<String, dynamic> value = await processPathRendering(
             pathPoints,
@@ -14218,17 +14217,17 @@ class _NavigationState extends State<Navigation>
                         ? Text("${user.theta}")
                         : Container(),
                     // if(_currentPoint!=null)Text("${_currentPoint!} ${_currentPoint!}"),
-                    // Text("coord [${user.coordX},${user.coordY}] \n"
-                    //     "showcoord [${user.showcoordX},${user.showcoordY}] \n"
-                    //     "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
-                    // // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
-                    //     "floor ${user.floor}\n"
-                    //     "userBid ${user.bid} \n"
-                    //     "stepSize ${UserState.stepSize}\n"
-                    //     "index ${user.pathobj.index} \n"
-                    //     "theta ${user.theta} \n"
-                    //     "theta ${tools.AngleBetweenBuildingandGlobalNorth} \n"
-                    //     "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
+                    Text("coord [${user.coordX},${user.coordY}] \n"
+                        "showcoord [${user.showcoordX},${user.showcoordY}] \n"
+                        "next coord [${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].x:0},${user.pathobj.index+1<user.cellPath.length?user.cellPath[user.pathobj.index+1].y:0}]\n"
+                    // "next bid ${user.pathobj.index+1<user.Cellpath.length?user.Cellpath[user.pathobj.index+1].bid:0} \n"
+                        "floor ${user.floor}\n"
+                        "userBid ${user.bid} \n"
+                        "stepSize ${UserState.stepSize}\n"
+                        "index ${user.pathobj.index} \n"
+                        "theta ${user.theta} \n"
+                        "theta ${tools.AngleBetweenBuildingandGlobalNorth} \n"
+                        "node ${user.path.isNotEmpty ? user.path[user.pathobj.index] : ""}"),
                     DebugToggle.Slider
                         ? Slider(
                         value: user.theta,

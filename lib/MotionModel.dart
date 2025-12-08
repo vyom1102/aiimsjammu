@@ -44,7 +44,7 @@ class MotionModel{
       print("isValid false due to building boundary ${user.bid} ${StackTrace.current}");
       // return false;
     }
-    if(nonWalkable != null && nonWalkable.contains((newY*cols)+newX) && false){
+    if(nonWalkable != null && nonWalkable.contains((newY*cols)+newX)){
       print("motionmodel $newY $newX $cols ${(newY*cols)+newX}");
       stuckCount++;
       if(stuckCount==5){
@@ -63,11 +63,11 @@ class MotionModel{
     try{
       print("motion model ${[user.coordX,user.coordY]} <> ${[user.showcoordX,user.showcoordY]}");
       if(user.cellPath[user.pathobj.index+1].move == tools.twocelltransitionhorizontal || user.cellPath[user.pathobj.index+1].move == tools.twocelltransitionvertical){
-        if(tools.calculateDistance([user.coordX,user.coordY], [user.showcoordX,user.showcoordY])>(user.bid==buildingAllApi.outdoorID?40:20)){
+        if(tools.calculateDistance([user.coordX,user.coordY], [user.showcoordX,user.showcoordY])>(user.bid==buildingAllApi.outdoorID?double.infinity:20)){
           reroute();
         }
       }else{
-        if(tools.calculateDistance([user.coordX,user.coordY], [user.showcoordX,user.showcoordY])>(user.bid==buildingAllApi.outdoorID?40:20)){
+        if(tools.calculateDistance([user.coordX,user.coordY], [user.showcoordX,user.showcoordY])>(user.bid==buildingAllApi.outdoorID?double.infinity:20)){
           reroute();
         }
       }

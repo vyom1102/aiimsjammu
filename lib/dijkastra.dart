@@ -53,7 +53,7 @@ double euclideanDistance(String point1, String point2, {String? prevPoint}) {
 }
 
 
-double masterEuclideanDistance(String node1, String node2, {String? prevPoint}) {
+double masterEuclideanDistance(String node1, String node2, {String? prevPoint, bool sameFloorDifferentBuilding = false}) {
   List<String> parts1 = node1.split(',');
   List<String> parts2 = node2.split(',');
 
@@ -71,6 +71,10 @@ double masterEuclideanDistance(String node1, String node2, {String? prevPoint}) 
 
   if (floor1 != floor2) {
     distance += 15; // Add floor change penalty
+  }
+
+  if(sameFloorDifferentBuilding){
+    distance += 100000;
   }
 
   // if (prevPoint != null) {
@@ -196,7 +200,11 @@ Future<List<String>> masterDijkstra(
 
   print("start $start goal $goal");
   unvisited.add(MapEntry(start, 0));
+  List<String> startExpanded = start.split(',');
+  List<String> goalExpanded = goal.split(',');
+  bool sameFloorDifferentBuilding = (startExpanded[0] != goalExpanded[0] && startExpanded[3] == goalExpanded[3]);
 
+  print("sameFloorDifferentBuilding $sameFloorDifferentBuilding");
   while (unvisited.isNotEmpty) {
     var currentNode = unvisited.removeFirst().key;
 
@@ -217,10 +225,16 @@ Future<List<String>> masterDijkstra(
 
     if (graph.containsKey(currentNode)) {
       for (var neighbor in graph[currentNode]!) {
+        if(int.parse(startExpanded[3]) == 0 && sameFloorDifferentBuilding && neighbor != null && neighbor.isNotEmpty){
+          List<String> neighborExpanded = neighbor.split(',');
+          if(int.parse(neighborExpanded[3]) != 0){
+            continue;
+          }
+        }
         if(neighbor != null && !nonPreferableConnectors.contains(neighbor) && !visited.contains(neighbor)){
           String? prevNode = previous[currentNode];
           // Simple edge distance without angle dependency
-          var edgeDistance = masterEuclideanDistance(currentNode, neighbor, prevPoint: prevNode);
+          var edgeDistance = masterEuclideanDistance(currentNode, neighbor, prevPoint: prevNode, sameFloorDifferentBuilding: sameFloorDifferentBuilding);
           var newDist = distances[currentNode]! + edgeDistance;
 
           if (newDist < distances[neighbor]!) {

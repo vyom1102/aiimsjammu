@@ -412,7 +412,7 @@ class _DirectionHeaderState extends State<DirectionHeader> {
       beaconWeight = beaconWeight * -1;
     }
 
-    if (nearestBeacon != "" && widget.user.key != SingletonFunctionController.apibeaconmap[nearestBeacon]!.sId) {
+    if (nearestBeacon != "" && widget.user.key != SingletonFunctionController.apibeaconmap[nearestBeacon]!.sId && widget.user.bid != buildingAllApi.outdoorID) {
       if (widget.user.floor != widget.user.pathobj.destinationFloor &&
           widget.user.pathobj.destinationFloor != widget.user.pathobj.sourceFloor &&
           widget.user.pathobj.destinationFloor == SingletonFunctionController.apibeaconmap[nearestBeacon]!.floor) {
