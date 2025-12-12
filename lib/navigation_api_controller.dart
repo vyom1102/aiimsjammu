@@ -20,12 +20,12 @@ import 'buildingState.dart';
 
 
 class NavigationAPIController {
-  Function createPatch = (patchDataModel value) {};
-  Function createotherPatch = (String key, patchDataModel value) {};
+  Function createPatch = (patchDataModel value, {   bool building = true, }) {};
+  Function createotherPatch = (String key, patchDataModel value, {   bool building = true, }) {};
   Function findCentroid = (List<Coordinates> vertices, String bid) {};
   Function createRooms = (polylinedata value, int floor){};
-  Function createARPatch = (Map<int, geo.LatLng> coordinates){};
-  Function createotherARPatch = (Map<int, geo.LatLng> coordinates, String bid){};
+  Function createARPatch = (Map<int, geo.LatLng> coordinates, {   bool building = true, }){};
+  Function createotherARPatch = (Map<int, geo.LatLng> coordinates, String bid, {   bool building = true, }){};
   Function createMarkers = (land landData, int floor, {String? bid}){};
 
   NavigationAPIController(
@@ -183,14 +183,14 @@ class NavigationAPIController {
     }
 
     if(selected){
-      print("createARPatch call");
+      print("createARPatch call $id $coordinates");
       createARPatch(coordinates);
       if (SingletonFunctionController.building.ARCoordinates.containsKey(id) && coordinates.isNotEmpty) {
         SingletonFunctionController.building.ARCoordinates[id] = coordinates;
         print("patchmade for${SingletonFunctionController.building.ARCoordinates.keys} ${StackTrace.current}");
       }
     }else{
-      print("createARPatch other call");
+      print("createARPatch other call $id");
       createotherARPatch(coordinates, id);
     }
   }

@@ -127,7 +127,7 @@ class GlobalAnnotationController {
     });
     print("for ${data.mappingElements!.first.buildingID!} coordinates are $coordinates");
     if(coordinates.isNotEmpty){
-      apiController?.createotherARPatch(coordinates, data.mappingElements!.first.buildingID!);
+      apiController?.createotherARPatch(coordinates, data.mappingElements!.first.buildingID!, building: false);
     }
 
     return landmarks;

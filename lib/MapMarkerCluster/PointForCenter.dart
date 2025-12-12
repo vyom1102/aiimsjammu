@@ -31,31 +31,6 @@ class LeftMost {
     }else{
       return -1;
     }
-    // Convert to Cartesian coordinates to handle lat/lon properly
-    double midLat = (p1.lat + p2.lat) / 2;
-
-    // Convert lat/lon differences to approximate Cartesian coordinates
-    // Account for longitude convergence using midpoint latitude
-    double cosLat = cos(midLat * pi / 180.0);
-
-    double x1 = (p1.lon - (p1.lon + p2.lon) / 2) * cosLat;
-    double y1 = p1.lat - (p1.lat + p2.lat) / 2;
-    double x2 = (p2.lon - (p1.lon + p2.lon) / 2) * cosLat;
-    double y2 = p2.lat - (p1.lat + p2.lat) / 2;
-
-    double theta = globalAngle * pi / 180.0;
-
-    // Get the LEFT perpendicular vector (90° counter-clockwise rotation)
-    double leftX = -sin(theta);
-    double leftY = cos(theta);
-
-    // Project onto the left perpendicular direction
-    double leftProjection1 = leftX * x1 + leftY * y1;
-    double leftProjection2 = leftX * x2 + leftY * y2;
-
-    // Compare projections (larger projection = more left)
-    if ((leftProjection1 - leftProjection2).abs() < 1e-9) return 0;
-    return leftProjection1 > leftProjection2 ? 1 : -1;
   }
 
   /// Alternative method using cross product (often more intuitive)

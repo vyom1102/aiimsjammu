@@ -9,13 +9,13 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../APIMODELS/landmark.dart';
 import '../ELEMENTS/HelperClass.dart';
-import '../MODELS/MarkerIconWithAnchor.dart';
 import '../NAVIGATIONTools.dart';
 import '../config.dart';
 import '../singletonClass.dart';
 import 'MarkerLandmarkInformation.dart';
 import 'PointForCenter.dart';
 import 'PolygonCalculations.dart';
+import 'UnifiedMarkerCreator.dart';
 
 class MapClustering {
   final void Function(String sId) onMarkerTapCallback;
@@ -30,302 +30,468 @@ class MapClustering {
   late MarkerIconWithAnchor entryMarker;
   late MarkerIconWithAnchor stairsMarker;
   late MarkerIconWithAnchor stageMarker;
+  late MarkerIconWithAnchor sittingAreaMarker;
   late MarkerIconWithAnchor counter;
-  late MarkerIconWithAnchor dotMarker;
-  late MarkerIconWithAnchor yellowDotMarker;
-  late MarkerIconWithAnchor greenDotMarker;
-  late MarkerIconWithAnchor blueDotMarker;
+  late MarkerIconWithAnchor yellowgreenDotMarker;
+  late MarkerIconWithAnchor greengreenDotMarker;
   late MarkerIconWithAnchor insideEntryMarker;
 
   Map<String,MarkerIconWithAnchor> bitMapMarkers = {};
   PolygonCalculations polygonCalculations = PolygonCalculations();
 
   Future<void> initMarkers() async {
-    liftMarker = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor("", 'assets/MapLift.png',imageSize: const Size(85, 85),color: Color(0xff544551), offset: Offset(0.5, 0.5));
-    cafeteriaMarker = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor("", 'assets/cutlery.png',imageSize: const Size(85, 85),color: Color(0xff544551));
-    femaleWashroomMarker = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor("", 'assets/MapFemaleWashroom.png',imageSize: const Size(85, 85),color: Color(0xff544551));
-    maleWashroomMarker = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor("", 'assets/MapMaleWashroom.png',imageSize: const Size(85, 85),color: Color(0xff544551));
-    entryMarker = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor("", 'assets/MapEntry.png',imageSize: const Size(75, 75),color: Color(0xff544551), offset: Offset(0.5, 0.5));
-    landmarkMarker = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor("", 'assets/Generic Marker.png',imageSize: const Size(70, 70),color: Color(0xff544551));
-    stairsMarker = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor("", 'assets/MapStairs.png',imageSize: const Size(60, 60),color: Color(0xff544551), offset: Offset(0.5, 0.5));
-    stageMarker = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor("", 'assets/MapStage.png',imageSize: const Size(85, 85),color: Color(0xff544551));
-    counter = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor("", 'assets/Counter.png',imageSize: const Size(60, 60),color: Color(0xff544551), offset: Offset(0.5, 0.5));
-    dotMarker = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor("", 'assets/dot.png',imageSize: const Size(25, 25),color: Color(0xff544551));
-    blueDotMarker = await bitmapDescriptorFromImageWithCenterAnchor('assets/greendot.png',imageSize: Size(95,95));
-    insideEntryMarker = await bitmapDescriptorFromImageWithCenterAnchor('assets/insideEntry.png',imageSize: Size(45,45));
-    greenDotMarker = await bitmapDescriptorFromImageWithCenterAnchor('assets/greendot.png',imageSize: Size(95,95));
+    final creator = UnifiedMarkerCreator();
 
+    liftMarker = await creator.createUnifiedMarker(
+      text: "",
+      imageSource: 'assets/MapLift.png',
+      layout: MarkerLayout.imageOnly,
+      customAnchor: const Offset(0.5, 0.5),
+    );
+
+    cafeteriaMarker = await creator.createUnifiedMarker(
+      text: "",
+      imageSource: 'assets/cutlery.png',
+      layout: MarkerLayout.imageOnly,
+    );
+
+    femaleWashroomMarker = await creator.createUnifiedMarker(
+      text: "",
+      imageSource: 'assets/MapFemaleWashroom.png',
+      layout: MarkerLayout.imageOnly,
+      customAnchor: const Offset(0.5, 1.0)
+    );
+
+    maleWashroomMarker = await creator.createUnifiedMarker(
+      text: "",
+      imageSource: 'assets/MapMaleWashroom.png',
+      layout: MarkerLayout.imageOnly,
+      customAnchor: const Offset(0.5, 1.0)
+    );
+
+    entryMarker = await creator.createUnifiedMarker(
+      text: "",
+      imageSource: 'assets/MapEntry.png',
+      layout: MarkerLayout.imageOnly,
+      imageSize: const Size(30, 30),
+      customAnchor: const Offset(0.5, 0.5),
+    );
+
+    landmarkMarker = await creator.createUnifiedMarker(
+      text: "",
+      imageSource: 'assets/Generic Marker.png',
+      layout: MarkerLayout.imageOnly,
+    );
+
+    stairsMarker = await creator.createUnifiedMarker(
+      text: "",
+      imageSource: 'assets/MapStairs.png',
+      layout: MarkerLayout.imageOnly,
+      imageSize: const Size(25, 25),
+      customAnchor: const Offset(0.5, 0.5),
+    );
+
+    stageMarker = await creator.createUnifiedMarker(
+      text: "",
+      imageSource: 'assets/MapStage.png',
+      layout: MarkerLayout.imageOnly,
+    );
+
+    sittingAreaMarker = await creator.createUnifiedMarker(
+      text: "",
+      imageSource: 'assets/Depth 3, Frame 1-3.png',
+      layout: MarkerLayout.imageOnly,
+    );
+
+    counter = await creator.createUnifiedMarker(
+      text: "",
+      imageSource: 'assets/Counter.png',
+      layout: MarkerLayout.imageOnly,
+      customAnchor: const Offset(0.5, 0.5),
+    );
+
+    insideEntryMarker = await creator.createUnifiedMarker(
+      text: "",
+      imageSource: 'assets/insideEntry.png',
+      layout: MarkerLayout.imageOnly,
+      customAnchor: const Offset(0.5, 0.5),
+    );
+
+    greengreenDotMarker = await creator.createUnifiedMarker(
+      text: "",
+      imageSource: 'assets/greendot.png',
+      layout: MarkerLayout.imageOnly,
+      customAnchor: const Offset(0.5, 0.5),
+    );
   }
 
-  void createBitmapMarker() {
+  Future<void> createBitmapMarker() async {
     print("createBitmapMarker ${StackTrace.current}");
+
+    final creator = UnifiedMarkerCreator();
+
     try {
-      SingletonFunctionController.building.landmarkdata!.then((value) async {
-        List<Landmarks> landmarks = value.landmarks!;
-        for (int i = 0; i < landmarks.length; i++) {
-          if(landmarks[i].element?.type =="Global"){
-            //FOR GLOBAL LANDMARKS (IIT DELHI - LHC,CAMPUS)
-            if(landmarks[i].element?.subType == "Male Washroom"){
-              bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.maleWashroomMarker;
-            }else if(landmarks[i].element?.subType == "Female Washroom"){
-              bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.femaleWashroomMarker;
-            }else if(landmarks[i].element?.subType == "room" || landmarks[i].element?.subType?.toLowerCase() == "booth"){
-              // print("landmarks[i].renderDetail ${landmarks[i].name} ${landmarks[i].renderDetail!.boothType} ${landmarks[i].element?.type} ${landmarks[i].element?.subType}");
-              // print("landmarks[i].name ${landmarks[i].name}");
-              if (landmarks[i].renderDetail != null) {
-                final detail = landmarks[i].renderDetail!;
+      final landmarkData = await SingletonFunctionController.building.landmarkdata!;
+      final landmarks = landmarkData.landmarks ?? [];
 
-                if (detail.logo.isNotEmpty && detail.boothType == null) {
-                  String name = detail.booth.isNotEmpty
-                      ? detail.booth.split('-').first.trim()
-                      : detail.name.split('-').first.trim();
+      for (final landmark in landmarks) {
+        final polyId = landmark.properties?.polyId;
+        if (polyId == null) continue;
 
-                  print("detail.logo ${detail.logo}");
-                  bitMapMarkers[landmarks[i].properties?.polyId ?? ""] =
-                  await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchorInternet(
-                    name,
-                    detail.logo,
-                  );
-                } else if (detail.logo.isNotEmpty) {
-                  if (detail.boothType == "Platinum Booth") {
+        final elementType = landmark.element?.type;
+        final elementSubType = landmark.element?.subType;
+        final hasCoordinate = landmark.coordinateX != null;
+        final hasValidPoly = !(landmark.wasPolyIdNull ?? true);
 
-                    bitMapMarkers[landmarks[i].properties?.polyId ?? ""] =
-                    await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchorInternet(
-                      "",
-                      "${AppConfig.baseUrl}/uploads/${detail.logo}",
-                      imageSize: const Size(150, 75),
-                    );
-                  }else if (detail.boothType == "General") {
-                    bitMapMarkers[landmarks[i].properties?.polyId ?? ""] =
-                    await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchorInternet(
-                      "",
-                      "${AppConfig.baseUrl}/uploads/${detail.logo}",
-                      imageSize: const Size(110, 110),
-                    );
-                  } else if (detail.boothType == "Gold Booth") {
-                    bitMapMarkers[landmarks[i].properties?.polyId ?? ""] =
-                    await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchorInternet(
-                      "",
-                      "${AppConfig.baseUrl}/uploads/${detail.logo}",
-                      imageSize: const Size(112, 75),
-                    );
-                  } else {
-                    bitMapMarkers[landmarks[i].properties?.polyId ?? ""] =
-                    await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchorInternet(
-                      "",
-                      "${AppConfig.baseUrl}/uploads/${detail.logo}",
-                    );
-                  }
-                } else {
-                  // no logo
-                  String name = detail.booth.isNotEmpty
-                      ? detail.booth.split('-').first.trim()
-                      : detail.name.split('-').first.trim();
-
-                  bitMapMarkers[landmarks[i].properties?.polyId ?? ""] = await HelperClass().bitmapDescriptorFromCenteredTextFormatName(name);
-                }
-              }
-
-            }else if(landmarks[i].element?.subType == "Lift"){
-              bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.liftMarker;
-            }else if(landmarks[i].element?.subType == "Stairs"){
-              bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.stairsMarker;
-            }else if(landmarks[i].element?.subType == "Stage"){
-              bitMapMarkers[landmarks[i].properties!.polyId!] = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchorInternet(
-                landmarks[i].renderDetail.name,
-                "assets/MapStage.png",
-                  imageSize : const Size(105, 105)
-              );
-            }else if(landmarks[i].element?.subType == "stage"){
-              bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.stageMarker;
-            }else if(landmarks[i].element?.subType == "Registration"){
-              bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.counter;
-            }else if(landmarks[i].element!.subType?.toLowerCase() == "main entry"){
-              bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.entryMarker;
-            }
-          }
-          else if (landmarks[i].element!.type == "Rooms" &&
-              landmarks[i].element!.subType == "Classroom" &&
-              landmarks[i].coordinateX != null &&
-              !landmarks[i].wasPolyIdNull!) {
-            if (landmarks[i].priority! > 1) {
-              bitMapMarkers[landmarks[i].properties!.polyId!] = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
-                  landmarks[i].name!, 'assets/Classroom.png',
-                  imageSize: const Size(85, 85), color: Color(0xfffb8c00));
-            } else {
-              bitMapMarkers[landmarks[i].properties!.polyId!] =
-              await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
-                  landmarks[i].name!, 'assets/Classroom.png',
-                  imageSize: const Size(85, 85), color: Color(0xfffb8c00));
-            }
-          }
-          else if (landmarks[i].element!.type == "Rooms" &&
-              landmarks[i].element!.subType == "Cafeteria" &&
-              landmarks[i].coordinateX != null &&
-              !landmarks[i].wasPolyIdNull!) {
+        // Global Landmarks
+        if (elementType == "Global") {
+          bitMapMarkers[polyId] = await _handleGlobalLandmark(
+            landmark,
+            creator,
             
-            bitMapMarkers[landmarks[i].properties!.polyId!] =
-            await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
-                landmarks[i].name!, 'assets/cutlery.png',
-                imageSize: const Size(65,65), color: Color(0xfffb8c00));
-          }
-          else if (landmarks[i].name != null &&
-              landmarks[i].name!.toLowerCase().contains("pharmacy")) {
-            // bitMapMarkers[landmarks[i].properties!.polyId!] = await HelperClass().bitmapDescriptorFromTextAndImage(landmarks[i].name!, 'assets/P.png', imageSize: const Size(95, 95), color: Color(0xfffb8c00));
-          }
-          else if (landmarks[i].element!.type == "Rooms" &&
-              landmarks[i].element!.subType == "Point of Interest" &&
-              landmarks[i].coordinateX != null &&
-              !landmarks[i].wasPolyIdNull!) {}
-          else if (landmarks[i].element!.type == "Rooms" &&
-              landmarks[i].element!.subType == "Counter" &&
-              landmarks[i].coordinateX != null) {
-            bitMapMarkers[landmarks[i].properties!.polyId!] =
-            await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
-                landmarks[i].name!, 'assets/Counter.png',
-                imageSize: const Size(85, 85), color: Color(0xfffb8c00));
-          }
-          else if (landmarks[i].element!.type == "Rooms" &&
-              (landmarks[i].element!.subType == "Sample Collection Room" || landmarks[i].element!.subType == "Reception"|| landmarks[i].element!.subType == "Cash Counter") &&
-              landmarks[i].coordinateX != null) {
-            // print("landmarks[i] ${landmarks[i].name} landmarks[i].element!.subType ${landmarks[i].element!.subType}");
-            bitMapMarkers[landmarks[i].properties!.polyId!] =
-            await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
-                "", 'assets/Counter.png',
-                imageSize: const Size(85, 85), color: Color(0xfffb8c00), offset: Offset(0.5, 0.5));
-          }
-          else if (landmarks[i].element!.type == "Rooms" &&
-              (landmarks[i].element!.subType == "Sitting Area") &&
-              landmarks[i].coordinateX != null) {
-            bitMapMarkers[landmarks[i].properties!.polyId!] =
-            await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
-                "", 'assets/Depth 3, Frame 1-3.png',
-                imageSize: const Size(65, 65), color: Color(0xfffb8c00), offset: Offset(0.5, 0.5));
-          }
-          else if (landmarks[i].element!.type == "Rooms" &&
-              landmarks[i].element!.subType == "ATM" &&
-              landmarks[i].coordinateX != null &&
-              !landmarks[i].wasPolyIdNull!) {
-            bitMapMarkers[landmarks[i].properties!.polyId!] =
-            await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
-                landmarks[i].name!, 'assets/ATM.png',
-                imageSize: const Size(65, 65), color: Color(0xfffb8c00));
-          }
-          else if (landmarks[i].element!.type == "Rooms" &&
-              landmarks[i].element!.subType == "Consultation Room" &&
-              landmarks[i].coordinateX != null &&
-              !landmarks[i].wasPolyIdNull!) {
-            bitMapMarkers[landmarks[i].properties!.polyId!] =
-            await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
-                landmarks[i].name!, 'assets/Consultation Room.png',
-                imageSize: const Size(65, 65), color: Color(0xfffb8c00));
-          }
-          else if (landmarks[i].element!.type == "Rooms" &&
-              landmarks[i].element!.subType == "Office" &&
-              landmarks[i].coordinateX != null &&
-              !landmarks[i].wasPolyIdNull!) {
-            bitMapMarkers[landmarks[i].properties!.polyId!] = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
-                landmarks[i].name!, 'assets/Office.png',
-                imageSize: const Size(65, 65), color: Color(0xfffb8c00));
-          }
-          else if (landmarks[i].element!.type == "Rooms" &&
-              landmarks[i].element!.subType == "Entrance Only" &&
-              landmarks[i].coordinateX != null) {
-            bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.blueDotMarker;
-          }else if(landmarks[i].element!.type == "Rooms" && landmarks[i].element!.subType == "main entry"){
-            // final result = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(landmarks[i].name!, 'assets/MapEntry.png', imageSize: const Size(100, 100),);
-            // print("main entry ${landmarks[i].name}");
-            // bitMapMarkers[landmarks[i].properties!.polyId!] = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(landmarks[i].name!, 'assets/MapEntry.png', imageSize: const Size(75, 75),fontSizee: 32);;
-            bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.entryMarker;
-          }
-          else if(landmarks[i].name != null && landmarks[i].name!.toLowerCase().contains("gate")){
-            bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.blueDotMarker;
-          }else if(landmarks[i].element!.type == "Rooms" && landmarks[i].element!.subType == "Door Only"){
-            bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.insideEntryMarker;
-          }
-          else if (landmarks[i].element!.type == "Rooms" &&
-              landmarks[i].element!.subType != "main entry" &&
-              landmarks[i].element!.subType != "Entrance Only" &&
-              landmarks[i].coordinateX != null) {
-
-            // try {
-              if(landmarks[i].wasPolyIdNull == false){
-                String? code;
-                if(landmarks[i].properties?.doorNumber == null){
-                  if(landmarks[i].name!.contains(" - ") || landmarks[i].name!.contains("-")){
-                    code = landmarks[i].name!.split("-")[0];
-                  }else{
-                    code = landmarks[i].name??"";
-                  }
-                }else{
-                  code = landmarks[i].properties?.doorNumber;
-                }
-                // print("landmarks[i].properties.doorNumber $code -- ${landmarks[i].properties?.doorNumber} ${landmarks[i].name} ${landmarks[i].buildingName}");
-
-                // bitMapMarkers[landmarks[i].properties!.polyId!] = MarkerIconWithAnchor(icon, Offset(0,0));
-                bitMapMarkers[landmarks[i].properties!.polyId!] = await HelperClass().bitmapDescriptorFromCenteredTextFormatEDName(code??"");
-              }else{
-                bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.blueDotMarker;
-              }
-
-            // }catch(e){
-            //   print()
-            // }
-          }
-          else if (landmarks[i].element != null &&
-              landmarks[i].element!.subType != null &&
-              landmarks[i].element!.subType == "room door" &&
-              landmarks[i].doorX != null) {
-            //for cubical marker changed form entryMarker to landmarkMarker
-            bitMapMarkers[landmarks[i].properties!.polyId!] = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
-                landmarks[i].name!, 'assets/MapEntry.png',
-                imageSize: const Size(65, 65), color: Colors.black);
-          }
-          else if (landmarks[i].name != null &&
-              landmarks[i].element!.type == ("FloorConnection") &&
-              landmarks[i].element!.subType == "lift") {
-            try {
-              bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.liftMarker;
-            }catch(e){}
-          }
-          else if (landmarks[i].name != null &&
-              landmarks[i].element!.type == "FloorConnection" &&
-              landmarks[i].element!.subType == "stairs") {
-            try {
-              bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.stairsMarker;
-            }catch(e){}
-          }
-          else if (landmarks[i].properties!.washroomType != null &&
-              landmarks[i].properties!.washroomType == "Male") {
-            try {
-              bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.maleWashroomMarker;
-            }catch(e){}
-          }
-          else if (landmarks[i].properties!.washroomType != null &&
-              landmarks[i].properties!.washroomType == "Female") {
-            bitMapMarkers[landmarks[i].properties!.polyId!] = SingletonFunctionController().mapCLustring.femaleWashroomMarker;
-          }
-          else if (landmarks[i].element!.subType != null &&
-              landmarks[i].element!.subType == "main entry") {
-            bitMapMarkers[landmarks[i].properties!.polyId!] = await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
-                landmarks[i].name!, 'assets/MapEntry.png',
-                imageSize: const Size(65, 65), color: Colors.black);
-          }
-          else if (landmarks[i].element!.type == "Services" &&
-              landmarks[i].element!.subType == "kiosk" &&
-              landmarks[i].coordinateX != null) {
-            bitMapMarkers[landmarks[i].properties!.polyId!] =
-            await HelperClass().bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
-                landmarks[i].name!, 'assets/check-in.png',
-                imageSize: const Size(65, 65), color: Color(0xfffb8c00));
-          } else {
-            // 
-          }
+          );
+          continue;
         }
-      });
-    }catch(e){
 
+        // Rooms
+        if (elementType == "Rooms" && hasCoordinate) {
+          bitMapMarkers[polyId] = await _handleRoomLandmark(
+            landmark,
+            creator,
+            
+            hasValidPoly,
+          );
+          continue;
+        }
+
+        // Floor Connections
+        if (elementType == "FloorConnection") {
+          bitMapMarkers[polyId] = _handleFloorConnection(
+            elementSubType,
+            
+          );
+          continue;
+        }
+
+        // Washrooms
+        if (landmark.properties?.washroomType != null) {
+          bitMapMarkers[polyId] = _handleWashroom(
+            landmark.properties!.washroomType!,
+            
+          );
+          continue;
+        }
+
+        // Services
+        if (elementType == "Services" && elementSubType == "kiosk" && hasCoordinate) {
+          bitMapMarkers[polyId] = await creator.createUnifiedMarker(
+            text: landmark.name ?? "",
+            imageSource: 'assets/check-in.png',
+            layout: MarkerLayout.horizontal,
+            textFormat: TextFormat.smartWrap,
+            textColor: const Color(0xfffb8c00),
+          );
+          continue;
+        }
+
+        // Room doors
+        if (elementSubType == "room door" && landmark.doorX != null) {
+          bitMapMarkers[polyId] = await creator.createUnifiedMarker(
+            text: landmark.name ?? "",
+            imageSource: 'assets/MapEntry.png',
+            layout: MarkerLayout.horizontal,
+            textFormat: TextFormat.smartWrap,
+            imageSize: const Size(65, 65),
+            textColor: Colors.black,
+          );
+          continue;
+        }
+      }
+    } catch (e) {
+      print("Error in createBitmapMarker: $e");
     }
+  }
+
+  Future<MarkerIconWithAnchor> _handleGlobalLandmark(
+      Landmarks landmark,
+      UnifiedMarkerCreator creator,
+      ) async {
+    final subType = landmark.element?.subType;
+
+    switch (subType) {
+      case "Male Washroom":
+        return maleWashroomMarker;
+
+      case "Female Washroom":
+        return femaleWashroomMarker;
+
+      case "Lift":
+        return liftMarker;
+
+      case "Stairs":
+        return stairsMarker;
+
+      case "Stage":
+        return await creator.createUnifiedMarker(
+          text: landmark.renderDetail?.name ?? "",
+          imageSource: "assets/MapStage.png",
+          layout: MarkerLayout.horizontal,
+          textFormat: TextFormat.smartWrap,
+          imageSize: const Size(105, 105),
+        );
+
+      case "stage":
+        return stageMarker;
+
+      case "Registration":
+        return counter;
+
+      default:
+        if (subType?.toLowerCase() == "main entry") {
+          return entryMarker;
+        }
+
+        // Handle rooms/booths
+        if (subType == "room" || subType?.toLowerCase() == "booth") {
+          return await _handleBoothLandmark(landmark, creator);
+        }
+
+        return landmarkMarker;
+    }
+  }
+
+  Future<MarkerIconWithAnchor> _handleBoothLandmark(
+      Landmarks landmark,
+      UnifiedMarkerCreator creator,
+      ) async {
+    final detail = landmark.renderDetail;
+    if (detail == null) {
+      return SingletonFunctionController().mapCLustring.landmarkMarker;
+    }
+
+    // Extract name
+    final name = detail.booth.isNotEmpty
+        ? detail.booth.split('-').first.trim()
+        : detail.name.split('-').first.trim();
+
+    // No logo
+    if (detail.logo.isEmpty) {
+      return await creator.createUnifiedMarker(
+        text: name,
+        layout: MarkerLayout.textOnly,
+        textFormat: TextFormat.lhFormat,
+      );
+    }
+
+    // Logo with no booth type
+    if (detail.boothType == null) {
+      return await creator.createUnifiedMarker(
+        text: name,
+        imageSource: detail.logo,
+        layout: MarkerLayout.horizontal,
+        textFormat: TextFormat.smartWrap,
+      );
+    }
+
+    // Logo with booth type
+    final logoUrl = "${AppConfig.baseUrl}/uploads/${detail.logo}";
+
+    switch (detail.boothType) {
+      case "Platinum Booth":
+        return await creator.createUnifiedMarker(
+          text: "",
+          imageSource: logoUrl,
+          layout: MarkerLayout.imageOnly,
+          imageSize: const Size(150, 75),
+        );
+
+      case "General":
+        return await creator.createUnifiedMarker(
+          text: "",
+          imageSource: logoUrl,
+          layout: MarkerLayout.imageOnly,
+          imageSize: const Size(110, 110),
+        );
+
+      case "Gold Booth":
+        return await creator.createUnifiedMarker(
+          text: "",
+          imageSource: logoUrl,
+          layout: MarkerLayout.imageOnly,
+          imageSize: const Size(112, 75),
+        );
+
+      default:
+        return await creator.createUnifiedMarker(
+          text: "",
+          imageSource: logoUrl,
+          layout: MarkerLayout.horizontal,
+          textFormat: TextFormat.smartWrap,
+        );
+    }
+  }
+
+  Future<MarkerIconWithAnchor> _handleRoomLandmark(
+      Landmarks landmark,
+      UnifiedMarkerCreator creator,
+      
+      bool hasValidPoly,
+      ) async {
+    final subType = landmark.element?.subType;
+    final name = landmark.name ?? "";
+
+    // Classroom
+    if (subType == "Classroom" && hasValidPoly) {
+      return await creator.createUnifiedMarker(
+        text: name,
+        imageSource: 'assets/Classroom.png',
+        layout: MarkerLayout.horizontal,
+        textFormat: TextFormat.smartWrap,
+        textColor: const Color(0xfffb8c00),
+      );
+    }
+
+    // Cafeteria
+    if (subType == "Cafeteria" && hasValidPoly) {
+      return await creator.createUnifiedMarker(
+        text: name,
+        imageSource: 'assets/cutlery.png',
+        layout: MarkerLayout.horizontal,
+        textFormat: TextFormat.smartWrap,
+        textColor: const Color(0xfffb8c00),
+      );
+    }
+
+    // Counter
+    if (subType == "Counter") {
+      return await creator.createUnifiedMarker(
+        text: name,
+        imageSource: 'assets/Counter.png',
+        layout: MarkerLayout.horizontal,
+        textFormat: TextFormat.smartWrap,
+        textColor: const Color(0xfffb8c00),
+      );
+    }
+
+    // Counter types with no text
+    if (subType == "Sample Collection Room" ||
+        subType == "Reception" ||
+        subType == "Cash Counter") {
+      return await creator.createUnifiedMarker(
+        text: "",
+        imageSource: 'assets/Counter.png',
+        layout: MarkerLayout.imageOnly,
+        customAnchor: const Offset(0.5, 0.5),
+      );
+    }
+
+    // Sitting Area
+    if (subType == "Sitting Area") {
+      return sittingAreaMarker;
+    }
+
+    // ATM
+    if (subType == "ATM" && hasValidPoly) {
+      return await creator.createUnifiedMarker(
+        text: name,
+        imageSource: 'assets/ATM.png',
+        layout: MarkerLayout.horizontal,
+        textFormat: TextFormat.smartWrap,
+        textColor: const Color(0xfffb8c00),
+      );
+    }
+
+    // Consultation Room
+    if (subType == "Consultation Room" && hasValidPoly) {
+      return await creator.createUnifiedMarker(
+        text: name,
+        imageSource: 'assets/Consultation Room.png',
+        layout: MarkerLayout.horizontal,
+        textFormat: TextFormat.smartWrap,
+        textColor: const Color(0xfffb8c00),
+      );
+    }
+
+    // Office
+    if (subType == "Office" && hasValidPoly) {
+      return await creator.createUnifiedMarker(
+        text: name,
+        imageSource: 'assets/Office.png',
+        layout: MarkerLayout.horizontal,
+        textFormat: TextFormat.smartWrap,
+        textColor: const Color(0xfffb8c00),
+      );
+    }
+
+    // Entrance Only
+    if (subType == "Entrance Only") {
+      return greengreenDotMarker;
+    }
+
+    // Main entry
+    if (subType == "main entry") {
+      return entryMarker;
+    }
+
+    // Gate
+    if (name.toLowerCase().contains("gate")) {
+      return greengreenDotMarker;
+    }
+
+    // Door Only
+    if (subType == "Door Only") {
+      return insideEntryMarker;
+    }
+
+    // Point of Interest (no marker)
+    if (subType == "Point of Interest") {
+      return greengreenDotMarker;
+    }
+
+    // Default room with door number/code
+    if (hasValidPoly) {
+      String code;
+      if (landmark.properties?.doorNumber != null) {
+        code = landmark.properties!.doorNumber!;
+      } else if (name.contains(" - ") || name.contains("-")) {
+        code = name.split("-")[0].trim();
+      } else {
+        code = name;
+      }
+
+      return await creator.createUnifiedMarker(
+        text: code,
+        layout: MarkerLayout.textOnly,
+        textFormat: TextFormat.smartWrap,
+      );
+    }
+
+    // Fallback for invalid poly
+    return greengreenDotMarker;
+  }
+
+  MarkerIconWithAnchor _handleFloorConnection(
+      String? subType,
+      
+      ) {
+    if (subType == "lift") {
+      return liftMarker;
+    } else if (subType == "stairs") {
+      return stairsMarker;
+    }
+    return greengreenDotMarker;
+  }
+
+  MarkerIconWithAnchor _handleWashroom(
+      String washroomType,
+      
+      ) {
+    if (washroomType == "Male") {
+      return maleWashroomMarker;
+    } else if (washroomType == "Female") {
+      return femaleWashroomMarker;
+    }
+    return greengreenDotMarker;
   }
 
 
@@ -449,8 +615,8 @@ class MapClustering {
   }
 
   double getClusteringDistanceDifferentTypes(double zoom) {
-    if (zoom <= 19.5 && zoom > 18.8) return 4;
-    if (zoom <= 18.8 && zoom > 17) return 8;
+    if (zoom <= 19.5 && zoom > 18.8) return 12;
+    if (zoom <= 18.8 && zoom > 17) return 14;
     if (zoom < 17) return 20;
     return double.negativeInfinity; // Aggressive clustering below 18
   }
@@ -504,14 +670,6 @@ class MapClustering {
       buildingId = landmark.buildingID;
       name = landmark.name;
     }
-    if(coordinateX != null && coordinateY != null && buildingId != null) {
-      List<double> value = tools.localtoglobal(
-          coordinateX,
-          coordinateY,
-          SingletonFunctionController.building
-              .patchData[buildingId]);
-      return (floor,LatLng(lat,lng),polyID,buildingId,name,cluster);
-    }
     return (floor,LatLng(lat,lng),polyID,buildingId,name,cluster);
   }
 
@@ -519,433 +677,444 @@ class MapClustering {
   double _toRadiansCluster(double degree) => degree * pi / 180;
 
 
-  Marker _createMarker(Landmarks landmark, double zoomLevel, double theta){
-    // if(landmark.element!.subType?.toLowerCase() == "booth"){
-    //   print("_createMarker ${landmark.name} ${bitMapMarkers.containsKey(landmark.properties!.polyId)} ${landmark.element!.subType}");
-    // }
-    if(bitMapMarkers.containsKey(landmark.properties!.polyId) && landmark.element != null && landmark.element!.subType != null){
-      MarkerIconWithAnchor dotIcon;
-      if(landmark.renderDetail != null){
-        // print("landmark.renderDetail!.color! ${landmark.renderDetail!.name!} ${landmark.renderDetail!.booth!} ${landmark.renderDetail!.color!}");
-        if(landmark.renderDetail!.color == "#3AADE8"){
-          dotIcon = SingletonFunctionController().mapCLustring.blueDotMarker;
-        }else if(landmark.renderDetail!.color == "#34CD2"){
-          // print("in#34CD2");
-          dotIcon = SingletonFunctionController().mapCLustring.greenDotMarker;
-        }else{
-          dotIcon = SingletonFunctionController().mapCLustring.blueDotMarker;
-        }
-      }else{
-        dotIcon = SingletonFunctionController().mapCLustring.blueDotMarker;
+  Marker _createMarker(Landmarks landmark, double zoomLevel, double theta) {
+    if (bitMapMarkers.containsKey(landmark.properties!.polyId) &&
+        landmark.element != null &&
+        landmark.element!.subType != null) {
+      return _createBitmapMarker(landmark, zoomLevel, theta);
+    } else {
+      return _createDefaultMarker(landmark);
+    }
+  }
+
+// Main bitmap marker creation with subtype routing
+  Marker _createBitmapMarker(Landmarks landmark, double zoomLevel, double theta) {
+    final subType = landmark.element!.subType!;
+
+    if (subType == "room door" || subType == "Reception" ||
+        subType == "Blood Bank" || subType == "Library") {
+      return _createRoomDoorMarker(landmark, zoomLevel);
+    } else if (subType.toLowerCase().contains("door only")) {
+      return _createDoorOnlyMarker(landmark, zoomLevel);
+    } else if (subType == "Female Washroom") {
+      return _createWashroomMarker(landmark, isFemale: true);
+    } else if (subType == "Male Washroom") {
+      return _createWashroomMarker(landmark, isFemale: false);
+    } else if (subType == "room" || subType.toLowerCase() == "booth") {
+      return _createRoomOrBoothMarker(landmark, zoomLevel, theta);
+    } else if (subType == "Lift") {
+      return _createLiftMarker(landmark);
+    } else if (subType == "Stairs") {
+      return _createStairsMarker(landmark);
+    } else {
+      return _createGenericBitmapMarker(landmark);
+    }
+  }
+
+// Room door marker (Reception, Blood Bank, Library, etc.)
+  Marker _createRoomDoorMarker(Landmarks landmark, double zoomLevel) {
+    final dotIcon = _getDotIcon(landmark);
+    final markerId = _buildMarkerId(landmark);
+    final polyId = landmark.properties!.polyId!;
+
+    if (zoomLevel < 20.8) {
+      return _createDotMarkerAtCalculatedOrDefaultPosition(
+          landmark, dotIcon, markerId, polyId
+      );
+    } else {
+      return _createRotatedMarkerAtCalculatedPosition(
+          landmark, markerId, polyId, zoomLevel
+      );
+    }
+  }
+
+// Helper: Create dot marker at calculated or default position
+  Marker _createDotMarkerAtCalculatedOrDefaultPosition(
+      Landmarks landmark,
+      MarkerIconWithAnchor dotIcon,
+      MarkerId markerId,
+      String polyId
+      ) {
+    List<LatLng>? calculatedPoints = polygonCalculations.landmarkWithLatLng[polyId];
+    List<LatLng>? polygonPoints = polygonCalculations.landmarkWithPolygonPoints[polyId];
+    LatLng position;
+
+    if(polygonPoints != null){
+      position = tools.calculateRoomCenter(polygonPoints!);
+    } else if (calculatedPoints != null) {
+      position = polygonCalculations.midpoint(calculatedPoints[0], calculatedPoints[1]);
+    } else {
+      position = _getDefaultPosition(landmark);
+    }
+
+    return Marker(
+      icon: dotIcon.icon,
+      markerId: markerId,
+      position: position,
+      anchor: dotIcon.anchor,
+      onTap: () => onMarkerTapCallback(polyId),
+    );
+  }
+
+// Helper: Create rotated marker with bearing calculation
+  Marker _createRotatedMarkerAtCalculatedPosition(
+      Landmarks landmark,
+      MarkerId markerId,
+      String polyId,
+      double zoomLevel
+      ) {
+    List<LatLng>? calculatedPoints = polygonCalculations.landmarkWithLatLng[polyId];
+
+    if (calculatedPoints != null) {
+      double rotation = _calculateRotation(calculatedPoints, polyId, zoomLevel);
+      LatLng positionPoint = _getPositionForRotatedMarker(calculatedPoints, polyId);
+
+      return Marker(
+        icon: bitMapMarkers[polyId]!.icon,
+        markerId: markerId,
+        position: positionPoint,
+        anchor: bitMapMarkers[polyId]!.anchor,
+        flat: true,
+        rotation: rotation,
+        onTap: () => onMarkerTapCallback(polyId),
+      );
+    } else if (polygonCalculations.landmarkWithPolygonPoints[polyId] != null) {
+      List<LatLng>? polygonPoints = polygonCalculations.landmarkWithPolygonPoints[polyId];
+      LatLng positionPoint = tools.calculateRoomCenter(polygonPoints!);
+
+      return Marker(
+        icon: bitMapMarkers[polyId]!.icon,
+        markerId: markerId,
+        position: positionPoint,
+        anchor: bitMapMarkers[polyId]!.anchor,
+        onTap: () => onMarkerTapCallback(polyId),
+      );
+    } else {
+      return Marker(
+        icon: bitMapMarkers[polyId]!.icon,
+        markerId: markerId,
+        position: _getDefaultPosition(landmark),
+        anchor: bitMapMarkers[polyId]!.anchor,
+        onTap: () => onMarkerTapCallback(polyId),
+      );
+    }
+  }
+
+// Door only marker
+  Marker _createDoorOnlyMarker(Landmarks landmark, double zoomLevel) {
+    final polyId = landmark.properties!.polyId!;
+    final markerId = _buildMarkerId(landmark);
+    final position = _getDefaultPosition(landmark);
+    final infoWindow = InfoWindow(title: landmark.name);
+
+    if (zoomLevel > 20.8) {
+      if (landmark.name!.toLowerCase().contains("main entry")) {
+        return Marker(
+          icon: SingletonFunctionController().mapCLustring.entryMarker.icon,
+          markerId: markerId,
+          position: position,
+          anchor: SingletonFunctionController().mapCLustring.entryMarker.anchor,
+          infoWindow: infoWindow,
+          onTap: () => onMarkerTapCallback(polyId),
+        );
+      } else {
+        return Marker(
+          icon: bitMapMarkers[polyId]!.icon,
+          markerId: markerId,
+          position: position,
+          anchor: bitMapMarkers[polyId]!.anchor,
+          infoWindow: infoWindow,
+          onTap: () => onMarkerTapCallback(polyId),
+        );
       }
-      if(landmark.element!.subType == "room door" || landmark.element!.subType == "Reception"|| landmark.element!.subType == "Blood Bank"|| landmark.element!.subType == "Library"){
-        if(zoomLevel < 20.8) {
-          List<LatLng>? calculatedPoints = polygonCalculations.landmarkWithLatLng[landmark.properties!.polyId];
-          // print("calculatedPoints check ${calculatedPoints} ${polygonCalculations.landmarkWithLatLng.containsKey(landmark.properties!.polyId)}");
-          if(calculatedPoints != null) {
-            LatLng positionPoint = polygonCalculations.midpoint(calculatedPoints[0], calculatedPoints[1]);
-            return Marker(
-                icon: dotIcon.icon,
-                markerId: MarkerId("polyId-${landmark.properties!.polyId} ${LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!))}landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name} sId-${landmark.sId}"),
-                position: positionPoint,
-                anchor: dotIcon.anchor,
-                onTap: () {
-                  onMarkerTapCallback(landmark.properties!.polyId!!);
-                }
-            );
-          }else{
-            return Marker(
-              markerId: MarkerId("polyId-${landmark.properties!.polyId} ${LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!))}landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name} sId-${landmark.sId}"),
-              icon: dotIcon.icon,
-              anchor: dotIcon.anchor,
-              position: LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!)),
-              onTap: () {
-                onMarkerTapCallback(landmark.properties!.polyId!!);
-              }
-            );
-          }
+    } else {
+      final dotIcon = _getDotIcon(landmark);
+      return Marker(
+        icon: dotIcon.icon,
+        markerId: markerId,
+        position: position,
+        anchor: dotIcon.anchor,
+        infoWindow: infoWindow,
+        onTap: () => onMarkerTapCallback(polyId),
+      );
+    }
+  }
+
+// Washroom marker (Male/Female)
+  Marker _createWashroomMarker(Landmarks landmark, {required bool isFemale}) {
+    final polyId = landmark.properties!.polyId!;
+    final markerId = _buildMarkerId(landmark);
+    final washroomMarker = isFemale
+        ? SingletonFunctionController().mapCLustring.femaleWashroomMarker
+        : SingletonFunctionController().mapCLustring.maleWashroomMarker;
+
+    LatLng position;
+    if (polygonCalculations.landmarkWithPolygonPoints.containsKey(polyId)) {
+      if (isFemale) print("For Female Washroom");
+      position = landmark.renderDetail!.calculateRoomCenter(
+          polygonCalculations.landmarkWithPolygonPoints[polyId]!
+      );
+    } else {
+      if (isFemale) print("For else Female Washroom");
+      position = _getDefaultPosition(landmark);
+    }
+
+    return Marker(
+      icon: washroomMarker.icon,
+      markerId: markerId,
+      position: position,
+      anchor: washroomMarker.anchor,
+      infoWindow: InfoWindow(title: landmark.name),
+      onTap: () => onMarkerTapCallback(polyId),
+    );
+  }
+
+// Room or booth marker
+  Marker _createRoomOrBoothMarker(Landmarks landmark, double zoomLevel, double theta) {
+    final polyId = landmark.properties!.polyId!;
+    final dotIcon = _getDotIcon(landmark);
+
+    List<LatLng>? polygonPoints = polygonCalculations.landmarkWithPolygonPoints[polyId];
+    double? area;
+    if (polygonPoints != null && polygonPoints.isNotEmpty) {
+      area = tools.calculatePolygonArea(polygonPoints);
+    }
+    print("area calc $area for ${landmark.name} zoomLevel $zoomLevel");
+
+    if (polygonCalculations.landmarkWithLatLng.containsKey(polyId)) {
+      LatLng positionPoint = _getDefaultPosition(landmark);
+
+      // Check if we should render a dot marker
+      if (area != null &&
+          !(area > 60 && zoomLevel > 19.9) &&
+          (!(area > 200 && zoomLevel < 19) && (area <= 200 && zoomLevel < 20.8))) {
+        return Marker(
+          icon: dotIcon.icon,
+          markerId: _buildMarkerId(landmark),
+          position: positionPoint,
+          anchor: dotIcon.anchor,
+          onTap: () => onMarkerTapCallback(polyId),
+        );
+      } else {
+        // Render bitmap marker with rotation
+        List<LatLng>? calculatedPoints = polygonCalculations.landmarkWithLatLng[polyId];
+        double rotation = _calculateRotationForRoom(calculatedPoints!, theta);
+
+        if (landmark.element?.subType?.toLowerCase() == "booth") {
+          return Marker(
+            markerId: _buildMarkerId(landmark),
+            icon: bitMapMarkers[polyId]!.icon,
+            anchor: Offset(0.5, 0.38),
+            flat: true,
+            position: positionPoint,
+            rotation: rotation,
+            onTap: () => onMarkerTapCallback(polyId),
+          );
         } else {
-            List<LatLng>? calculatedPoints = polygonCalculations.landmarkWithLatLng[landmark.properties!.polyId];
-            // print("print${landmark.name} ${landmark.properties!.polyId} ${calculatedPoints?.length}");
-            if(calculatedPoints != null){
-              int leftMost = LeftMost().leftMostPoint(PointForCenter(calculatedPoints![0].latitude, calculatedPoints[0].longitude, "name"), PointForCenter(calculatedPoints[1].latitude, calculatedPoints[1].longitude, "name"), zoomLevel);
-              double rotation;
-              if(leftMost == -1){
-                rotation = polygonCalculations.calculateBearing(calculatedPoints[0],calculatedPoints[1]);
-              }else{
-                rotation = polygonCalculations.calculateBearing(calculatedPoints[1],calculatedPoints[0]);
-              }
-              LatLng positionPoint = polygonCalculations.midpoint(calculatedPoints[0], calculatedPoints[1]);
-
-              return Marker(
-                  icon: bitMapMarkers[landmark.properties!.polyId!]!.icon,
-                  markerId: MarkerId("polyId-${landmark.properties!.polyId} ${LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!))}landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name} sId-${landmark.sId}"),
-                  position: positionPoint,
-                  anchor: bitMapMarkers[landmark.properties!.polyId!]!.anchor,
-                  flat: true,
-                  rotation: rotation,
-                  onTap: () {
-                    onMarkerTapCallback(landmark.properties!.polyId!!);
-                    //
-                  }
-              );
-            }else if(polygonCalculations.landmarkWithPolygonPoints[landmark.properties!.polyId] != null){
-              List<LatLng>? calculatedPoints = polygonCalculations.landmarkWithPolygonPoints[landmark.properties!.polyId];
-              LatLng positionPoint = tools.calculateRoomCenter(calculatedPoints!);
-
-              return Marker(
-                  icon: bitMapMarkers[landmark.properties!.polyId!]!.icon,
-                  markerId: MarkerId("polyId-${landmark.properties!.polyId} ${LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!))}landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name} sId-${landmark.sId}"),
-                  position: positionPoint,
-                  anchor: bitMapMarkers[landmark.properties!.polyId!]!.anchor,
-                  onTap: () {
-                    onMarkerTapCallback(landmark.properties!.polyId!!);
-                    //
-                  }
-              );
-            }else{
-              return Marker(
-                  icon: bitMapMarkers[landmark.properties!.polyId!]!.icon,
-                  markerId: MarkerId("polyId-${landmark.properties!.polyId} ${LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!))}landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name} sId-${landmark.sId}"),
-                  position: LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!)),
-                  anchor: bitMapMarkers[landmark.properties!.polyId!]!.anchor,
-                  onTap: () {
-                    onMarkerTapCallback(landmark.properties!.polyId!!);
-                    //
-                  }
-              );
-            }
-        }
-      }
-      else if(landmark.element!.subType!.toLowerCase().contains("door only")){
-        if(zoomLevel > 20.8){
-          if(landmark.name!.toLowerCase().contains("main entry")){
-            return Marker(
-                icon: SingletonFunctionController().mapCLustring.entryMarker.icon,
-                markerId: MarkerId("polyId-${landmark.properties!.polyId} ${LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!))}landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name} sId- ${landmark.sId}"),
-                position: LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!)),
-                anchor: SingletonFunctionController().mapCLustring.entryMarker.anchor,
-                infoWindow: InfoWindow(title: landmark.name),
-                onTap: () {
-                  onMarkerTapCallback(landmark.properties!.polyId!!);
-                }
-            );
-          }else {
-            return Marker(
-                icon: bitMapMarkers[landmark.properties!.polyId!]!.icon,
-                markerId: MarkerId("polyId-${landmark.properties!.polyId} ${LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!))}landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name} sId- ${landmark.sId}"),
-                position: LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!)),
-                anchor: bitMapMarkers[landmark.properties!.polyId!]!.anchor,
-                infoWindow: InfoWindow(title: landmark.name),
-                onTap: () {
-                  onMarkerTapCallback(landmark.properties!.polyId!!);
-                }
-            );
-          }
-        }else{
           return Marker(
-              icon: dotIcon.icon,
-              markerId: MarkerId("polyId-${landmark.properties!.polyId} ${LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!))}landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name} sId- ${landmark.sId}"),
-              position: LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!)),
-              anchor: dotIcon.anchor,
-              infoWindow: InfoWindow(title: landmark.name),
-              onTap: () {
-                onMarkerTapCallback(landmark.properties!.polyId!!);
-              }
+            markerId: _buildMarkerId(landmark),
+            icon: bitMapMarkers[polyId]!.icon,
+            anchor: dotIcon.anchor,
+            position: positionPoint,
+            onTap: () => onMarkerTapCallback(polyId),
           );
         }
       }
-      // FOR GLOBAL ANNOTATION
-      else if(landmark.element!.subType == "Female Washroom"){
-        if(polygonCalculations.landmarkWithPolygonPoints.containsKey(landmark.properties!.polyId!)){
-          print("For Female Washroom");
-          LatLng positionPoint = landmark.renderDetail!.calculateRoomCenter(polygonCalculations.landmarkWithPolygonPoints[landmark.properties!.polyId!]!);
-          return Marker(
-              icon: SingletonFunctionController().mapCLustring
-                  .femaleWashroomMarker.icon,
-              markerId: MarkerId(
-                  "polyId-${landmark.properties!.polyId} ${LatLng(
-                      double.parse(landmark.properties!.latitude!),
-                      double.parse(landmark.properties!
-                          .longitude!))}landmarkType-${landmark.element!
-                      .subType}buildingID-${landmark.buildingID}name-${landmark
-                      .name} sId- ${landmark.sId}"),
-              position: positionPoint,
-              anchor: SingletonFunctionController().mapCLustring
-                  .femaleWashroomMarker.anchor,
-              infoWindow: InfoWindow(title: landmark.name),
-              onTap: () {
-                onMarkerTapCallback(landmark.properties!.polyId!);
-              }
-          );
-        }else {
-          print("For else Female Washroom");
-          return Marker(
-              icon: SingletonFunctionController().mapCLustring
-                  .femaleWashroomMarker.icon,
-              markerId: MarkerId(
-                  "polyId-${landmark.properties!.polyId} ${LatLng(
-                      double.parse(landmark.properties!.latitude!),
-                      double.parse(landmark.properties!
-                          .longitude!))}landmarkType-${landmark.element!
-                      .subType}buildingID-${landmark.buildingID}name-${landmark
-                      .name} sId- ${landmark.sId}"),
-              position: LatLng(double.parse(landmark.properties!.latitude!),
-                  double.parse(landmark.properties!.longitude!)),
-              anchor: SingletonFunctionController().mapCLustring
-                  .femaleWashroomMarker.anchor,
-              infoWindow: InfoWindow(title: landmark.name),
-              onTap: () {
-                onMarkerTapCallback(landmark.properties!.polyId!);
-              }
-          );
-        }
-      }
-      else if(landmark.element!.subType == "Male Washroom"){
-        if(polygonCalculations.landmarkWithPolygonPoints.containsKey(landmark.properties!.polyId!)){
-          LatLng positionPoint = landmark.renderDetail!.calculateRoomCenter(polygonCalculations.landmarkWithPolygonPoints[landmark.properties!.polyId!]!);
-          return Marker(
-              icon: SingletonFunctionController().mapCLustring
-                  .maleWashroomMarker.icon,
-              markerId: MarkerId(
-                  "polyId-${landmark.properties!.polyId} ${LatLng(
-                      double.parse(landmark.properties!.latitude!),
-                      double.parse(landmark.properties!
-                          .longitude!))}landmarkType-${landmark.element!
-                      .subType}buildingID-${landmark.buildingID}name-${landmark
-                      .name} sId- ${landmark.sId}"),
-              position: positionPoint,
-              anchor: SingletonFunctionController().mapCLustring
-                  .maleWashroomMarker.anchor,
-              infoWindow: InfoWindow(title: landmark.name),
-              onTap: () {
-                onMarkerTapCallback(landmark.properties!.polyId!);
-              }
-          );
-        }else {
-          return Marker(
-              icon: SingletonFunctionController().mapCLustring
-                  .maleWashroomMarker.icon,
-              markerId: MarkerId(
-                  "polyId-${landmark.properties!.polyId} ${LatLng(
-                      double.parse(landmark.properties!.latitude!),
-                      double.parse(landmark.properties!
-                          .longitude!))}landmarkType-${landmark.element!
-                      .subType}buildingID-${landmark.buildingID}name-${landmark
-                      .name} sId- ${landmark.sId}"),
-              position: LatLng(double.parse(landmark.properties!.latitude!),
-                  double.parse(landmark.properties!.longitude!)),
-              anchor: SingletonFunctionController().mapCLustring
-                  .maleWashroomMarker.anchor,
-              infoWindow: InfoWindow(title: landmark.name),
-              onTap: () {
-                onMarkerTapCallback(landmark.properties!.polyId!);
-              }
-          );
-        }
-      }
+    } else {
+      return Marker(
+        markerId: _buildMarkerId(landmark),
+        icon: dotIcon.icon,
+        anchor: dotIcon.anchor,
+        position: _getDefaultPosition(landmark),
+        onTap: () => onMarkerTapCallback(polyId),
+      );
+    }
+  }
 
-      else if(landmark.element!.subType == "room" || landmark.element!.subType?.toLowerCase() == "booth"){
-        // print("inroom ${landmark.name} $zoomLevel");
-        List<LatLng>? polygonPoints = polygonCalculations.landmarkWithPolygonPoints[landmark.properties!.polyId];
-        double? area;
-        if (polygonPoints != null && polygonPoints.isNotEmpty) {
-          area = tools.calculatePolygonArea(polygonPoints);
-        }
-        print("area calc $area for ${landmark.name} zoomLevel $zoomLevel");
+// Lift marker
+  Marker _createLiftMarker(Landmarks landmark) {
+    final polyId = landmark.properties!.polyId!;
+    final liftMarker = SingletonFunctionController().mapCLustring.liftMarker;
 
-        if(polygonCalculations.landmarkWithLatLng.containsKey(landmark.properties!.polyId!)){
-          LatLng positionPoint = LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!));
-          if(area != null &&
-              !(area > 60 && zoomLevel > 19.9) && // <-- skip marker if both true
-              (!(area > 200 && zoomLevel < 19) &&
-                  (area <= 200 && zoomLevel < 20.8))){
-            // print("dot rendered for ${landmark.name} first else");
-            return Marker(
-                icon: dotIcon.icon,
-                markerId: MarkerId("polyId-${landmark.properties!.polyId} ${LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!))}landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name}sId-${landmark.sId}"),
-                position: positionPoint,
-                // flat: true,
-                anchor: dotIcon.anchor,
-                onTap: () {
-                  onMarkerTapCallback(landmark.properties!.polyId!);
-                }
-            );
-          }else{
-            List<LatLng>? points = polygonCalculations.landmarkWithPolygonPoints[landmark.properties!.polyId];
-            List<LatLng>? calculatedPoints = polygonCalculations.landmarkWithLatLng[landmark.properties!.polyId];
-            int leftMost = LeftMost().leftMostPoint(PointForCenter(calculatedPoints![0].latitude, calculatedPoints[0].longitude, "name"), PointForCenter(calculatedPoints[1].latitude, calculatedPoints[1].longitude, "name"), theta);
-            double rotation;
-            if(leftMost == -1) {
-              rotation = polygonCalculations.calculateBearing(calculatedPoints[0],calculatedPoints[1]);
-            }else{
-              rotation = polygonCalculations.calculateBearing(calculatedPoints[1],calculatedPoints[0]);
-            }
+    LatLng position;
+    if (polygonCalculations.landmarkWithPolygonPoints.containsKey(polyId)) {
+      position = landmark.renderDetail!.calculateRoomCenter(
+          polygonCalculations.landmarkWithPolygonPoints[polyId]!
+      );
+    } else {
+      position = _getDefaultPosition(landmark);
+    }
 
-            // LatLng positionPoint = tools.calculateRoomCenter(calculatedPoints);
+    return Marker(
+      icon: liftMarker.icon,
+      markerId: _buildMarkerId(landmark),
+      position: position,
+      anchor: liftMarker.anchor,
+      infoWindow: InfoWindow(title: landmark.name),
+      onTap: () => onMarkerTapCallback(polyId),
+    );
+  }
 
-            if(landmark.element?.subType?.toLowerCase() == "booth"){
-              // print("landmark name center ${landmark.name} $rotation");
-              // LatLng positionPoint = polygonCalculations.midpoint(calculatedPoints[0], calculatedPoints[1]);
-              return Marker(
-                  markerId: MarkerId("polyId-${landmark.properties!.polyId} ${LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!))}landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name}sId-${landmark.sId}"),
-                  icon: bitMapMarkers[landmark.properties!.polyId!]!.icon,
-                  anchor: Offset(0.5, 0.38),
-                  flat: true,
-                  position: positionPoint,
-                  rotation: rotation,
-                  onTap: () {
-                    onMarkerTapCallback(landmark.properties!.polyId!);
-                  }
-              );
-            }else{
-              return Marker(
-                  markerId: MarkerId("polyId-${landmark.properties!.polyId} ${LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!))}landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name}sId-${landmark.sId}"),
-                  icon: bitMapMarkers[landmark.properties!.polyId!]!.icon,
-                  anchor: dotIcon.anchor,
-                  // flat: true,
-                  position: positionPoint,
-                  // rotation: rotation,
-                  onTap: () {
-                    onMarkerTapCallback(landmark.properties!.polyId!);
-                  }
-              );
-            }
+// Stairs marker
+  Marker _createStairsMarker(Landmarks landmark) {
+    final stairsMarker = SingletonFunctionController().mapCLustring.stairsMarker;
 
-          }
-        }else{
-          // print("dot rendered for ${landmark.name} last else");
-          return Marker(
-              markerId: MarkerId("polyId-${landmark.properties!.polyId} ${LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!))}landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name}sId-${landmark.sId}"),
-              icon: dotIcon.icon,
-              anchor: dotIcon.anchor,
-              position: LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!)),
-              onTap: () {
-                onMarkerTapCallback(landmark.properties!.polyId!);
-              }
-          );
-        }
+    return Marker(
+      icon: stairsMarker.icon,
+      markerId: _buildMarkerId(landmark),
+      position: _getDefaultPosition(landmark),
+      anchor: stairsMarker.anchor,
+      infoWindow: InfoWindow(title: landmark.name),
+      onTap: () => onMarkerTapCallback(landmark.properties!.polyId!),
+    );
+  }
 
-      }
-      else if(landmark.element!.subType == "Lift"){
-        if(polygonCalculations.landmarkWithPolygonPoints.containsKey(landmark.properties!.polyId!)){
-          LatLng positionPoint = landmark.renderDetail!.calculateRoomCenter(polygonCalculations.landmarkWithPolygonPoints[landmark.properties!.polyId!]!);
-          return Marker(
-              icon: SingletonFunctionController().mapCLustring.liftMarker.icon,
-              markerId: MarkerId(
-                  "polyId-${landmark.properties!.polyId} ${LatLng(
-                      double.parse(landmark.properties!.latitude!),
-                      double.parse(landmark.properties!
-                          .longitude!))}landmarkType-${landmark.element!
-                      .subType}buildingID-${landmark.buildingID}name-${landmark
-                      .name}sId-${landmark.sId}"),
-              position: positionPoint,
-              anchor: SingletonFunctionController().mapCLustring.liftMarker
-                  .anchor,
-              infoWindow: InfoWindow(title: landmark.name),
-              onTap: () {
-                onMarkerTapCallback(landmark.properties!.polyId!);
-              }
-          );
-        }else {
-          return Marker(
-              icon: SingletonFunctionController().mapCLustring.liftMarker.icon,
-              markerId: MarkerId(
-                  "polyId-${landmark.properties!.polyId} ${LatLng(
-                      double.parse(landmark.properties!.latitude!),
-                      double.parse(landmark.properties!
-                          .longitude!))}landmarkType-${landmark.element!
-                      .subType}buildingID-${landmark.buildingID}name-${landmark
-                      .name}sId-${landmark.sId}"),
-              position: LatLng(double.parse(landmark.properties!.latitude!),
-                  double.parse(landmark.properties!.longitude!)),
-              anchor: SingletonFunctionController().mapCLustring.liftMarker
-                  .anchor,
-              infoWindow: InfoWindow(title: landmark.name),
-              onTap: () {
-                onMarkerTapCallback(landmark.properties!.polyId!);
-              }
-          );
-        }
-      }
-      else if(landmark.element!.subType == "Stairs"){
-        return Marker(
-            icon: SingletonFunctionController().mapCLustring.stairsMarker.icon,
-            markerId: MarkerId("polyId-${landmark.properties!.polyId} ${LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!))}landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name}sId-${landmark.sId}"),
-            position: LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!)),
-            anchor: SingletonFunctionController().mapCLustring.stairsMarker.anchor,
-            infoWindow: InfoWindow(title: landmark.name),
-            onTap: () {
-              onMarkerTapCallback(landmark.properties!.polyId!);
-            }
-        );
-      }
-      else{
-        return Marker(
-            icon: bitMapMarkers[landmark.properties!.polyId!]!.icon,
-            markerId: MarkerId("polyId-${landmark.properties!.polyId} ${LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!))}landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name}sId-${landmark.sId}"),
-            position: LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!)),
-            anchor: bitMapMarkers[landmark.properties!.polyId!]!.anchor,
-            infoWindow: InfoWindow(title: landmark.name),
-            onTap: () {
-              onMarkerTapCallback(landmark.properties!.polyId!);
-            }
-        );
+// Generic bitmap marker (fallback)
+  Marker _createGenericBitmapMarker(Landmarks landmark) {
+    final polyId = landmark.properties!.polyId!;
+
+    return Marker(
+      icon: bitMapMarkers[polyId]!.icon,
+      markerId: _buildMarkerId(landmark),
+      position: _getDefaultPosition(landmark),
+      anchor: bitMapMarkers[polyId]!.anchor,
+      infoWindow: InfoWindow(title: landmark.name),
+      onTap: () => onMarkerTapCallback(polyId),
+    );
+  }
+
+// Default marker (for non-bitmap cases)
+  Marker _createDefaultMarker(Landmarks landmark) {
+    final MarkerIconWithAnchor assignMarker = _getDefaultMarkerIcon(landmark);
+    final markerId = _buildMarkerId(landmark);
+
+    try {
+      return Marker(
+        icon: assignMarker.icon,
+        markerId: markerId,
+        position: _getDefaultPosition(landmark),
+        anchor: assignMarker.anchor,
+        infoWindow: InfoWindow(title: landmark.name),
+        onTap: () => onMarkerTapCallback(landmark.properties!.polyId!),
+      );
+    } catch (e) {
+      return Marker(
+        icon: assignMarker.icon,
+        markerId: MarkerId("polyId-${landmark.properties!.polyId})}landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name}sId-${landmark.sId}"),
+        anchor: assignMarker.anchor,
+        infoWindow: InfoWindow(title: landmark.name),
+        onTap: () => onMarkerTapCallback(landmark.properties!.polyId!),
+      );
+    }
+  }
+
+// === HELPER METHODS ===
+
+  MarkerIconWithAnchor _getDotIcon(Landmarks landmark) {
+    if (landmark.renderDetail != null) {
+      if (landmark.renderDetail!.color == "#3AADE8" ||
+          landmark.renderDetail!.color == "#34CD2") {
+        return SingletonFunctionController().mapCLustring.greengreenDotMarker;
+      } else {
+        return SingletonFunctionController().mapCLustring.greengreenDotMarker;
       }
     }
-    else {
-      // ELSE FOR NON-GLOBAL MAIN ENTRY, CAFETERIA, LIFT, RESTROOM
-      MarkerIconWithAnchor assignMarker;
-      if(landmark.element!.subType =="main entry"){
-        assignMarker = SingletonFunctionController().mapCLustring.entryMarker;
-      }else if(landmark.element!.subType =="Cafeteria"){
-        assignMarker = SingletonFunctionController().mapCLustring.cafeteriaMarker;
-      }else if(landmark.element!.subType =="lift"){
-        assignMarker = SingletonFunctionController().mapCLustring.liftMarker;
-      }else if(landmark.element!.subType == "restRoom"){
-        if(landmark.name!.toLowerCase().contains('female')) {
-          assignMarker = SingletonFunctionController().mapCLustring.femaleWashroomMarker;
-        }else if(landmark.name!.toLowerCase().contains('male')){
-          assignMarker = SingletonFunctionController().mapCLustring.maleWashroomMarker;
-        }else{
-          assignMarker = SingletonFunctionController().mapCLustring.femaleWashroomMarker;
-        }
-      }else if(landmark.element!.subType =="room door"){
-        assignMarker = SingletonFunctionController().mapCLustring.blueDotMarker;
-      }else if(landmark.element!.subType =="stairs"){
-        assignMarker = SingletonFunctionController().mapCLustring.stairsMarker;
-      }else{
-        assignMarker = SingletonFunctionController().mapCLustring.blueDotMarker;
+    return SingletonFunctionController().mapCLustring.greengreenDotMarker;
+  }
+
+  MarkerIconWithAnchor _getDefaultMarkerIcon(Landmarks landmark) {
+    final subType = landmark.element!.subType;
+
+    if (subType == "main entry") {
+      return SingletonFunctionController().mapCLustring.entryMarker;
+    } else if (subType == "Cafeteria") {
+      return SingletonFunctionController().mapCLustring.cafeteriaMarker;
+    } else if (subType == "lift") {
+      return SingletonFunctionController().mapCLustring.liftMarker;
+    } else if (subType == "restRoom") {
+      if (landmark.name!.toLowerCase().contains('female')) {
+        return SingletonFunctionController().mapCLustring.femaleWashroomMarker;
+      } else if (landmark.name!.toLowerCase().contains('male')) {
+        return SingletonFunctionController().mapCLustring.maleWashroomMarker;
+      } else {
+        return SingletonFunctionController().mapCLustring.femaleWashroomMarker;
       }
-      try {
-        return Marker(
-            icon: assignMarker.icon,
-            markerId: MarkerId("polyId-${landmark.properties!.polyId} ${LatLng(
-                double.parse(landmark.properties!.latitude!), double.parse(
-                landmark.properties!.longitude!))}landmarkType-${landmark
-                .element!.subType}buildingID-${landmark
-                .buildingID}name-${landmark.name}sId-${landmark.sId}"),
-            position: LatLng(double.parse(landmark.properties!.latitude!),
-                double.parse(landmark.properties!.longitude!)),
-            anchor: assignMarker.anchor,
-            infoWindow: InfoWindow(title: landmark.name),
-            onTap: () {
-              onMarkerTapCallback(landmark.properties!.polyId!);
-            }
-        );
-      }catch(e){
-        // print("landmark error ${landmark.sId} ${landmark.coordinateX} ${landmark.coordinateY} ${landmark.name} ${landmark.properties!.latitude} ${landmark.properties!.longitude}");
-        return Marker(
-            icon: assignMarker.icon,
-            markerId: MarkerId("polyId-${landmark.properties!.polyId})}landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name}sId-${landmark.sId}"),
-            anchor: assignMarker.anchor,
-            infoWindow: InfoWindow(title: landmark.name),
-            onTap: () {
-              onMarkerTapCallback(landmark.properties!.polyId!);
-            }
-        );
-      }
+    } else if (subType == "room door") {
+      return SingletonFunctionController().mapCLustring.greengreenDotMarker;
+    } else if (subType == "stairs") {
+      return SingletonFunctionController().mapCLustring.stairsMarker;
+    } else {
+      return SingletonFunctionController().mapCLustring.greengreenDotMarker;
     }
+  }
+
+  MarkerId _buildMarkerId(Landmarks landmark) {
+    try{
+      return MarkerId(
+          "polyId-${landmark.properties!.polyId} ${LatLng(double.parse(landmark.properties!.latitude!), double.parse(landmark.properties!.longitude!))}landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name}sId-${landmark.sId}"
+      );
+    }catch(e){
+      return MarkerId(
+          "polyId-${landmark.properties!.polyId} landmarkType-${landmark.element!.subType}buildingID-${landmark.buildingID}name-${landmark.name}sId-${landmark.sId}"
+      );
+    }
+  }
+
+  LatLng _getDefaultPosition(Landmarks landmark) {
+    return LatLng(
+        double.parse(landmark.properties!.latitude!),
+        double.parse(landmark.properties!.longitude!)
+    );
+  }
+
+  double _calculateRotation(List<LatLng> calculatedPoints, String polyId, double zoomLevel) {
+    int leftMost = LeftMost().leftMostPoint(
+        PointForCenter(calculatedPoints[0].latitude, calculatedPoints[0].longitude, "name"),
+        PointForCenter(calculatedPoints[1].latitude, calculatedPoints[1].longitude, "name"),
+        zoomLevel
+    );
+
+    double rotation;
+    if (leftMost == -1) {
+      rotation = polygonCalculations.calculateBearing(calculatedPoints[0], calculatedPoints[1]);
+    } else {
+      rotation = polygonCalculations.calculateBearing(calculatedPoints[1], calculatedPoints[0]);
+    }
+
+    if (polygonCalculations.landmarkWithPolygonPoints[polyId] != null) {
+      final result = findBestFitRectangleBearing(
+          polygonCalculations.landmarkWithPolygonPoints[polyId]!
+      );
+      rotation = result.bearing;
+    }
+
+    return rotation;
+  }
+
+  double _calculateRotationForRoom(List<LatLng> calculatedPoints, double theta) {
+    int leftMost = LeftMost().leftMostPoint(
+        PointForCenter(calculatedPoints[0].latitude, calculatedPoints[0].longitude, "name"),
+        PointForCenter(calculatedPoints[1].latitude, calculatedPoints[1].longitude, "name"),
+        theta
+    );
+
+    if (leftMost == -1) {
+      return polygonCalculations.calculateBearing(calculatedPoints[0], calculatedPoints[1]);
+    } else {
+      return polygonCalculations.calculateBearing(calculatedPoints[1], calculatedPoints[0]);
+    }
+  }
+
+  LatLng _getPositionForRotatedMarker(List<LatLng> calculatedPoints, String polyId) {
+    LatLng positionPoint = polygonCalculations.midpoint(calculatedPoints[0], calculatedPoints[1]);
+
+    if (polygonCalculations.landmarkWithPolygonPoints[polyId] != null) {
+      positionPoint = tools.calculateRoomCenter(
+          polygonCalculations.landmarkWithPolygonPoints[polyId]!
+      );
+    }
+
+    return positionPoint;
   }
 
   Marker _createClusterMarker(LatLng center, int count,double zoom,int? floor,String? polyId,String? buildingId,String? name,List<Landmarks>? allLandmarks) {
@@ -1063,8 +1232,8 @@ class MapClustering {
           'cluster_${center.latitude}_${center.longitude}buildingID-${buildingId} floor ${floor}',
         ),
         position: positionPoint,
-        icon: SingletonFunctionController().mapCLustring.blueDotMarker.icon,
-        anchor: SingletonFunctionController().mapCLustring.blueDotMarker.anchor,
+        icon: SingletonFunctionController().mapCLustring.greengreenDotMarker.icon,
+        anchor: SingletonFunctionController().mapCLustring.greengreenDotMarker.anchor,
         infoWindow: InfoWindow(title: '$count locations'),
         onTap: () {
           onMarkerTapCallback(polyId!);
@@ -1089,8 +1258,8 @@ class MapClustering {
           'cluster_${center.latitude}_${center.longitude}buildingID-${buildingId} floor ${floor}',
         ),
         position: positionPoint,
-        icon: SingletonFunctionController().mapCLustring.blueDotMarker.icon,
-        anchor: SingletonFunctionController().mapCLustring.blueDotMarker.anchor,
+        icon: SingletonFunctionController().mapCLustring.greengreenDotMarker.icon,
+        anchor: SingletonFunctionController().mapCLustring.greengreenDotMarker.anchor,
         infoWindow: InfoWindow(title: '$count locations'),
         onTap: () {
           onMarkerTapCallback(polyId!);
@@ -1142,8 +1311,8 @@ class MapClustering {
           'cluster_${center.latitude}_${center.longitude}buildingID-${buildingId} floor ${floor}',
         ),
         position: positionPoint,
-        icon: SingletonFunctionController().mapCLustring.blueDotMarker.icon,
-        anchor: SingletonFunctionController().mapCLustring.blueDotMarker.anchor,
+        icon: SingletonFunctionController().mapCLustring.greengreenDotMarker.icon,
+        anchor: SingletonFunctionController().mapCLustring.greengreenDotMarker.anchor,
         infoWindow: InfoWindow(title: '$count locations'),
         onTap: () {
           onMarkerTapCallback(polyId!);

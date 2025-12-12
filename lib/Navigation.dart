@@ -86,10 +86,10 @@ import 'GPSService.dart';
 import 'GlobalAnnotation/global_annotation_controller.dart';
 import 'GlobalAnnotation/global_rendering.dart';
 import 'LogginhScreen.dart';
-import 'MODELS/MarkerIconWithAnchor.dart';
 import 'MapMarkerCluster/MarkerClustering.dart';
 import 'MapMarkerCluster/PointForCenter.dart';
 import 'MapMarkerCluster/PolygonCalculations.dart';
+import 'MapMarkerCluster/UnifiedMarkerCreator.dart';
 import 'PlayPreview/PlayPreviewManager.dart';
 import 'Repository/RepositoryManager.dart';
 import 'Sensor/SensorManager.dart';
@@ -245,6 +245,7 @@ class _NavigationState extends State<Navigation>
   bool checkedForPatchDataUpdated = false;
   bool checkedForLandmarkDataUpdated = false;
   pac.PriorityQueue<MapEntry<String, double>> debugPQ = new pac.PriorityQueue();
+  final creator = UnifiedMarkerCreator();
   late Uint8List userloc;
   late Uint8List userlocdebug;
   PlayPreviewManager? playPreviewManager;
@@ -522,32 +523,6 @@ class _NavigationState extends State<Navigation>
     });
   }
 
-  void _produceNameMarker() async {
-    listOfCoordinates.forEach((key, value) async {
-      LatLng midpoint(LatLng p1, LatLng p2) {
-        return LatLng(
-          (p1.latitude + p2.latitude) / 2,
-          (p1.longitude + p2.longitude) / 2,
-        );
-      }
-
-      LatLng topMid = midpoint(value[0], value[3]);
-      LatLng bottomMid = midpoint(value[0], value[3]);
-
-      MarkerIconWithAnchor result = await HelperClass()
-          .bitmapDescriptorFromTextAndImageUpdatedWithAnchor(key, null);
-      roomNameMarkers.add(Marker(
-          markerId: MarkerId("${key}}"),
-          visible: true,
-          flat: true,
-          position: LatLng((topMid.longitude + bottomMid.longitude) / 2,
-              (topMid.latitude + bottomMid.latitude) / 2),
-          icon: result.icon,
-          anchor: result.anchor));
-    });
-    print("_produceNameMarker ${listOfCoordinates.length}");
-  }
-
   // Start the animation loop
   void PB_startAnimation() {
     if (!PB_isProgressing) {
@@ -578,9 +553,9 @@ class _NavigationState extends State<Navigation>
   }
   bool isFromLocalize = true; // Initialize at class level
   Future<void> initializeMarkers() async {
-    userloc = await getImagesFromMarker('assets/userloc0.png', 130);
+    userloc = await getImagesFromMarker('assets/userloc0.png', 70);
     if (!kIsWeb && kDebugMode) {
-      userlocdebug = await getImagesFromMarker('assets/tealtorch.png', 35);
+      userlocdebug = await getImagesFromMarker('assets/tealtorch.png', 15);
     }
   }
   bool isAppinForeground = true;
@@ -1528,7 +1503,7 @@ class _NavigationState extends State<Navigation>
   Landmarks? PinedLandmark;
 
   Future<void> addNearbyLandmarkMarkers(LatLng point,String id, String name, bool visible, {String? road}) async {
-    final Uint8List iconMarker = await getImagesFromMarker('assets/OptionLandmark.png', 85);
+    final Uint8List iconMarker = await getImagesFromMarker('assets/OptionLandmark.png', 30);
     BitmapDescriptor optionLandmark = BitmapDescriptor.fromBytes(iconMarker);
     final markerId = MarkerId(id);
     setState(() {
@@ -1540,6 +1515,7 @@ class _NavigationState extends State<Navigation>
         position: point,
         visible: visible,
         icon: optionLandmark,
+        anchor: Offset(0.5, 0.5)
       );
     });
     PinLandmarkPannel.togglePanel();
@@ -1573,7 +1549,7 @@ class _NavigationState extends State<Navigation>
         position.latitude.toStringAsFixed(5) ||
         center.longitude.toStringAsFixed(5) !=
             position.longitude.toStringAsFixed(5)) {
-      print("focusing map");
+      print("focusing map $position");
       _googleMapController.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
@@ -1600,21 +1576,21 @@ class _NavigationState extends State<Navigation>
                 .where((landmark) => landmark.sId == id.value)
                 .first) return;
     final Uint8List selectedMarker =
-    await getImagesFromMarker('assets/LandmarkSelected.png', 85);
+    await getImagesFromMarker('assets/LandmarkSelected.png', 30);
     BitmapDescriptor selectedLandmark =
     BitmapDescriptor.fromBytes(selectedMarker);
 
     final Uint8List iconMarker =
-    await getImagesFromMarker('assets/OptionLandmark.png', 85);
+    await getImagesFromMarker('assets/OptionLandmark.png', 30);
     BitmapDescriptor optionLandmark = BitmapDescriptor.fromBytes(iconMarker);
     setState(() {
       // Update all markers to default
       nearbyLandmarks.updateAll((markerId, marker) {
-        return marker.copyWith(iconParam: optionLandmark);
+        return marker.copyWith(iconParam: optionLandmark, anchorParam: Offset(0.5, 0.5));
       });
       // Update the selected marker to a different icon
       nearbyLandmarks[id] =
-          nearbyLandmarks[id]!.copyWith(iconParam: selectedLandmark);
+          nearbyLandmarks[id]!.copyWith(iconParam: selectedLandmark, anchorParam: Offset(0.5, 0.5));
     });
     focusOnPinLandmark(nearbyLandmarks[id]!.position);
     if (SingletonFunctionController.building.listOfNearbyLandmarksToLocalize !=
@@ -3484,9 +3460,14 @@ class _NavigationState extends State<Navigation>
           print("Part 4 ${"${AppConfig.baseUrl}/uploads/$part2"}");
 
           try {
-            MarkerIconWithAnchor markerName = await HelperClass()
-                .bitmapDescriptorFromTextAndImageUpdatedWithAnchorInternetNew(
-                part1, "${AppConfig.baseUrl}/uploads/$part2");
+            final marker = await creator.createUnifiedMarker(
+              text: part1,
+              imageSource: "${AppConfig.baseUrl}/uploads/$part2",
+              layout: MarkerLayout.horizontal,
+              textFormat: TextFormat.smartWrap,  // Uses your preferred logic!
+              fontSize: 12.0,
+            );
+
             globalBlock.add(currentPolygon);
             List<LatLng> latLngPoints = currentPolygon.points;
             polygonCalculation.landmarkWithPolygonPoints[part3] =
@@ -3516,9 +3497,9 @@ class _NavigationState extends State<Navigation>
             blockMarker.add(
                 Marker(
                     markerId: MarkerId("Indoor Block Layer ${currentPolygon.polygonId.toString()}"),
-                    anchor: markerName.anchor,
+                    anchor: marker.anchor,
                     position: positionPoint,
-                    icon: markerName.icon,
+                    icon: marker.icon,
                     onTap: (){
                       _googleMapController.animateCamera(
                         CameraUpdate.newCameraPosition(
@@ -3559,10 +3540,14 @@ class _NavigationState extends State<Navigation>
           print("Part1: $part1");
           print("Part2: $part2");
           print("Part3: $part3");
-          MarkerIconWithAnchor markerName = await HelperClass()
-              .bitmapDescriptorFromTextAndImageUpdatedWithAnchorInternetNew(
-              part1, "${AppConfig.baseUrl}/uploads/$part2",
-              imageSize: const Size(100, 100));
+
+          final marker = await creator.createUnifiedMarker(
+            text: part1,
+            imageSource: "${AppConfig.baseUrl}/uploads/$part2",
+            layout: MarkerLayout.horizontal,
+            textFormat: TextFormat.smartWrap,  // Uses your preferred logic!
+            fontSize: 12.0,
+          );
           // MarkerIconWithAnchor markerName =
           //     await HelperClass().bitmapDescriptorFromCenteredText(part1);
           outDoorGlobalBlock.add(currentPolygon);
@@ -3608,9 +3593,9 @@ class _NavigationState extends State<Navigation>
           print("Centroid: lat=${center.lat}, lng=${center.lng}");
           outdoorBlockMarker.add(Marker(
               markerId: MarkerId("Outdoor Block Layer ${currentPolygon.polygonId.toString()}"),
-              anchor: markerName.anchor,
+              anchor: marker.anchor,
               position: positionPoint,
-              icon: markerName.icon,
+              icon: marker.icon,
               onTap: (){
                 _googleMapController.animateCamera(
                   CameraUpdate.newCameraPosition(
@@ -3973,99 +3958,7 @@ class _NavigationState extends State<Navigation>
   String firstValue = "";
   LatLng lastExplorePosition = LatLng(0.0, 0.0);
 
-  Future<void> realTimeReLocalizeUser(
-      HashMap<String, beacon> apibeaconmap) async {
-    sumMap.clear();
-    setState(() {
-      sumMap = SingletonFunctionController.btadapter.calculateAverage();
-    });
-    final Uint8List iconMarker =
-    await getImagesFromMarker('assets/dot.png', 30);
-    sumMap.forEach((key, value) {
-      List<double> position = [];
-      if (SingletonFunctionController.apibeaconmap[key]! != null) {
-        if (SingletonFunctionController.apibeaconmap[key]!.coordinateX! !=
-            null) {
-          position = tools.localtoglobal(
-              SingletonFunctionController.apibeaconmap[key]!.coordinateX!,
-              SingletonFunctionController.apibeaconmap[key]!.coordinateY!,
-              SingletonFunctionController.building.patchData[
-              SingletonFunctionController.apibeaconmap[key]!.sId! ??
-                  buildingAllApi.getStoredString()]);
-          if (lastExplorePosition.latitude != position[0] &&
-              lastExplorePosition.longitude != position[1]) {
-            // _exploreModeDebugBeaconMarker.add(
-            //   Marker(
-            //     markerId: MarkerId(
-            //         "${SingletonFunctionController.apibeaconmap[key]!
-            //             .name!}${position[0]}, ${position[1]}"),
-            //     position: LatLng(position[0], position[1]),
-            //     icon: BitmapDescriptor.fromBytes(iconMarker),
-            //     onTap: () {},
-            //   ),
-            // );
-            lastExplorePosition = LatLng(position[0], position[1]);
-            setState(() {});
-          }
-        }
-      }
-    });
-    setState(() {});
-    firstValue = "";
-    if (sumMap.isNotEmpty) {
-      Map<String, double> sortedsumMap = sortMapByValue(sumMap);
-      firstValue = sortedsumMap.entries.first.key;
-      print("wilsonsortedsumMap $sortedsumMap");
-      final Uint8List iconMarker =
-      await getImagesFromMarker('assets/EM_CurrentLocationMarker.png', 85);
-      if (lastBeaconValue != firstValue &&
-          sortedsumMap.entries.first.value >= 0.4) {
-        SingletonFunctionController.btadapter.stopScanning();
-        _exploreModeMarker.clear();
-        await SingletonFunctionController.building.landmarkdata!.then((value) {
-          getallnearestInfo = tools.localizefindAllNearbyLandmark(
-              apibeaconmap[firstValue]!, value.landmarksMap!);
-          getallnearestInfo.forEach((landmark) {
-            List<double> value = [];
-            if (landmark.coordinateX != null) {
-              value = tools.localtoglobal(
-                  landmark.coordinateX!,
-                  landmark.coordinateY!,
-                  SingletonFunctionController.building.patchData[
-                  landmark.buildingID ?? buildingAllApi.getStoredString()]);
-            }
-            print("wilsonvalues $value");
-            _exploreModeMarker.add(
-              Marker(
-                markerId: MarkerId("${landmark.name}${value[0]}, ${value[1]}"),
-                position: LatLng(value[0], value[1]),
-                icon: BitmapDescriptor.fromBytes(iconMarker),
-                onTap: () {},
-              ),
-            );
-            setState(() {});
-          });
-        });
 
-        List<int> tv = tools.eightcelltransition(user.theta);
-        finalDirections = calcDirectionsExploreMode([
-          apibeaconmap[firstValue]!.coordinateX!,
-          apibeaconmap[firstValue]!.coordinateY!
-        ], [
-          apibeaconmap[firstValue]!.coordinateX! + tv[0],
-          apibeaconmap[firstValue]!.coordinateY! + tv[1]
-        ], getallnearestInfo);
-        paintUser(firstValue, null);
-        ExploreModePannelController.open();
-        setState(() {
-          lastBeaconValue = firstValue;
-        });
-        SingletonFunctionController.btadapter.emptyBin();
-      } else {
-        //HelperClass.showToast("Beacon Already scanned");
-      }
-    }
-  }
 
   void relocalizeUser() {
     print("relocalizeUser");
@@ -4105,7 +3998,7 @@ class _NavigationState extends State<Navigation>
     }
   }
 
-  void createPatch(patchDataModel value) async {
+  void createPatch(patchDataModel value, {bool building = true}) async {
     print("patchformation $value");
     if (value.patchData!.coordinates!.isNotEmpty) {
       List<LatLng> polygonPoints = [];
@@ -4162,17 +4055,31 @@ class _NavigationState extends State<Navigation>
       }
 
       setState(() {
-        patch.add(
-          Polygon(
-              polygonId: PolygonId('patch'),
-              points: polygonPoints,
-              strokeWidth: 1,
-              strokeColor: Color(0xffC0C0C0),
-              fillColor: Color(0xffffffff),
-              geodesic: false,
-              consumeTapEvents: true,
-              zIndex: -1),
-        );
+        if(building){
+          patch.add(
+            Polygon(
+                polygonId: PolygonId('patch'),
+                points: polygonPoints,
+                strokeWidth: 1,
+                strokeColor: Colors.white70,
+                fillColor: Colors.white,
+                geodesic: false,
+                consumeTapEvents: true,
+                zIndex: -1),
+          );
+        }else{
+          patch.add(
+            Polygon(
+                polygonId: PolygonId('patch'),
+                points: polygonPoints,
+                strokeWidth: 1,
+                strokeColor: Color(0xffC0C0C0),
+                fillColor: Color(0xffffffff),
+                geodesic: false,
+                consumeTapEvents: true,
+                zIndex: -1),
+          );
+        }
         cachedPolygon.clear();
       });
 
@@ -4198,7 +4105,7 @@ class _NavigationState extends State<Navigation>
     return wayPoints;
   }
 
-  void createotherPatch(String key, patchDataModel value) async {
+  void createotherPatch(String key, patchDataModel value, {bool building = true}) async {
     if (value.patchData!.coordinates!.isNotEmpty) {
       List<LatLng> polygonPoints = [];
       double latcenterofmap = 0.0;
@@ -4247,17 +4154,31 @@ class _NavigationState extends State<Navigation>
         print("patchmade for${SingletonFunctionController.building.ARCoordinates.keys} ${StackTrace.current}");
       }
       setState(() {
-        otherpatch.add(
-          Polygon(
-              polygonId: PolygonId('otherpatch ${value.patchData!.buildingID}'),
-              points: polygonPoints,
-              strokeWidth: 1,
-              strokeColor: Color(0xffC0C0C0),
-              fillColor: Color(0xffffffff),
-              geodesic: false,
-              consumeTapEvents: true,
-              zIndex: -1),
-        );
+        if(building){
+          otherpatch.add(
+            Polygon(
+                polygonId: PolygonId('otherpatch ${value.patchData!.buildingID}'),
+                points: polygonPoints,
+                strokeWidth: 1,
+                strokeColor: Colors.white70,
+                fillColor: Colors.white,
+                geodesic: false,
+                consumeTapEvents: true,
+                zIndex: -1),
+          );
+        }else{
+          otherpatch.add(
+            Polygon(
+                polygonId: PolygonId('otherpatch ${value.patchData!.buildingID}'),
+                points: polygonPoints,
+                strokeWidth: 1,
+                strokeColor: Color(0xffC0C0C0),
+                fillColor: Color(0xffffffff),
+                geodesic: false,
+                consumeTapEvents: true,
+                zIndex: -2),
+          );
+        }
         cachedPolygon.clear();
       });
     }
@@ -4440,19 +4361,20 @@ class _NavigationState extends State<Navigation>
                 showBuildingName = currValue;
               }
             });
-            final result = await HelperClass()
-                .bitmapDescriptorFromTextAndImageUpdatedWithAnchor(
-                showBuildingName?.trim() ?? "Zone",
-                'assets/campusPurpleFestMapIcon.png',
-                imageSize: const Size(100, 100));
-            final iconMarker = result.icon;
-            final anchor = result.anchor;
+
+            final marker = await creator.createUnifiedMarker(
+              text: showBuildingName?.trim() ?? "Zone",
+              imageSource: 'assets/campusPurpleFestMapIcon.png',
+              layout: MarkerLayout.horizontal,
+              textFormat: TextFormat.smartWrap,  // Uses your preferred logic!
+              fontSize: 12.0,
+            );
             blurPatchCampusMarker.add(
               Marker(
                   markerId: MarkerId(showBuildingName! + Key + Value.toString()),
                   position: Value,
-                  icon: iconMarker,
-                  anchor: anchor,
+                  icon: marker.icon,
+                  anchor: marker.anchor,
                   visible: false,
                   onTap: (){
                     _googleMapController.animateCamera(
@@ -4563,7 +4485,7 @@ class _NavigationState extends State<Navigation>
     // }
   }
 
-  void createARPatch(Map<int, LatLng> coordinates) async {
+  void createARPatch(Map<int, LatLng> coordinates, {bool building = true}) async {
     print("createARPatch ${StackTrace.current}");
     if (coordinates.isNotEmpty) {
       List<LatLng> points = [];
@@ -4587,17 +4509,31 @@ class _NavigationState extends State<Navigation>
 
       setState(() {
         patch.clear();
-        patch.add(
-          Polygon(
-              polygonId: PolygonId('patch'),
-              points: points,
-              strokeWidth: 1,
-              strokeColor: Color(0xffC0C0C0),
-              fillColor: Color(0xffffffff),
-              geodesic: false,
-              consumeTapEvents: true,
-              zIndex: -1),
-        );
+        if(building){
+          patch.add(
+            Polygon(
+                polygonId: PolygonId('patch ${DateTime.now()}'),
+                points: points,
+                strokeWidth: 2,
+                strokeColor: Colors.grey,
+                fillColor: Colors.white,
+                geodesic: false,
+                consumeTapEvents: true,
+                zIndex: -1),
+          );
+        }else{
+          patch.add(
+            Polygon(
+                polygonId: PolygonId('patch ${DateTime.now()}'),
+                points: points,
+                strokeWidth: 1,
+                strokeColor: Color(0xffC0C0C0),
+                fillColor: Color(0xffffffff),
+                geodesic: false,
+                consumeTapEvents: true,
+                zIndex: -2),
+          );
+        }
         cachedPolygon.clear();
       });
     } else {
@@ -4605,7 +4541,7 @@ class _NavigationState extends State<Navigation>
     }
   }
 
-  void createotherARPatch(Map<int, LatLng> coordinates, String bid) async {
+  void createotherARPatch(Map<int, LatLng> coordinates, String bid, {bool building = true}) async {
     print("createotherARPatch bid ${bid} ${StackTrace.current}");
     if (!mounted || disposed) return;
     if (coordinates.isNotEmpty) {
@@ -4630,17 +4566,31 @@ class _NavigationState extends State<Navigation>
       setState(() {
         otherpatch
             .removeWhere((element) => element.polygonId.value.contains(bid));
-        otherpatch.add(
-          Polygon(
-              polygonId: PolygonId('otherpatch $bid'),
-              points: points,
-              strokeWidth: 1,
-              strokeColor: bid == buildingAllApi.selectedID?Colors.white:Color(0xfff6f6f6),
-              fillColor: bid == buildingAllApi.selectedID?Colors.white:Color(0xfff6f6f6),
-              geodesic: false,
-              consumeTapEvents: true,
-              zIndex: -1),
-        );
+        if(building){
+          otherpatch.add(
+            Polygon(
+                polygonId: PolygonId('otherpatch $bid'),
+                points: points,
+                strokeWidth: 2,
+                strokeColor: Colors.grey,
+                fillColor: Colors.white,
+                geodesic: false,
+                consumeTapEvents: true,
+                zIndex: -1),
+          );
+        }else{
+          otherpatch.add(
+            Polygon(
+                polygonId: PolygonId('otherpatch $bid'),
+                points: points,
+                strokeWidth: 1,
+                strokeColor: Color(0xfff6f6f6),
+                fillColor: Color(0xfff6f6f6),
+                geodesic: false,
+                consumeTapEvents: true,
+                zIndex: -2),
+          );
+        }
         cachedPolygon.clear();
       });
     }
@@ -4655,60 +4605,72 @@ class _NavigationState extends State<Navigation>
   late Animation<LatLng> _latLngAnimation;
 
   Future<void> addselectedRoomMarker(
-      List<LatLng> polygonPoints, String assetPath,
-      {Color? color}) async {
-    // Cancel any ongoing animation
+      List<LatLng> polygonPoints,
+      String assetPath, {
+        Color? color,
+      }) async {
+    // Cancel ongoing animation
     _controller12?.stop();
     _controller12?.dispose();
     _controller12 = null;
+
     selectedroomMarker.clear();
     _markers.clear();
 
     matchPolygonId = PolygonId("$polygonPoints");
     matchPolygonPoints = polygonPoints;
+
     _polygon.clear();
-    _polygon.add(Polygon(
-      polygonId: PolygonId("$polygonPoints"),
-      points: polygonPoints,
-      fillColor:
-      color?.withOpacity(0.4) ?? Colors.lightBlueAccent.withOpacity(0.4),
-      strokeColor: color ?? Colors.blue,
-      strokeWidth: 2,
-    ));
+    _polygon.add(
+      Polygon(
+        polygonId: PolygonId("$polygonPoints"),
+        points: polygonPoints,
+        fillColor:
+        color?.withOpacity(0.4) ?? Colors.lightBlueAccent.withOpacity(0.4),
+        strokeColor: color ?? Colors.blue,
+        strokeWidth: 2,
+      ),
+    );
+
     cachedPolygon.clear();
 
-    List<geo.LatLng> points =
-    polygonPoints.map((e) => geo.LatLng(e.latitude, e.longitude)).toList();
-    Uint8List baseIcon = await getImagesFromMarker(assetPath, 140);
+    // BASE SIZE IN LOGICAL PIXELS
+    const int baseSize = 50;
 
+    Uint8List baseIcon = await getImagesFromMarker(assetPath, baseSize);
+
+    // Animation controller
     _controller12 = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 200),
     );
 
     _sizeAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(
       CurvedAnimation(parent: _controller12!, curve: Curves.easeInOut),
     );
-    _controller12?.addListener(() async {
-      double scale = _sizeAnimation?.value ?? 1.0;
-      Uint8List resizedIcon =
-      await getImagesFromMarker(assetPath, (140 * scale).toInt());
+
+    _controller12!.addListener(() async {
+      double scale = _sizeAnimation!.value;
+
+      // New logical size
+      int newSize = (baseSize * scale).toInt();
+
+      Uint8List resizedIcon = await getImagesFromMarker(assetPath, newSize);
 
       setState(() {
         final key = buildingAllApi.getStoredString();
         selectedroomMarker[key] = {
           Marker(
-            markerId: MarkerId('selectedRoomMarker'),
+            markerId: const MarkerId('selectedRoomMarker'),
             position: calculateRoomCenter(polygonPoints),
             icon: BitmapDescriptor.fromBytes(resizedIcon),
-            infoWindow: InfoWindow(title: "Title"),
             onTap: () {},
           )
         };
       });
     });
 
-    _controller12?.addStatusListener((status) async {
+    _controller12!.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         _controller12?.dispose();
         _controller12 = null;
@@ -4717,7 +4679,7 @@ class _NavigationState extends State<Navigation>
           final key = buildingAllApi.getStoredString();
           selectedroomMarker[key] = {
             Marker(
-              markerId: MarkerId('selectedRoomMarker'),
+              markerId: const MarkerId('selectedRoomMarker'),
               position: calculateRoomCenter(polygonPoints),
               icon: BitmapDescriptor.fromBytes(baseIcon),
               onTap: () {},
@@ -4727,8 +4689,9 @@ class _NavigationState extends State<Navigation>
       }
     });
 
-    _controller12?.forward();
+    _controller12!.forward();
   }
+
 
   Future<void> addselectedMarker(LatLng point,{String? path}) async {
     selectedroomMarker.clear(); // Clear existing markers
@@ -4736,7 +4699,7 @@ class _NavigationState extends State<Navigation>
     Uint8List? resizedIcon;
     String buildingKey = buildingAllApi.getStoredString();
     if(path != null){
-      resizedIcon = await getImagesFromMarker(path,150);
+      resizedIcon = await getImagesFromMarker(path,75);
     }
 
 
@@ -6185,15 +6148,52 @@ class _NavigationState extends State<Navigation>
     );
   }
 
-  Future<Uint8List> getImagesFromMarker(String path, int width) async {
-    if (kIsWeb) {
-      width = 45;
+  Future<Uint8List> getImagesFromMarker(String assetPath, int logicalSize) async {
+    final double dpr = ui.window.devicePixelRatio;
+
+    // Load original bytes
+    final ByteData data = await rootBundle.load(assetPath);
+    final Uint8List bytes = data.buffer.asUint8List();
+
+    // Step 1: Decode once to read natural width/height
+    final ui.Codec originalCodec = await ui.instantiateImageCodec(bytes);
+    final ui.FrameInfo originalFrame = await originalCodec.getNextFrame();
+    final ui.Image original = originalFrame.image;
+
+    final int originalW = original.width;
+    final int originalH = original.height;
+
+    // Step 2: Maintain aspect ratio using logicalSize as the SHORTER side
+    double aspect = originalW / originalH;
+
+    int targetW;
+    int targetH;
+
+    if (aspect >= 1) {
+      // Landscape or square → width dominates
+      targetW = (logicalSize * dpr).toInt();
+      targetH = ((logicalSize / aspect) * dpr).toInt();
+    } else {
+      // Portrait → height dominates
+      targetH = (logicalSize * dpr).toInt();
+      targetW = ((logicalSize * aspect) * dpr).toInt();
     }
-    final data = await rootBundle.load(path);
-    final image = img.decodeImage(data.buffer.asUint8List());
-    final resized = img.copyResize(image!, width: width);
-    return Uint8List.fromList(img.encodePng(resized));
+
+    // Step 3: Re-decode with correct proportional size
+    final ui.Codec codec = await ui.instantiateImageCodec(
+      bytes,
+      targetWidth: targetW,
+      targetHeight: targetH,
+    );
+
+    final ui.FrameInfo frameInfo = await codec.getNextFrame();
+    final ByteData? pngBytes =
+    await frameInfo.image.toByteData(format: ui.ImageByteFormat.png);
+
+    return pngBytes!.buffer.asUint8List();
   }
+
+
 
   Future<BitmapDescriptor> bitmapDescriptorFromTextAndImage(
       String text, String? imagePath,
@@ -7769,26 +7769,26 @@ class _NavigationState extends State<Navigation>
     }
   }
 
-  void fitToPath(List<dynamic> result) async {
-    Map<String, dynamic> dataCurrent = await result.first;
-    Map<String, dynamic> dataLast = await result.last;
-    if (PathState.sourceBid == PathState.destinationBid) {
-      List<LatLng> points = [
-        LatLng(dataLast["svalue"][0], dataLast["svalue"][1]),
-        LatLng(dataLast["dvalue"][0], dataLast["dvalue"][1])
-      ];
-      print("source latlngs:${dataLast["svalue"][0]}");
-      print("destination latlngs:${dataLast["dvalue"][0]}");
-      fitTwoPoints(points);
-    } else {
-      print("calling outdoor fittopath");
-      print("calling outdoor fittopath");
-      List<LatLng> points = [
-        LatLng(dataCurrent["dvalue"][0], dataCurrent["dvalue"][1]),
-        LatLng(dataLast["svalue"][0], dataLast["svalue"][1])
-      ];
-      fitTwoPoints(points);
+  void fitToPath(List<Cell> result) async {
+    Cell? firstCell;
+    Cell? lastCell;
+
+    int? targetFloor = result.isNotEmpty ? result.first.floor : null;
+
+    for (final cell in result) {
+      if (cell.floor != targetFloor) break;
+
+      firstCell ??= cell;   // assign when first time reached
+      lastCell = cell;      // update continuously
     }
+      List<LatLng> points = [
+        LatLng(firstCell!.lat, firstCell!.lng),
+        LatLng(lastCell!.lat, lastCell!.lng)
+      ];
+      print("source latlngs:${points.first}");
+      print("destination latlngs:${points.last}");
+      fitTwoPoints(points);
+
   }
 
   Future<void> fitTwoPoints(List<LatLng> points) async {
@@ -7833,8 +7833,6 @@ class _NavigationState extends State<Navigation>
         result = result.reversed.toList();
       }
 
-      fitToPath(result);
-
       List<direction?> lifts = [];
       for (var res in result) {
         Map<String, dynamic> data = await res;
@@ -7863,6 +7861,7 @@ class _NavigationState extends State<Navigation>
       await createMarkersAndDirections(PathState.singleCellListPath, lifts);
 
       if (PathState.singleCellListPath.isNotEmpty) {
+        fitToPath(PathState.singleCellListPath);
         setState(() {
           _focusNodeA.unfocus();
           _focusNodeA.requestFocus();
@@ -8560,8 +8559,6 @@ class _NavigationState extends State<Navigation>
     ];
     PathState.realWorldCoordinates.clear();
     PathState.realWorldCoordinates.add(sourceEntryCoordinates);
-    final Uint8List realWorldPathMarker =
-    await getImagesFromMarker('assets/rw.png', 30);
 
     if (buildData != null) {
       //uncomment here
@@ -8965,7 +8962,7 @@ class _NavigationState extends State<Navigation>
       // });
 
       final Uint8List tealtorch =
-      await getImagesFromMarker('assets/tealtorch.png', 35);
+      await getImagesFromMarker('assets/tealtorch.png', 15);
       print("liftfound ${lift?.toJson()}");
       if (lift?.name != null) {
         liftDirection = direction(
@@ -8981,7 +8978,7 @@ class _NavigationState extends State<Navigation>
           liftDestinationFloor: nextFloor,
         );
         if(lift?.lat != null && lift?.lng != null){
-          final Uint8List greyDot = await getImagesFromMarker('assets/button.png', 35);
+          final Uint8List greyDot = await getImagesFromMarker('assets/button.png', 12);
           innerMarker.add(
             Marker(
                 markerId: MarkerId('lift${lift!.lat}'),
@@ -12937,7 +12934,7 @@ class _NavigationState extends State<Navigation>
       poly = poly.union(value).union(focusturn);
     });
 
-    if (mapState.zoom > 15) {
+    if (mapState.zoom > 20) {
       dottedPath.forEach((key, value) {
         poly = poly.union(value);
       });
@@ -13432,7 +13429,7 @@ class _NavigationState extends State<Navigation>
         i--;
       }
       final Uint8List greytorch =
-      await getImagesFromMarker('assets/previewarrow.png', 75);
+      await getImagesFromMarker('assets/previewarrow.png', 25);
       if (turn.floor != null &&
           SingletonFunctionController
               .building.floor[buildingAllApi.getStoredString()] !=
@@ -14070,6 +14067,25 @@ class _NavigationState extends State<Navigation>
                       } else {
                         rotation = polygonCalculation.calculateBearing(
                             calculatedPoints[1], calculatedPoints[0]);
+                      }
+
+                      if(polygonCalculation.landmarkWithPolygonPoints[polyId] != null){
+                        final result = findBestFitRectangleBearing(polygonCalculation.landmarkWithPolygonPoints[polyId]!);
+                        rotation = result.bearing;
+                        int leftMost = LeftMost().leftMostPoint(
+                          PointForCenter(result.longestSide[0].latitude,
+                              result.longestSide[0].longitude, "name"),
+                          PointForCenter(result.longestSide[1].latitude,
+                              result.longestSide[1].longitude, "name1"),
+                          mapState.bearing,
+                        );
+                        if(leftMost == -1){
+                          rotation -= 180;
+                          if(rotation < 0){
+                            rotation += 360;
+                          }
+                        }
+                        // print('Longest axis bearing: ${rotation.toStringAsFixed(2)}°');
                       }
 
                       // print("marker.markerId.toString() ${marker.markerId.toString()} $leftMost $rotation");
