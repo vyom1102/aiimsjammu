@@ -114,6 +114,7 @@ class MapClustering {
       text: "",
       imageSource: 'assets/insideEntry.png',
       layout: MarkerLayout.imageOnly,
+      imageSize: const Size(20, 20),
       customAnchor: const Offset(0.5, 0.5),
     );
 
