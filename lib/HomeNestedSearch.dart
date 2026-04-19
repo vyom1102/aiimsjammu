@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:navigation_sdk/navigation_sdk.dart';
 
+import 'package:unified_map_view/unified_map_view.dart';
+import 'package:unified_map_view/maplibre.dart';
 import 'API/buildingAllApi.dart';
 import 'APIMODELS/buildingAll.dart';
 import 'Elements/buildingCard.dart';
 import 'Navigation.dart';
+import 'config.dart';
 
 class HomeNestedSearch extends SearchDelegate{
   List<buildingAll> searchList=[];
@@ -71,13 +75,26 @@ class HomeNestedSearch extends SearchDelegate{
       itemBuilder: (BuildContext context, int index) {
         var data = bbsearchList[index];
         return GestureDetector(
-          onTap: (){
+          // onTap: (){
+          //   buildingAllApi.setStoredString(data.sId!);
+          //   Navigator.push(
+          //     context,
+          //     MaterialPageRoute(
+          //       builder: (context) => Navigation(),
+          //     ),
+          //   );
+          // },
+          onTap: () {
             buildingAllApi.setStoredString(data.sId!);
-            Navigator.push(
+            NavigationSDK.startNavigation(
               context,
-              MaterialPageRoute(
-                builder: (context) => Navigation(),
-              ),
+              data: {"venueName": "AIIMSJAMMU"},
+              appColor: const Color(0xFFEC5B13),
+              closeApp: false,
+              locale: AppConfig.languageCode,
+              skipSplash: true,
+              mapType: MapProvider.mapLibre,
+              providers: {MapProvider.mapLibre: MaplibreMapProvider()},
             );
           },
           child: buildingCard(imageURL: data.buildingPhoto ?? "",

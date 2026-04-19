@@ -26,8 +26,12 @@ import 'APIMODELS/buildingAll.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'Elements/InsideBuildingCard.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
+import 'package:navigation_sdk/navigation_sdk.dart';
+import 'package:unified_map_view/unified_map_view.dart';
+import 'package:unified_map_view/maplibre.dart';
 
-import 'Navigation.dart';
+import 'config.dart';
+// import 'Navigation.dart';
 
 
 class BuildingInfoScreen extends StatefulWidget {
@@ -346,26 +350,34 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                     // }
                                     //customEnableBT(context);
 
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => Navigation(),
-                                      ),
-                                    );
+                                   NavigationSDK.startNavigation(
+                                     context,
+                                     data: {"venueName": "AIIMSJAMMU"},
+                                     appColor: const Color(0xFFEC5B13),
+                                     closeApp: false,
+                                     locale: AppConfig.languageCode,
+                                     skipSplash: true,
+                                     mapType: MapProvider.mapLibre,
+                                     providers: {MapProvider.mapLibre: MaplibreMapProvider()},
+                                   );
                                 }else{
-                                    if(widget.dist==0){
-                                      wsocket.message["AppInitialization"]["BID"]=widget.receivedAllBuildingList![index].sId!;
-                                      wsocket.message["AppInitialization"]["buildingName"]=widget.receivedAllBuildingList![index].buildingName!;
-                                      buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
-                                      buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
-                                      buildingAllApi.setStoredAllBuildingID(allBuildingID);
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>   Navigation(),
-                                        ),
-                                      );
-                                    }else{
+                                   if (widget.dist == 0) {
+                                     wsocket.message["AppInitialization"]["BID"] = widget.receivedAllBuildingList![index].sId!;
+                                     wsocket.message["AppInitialization"]["buildingName"] = widget.receivedAllBuildingList![index].buildingName!;
+                                     buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
+                                     buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
+                                     buildingAllApi.setStoredAllBuildingID(allBuildingID);
+                                     NavigationSDK.startNavigation(
+                                       context,
+                                       data: {"venueName": "AIIMSJAMMU"},
+                                       appColor: const Color(0xFFEC5B13),
+                                       closeApp: false,
+                                       locale: AppConfig.languageCode,
+                                       skipSplash: true,
+                                       mapType: MapProvider.mapLibre,
+                                       providers: {MapProvider.mapLibre: MaplibreMapProvider()},
+                                     );
+                                   }else{
                                       HelperClass.showToast("Not your current venue");
                                     }
 
@@ -726,17 +738,21 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                     ],
                   ),
                 ),
-                IconButton(onPressed: (){
-                  buildingAllApi.setStoredString(currentData.sId!);
-                  buildingAllApi.setSelectedBuildingID(currentData.sId!);
-                  buildingAllApi.setStoredAllBuildingID( allBuildingID);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>   Navigation(directLandID: "0a8bdc2-b0b2-662a-ae5-bff7bff350c0",),
-                    ),
-                  );
-                }, icon: Icon(Icons.accessibility_outlined),)
+          IconButton(onPressed: () {
+              buildingAllApi.setStoredString(currentData.sId!);
+              buildingAllApi.setSelectedBuildingID(currentData.sId!);
+              buildingAllApi.setStoredAllBuildingID(allBuildingID);
+              NavigationSDK.callWithLandMarkId(
+                context,
+                "AIIMSJAMMU",
+                "0a8bdc2-b0b2-662a-ae5-bff7bff350c0",
+                const Color(0xFFEC5B13),
+                false,
+                AppConfig.languageCode,
+                mapType: MapProvider.mapLibre,
+                providers: {MapProvider.mapLibre: MaplibreMapProvider()},
+              );
+            }, icon: Icon(Icons.accessibility_outlined),)
                 // Flexible(
                 //   child: Container(
                 //     child: Text(

@@ -14,6 +14,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
+import 'package:unified_map_view/unified_map_view.dart';
+import 'package:unified_map_view/maplibre.dart';
+import 'package:navigation_sdk/navigation_sdk.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/rendering.dart';
@@ -23,6 +26,7 @@ import 'dart:typed_data';
 import 'dart:io';
 import 'dart:ui' as ui;
 import '../Navigation.dart';
+import '../config.dart';
 import 'APIModel/CardData.dart';
 
 class SessionDetail extends StatefulWidget {
@@ -1006,11 +1010,15 @@ class SessionDetailState extends State<SessionDetail> {
                 ),
               ),
               onPressed: () {
-                Navigator.push(
+                NavigationSDK.startNavigation(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => Navigation(directLandID: widget.venueId!,),
-                  ),
+                  data: {"venueName": "AIIMSJAMMU"},
+                  appColor: const Color(0xFFEC5B13),
+                  closeApp: false,
+                  locale: AppConfig.languageCode,
+                  skipSplash: true,
+                  mapType: MapProvider.mapLibre,
+                  providers: {MapProvider.mapLibre: MaplibreMapProvider()},
                 );
               },
               child: Center(

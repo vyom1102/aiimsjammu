@@ -7,6 +7,9 @@ import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
+import 'package:unified_map_view/unified_map_view.dart';
+import 'package:unified_map_view/maplibre.dart';
+import 'package:navigation_sdk/navigation_sdk.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/BuildingLandmarks.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/DirectoryScreen.dart';
@@ -49,7 +52,7 @@ import '../../DATABASE/BOXES/PatchAPIModelBox.dart';
 import '../../DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import '../../DATABASE/BOXES/WayPointModelBOX.dart';
 import '../../Elements/HelperClass.dart';
-import '../../Navigation.dart';
+// import '../../Navigation.dart';
 import '../../Repository/RepositoryManager.dart';
 import '../../UserState.dart';
 import '../../VenueManager/VenueManager.dart';
@@ -594,13 +597,23 @@ class _HomePageState extends State<HomePage> {
       });
       print('selectedlandmarkpolyId from nearby amenities');
       print(selectedlandmarkpolyId);
-      if(selectedlandmarkpolyId!=null)
-        Navigator.push(
+      if (selectedlandmarkpolyId != null) {
+        await NavigationSDK.startNavigation(
           context,
-          MaterialPageRoute(
-            builder: (context) => Navigation(directLandID: selectedlandmarkpolyId!,),
-          ),
+          data: {
+            "venueName": "AIIMSJAMMU",
+            "directLandID": selectedlandmarkpolyId,
+          },
+          appColor: const Color(0xFFEC5B13),
+          closeApp: false,
+          locale: AppConfig.languageCode,
+          skipSplash: true,
+          mapType: MapProvider.mapLibre,
+          providers: {
+            MapProvider.mapLibre: MaplibreMapProvider(),
+          },
         );
+      }
 
     } else {
       print('No landmarks found of type: ${type ?? 'all'} on floor $floorInt in building');
@@ -2320,12 +2333,15 @@ class _HomePageState extends State<HomePage> {
           // ),
           floatingActionButton: FloatingActionButton(
             onPressed: (){
-              Navigator.pop(context);
-              Navigator.pop(
+              NavigationSDK.startNavigation(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => Navigation(),
-                ),
+                  data: {"venueName": "AIIMSJAMMU"},
+                  appColor: const Color(0xFFEC5B13),
+                  closeApp: false,
+                  locale: AppConfig.languageCode,
+                  skipSplash: true,
+                  mapType: MapProvider.mapLibre,
+                  providers: {MapProvider.mapLibre: MaplibreMapProvider()}
               );
             },
             backgroundColor: Color(0xFFFEAB01),

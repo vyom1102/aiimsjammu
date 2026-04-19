@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
+import 'AA/language.dart';
+
 class AppConfig {
   static String appID = "com.iwayplus.aiimsjammu";
 
@@ -29,6 +31,14 @@ class AppConfig {
       return '023357e0-cf4f-11ef-8c00-45832f202b2e';
     }
   }
+  static Language _language = Language.english;
+  static final ValueNotifier<String> languageNotifier = ValueNotifier('en');
+
+  static setLanguage({required String value}) {
+    _language = Language.fromString(value);
+    languageNotifier.value = value;
+  }
+  static String get languageCode => _language.code;
 }
 
 String encryptDecrypt(String input) {

@@ -4,14 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:hive/hive.dart';
-
+import 'package:navigation_sdk/navigation_sdk.dart';
+import 'package:unified_map_view/unified_map_view.dart';
+import 'package:unified_map_view/maplibre.dart';
 import '../API/buildingAllApi.dart';
 import '../APIMODELS/buildingAll.dart';
 import '../DATABASE/BOXES/BuildingAPIModelBox.dart';
 import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import '../DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
 import '../DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
-import '../Navigation.dart';
+import '../config.dart';
+// import '../Navigation.dart';
 
 class InsideBuildingCard extends StatefulWidget {
   String buildingImageURL;
@@ -65,15 +68,19 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
       child: Column(
         children: [
           GestureDetector(
-            onTap: (){
+            onTap: () {
               buildingAllApi.setStoredString(widget.buildingId);
               buildingAllApi.setSelectedBuildingID(widget.buildingId);
               buildingAllApi.setStoredAllBuildingID(widget.allBuildingID);
-              Navigator.push(
+              NavigationSDK.startNavigation(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => Navigation(),
-                ),
+                data: {"venueName": "AIIMSJAMMU"},
+                appColor: const Color(0xFFEC5B13),
+                closeApp: false,
+                locale: AppConfig.languageCode,
+                skipSplash: true,
+                mapType: MapProvider.mapLibre,
+                providers: {MapProvider.mapLibre: MaplibreMapProvider()},
               );
             },
             child: Container(
@@ -106,11 +113,15 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
               buildingAllApi.setStoredString(widget.buildingId);
               buildingAllApi.setSelectedBuildingID(widget.buildingId);
               buildingAllApi.setStoredAllBuildingID(widget.allBuildingID);
-              Navigator.push(
+              NavigationSDK.startNavigation(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => Navigation(),
-                ),
+                data: {"venueName": "AIIMSJAMMU"},
+                appColor: const Color(0xFFEC5B13),
+                closeApp: false,
+                locale: AppConfig.languageCode,
+                skipSplash: true,
+                mapType: MapProvider.mapLibre,
+                providers: {MapProvider.mapLibre: MaplibreMapProvider()},
               );
             },
             child: Container(
@@ -136,12 +147,15 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
                   buildingAllApi.setSelectedBuildingID(widget.buildingId);
 
                   buildingAllApi.setStoredAllBuildingID(widget.allBuildingID);
-
-                  Navigator.push(
+                  NavigationSDK.startNavigation(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => Navigation(),
-                    ),
+                    data: {"venueName": "AIIMSJAMMU"},
+                    appColor: const Color(0xFFEC5B13),
+                    closeApp: false,
+                    locale: AppConfig.languageCode,
+                    skipSplash: true,
+                    mapType: MapProvider.mapLibre,
+                    providers: {MapProvider.mapLibre: MaplibreMapProvider()},
                   );
                 },
                 child: Container(

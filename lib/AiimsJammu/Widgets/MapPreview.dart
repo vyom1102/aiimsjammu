@@ -4,7 +4,9 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
-
+import 'package:navigation_sdk/navigation_sdk.dart';
+import 'package:unified_map_view/unified_map_view.dart';
+import 'package:unified_map_view/maplibre.dart';
 import '../../API/PolyLineApi.dart';
 import '../../APIMODELS/GlobalAnnotationModel.dart';
 import '../../APIMODELS/landmark.dart';
@@ -12,6 +14,7 @@ import '../../APIMODELS/patchDataModel.dart';
 import '../../APIMODELS/polylinedata.dart';
 import '../../GlobalAnnotation/global_rendering.dart';
 import '../../Navigation.dart';
+import '../../config.dart';
 import '../../navigationTools.dart';
 import '../../singletonClass.dart';
 
@@ -600,12 +603,24 @@ class _MapPreviewState extends State<MapPreview> {
               child: FloatingActionButton(
                 backgroundColor: Colors.white,
                 mini: true,
+                // onPressed: () {
+                //   Navigator.push(
+                //     context,
+                //     MaterialPageRoute(
+                //       builder: (context) => Navigation(),
+                //     ),
+                //   );
+                // },
                 onPressed: () {
-                  Navigator.push(
+                  NavigationSDK.startNavigation(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => Navigation(),
-                    ),
+                    data: {"venueName": "AIIMSJAMMU"},
+                    appColor: const Color(0xFFEC5B13),
+                    closeApp: false,
+                    locale: AppConfig.languageCode,
+                    skipSplash: true,
+                    mapType: MapProvider.mapLibre,
+                    providers: {MapProvider.mapLibre: MaplibreMapProvider()},
                   );
                 },
                 child: Icon(

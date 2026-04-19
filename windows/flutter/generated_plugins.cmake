@@ -3,7 +3,9 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  adapter_manager
   app_links
+  audioplayers_windows
   connectivity_plus
   file_selector_windows
   flutter_localization
@@ -12,6 +14,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   geolocator_windows
   permission_handler_windows
   share_plus
+  universal_ble
   url_launcher_windows
 )
 

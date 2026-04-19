@@ -13,6 +13,9 @@ import 'package:iwaymaps/singletonClass.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:iwaymaps/websocket/interactionManager.dart';
 import 'package:lottie/lottie.dart';
+import 'package:unified_map_view/unified_map_view.dart';
+import 'package:unified_map_view/maplibre.dart';
+import 'package:navigation_sdk/navigation_sdk.dart';
 import 'package:new_version_plus/new_version_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:quickalert/models/quickalert_type.dart';
@@ -22,7 +25,7 @@ import '/MapScreen.dart';
 import '/AiimsJammu/Screens/FavouriteRGCIScreen.dart';
 import '/AiimsJammu/Screens/QrScanner.dart';
 import '/VenueSelectionScreen.dart';
-import '/Navigation.dart';
+// import '/Navigation.dart';
 
 import './AiimsJammu/Screens/HomePage.dart';
 import 'API/buildingAllApi.dart';
@@ -36,6 +39,7 @@ import 'DATABASE/BOXES/PatchAPIModelBox.dart';
 import 'DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import 'DATABASE/BOXES/WayPointModelBOX.dart';
 import 'FavouriteScreen.dart';
+import 'config.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -275,21 +279,16 @@ class _MainScreenState extends State<MainScreen> {
               heroTag: 'mainscreen',
 
               onPressed: (){
-                // if(UserState.geoFenced){
-                  Navigator.push(
+                NavigationSDK.startNavigation(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => Navigation(),
-                    ),
-                  ).then((value){
-                    SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID).then((_){
-                      SingletonFunctionController.timer?.whenComplete((){});
-                    });
-                  });
-                // }else{
-                //   HelperClass.showToast("Not at the current venue");
-                // }
-
+                    data: {"venueName": "AIIMSJAMMU"},
+                    appColor: const Color(0xFFEC5B13),
+                    closeApp: false,
+                    locale: AppConfig.languageCode,
+                    skipSplash: true,
+                    mapType: MapProvider.mapLibre,
+                    providers: {MapProvider.mapLibre: MaplibreMapProvider()}
+                );
               },
               backgroundColor: Color(0xFFFEAB01),
               shape: CircleBorder(),

@@ -5,10 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
-
+import 'package:navigation_sdk/navigation_sdk.dart';
+import 'package:unified_map_view/unified_map_view.dart';
+import 'package:unified_map_view/maplibre.dart';
 import '../API/buildingAllApi.dart';
 import '../APIMODELS/buildingAll.dart';
 import '../Navigation.dart';
+import '../config.dart';
 
 class Deeplink{
   static String? initialDocId; // To store the initial doctor's ID from the deep link
@@ -63,24 +66,29 @@ class Deeplink{
         buildingAllApi.selectedID = bid!;
         buildingAllApi.selectedVenue = venue;
         if(Deeplink.source != null){
-          Navigator.push(
+          NavigationSDK.startNavigation(
               context,
-              MaterialPageRoute(
-                  builder: (context) => Navigation(directsourceID: uri!.queryParameters['source']??""))
+              data: {"venueName": "AIIMSJAMMU"},
+              appColor: const Color(0xFFEC5B13),
+              closeApp: false,
+              locale: AppConfig.languageCode,
+              skipSplash: true,
+              mapType: MapProvider.mapLibre,
+              providers: {MapProvider.mapLibre: MaplibreMapProvider()}
           );
         }else{
-          Navigator.push(
+          NavigationSDK.startNavigation(
               context,
-              MaterialPageRoute(
-                  builder: (context) => Navigation(directLandID: uri!.queryParameters['landmark']??""))
+              data: {"venueName": "AIIMSJAMMU"},
+              appColor: const Color(0xFFEC5B13),
+              closeApp: false,
+              locale: AppConfig.languageCode,
+              skipSplash: true,
+              mapType: MapProvider.mapLibre,
+              providers: {MapProvider.mapLibre: MaplibreMapProvider()}
           );
         }
         return;
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => Navigation(directLandID: landmarkID,))
-        );
       });
     }
   }
@@ -121,16 +129,26 @@ class Deeplink{
         buildingAllApi.selectedID = bid!;
         buildingAllApi.selectedVenue = venue;
         if(Deeplink.source != null){
-          Navigator.push(
+          NavigationSDK.startNavigation(
               context,
-              MaterialPageRoute(
-                  builder: (context) => Navigation(directsourceID: uri!.queryParameters['source']??""))
+              data: {"venueName": "AIIMSJAMMU"},
+              appColor: const Color(0xFFEC5B13),
+              closeApp: false,
+              locale: AppConfig.languageCode,
+              skipSplash: true,
+              mapType: MapProvider.mapLibre,
+              providers: {MapProvider.mapLibre: MaplibreMapProvider()}
           );
         }else{
-          Navigator.push(
+          NavigationSDK.startNavigation(
               context,
-              MaterialPageRoute(
-                  builder: (context) => Navigation(directLandID: uri!.queryParameters['landmark']??""))
+              data: {"venueName": "AIIMSJAMMU"},
+              appColor: const Color(0xFFEC5B13),
+              closeApp: false,
+              locale: AppConfig.languageCode,
+              skipSplash: true,
+              mapType: MapProvider.mapLibre,
+              providers: {MapProvider.mapLibre: MaplibreMapProvider()}
           );
         }
         return;
@@ -176,16 +194,26 @@ class Deeplink{
         buildingAllApi.findBuildings(value);
         print("deeplink $bid ${uri!.queryParameters['bid']}");
         if(Deeplink.source != null){
-          Navigator.push(
+          NavigationSDK.startNavigation(
               context,
-              MaterialPageRoute(
-                  builder: (context) => Navigation(directsourceID: uri!.queryParameters['source']??""))
+              data: {"venueName": "AIIMSJAMMU"},
+              appColor: const Color(0xFFEC5B13),
+              closeApp: false,
+              locale: AppConfig.languageCode,
+              skipSplash: true,
+              mapType: MapProvider.mapLibre,
+              providers: {MapProvider.mapLibre: MaplibreMapProvider()}
           );
         }else{
-          Navigator.push(
+          NavigationSDK.startNavigation(
               context,
-              MaterialPageRoute(
-                  builder: (context) => Navigation(directLandID: uri!.queryParameters['landmark']??""))
+              data: {"venueName": "AIIMSJAMMU"},
+              appColor: const Color(0xFFEC5B13),
+              closeApp: false,
+              locale: AppConfig.languageCode,
+              skipSplash: true,
+              mapType: MapProvider.mapLibre,
+              providers: {MapProvider.mapLibre: MaplibreMapProvider()}
           );
         }
         return;
