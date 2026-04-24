@@ -39,7 +39,6 @@ import 'DATABASE/BOXES/PatchAPIModelBox.dart';
 import 'DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import 'DATABASE/BOXES/WayPointModelBOX.dart';
 import 'FavouriteScreen.dart';
-import 'config.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -282,7 +281,7 @@ class _MainScreenState extends State<MainScreen> {
                 NavigationSDK.startNavigation(
                     context,
                     data: {"venueName": "AIIMSJAMMU"},
-                    appColor: const Color(0xFFEC5B13),
+                    appColor: const Color(0xFF0097A7),
                     closeApp: false,
                     locale: AppConfig.languageCode,
                     skipSplash: true,

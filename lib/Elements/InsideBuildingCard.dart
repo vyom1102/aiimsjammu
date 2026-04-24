@@ -13,7 +13,6 @@ import '../DATABASE/BOXES/BuildingAPIModelBox.dart';
 import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import '../DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
 import '../DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
-import '../config.dart';
 // import '../Navigation.dart';
 
 class InsideBuildingCard extends StatefulWidget {
@@ -75,7 +74,7 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
               NavigationSDK.startNavigation(
                 context,
                 data: {"venueName": "AIIMSJAMMU"},
-                appColor: const Color(0xFFEC5B13),
+                appColor: const Color(0xFF0097A7),
                 closeApp: false,
                 locale: AppConfig.languageCode,
                 skipSplash: true,
@@ -116,7 +115,7 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
               NavigationSDK.startNavigation(
                 context,
                 data: {"venueName": "AIIMSJAMMU"},
-                appColor: const Color(0xFFEC5B13),
+                appColor: const Color(0xFF0097A7),
                 closeApp: false,
                 locale: AppConfig.languageCode,
                 skipSplash: true,
@@ -150,7 +149,7 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
                   NavigationSDK.startNavigation(
                     context,
                     data: {"venueName": "AIIMSJAMMU"},
-                    appColor: const Color(0xFFEC5B13),
+                    appColor: const Color(0xFF0097A7),
                     closeApp: false,
                     locale: AppConfig.languageCode,
                     skipSplash: true,

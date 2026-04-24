@@ -31,7 +31,6 @@ import 'Elements/deeplinks.dart';
 import 'MainScreen.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
-import 'config.dart';
 import 'fingerprinting/fingerprinting.dart';
 
 final interactionManager = InteractionManager();

@@ -30,7 +30,6 @@ import 'package:navigation_sdk/navigation_sdk.dart';
 import 'package:unified_map_view/unified_map_view.dart';
 import 'package:unified_map_view/maplibre.dart';
 
-import 'config.dart';
 // import 'Navigation.dart';
 
 
@@ -372,7 +371,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                        data: {"venueName": "AIIMSJAMMU"},
                                        appColor: const Color(0xFFEC5B13),
                                        closeApp: false,
-                                       locale: AppConfig.languageCode,
+                                       locale: 'en',
                                        skipSplash: true,
                                        mapType: MapProvider.mapLibre,
                                        providers: {MapProvider.mapLibre: MaplibreMapProvider()},
@@ -746,7 +745,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                 context,
                 "AIIMSJAMMU",
                 "0a8bdc2-b0b2-662a-ae5-bff7bff350c0",
-                const Color(0xFFEC5B13),
+                const Color(0xFF0097A7),
                 false,
                 AppConfig.languageCode,
                 mapType: MapProvider.mapLibre,

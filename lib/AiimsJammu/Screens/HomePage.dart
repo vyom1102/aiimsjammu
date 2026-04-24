@@ -58,7 +58,6 @@ import '../../UserState.dart';
 import '../../VenueManager/VenueManager.dart';
 import '../../VersioInfo.dart';
 import '../../buildingState.dart';
-import '../../config.dart';
 import '../../singletonClass.dart';
 import '../../websocket/NotifIcationSocket.dart';
 import '../../websocket/UserLog.dart';
@@ -604,7 +603,7 @@ class _HomePageState extends State<HomePage> {
             "venueName": "AIIMSJAMMU",
             "directLandID": selectedlandmarkpolyId,
           },
-          appColor: const Color(0xFFEC5B13),
+          appColor: const Color(0xFF0097A7),
           closeApp: false,
           locale: AppConfig.languageCode,
           skipSplash: true,
@@ -2336,7 +2335,7 @@ class _HomePageState extends State<HomePage> {
               NavigationSDK.startNavigation(
                 context,
                   data: {"venueName": "AIIMSJAMMU"},
-                  appColor: const Color(0xFFEC5B13),
+                  appColor: const Color(0xFF0097A7),
                   closeApp: false,
                   locale: AppConfig.languageCode,
                   skipSplash: true,

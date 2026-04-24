@@ -1411,7 +1411,7 @@ packages:
     description:
       path: "."
       ref: v3
-      resolved-ref: "3dbf4d8ac6b29e017cf1e065c6822e7626487d4f"
+      resolved-ref: "35ed7a9ba1e6713ca1a5742020208d3939a88dc1"
       url: "https://github.com/iisthehimanshu/localization_engine.git"
     source: git
     version: "0.0.1"
@@ -1516,7 +1516,7 @@ packages:
     description:
       path: "."
       ref: landmarkPanel
-      resolved-ref: db07ef07aeb50b5d8bb4046bea56ae0077335219
+      resolved-ref: "729a3e57132382b3ad62aa7180547b0ea39437bb"
       url: "https://github.com/udit6023/navigation_sdk.git"
     source: git
     version: "1.0.0+1"
@@ -2339,7 +2339,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "0ce481195744313be0a85cb31eb32d78f473aecf"
+      resolved-ref: "60c9dabf6aac594560231dc5fd267437995c2259"
       url: "https://github.com/iisthehimanshu/unified_map_view.git"
     source: git
     version: "0.0.1"

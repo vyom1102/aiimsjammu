@@ -14,7 +14,6 @@ import '../../APIMODELS/patchDataModel.dart';
 import '../../APIMODELS/polylinedata.dart';
 import '../../GlobalAnnotation/global_rendering.dart';
 import '../../Navigation.dart';
-import '../../config.dart';
 import '../../navigationTools.dart';
 import '../../singletonClass.dart';
 
@@ -615,7 +614,7 @@ class _MapPreviewState extends State<MapPreview> {
                   NavigationSDK.startNavigation(
                     context,
                     data: {"venueName": "AIIMSJAMMU"},
-                    appColor: const Color(0xFFEC5B13),
+                    appColor: const Color(0xFF0097A7),
                     closeApp: false,
                     locale: AppConfig.languageCode,
                     skipSplash: true,

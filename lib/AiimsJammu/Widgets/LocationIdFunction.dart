@@ -5,7 +5,6 @@ import 'package:unified_map_view/unified_map_view.dart';
 import 'package:unified_map_view/maplibre.dart';
 
 import '../../Navigation.dart';
-import '../../config.dart';
 
 
 void PassLocationId(BuildContext context,String Id){
@@ -20,7 +19,7 @@ void PassLocationId(BuildContext context,String Id){
       context,
       "AIIMSJAMMU",
       Id,
-      Color(0xFFEC5B13),
+      Color(0xFF0097A7),
       false,
       AppConfig.languageCode,
       mapType: MapProvider.mapLibre, providers: {MapProvider.mapLibre : MaplibreMapProvider()}

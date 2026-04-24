@@ -7,7 +7,6 @@ import 'package:shimmer/shimmer.dart';
 import 'package:unified_map_view/unified_map_view.dart';
 import 'package:unified_map_view/maplibre.dart';
 import '../../Navigation.dart';
-import '../../config.dart';
 
 class Buildinglandmarks extends StatefulWidget {
   final String buildingName;
@@ -409,7 +408,7 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
                               context,
                               "AIIMSJAMMU",
                               polyId,
-                              const Color(0xFFEC5B13),
+                              const Color(0xFF0097A7),
                               false,
                               AppConfig.languageCode,
                               mapType: MapProvider.mapLibre,

@@ -7,7 +7,6 @@ import 'API/buildingAllApi.dart';
 import 'APIMODELS/buildingAll.dart';
 import 'Elements/buildingCard.dart';
 import 'Navigation.dart';
-import 'config.dart';
 
 class HomeNestedSearch extends SearchDelegate{
   List<buildingAll> searchList=[];
@@ -89,7 +88,7 @@ class HomeNestedSearch extends SearchDelegate{
             NavigationSDK.startNavigation(
               context,
               data: {"venueName": "AIIMSJAMMU"},
-              appColor: const Color(0xFFEC5B13),
+              appColor: const Color(0xFF0097A7),
               closeApp: false,
               locale: AppConfig.languageCode,
               skipSplash: true,

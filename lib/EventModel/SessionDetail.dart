@@ -26,7 +26,6 @@ import 'dart:typed_data';
 import 'dart:io';
 import 'dart:ui' as ui;
 import '../Navigation.dart';
-import '../config.dart';
 import 'APIModel/CardData.dart';
 
 class SessionDetail extends StatefulWidget {
@@ -1013,7 +1012,7 @@ class SessionDetailState extends State<SessionDetail> {
                 NavigationSDK.startNavigation(
                   context,
                   data: {"venueName": "AIIMSJAMMU"},
-                  appColor: const Color(0xFFEC5B13),
+                  appColor: const Color(0xFF0097A7),
                   closeApp: false,
                   locale: AppConfig.languageCode,
                   skipSplash: true,

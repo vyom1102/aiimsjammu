@@ -250,7 +250,6 @@ import '../../APIMODELS/buildingAll.dart';
 import '../../Elements/HelperClass.dart';
 import '../../MainScreen.dart';
 // import '../../Navigation.dart';
-import '../../config.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/Translator.dart';
 
@@ -308,7 +307,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           context,
           "AIIMSJAMMU",
           source!,
-          const Color(0xFFEC5B13),
+          const Color(0xFF0097A7),
           false,
           AppConfig.languageCode,
           mapType: MapProvider.mapLibre,
@@ -319,7 +318,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           context,
           "AIIMSJAMMU",
           landmarkID ?? "",
-          const Color(0xFFEC5B13),
+          const Color(0xFF0097A7),
           false,
           AppConfig.languageCode,
           mapType: MapProvider.mapLibre,
@@ -439,7 +438,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 context,
                 "AIIMSJAMMU",
                 id ?? "",
-                const Color(0xFFEC5B13),
+                const Color(0xFF0097A7),
                 false,
                 AppConfig.languageCode,
                 mapType: MapProvider.mapLibre,

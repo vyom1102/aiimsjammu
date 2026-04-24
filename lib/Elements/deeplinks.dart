@@ -11,7 +11,6 @@ import 'package:unified_map_view/maplibre.dart';
 import '../API/buildingAllApi.dart';
 import '../APIMODELS/buildingAll.dart';
 import '../Navigation.dart';
-import '../config.dart';
 
 class Deeplink{
   static String? initialDocId; // To store the initial doctor's ID from the deep link
@@ -69,7 +68,7 @@ class Deeplink{
           NavigationSDK.startNavigation(
               context,
               data: {"venueName": "AIIMSJAMMU"},
-              appColor: const Color(0xFFEC5B13),
+              appColor: const Color(0xFF0097A7),
               closeApp: false,
               locale: AppConfig.languageCode,
               skipSplash: true,
@@ -80,7 +79,7 @@ class Deeplink{
           NavigationSDK.startNavigation(
               context,
               data: {"venueName": "AIIMSJAMMU"},
-              appColor: const Color(0xFFEC5B13),
+              appColor: const Color(0xFF0097A7),
               closeApp: false,
               locale: AppConfig.languageCode,
               skipSplash: true,
@@ -132,7 +131,7 @@ class Deeplink{
           NavigationSDK.startNavigation(
               context,
               data: {"venueName": "AIIMSJAMMU"},
-              appColor: const Color(0xFFEC5B13),
+              appColor: const Color(0xFF0097A7),
               closeApp: false,
               locale: AppConfig.languageCode,
               skipSplash: true,
@@ -143,7 +142,7 @@ class Deeplink{
           NavigationSDK.startNavigation(
               context,
               data: {"venueName": "AIIMSJAMMU"},
-              appColor: const Color(0xFFEC5B13),
+              appColor: const Color(0xFF0097A7),
               closeApp: false,
               locale: AppConfig.languageCode,
               skipSplash: true,
@@ -197,7 +196,7 @@ class Deeplink{
           NavigationSDK.startNavigation(
               context,
               data: {"venueName": "AIIMSJAMMU"},
-              appColor: const Color(0xFFEC5B13),
+              appColor: const Color(0xFF0097A7),
               closeApp: false,
               locale: AppConfig.languageCode,
               skipSplash: true,
@@ -208,7 +207,7 @@ class Deeplink{
           NavigationSDK.startNavigation(
               context,
               data: {"venueName": "AIIMSJAMMU"},
-              appColor: const Color(0xFFEC5B13),
+              appColor: const Color(0xFF0097A7),
               closeApp: false,
               locale: AppConfig.languageCode,
               skipSplash: true,
