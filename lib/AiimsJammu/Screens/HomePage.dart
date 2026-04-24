@@ -171,8 +171,8 @@ class _HomePageState extends State<HomePage> {
     callbackFunc();
     checkPermission();
     requestNotificationPermission();
-    SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID);
-    SingletonFunctionController().mapCLustring.initMarkers();
+    // SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID);
+    // SingletonFunctionController().mapCLustring.initMarkers();
     index = 0;
     _scrollController = ScrollController(initialScrollOffset: 140.0);
     // requestStoragePermission();

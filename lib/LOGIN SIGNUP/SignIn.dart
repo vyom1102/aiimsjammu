@@ -149,9 +149,9 @@ class _SignInState extends State<SignIn> {
       });
       HelperClass.showToast("Invalid Username or Password");
     } else {
-      await buildingAllApi().fetchBuildingAllData().then((value){
-        buildingAllApi.findBuildings(value);
-      });
+      // await buildingAllApi().fetchBuildingAllData().then((value){
+      //   buildingAllApi.findBuildings(value);
+      // });
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
