@@ -52,8 +52,6 @@ class _SignInState extends State<SignIn> {
   void initState() {
     super.initState();
 
-
-
     // Initialize the fields with provided parameters if available
     if (widget.emailOrPhoneNumber != null) {
       mailEditingController.text = widget.emailOrPhoneNumber!;
