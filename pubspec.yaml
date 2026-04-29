@@ -157,6 +157,7 @@ flutter:
     - assets/profilePageAssets/
     - assets/PreLoads/
     - assets/DoctorProfileAssets/
+    - assets/api_data/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

@@ -280,7 +280,7 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: (){
                 NavigationSDK.startNavigation(
                     context,
-                    data: {"venueName": "AIIMSJAMMU"},
+                    data: {"venueName": "AIGHospital"},
                     appColor: const Color(0xFF0097A7),
                     closeApp: false,
                     locale: AppConfig.languageCode,

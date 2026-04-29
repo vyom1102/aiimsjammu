@@ -16,7 +16,6 @@ import 'APIMODELS/patchDataModel.dart';
 import 'Cell.dart';
 import 'ELEMENTS/UserCredential.dart';
 import 'Elements/locales.dart';
-import 'Navigation.dart';
 import 'UserState.dart';
 import 'directionClass.dart';
 
@@ -1826,14 +1825,14 @@ class tools {
     }).toList();
   }
 
-  static List<IntPoint> convertToIntPointList(List<dynamic> coordinates) {
-    return coordinates.map((coordinate) {
-      // Split the coordinate string by comma
-      var parts = coordinate.split(',');
-      // Convert the parts to int and return as IntPoint
-      return IntPoint(int.parse(parts[0]), int.parse(parts[1]));
-    }).toList();
-  }
+  // static List<IntPoint> convertToIntPointList(List<dynamic> coordinates) {
+  //   return coordinates.map((coordinate) {
+  //     // Split the coordinate string by comma
+  //     var parts = coordinate.split(',');
+  //     // Convert the parts to int and return as IntPoint
+  //     return IntPoint(int.parse(parts[0]), int.parse(parts[1]));
+  //   }).toList();
+  // }
 
   static bool isPointOnLineSegment(List<int> x, List<int> y, List<int> z) {
     // Check if point x is collinear with points y and z using the area of triangle approach
@@ -1887,27 +1886,27 @@ class tools {
     return [firstPoint, ...remainingPoints];
   }
 
-  static IntPoint? findCoordinatesOfWaypoint(LatLng waypoint){
-    final polylineData = SingletonFunctionController.building.polylinedatamap;
-    IntPoint? point;
-    polylineData.forEach((key,value){
-      if(key == buildingAllApi.outdoorID ){
-        for (var floor in value.polyline!.floors!) {
-          for (var polyline in floor.polyArray!) {
-            if(polyline.polygonType == "Waypoints" && polyline.floor == tools.numericalToAlphabetical(0)){
-              for (var node in polyline.nodes!) {
-                if(node.lat == waypoint.latitude && node.lon == waypoint.longitude){
-                  point = IntPoint(node.coordx!, node.coordy!);
-                  continue;
-                }
-              }
-            }
-          }
-        }
-      }
-    });
-    return point;
-  }
+  // static IntPoint? findCoordinatesOfWaypoint(LatLng waypoint){
+  //   final polylineData = SingletonFunctionController.building.polylinedatamap;
+  //   IntPoint? point;
+  //   polylineData.forEach((key,value){
+  //     if(key == buildingAllApi.outdoorID ){
+  //       for (var floor in value.polyline!.floors!) {
+  //         for (var polyline in floor.polyArray!) {
+  //           if(polyline.polygonType == "Waypoints" && polyline.floor == tools.numericalToAlphabetical(0)){
+  //             for (var node in polyline.nodes!) {
+  //               if(node.lat == waypoint.latitude && node.lon == waypoint.longitude){
+  //                 point = IntPoint(node.coordx!, node.coordy!);
+  //                 continue;
+  //               }
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+  //   });
+  //   return point;
+  // }
 
   static List<Landmarks> findNearbyLandmark(
       List<Cell> path,

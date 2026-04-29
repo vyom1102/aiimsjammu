@@ -13,7 +13,6 @@ import '../../APIMODELS/landmark.dart';
 import '../../APIMODELS/patchDataModel.dart';
 import '../../APIMODELS/polylinedata.dart';
 import '../../GlobalAnnotation/global_rendering.dart';
-import '../../Navigation.dart';
 import '../../navigationTools.dart';
 import '../../singletonClass.dart';
 

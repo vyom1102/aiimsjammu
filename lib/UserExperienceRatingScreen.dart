@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../VenueSelectionScreen.dart';
 import 'package:test/scaffolding.dart';
 
-import 'Navigation.dart';
 
 class UserExperienceRatingScreen extends StatefulWidget {
   @override

@@ -10,9 +10,9 @@ class AppConfig {
 
   static String get baseUrl {
     if (kDebugMode) {
-      return 'https://maps.iwayplus.in';
+      return 'https://dev.iwayplus.in';
     } else {
-      return 'https://maps.iwayplus.in';
+      return 'https://dev.iwayplus.in';
     }
   }
 

@@ -6,7 +6,6 @@ import 'package:unified_map_view/maplibre.dart';
 import 'API/buildingAllApi.dart';
 import 'APIMODELS/buildingAll.dart';
 import 'Elements/buildingCard.dart';
-import 'Navigation.dart';
 
 class HomeNestedSearch extends SearchDelegate{
   List<buildingAll> searchList=[];

@@ -1516,7 +1516,7 @@ packages:
     description:
       path: "."
       ref: landmarkPanel
-      resolved-ref: "729a3e57132382b3ad62aa7180547b0ea39437bb"
+      resolved-ref: "9285fee29366ff846172d30492ff2869cecfa83c"
       url: "https://github.com/udit6023/navigation_sdk.git"
     source: git
     version: "1.0.0+1"
@@ -2339,7 +2339,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "60c9dabf6aac594560231dc5fd267437995c2259"
+      resolved-ref: b031d4ef0ca8dacfc78a1b775c9e53c638d05976
       url: "https://github.com/iisthehimanshu/unified_map_view.git"
     source: git
     version: "0.0.1"

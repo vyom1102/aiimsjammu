@@ -1571,7 +1571,7 @@ class _HomePageState extends State<HomePage> {
                     Column(
                       children: [
                         Text(
-                          'AIIMS JAMMU',
+                          'AIG Hyderabad',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Color(0xFF003666),
@@ -2334,7 +2334,7 @@ class _HomePageState extends State<HomePage> {
             onPressed: (){
               NavigationSDK.startNavigation(
                 context,
-                  data: {"venueName": "AIIMSJAMMU"},
+                  data: {"venueName": "AIGHospital"},
                   appColor: const Color(0xFF0097A7),
                   closeApp: false,
                   locale: AppConfig.languageCode,

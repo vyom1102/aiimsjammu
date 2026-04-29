@@ -6,7 +6,6 @@ import 'package:navigation_sdk/navigation_sdk.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:unified_map_view/unified_map_view.dart';
 import 'package:unified_map_view/maplibre.dart';
-import '../../Navigation.dart';
 
 class Buildinglandmarks extends StatefulWidget {
   final String buildingName;

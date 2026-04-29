@@ -45,7 +45,7 @@ Future<void> main() async {
 
   var directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
-  await NavigationSDK.initializeapp(venueName: "AIIMSJAMMU");
+  await NavigationSDK.initializeapp(venueName: "AIGHospital");
   await interactionManager.initialize();
   await sessionManager.initialize();
   await navigationManager.initialize();
