@@ -270,6 +270,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
@@ -294,6 +295,7 @@ class LocationTrackingService {
   bool _isTracking = false;
   bool _isConnected = false;
   bool _isSosActive = false; // ← tracks whether SOS live-share is running
+  bool _isInitializingSocket = false;
 
   String? _userId;
   String? _name;
@@ -382,56 +384,183 @@ class LocationTrackingService {
 
   /// Called ONLY when the SOS button is pressed.
   /// Creates a fresh socket if one doesn't exist, then connects.
-  void _initializeSocket() {
-    if (_socket != null) {
-      if (_isConnected) {
-        print('✅ Already connected, skipping');
-        return;
-      }
-      print(
-          '⚠️ Dead socket found (id: ${_socket!.id}) — destroying and recreating...');
-      _socket!.dispose();
-      _socket = null;
+
+  Future<void> _initializeSocket() async {
+    if (_isInitializingSocket) {
+      print('⚠️ [SOCKET] Already initializing, skipping duplicate call');
+      return;
+    }
+    if (_socket != null && _isConnected) {
+      print('✅ Already connected, skipping');
+      return;
     }
 
-    print('🔌 [SOCKET] Creating new socket → ${AppConfig.baseUrl}');
-    _socket = io.io(AppConfig.baseUrl, <String, dynamic>{
-      'transports': ['polling', 'websocket'],
-      'auth': {'token': _accessToken},
-      'autoConnect': true,
-      'reconnection': true,
-      'reconnectionAttempts': 5,
-      'reconnectionDelay': 2000,
-    });
+    _isInitializingSocket = true;
 
-    _socket!.onConnect((_) {
-      _isConnected = true;
-      print('✅ [SOCKET] Connected | id: ${_socket!.id}');
-      // ← Once connected, start sending live SOS location immediately
-      _startSosLiveLocation();
-    });
+    try {
+      if (_socket != null) {
+        print('⚠️ Dead socket — destroying and recreating...');
+        _socket!.dispose();
+        _socket = null;
+      }
 
-    _socket!.onDisconnect((reason) {
-      _isConnected = false;
-      print('⚠️ [SOCKET] Disconnected | reason: $reason');
-    });
+      print('🔑 [SOCKET] Refreshing token before connect...');
+      try {
+        _accessToken = await RefreshTokenAPI.refresh();
+        print('🔑 [SOCKET] Token refreshed: $_accessToken');
+      } catch (e) {
+        print('❌ [SOCKET] Token refresh failed: $e');
+      }
 
-    _socket!.onConnectError((data) {
-      _isConnected = false;
-      print(
-          '❌ [SOCKET] onConnectError: $data'); // ← was missing _isConnected = false
-      print('❌ [SOCKET] baseUrl was: ${AppConfig.baseUrl}');
-    });
+      // ─── DIAGNOSTIC BLOCK ───────────────────────────────────────────────────
+      print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      print('🔍 [DIAG] AppConfig.baseUrl = "${AppConfig.baseUrl}"');
+      print('🔍 [DIAG] Token (first 30 chars) = "${_accessToken?.substring(0, 30)}..."');
 
-    _socket!.onError((data) {
-      print('❌ [SOCKET] Socket Error: $data');
-    });
+      // Test 1: Basic server reachability
+      print('🏓 [DIAG] Test 1 — Basic reachability...');
+      try {
+        final basicRes = await http.get(
+          Uri.parse(AppConfig.baseUrl),
+        ).timeout(const Duration(seconds: 5));
+        print('🏓 [DIAG] Test 1 PASSED — status: ${basicRes.statusCode}');
+      } catch (e) {
+        print('❌ [DIAG] Test 1 FAILED — server unreachable: $e');
+        print('❌ [DIAG] CHECK: Is the device on the correct WiFi/network?');
+        print('❌ [DIAG] CHECK: Is AppConfig.baseUrl correct?');
+      }
 
-    _socket!.onAny((event, data) {
-      print('📦 [SOCKET] Event: $event | data: $data');
-    });
+      // Test 2: Socket.IO polling handshake (no auth)
+      print('🏓 [DIAG] Test 2 — Socket.IO polling endpoint (no auth)...');
+      try {
+        final pollRes = await http.get(
+          Uri.parse('${AppConfig.baseUrl}/socket.io/?EIO=4&transport=polling'),
+        ).timeout(const Duration(seconds: 5));
+        print('🏓 [DIAG] Test 2 status: ${pollRes.statusCode}');
+        print('🏓 [DIAG] Test 2 body: ${pollRes.body}');
+        if (pollRes.statusCode == 200) {
+          print('✅ [DIAG] Socket.IO endpoint reachable — server is UP');
+        } else {
+          print('⚠️ [DIAG] Unexpected status — server may use custom path or reject unauthenticated polling');
+        }
+      } catch (e) {
+        print('❌ [DIAG] Test 2 FAILED: $e');
+        print('❌ [DIAG] Socket.IO endpoint not reachable at all');
+      }
 
-    print('🔌 [SOCKET] Socket initialized, waiting for connection...');
+      // Test 3: Socket.IO polling with token in query
+      print('🏓 [DIAG] Test 3 — Socket.IO polling WITH token...');
+      try {
+        final authPollRes = await http.get(
+          Uri.parse('${AppConfig.baseUrl}/socket.io/?EIO=4&transport=polling&token=${_accessToken}&accessToken=${_accessToken}'),
+          headers: {
+            'x-access-token': _accessToken ?? '',
+          },
+        ).timeout(const Duration(seconds: 5));
+        print('🏓 [DIAG] Test 3 status: ${authPollRes.statusCode}');
+        print('🏓 [DIAG] Test 3 body: ${authPollRes.body}');
+        if (authPollRes.statusCode == 200) {
+          print('✅ [DIAG] Auth polling works — token is accepted');
+        } else if (authPollRes.statusCode == 401 || authPollRes.statusCode == 403) {
+          print('❌ [DIAG] Token REJECTED by server — auth key name mismatch');
+        }
+      } catch (e) {
+        print('❌ [DIAG] Test 3 FAILED: $e');
+      }
+
+      // Test 4: Check if a namespace is required (e.g. /tracking, /sos)
+      print('🏓 [DIAG] Test 4 — Checking common namespaces...');
+      for (final ns in ['/tracking', '/sos', '/live', '/socket']) {
+        // try {
+        //   final nsRes = await http.get(
+        //     Uri.parse('${AppConfig.baseUrl}$ns/socket.io/?EIO=4&transport=polling'),
+        //   ).timeout(const Duration(seconds: 3));
+        //   print('🏓 [DIAG] Namespace "$ns" → status: ${nsRes.statusCode} | body: ${nsRes.body.substring(0, nsRes.body.length.clamp(0, 80))}');
+        // } catch (e) {
+        //   print('🏓 [DIAG] Namespace "$ns" → unreachable: $e');
+        // }
+      }
+      print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      // ────────────────────────────────────────────────────────────────────────
+
+      print('🔌 [SOCKET] Creating new socket → ${AppConfig.baseUrl}');
+
+      // _socket = IO.io(
+      //   AppConfig.baseUrl,
+      //   IO.OptionBuilder()
+      //       .setTransports(['polling', 'websocket'])
+      //       .setAuth({
+      //     'x-access-token': _accessToken,
+      //     // 'accessToken': _accessToken,
+      //   })
+      //       .setExtraHeaders({
+      //     'x-access-token': _accessToken ?? '',
+      //   })
+      //       .setQuery({
+      //     // 'accessToken': _accessToken,
+      //     'x-access-token': _accessToken,
+      //   })
+      //       .enableAutoConnect()
+      //       .enableReconnection()
+      //       .setReconnectionAttempts(3)
+      //       .setReconnectionDelay(2000)
+      //       .setTimeout(10000)
+      //       .build(),
+      // );
+
+      _socket = IO.io(
+        AppConfig.baseUrl,
+        IO.OptionBuilder()
+            .setTransports(['polling','websocket'])
+            .disableAutoConnect()
+            .setExtraHeaders({
+          'x-access-token': _accessToken ?? '',
+        })
+            .setAuth({
+          'token': _accessToken ?? '',
+        })
+            .setQuery({
+          'x-access-token': _accessToken ?? '',
+          'token': _accessToken ?? '',
+        })
+            .enableForceNew()
+            .build(),
+      );
+
+      _socket!.connect();
+
+      _socket!.onConnect((_) {
+        _isConnected = true;
+        print('✅ [SOCKET] Connected | id: ${_socket?.id}');
+        _startSosLiveLocation();
+      });
+
+      _socket!.onDisconnect((reason) {
+        _isConnected = false;
+        print('⚠️ [SOCKET] Disconnected | reason: $reason');
+      });
+
+      _socket!.onConnectError((data) {
+        _isConnected = false;
+        print('❌ [SOCKET] onConnectError: $data');
+        print('❌ [SOCKET] This means the socket reached the server but was rejected');
+        print('❌ [SOCKET] Likely cause: wrong auth key, wrong namespace, or CORS');
+      });
+
+      _socket!.onError((data) {
+        print('❌ [SOCKET] Socket Error: $data');
+        print('❌ [SOCKET] This is a server-side error after connection');
+      });
+
+      _socket!.onAny((event, data) {
+        print('📦 [SOCKET] Event: $event | data: $data');
+      });
+
+      print('🔌 [SOCKET] Socket initialized, waiting for connection...');
+      print('🔌 [SOCKET] Socket connected property right now: ${_socket?.connected}');
+    } finally {
+      _isInitializingSocket = false;
+    }
   }
 
   // ─── REGULAR LOCATION TRACKING (unchanged) ───────────────────────────────────
@@ -557,7 +686,8 @@ class LocationTrackingService {
     // Step 3 — initialize & connect socket (lazy, only on SOS)
     print('🆘 [SOS] Initializing socket...');
     _isSosActive = true;
-    _initializeSocket(); // onConnect callback triggers _startSosLiveLocation()
+    // _initializeSocket(); // onConnect callback triggers _startSosLiveLocation()
+    await _initializeSocket();
 
     // Step 4 — if already connected (e.g. socket was alive from before),
     //           start live location immediately without waiting for onConnect
