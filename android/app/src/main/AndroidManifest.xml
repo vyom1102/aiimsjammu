@@ -32,7 +32,7 @@
 
     <application
         android:enableOnBackInvokedCallback="true"
-        android:label="AIIMS Jammu Navigation"
+        android:label="AIG Hyderabad Navigation"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

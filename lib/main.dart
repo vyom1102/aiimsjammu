@@ -15,6 +15,7 @@ import 'package:iwaymaps/websocket/interactionManager.dart';
 import 'package:iwaymaps/websocket/navigationLogManager.dart';
 import 'package:iwaymaps/websocket/sessionManager.dart';
 import 'package:navigation_sdk/navigation_sdk.dart' hide LOCALES;
+import 'package:navigation_sdk/pip_overlay.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:path_provider/path_provider.dart';
@@ -200,8 +201,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
       print("Android");
     }
     requestLocationPermission();
-    return
-      MaterialApp(
+    return MaterialApp(
       title: "IWAYPLUS",
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -210,6 +210,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
           selectionColor: Colors.greenAccent.withOpacity(0.5), // Change selection color
           selectionHandleColor: Color(0xff0B6B94), // Change selection handle color
         ),
+      ),
+      // ✅ PipOverlay always on top, across all screens/routes
+      builder: (context, child) => Stack(
+        children: [
+          child!,
+          const PipOverlay(),
+        ],
       ),
       home: FutureBuilder<bool>(
         future: null,

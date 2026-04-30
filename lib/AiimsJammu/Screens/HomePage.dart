@@ -58,6 +58,7 @@ import '../../UserState.dart';
 import '../../VenueManager/VenueManager.dart';
 import '../../VersioInfo.dart';
 import '../../buildingState.dart';
+import '../../config.dart' as con;
 import '../../singletonClass.dart';
 import '../../websocket/NotifIcationSocket.dart';
 import '../../websocket/UserLog.dart';
@@ -333,7 +334,7 @@ class _HomePageState extends State<HomePage> {
     required String buildingId,
   }) async {
     try {
-      final Uri url = Uri.parse('${AppConfig.baseUrl}/secured/data-version');
+      final Uri url = Uri.parse('${con.AppConfig.baseUrl}/secured/data-version');
       final headers = {
         'Content-Type': 'application/json',
         'x-access-token': '$accessToken',
@@ -408,7 +409,7 @@ class _HomePageState extends State<HomePage> {
 
     var request = http.Request(
       'POST',
-      Uri.parse('${AppConfig.baseUrl}/secured/landmarks'),
+      Uri.parse('${con.AppConfig.baseUrl}/secured/landmarks'),
     );
     request.body = json.encode({"id": buildingId});
     request.headers.addAll(headers);
@@ -450,7 +451,7 @@ class _HomePageState extends State<HomePage> {
 
     var request = http.Request(
       'POST',
-      Uri.parse('${AppConfig.baseUrl}/secured/landmarks-venue'),
+      Uri.parse('${con.AppConfig.baseUrl}/secured/landmarks-venue'),
     );
     request.body = json.encode({"venueName": venueName});
     request.headers.addAll(headers);
@@ -597,21 +598,28 @@ class _HomePageState extends State<HomePage> {
       print('selectedlandmarkpolyId from nearby amenities');
       print(selectedlandmarkpolyId);
       if (selectedlandmarkpolyId != null) {
-        await NavigationSDK.startNavigation(
-          context,
-          data: {
-            "venueName": "AIIMSJAMMU",
-            "directLandID": selectedlandmarkpolyId,
-          },
-          appColor: const Color(0xFF0097A7),
-          closeApp: false,
-          locale: AppConfig.languageCode,
-          skipSplash: false,
-          mapType: MapProvider.mapLibre,
-          providers: {
-            MapProvider.mapLibre: MaplibreMapProvider(),
-          },
-        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+           NavigationSDK.startNavigation(
+            context,
+            data: {
+              "venueName": "AIGHospital",
+              "directLandID": selectedlandmarkpolyId,
+            },
+            appColor: const Color(0xFF0097A7),
+            closeApp: false,
+            locale: con.AppConfig.languageCode,
+            skipSplash: true,
+            mapType: MapProvider.mapLibre,
+            providers: {
+              MapProvider.mapLibre: MaplibreMapProvider(),
+            },
+          );
+
+          // NEW: Show PiP
+          PipManager.instance.showFullscreen();
+          print("PipManager.instance:${PipManager.instance.isFullscreen}");
+        });
       }
 
     } else {
@@ -808,7 +816,7 @@ class _HomePageState extends State<HomePage> {
       refreshTokenN = signInBox.get("refreshToken");
 
       final response = await http.post(
-        Uri.parse("${AppConfig.baseUrl}/secured/data-version1"),
+        Uri.parse("${con.AppConfig.baseUrl}/secured/data-version1"),
         body: json.encode({
           "id": "6673e7a3b92e69bc7f4b40ae",
         }),
@@ -904,7 +912,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> fetchDirectories() async {
     try {
       final response = await http.get(
-        Uri.parse('${AppConfig.baseUrl}/secured/hospital/all-directory/6673e7a3b92e69bc7f4b40ae'),
+        Uri.parse('${con.AppConfig.baseUrl}/secured/hospital/all-directory/6673e7a3b92e69bc7f4b40ae'),
         headers: {
           'Content-Type': 'application/json',
           'x-access-token': '$accessToken',
@@ -1162,7 +1170,7 @@ class _HomePageState extends State<HomePage> {
 
   }
   Future<void> getDriverDetail() async {
-    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
+    final String baseUrl = "${con.AppConfig.baseUrl}/secured/user/get";
 
     try {
       final response = await http.post(
@@ -1222,7 +1230,7 @@ class _HomePageState extends State<HomePage> {
       print('trying for doctor');
       final response = await http.get(
 
-        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-doctors/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${con.AppConfig.baseUrl}/secured/hospital/all-doctors/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": '$accessToken',
@@ -1300,7 +1308,7 @@ class _HomePageState extends State<HomePage> {
 
       print('trying');
       final response = await http.get(
-        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-corousal/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${con.AppConfig.baseUrl}/secured/hospital/all-corousal/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": '$accessToken',
@@ -1341,7 +1349,7 @@ class _HomePageState extends State<HomePage> {
     try {
 
       final response = await http.get(
-        Uri.parse('${AppConfig.baseUrl}/secured/hospital/all-announcement/6673e7a3b92e69bc7f4b40ae'),
+        Uri.parse('${con.AppConfig.baseUrl}/secured/hospital/all-announcement/6673e7a3b92e69bc7f4b40ae'),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": '$accessToken',
@@ -1380,7 +1388,7 @@ class _HomePageState extends State<HomePage> {
 
       print('trying');
       final response = await http.get(
-        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${con.AppConfig.baseUrl}/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": '$accessToken',
@@ -1475,7 +1483,7 @@ class _HomePageState extends State<HomePage> {
   //   setState(() {
   //     nameLoading = true;
   //   });
-  //   final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
+  //   final String baseUrl = "${con.AppConfig.baseUrl}/secured/user/get";
   //
   //   try {
   //     final response = await http.post(
@@ -2332,16 +2340,27 @@ class _HomePageState extends State<HomePage> {
           // ),
           floatingActionButton: FloatingActionButton(
             onPressed: (){
-              NavigationSDK.startNavigation(
-                context,
-                  data: {"venueName": "AIGHospital"},
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!mounted) return;
+                NavigationSDK.startNavigation(
+                  context,
+                  data: {
+                    "venueName": "AIGHospital",
+                  },
                   appColor: const Color(0xFF0097A7),
                   closeApp: false,
-                  locale: AppConfig.languageCode,
-                  skipSplash: false,
+                  locale: con.AppConfig.languageCode,
+                  skipSplash: true,
                   mapType: MapProvider.mapLibre,
-                  providers: {MapProvider.mapLibre: MaplibreMapProvider()}
-              );
+                  providers: {
+                    MapProvider.mapLibre: MaplibreMapProvider(),
+                  },
+                );
+
+                // NEW: Show PiP
+                PipManager.instance.showFullscreen();
+                print("PipManager.instance:${PipManager.instance.isFullscreen}");
+              });
             },
             backgroundColor: Color(0xFFFEAB01),
             shape: CircleBorder(),

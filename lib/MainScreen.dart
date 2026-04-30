@@ -276,18 +276,28 @@ class _MainScreenState extends State<MainScreen> {
           ),
             floatingActionButton: FloatingActionButton(
               heroTag: 'mainscreen',
-
               onPressed: (){
-                NavigationSDK.startNavigation(
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  NavigationSDK.startNavigation(
                     context,
-                    data: {"venueName": "AIGHospital"},
+                    data: {
+                      "venueName": "AIGHospital",
+                    },
                     appColor: const Color(0xFF0097A7),
                     closeApp: false,
                     locale: AppConfig.languageCode,
                     skipSplash: false,
                     mapType: MapProvider.mapLibre,
-                    providers: {MapProvider.mapLibre: MaplibreMapProvider()}
-                );
+                    providers: {
+                      MapProvider.mapLibre: MaplibreMapProvider(),
+                    },
+                  );
+
+                  // NEW: Show PiP
+                  PipManager.instance.showFullscreen();
+                  print("PipManager.instance:${PipManager.instance.isFullscreen}");
+                });
               },
               backgroundColor: Color(0xFFFEAB01),
               shape: CircleBorder(),
