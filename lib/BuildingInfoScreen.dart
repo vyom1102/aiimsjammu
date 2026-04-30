@@ -355,7 +355,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                      appColor: const Color(0xFFEC5B13),
                                      closeApp: false,
                                      locale: AppConfig.languageCode,
-                                     skipSplash: true,
+                                     skipSplash: false,
                                      mapType: MapProvider.mapLibre,
                                      providers: {MapProvider.mapLibre: MaplibreMapProvider()},
                                    );
@@ -372,7 +372,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                        appColor: const Color(0xFFEC5B13),
                                        closeApp: false,
                                        locale: 'en',
-                                       skipSplash: true,
+                                       skipSplash: false,
                                        mapType: MapProvider.mapLibre,
                                        providers: {MapProvider.mapLibre: MaplibreMapProvider()},
                                      );
