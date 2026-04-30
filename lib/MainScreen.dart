@@ -5,14 +5,16 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/GlobalSearch.dart';
+import 'package:iwaymaps/AiimsJammu/Widgets/WebSocketDriver.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/AiimsJammu/Widgets/LeftFloatingActionMenu.dart';
 import 'package:iwaymaps/UserState.dart';
 import 'package:iwaymaps/singletonClass.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:iwaymaps/websocket/interactionManager.dart';
-import 'package:lottie/lottie.dart';
 import 'package:unified_map_view/unified_map_view.dart';
 import 'package:unified_map_view/maplibre.dart';
 import 'package:navigation_sdk/navigation_sdk.dart';
@@ -43,7 +45,7 @@ import 'FavouriteScreen.dart';
 class MainScreen extends StatefulWidget {
   final int initialIndex;
 
-  const MainScreen({super.key, this.initialIndex=0});
+  const MainScreen({super.key, this.initialIndex = 0});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -53,16 +55,17 @@ class _MainScreenState extends State<MainScreen> {
   late int index;
   final ws = wsocket("com.iwayplus.aiimsjammu");
 
-
   final screens = [
     HomePage(),
-    GlobalSearchPage(voiceInputEnabled: false,frombottombar: true,),
+    GlobalSearchPage(
+      voiceInputEnabled: false,
+      frombottombar: true,
+    ),
     // GlobalSearchPage(voiceInputEnabled: false),
     QRScannerScreen(),
     FavouriteRGCIScreen(),
     ProfilePage(),
   ];
-
 
   @override
   void initState() {
@@ -73,19 +76,19 @@ class _MainScreenState extends State<MainScreen> {
     print(index);
   }
 
-
-
-  void checkPermission()async{
+  void checkPermission() async {
     await requestBluetoothConnectPermission();
     await requestLocationPermission();
     await enableBT();
   }
+
   Future<void> enableBT() async {
     BluetoothEnable.enableBluetooth.then((value) {});
   }
+
   Future<void> requestBluetoothConnectPermission() async {
     final PermissionStatus permissionStatus =
-    await Permission.bluetoothScan.request();
+        await Permission.bluetoothScan.request();
     if (permissionStatus.isGranted) {
       wsocket.message["deviceInfo"]["sensors"]["BLE"] = true;
       wsocket.message["deviceInfo"]["permissions"]["BLE"] = true;
@@ -117,7 +120,7 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  void setIDforWebSocket()async{
+  void setIDforWebSocket() async {
     final signInBox = await Hive.openBox('SignInDatabase');
     print("user id ${signInBox.get("userId")}");
     wsocket.message["userId"] = signInBox.get("userId");
@@ -131,19 +134,19 @@ class _MainScreenState extends State<MainScreen> {
     try {
       final status = await newVersion.getVersionStatus();
 
-      handleAppUpdate(status!.storeVersion,status!.localVersion);
+      handleAppUpdate(status!.storeVersion, status!.localVersion);
     } catch (e) {
       print('Error checking for updates: $e');
-
     }
   }
+
   Future<void> handleAppUpdate(String currVersion, String localVersion) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     // Get current app version
     String currentVersion = currVersion;
 
     // Fetch stored version from preferences
-    String? storedVersion = prefs.getString('appVersion')??localVersion;
+    String? storedVersion = prefs.getString('appVersion') ?? localVersion;
 
     // Check if the app was updated (if stored version is different from the current version)
     print(storedVersion);
@@ -169,20 +172,20 @@ class _MainScreenState extends State<MainScreen> {
       print("clearedafterupdate");
       //showToast("Database Cleared ${BeaconBox.length},${BuildingAllBox.length},${LandMarkBox.length},${PatchBox.length},${PolyLineBox.length},${WayPointBox.length},${OutBuildingBox.length}");
 
-      await resetBluetooth();  // Reset Bluetooth adapter or any other necessary reset logic
+      await resetBluetooth(); // Reset Bluetooth adapter or any other necessary reset logic
 
       // Mark that the update has been handled to avoid running the reset again
       await prefs.setBool('hasHandledUpdate', true);
       // Update the stored version to the current version
       await prefs.setString('appVersion', currentVersion);
-
-
     }
   }
+
   Future<void> resetBluetooth() async {
     // Turn Bluetooth off
     try {
-      await FlutterBluePlus.turnOff().timeout(Duration(seconds: 20)); // Increased timeout to 20s
+      await FlutterBluePlus.turnOff()
+          .timeout(Duration(seconds: 20)); // Increased timeout to 20s
     } catch (e) {
       print('Failed to turn off Bluetooth: $e');
     }
@@ -190,6 +193,7 @@ class _MainScreenState extends State<MainScreen> {
     await Future.delayed(Duration(seconds: 2));
     await FlutterBluePlus.turnOn();
   }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -224,10 +228,9 @@ class _MainScreenState extends State<MainScreen> {
                 fontSize: 13,
                 fontWeight: FontWeight.w400,
                 color: Color(0xff4B4B4B),
-                height: 20/14,
+                height: 20 / 14,
               )),
             ),
-
             child: Container(
               decoration: BoxDecoration(
                 boxShadow: [
@@ -243,58 +246,147 @@ class _MainScreenState extends State<MainScreen> {
                 surfaceTintColor: Colors.white,
                 backgroundColor: Color(0xffFFFFFF),
                 selectedIndex: index,
-                onDestinationSelected: (index)=>setState(() {
-
-                  if(index==0){
+                onDestinationSelected: (index) => setState(() {
+                  if (index == 0) {
                     InteractionManager().logInteraction("Home Button");
-                  }else if(index==1){
+                  } else if (index == 1) {
                     InteractionManager().logInteraction("Global Search");
-                  }else if(index==2){
+                  } else if (index == 2) {
                     InteractionManager().logInteraction("Scan Button");
-                  }else if(index==3){
+                  } else if (index == 3) {
                     InteractionManager().logInteraction("Favourite Button");
-                  }else if(index==4){
+                  } else if (index == 4) {
                     InteractionManager().logInteraction("Profile Button");
                   }
                   // if (index==1){
                   //     Navigator.push(context, MaterialPageRoute(builder: (context) => GlobalSearchPage(voiceInputEnabled: false)));
                   //
                   // } else {
-                    this.index = index;
-                    print(index);
+                  this.index = index;
+                  print(index);
                   // }
                 }),
                 destinations: [
-                  NavigationDestination(icon: SvgPicture.asset("assets/MainScreen_home.svg",color: Color(0xff1C1B1F)),selectedIcon: SvgPicture.asset("assets/MainScreen_home.svg",color: Color(0xFF0B6B94),), label: 'Home',),
-                  NavigationDestination(icon: SvgPicture.asset("assets/images/searchicon.svg",color: Color(0xff1C1B1F)),selectedIcon: SvgPicture.asset("assets/images/searchicon.svg",color: Color(0xFF0B6B94),), label: "Search",),
-                  NavigationDestination(icon: SvgPicture.asset("assets/MainScreen_Scanner.svg",color: Color(0xff1C1B1F),),selectedIcon: SvgPicture.asset("assets/MainScreen_Scanner.svg",color: Color(0xFF0B6B94),width: 34,height: 34,), label: 'Scan',),
-                  NavigationDestination(icon: SvgPicture.asset("assets/MainScreen_Favourite.svg",color: Color(0xff1C1B1F),),selectedIcon: SvgPicture.asset("assets/MainScreen_Favourite.svg",color: Color(0xFF0B6B94),), label: "Favourite",),
-                  NavigationDestination(icon: SvgPicture.asset("assets/MainScreen_Profile.svg",color: Color(0xff1C1B1F),),selectedIcon: SvgPicture.asset("assets/MainScreen_Profile.svg",color: Color(0xFF0B6B94),), label: "Profile"),
+                  NavigationDestination(
+                    icon: SvgPicture.asset("assets/MainScreen_home.svg",
+                        color: Color(0xff1C1B1F)),
+                    selectedIcon: SvgPicture.asset(
+                      "assets/MainScreen_home.svg",
+                      color: Color(0xFF0B6B94),
+                    ),
+                    label: 'Home',
+                  ),
+                  NavigationDestination(
+                    icon: SvgPicture.asset("assets/images/searchicon.svg",
+                        color: Color(0xff1C1B1F)),
+                    selectedIcon: SvgPicture.asset(
+                      "assets/images/searchicon.svg",
+                      color: Color(0xFF0B6B94),
+                    ),
+                    label: "Search",
+                  ),
+                  NavigationDestination(
+                    icon: SvgPicture.asset(
+                      "assets/MainScreen_Scanner.svg",
+                      color: Color(0xff1C1B1F),
+                    ),
+                    selectedIcon: SvgPicture.asset(
+                      "assets/MainScreen_Scanner.svg",
+                      color: Color(0xFF0B6B94),
+                      width: 34,
+                      height: 34,
+                    ),
+                    label: 'Scan',
+                  ),
+                  NavigationDestination(
+                    icon: SvgPicture.asset(
+                      "assets/MainScreen_Favourite.svg",
+                      color: Color(0xff1C1B1F),
+                    ),
+                    selectedIcon: SvgPicture.asset(
+                      "assets/MainScreen_Favourite.svg",
+                      color: Color(0xFF0B6B94),
+                    ),
+                    label: "Favourite",
+                  ),
+                  NavigationDestination(
+                      icon: SvgPicture.asset(
+                        "assets/MainScreen_Profile.svg",
+                        color: Color(0xff1C1B1F),
+                      ),
+                      selectedIcon: SvgPicture.asset(
+                        "assets/MainScreen_Profile.svg",
+                        color: Color(0xFF0B6B94),
+                      ),
+                      label: "Profile"),
                 ],
               ),
             ),
           ),
-            floatingActionButton: FloatingActionButton(
-              heroTag: 'mainscreen',
-
-              onPressed: (){
-                NavigationSDK.startNavigation(
-                    context,
-                    data: {"venueName": "AIIMSJAMMU"},
-                    appColor: const Color(0xFF0097A7),
-                    closeApp: false,
-                    locale: AppConfig.languageCode,
-                    skipSplash: true,
-                    mapType: MapProvider.mapLibre,
-                    providers: {MapProvider.mapLibre: MaplibreMapProvider()}
-                );
-              },
-              backgroundColor: Color(0xFFFEAB01),
-              shape: CircleBorder(),
-              child: Semantics(
-                  label: "Map",
-                  child: Lottie.asset('assets/images/floatingmap.json')),
-            ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.startFloat,
+          floatingActionButton: LeftFloatingActionMenu(
+            primaryColor: const Color(0xFFFEAB01),
+            mainIcon: Icons.menu_rounded,
+            tiles: [
+              // ── SOS ──────────────────────────────────────────────────────
+              FloatingActionTile(
+                icon: Icons.crisis_alert,
+                title: "SOS",
+                backgroundColor: Colors.red,
+                iconColor: Colors.white,
+                confirm: const TileConfirmConfig(
+                  title: 'Send SOS Alert?',
+                  message:
+                      'This will immediately notify the admin with your current location. Only use in a real emergency.',
+                  confirmLabel: 'Send SOS',
+                  cancelLabel: 'Cancel',
+                  confirmColor: Colors.red,
+                  dialogIcon: Icons.crisis_alert,
+                  iconColor: Colors.red,
+                ),
+                onTap: () async {
+                  await LocationTrackingService().sendSOS();
+                },
+              ),
+              // ── Share Location ───────────────────────────────────────────
+              FloatingActionTile(
+                icon: Icons.share_location_rounded,
+                title: "Share Location",
+                backgroundColor: const Color(0xFF0B6B94),
+                iconColor: Colors.white,
+                confirm: const TileConfirmConfig(
+                  title: 'Share Your Location?',
+                  message:
+                      'Your current GPS coordinates will be shared as a link.',
+                  confirmLabel: 'Share',
+                  cancelLabel: 'Cancel',
+                  confirmColor: Color(0xFF0B6B94),
+                  dialogIcon: Icons.share_location_rounded,
+                  iconColor: Color(0xFF0B6B94),
+                ),
+                onTap: () async {
+                  try {
+                    final pos = await Geolocator.getCurrentPosition(
+                      desiredAccuracy: LocationAccuracy.high,
+                    );
+                    final lat = pos.latitude.toStringAsFixed(6);
+                    final lng = pos.longitude.toStringAsFixed(6);
+                    final link =
+                        'https://maps.google.com/?q=$lat,$lng';
+                    await SharePlus.instance.share(
+                      ShareParams(
+                        text: '📍 My current location:\n$link',
+                        subject: 'My Location',
+                      ),
+                    );
+                  } catch (e) {
+                    debugPrint('Share location error: $e');
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -317,6 +409,7 @@ class _MainScreenState extends State<MainScreen> {
     );
     return exit ?? false;
   }
+
   void showToast(String mssg) {
     Fluttertoast.showToast(
       msg: mssg,
@@ -329,4 +422,3 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
-

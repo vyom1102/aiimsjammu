@@ -40,7 +40,7 @@ class AppConfig {
   }
   static String get languageCode => _language.code;
 }
-
+ 
 String encryptDecrypt(String input) {
   String key = AppConfig.encryptionKey;
   StringBuffer result = StringBuffer();
