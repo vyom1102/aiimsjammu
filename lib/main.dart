@@ -16,6 +16,7 @@ import 'package:iwaymaps/websocket/navigationLogManager.dart';
 import 'package:iwaymaps/websocket/sessionManager.dart';
 import 'package:navigation_sdk/navigation_sdk.dart' hide LOCALES;
 import 'package:navigation_sdk/pip_overlay.dart';
+
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:path_provider/path_provider.dart';
@@ -31,7 +32,6 @@ import 'BluetoothManager/BLEManager.dart';
 import 'Elements/deeplinks.dart';
 import 'MainScreen.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
-
 import 'fingerprinting/fingerprinting.dart';
 
 final interactionManager = InteractionManager();
@@ -39,6 +39,7 @@ final sessionManager = SessionManager();
 final navigationManager=NavigationLogManager();
 BLEManager bleManager=BLEManager();
 Fingerprinting fingerprinting=Fingerprinting();
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -202,6 +203,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
     }
     requestLocationPermission();
     return MaterialApp(
+      navigatorKey:PipManager.instance.rootNavigatorKey,
       title: "IWAYPLUS",
       theme: ThemeData(
         primarySwatch: Colors.blue,

@@ -197,7 +197,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     Timer(const Duration(seconds: 6), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => SignIn()),
+        MaterialPageRoute(builder: (context) => SignIn(emailOrPhoneNumber: 'mailtohimanshu100@gmail.com',password: 'BlackWater4232',)),
       );
     });
   }

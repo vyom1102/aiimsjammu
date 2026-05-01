@@ -499,39 +499,6 @@ class _HomePageState extends State<HomePage> {
       }
     }
     String? selectedWashroomType =washroomType??"male";
-
-    // // If the user selected washroom, ask for male or female
-    // if (type?.toLowerCase() == 'washroom') {
-    //   selectedWashroomType = await showDialog<String>(
-    //     context: context,
-    //     builder: (BuildContext context) {
-    //       return AlertDialog(
-    //         title: const Text('Select Washroom Type'),
-    //         content: Column(
-    //           mainAxisSize: MainAxisSize.min,
-    //           children: [
-    //             ListTile(
-    //               title: const Text('Male'),
-    //               onTap: () {
-    //                 Navigator.pop(context, 'male');
-    //               },
-    //             ),
-    //             ListTile(
-    //               title: const Text('Female'),
-    //               onTap: () {
-    //                 Navigator.pop(context, 'female');
-    //               },
-    //             ),
-    //           ],
-    //         ),
-    //       );
-    //     },
-    //   );
-    //
-    //   // If the user cancels the selection, exit the function
-    //   if (selectedWashroomType == null) return;
-    // }
-
     filteredLandmarks = landmarks.where((landmark) {
       bool floorMatch = landmark['floor'] == floorInt;
       String landmarkType = landmark['element']['subType']?.toString().toLowerCase() ?? '';
@@ -561,7 +528,6 @@ class _HomePageState extends State<HomePage> {
           return floorMatch;
       }
     }).toList();
-
     if (filteredLandmarks.isNotEmpty) {
       // Find nearest landmark based on current position
       Map<dynamic, dynamic> nearestLandmark = filteredLandmarks[0];
@@ -615,13 +581,11 @@ class _HomePageState extends State<HomePage> {
               MapProvider.mapLibre: MaplibreMapProvider(),
             },
           );
-
           // NEW: Show PiP
           PipManager.instance.showFullscreen();
           print("PipManager.instance:${PipManager.instance.isFullscreen}");
         });
       }
-
     } else {
       print('No landmarks found of type: ${type ?? 'all'} on floor $floorInt in building');
       Fluttertoast.showToast(msg: "Error finding nearby $type ");
@@ -1620,69 +1584,6 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-                SizedBox(height: 10,),
-                GestureDetector(
-                  onTap: () {
-                    InteractionManager().logInteraction('Search Bar');
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => GlobalSearchPage(voiceInputEnabled: false),
-                      ),
-                    ).then((value) => PassLocationId(context, value));
-                  },
-                  child: Container(
-                    padding: EdgeInsets.only(left: 16, right: 8),
-                    decoration: BoxDecoration(
-                      // color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(10),
-                      border:
-                      Border.all(color: Color(0xFFE0E0E0), width: 1),
-                    ),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          child: SvgPicture.asset(
-                              'assets/images/searchicon.svg'),
-                        ),
-                        // Icon(Icons.search),
-                        SizedBox(width: 16),
-
-                        Semantics(
-                          header: true,
-                          // label: "Search Bar",
-                          child: Container(
-                              padding: EdgeInsets.only(top: 8),
-                              width: MediaQuery.of(context).size.width * 0.67,
-                              height: 40,
-                              child: TranslatorWidget(
-                                "Where do you want to go?",
-                                style: const TextStyle(
-                                  fontFamily: "Roboto",
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xff535353),
-
-                                ),
-                                textAlign: TextAlign.left,
-                              )
-                          ),
-                        ),
-
-                        // SizedBox(width: 26,),
-                        // Spacer(),
-                        // Semantics(
-                        //   label: "Microphone",
-                        //   child: Icon(
-                        //     Icons.mic_none_outlined,
-                        //     color: Color(0xff8E8C8C),
-                        //   ),
-                        // ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: 10,),
 
               ],
             ),
@@ -1709,7 +1610,7 @@ class _HomePageState extends State<HomePage> {
                     //
                     // ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 16),
+                      padding: const EdgeInsets.symmetric(vertical: 1.0,horizontal: 16),
                       child: _buildMainServices(),
                     ),
                     SizedBox(

@@ -14,16 +14,19 @@ void PassLocationId(BuildContext context,String Id){
   //     builder: (context) => Navigation(directLandID: Id,),
   //   ),
   // );
-  NavigationSDK.callWithLandMarkId(
-      context,
-      "AIIMSJAMMU",
-      Id,
-      Color(0xFF0097A7),
-      false,
-      AppConfig.languageCode,
-      mapType: MapProvider.mapLibre, providers: {MapProvider.mapLibre : MaplibreMapProvider()}
-  );
 
+    NavigationSDK.callWithLandMarkId(
+        context,
+        "AIGHospital",
+        Id,
+        Color(0xFF0097A7),
+        false,
+        AppConfig.languageCode,
+        mapType: MapProvider.mapLibre, providers: {MapProvider.mapLibre : MaplibreMapProvider()}
+    );
+    // NEW: Show PiP
+    PipManager.instance.showFullscreen();
+    print("PipManager.instance:${PipManager.instance.isFullscreen}");
   print(Id);
 
 }

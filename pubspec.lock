@@ -2320,7 +2320,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "74d9fb19cc7d9f0be53015806da44833dbe67b93"
+      resolved-ref: "10c6ec1c455c1fd7464b3e9a12d3367c57810a21"
       url: "https://github.com/iisthehimanshu/turn_highlighter.git"
     source: git
     version: "2.0.0"
@@ -2337,7 +2337,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "1056ec7131819c88f52815ea9c5559f2ce22fab0"
+      resolved-ref: d52b960a77ee939dca63770a76437a2508c06cda
       url: "https://github.com/iisthehimanshu/unified_map_view.git"
     source: git
     version: "0.0.1"
