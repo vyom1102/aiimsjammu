@@ -120,7 +120,7 @@ class _SignInState extends State<SignIn> {
 
 
 
-  Future<void> _signIn() async {
+  Future<void> _signIn({String? name, String? password}) async {
     if (mailEditingController.text.isEmpty && passEditingController.text.isEmpty) {
       return HelperClass.showToast("Enter username and password ");
     }
@@ -136,7 +136,7 @@ class _SignInState extends State<SignIn> {
     setState(() {
       isLoading = true;
     });
-    SignInApiModel? signInResponse = await SignInAPI().signIN(phoneNumberOEmail, passEditingController.text);
+    SignInApiModel? signInResponse = await SignInAPI().signIN(name??phoneNumberOEmail, password??passEditingController.text);
     print("signInResponse.accessToken");
     print(signInResponse?.refreshToken);
     print(signInResponse?.accessToken);
