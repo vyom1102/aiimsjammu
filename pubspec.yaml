@@ -33,7 +33,7 @@ dependencies:
 #    git:
 #      url: https://github.com/udit6023/navigation_sdk.git
 #      ref: landmarkPanel
-    path: ../navigation_sdk
+    path: /Users/macmini/StudioProjects/navigation_sdk
 
 
 
