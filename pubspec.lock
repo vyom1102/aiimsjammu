@@ -1516,7 +1516,7 @@ packages:
     description:
       path: "."
       ref: landmarkPanel
-      resolved-ref: "729a3e57132382b3ad62aa7180547b0ea39437bb"
+      resolved-ref: "87577d701727f791a6304ebd44417b6e3441f597"
       url: "https://github.com/udit6023/navigation_sdk.git"
     source: git
     version: "1.0.0+1"
@@ -1744,6 +1744,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.2"
+  photo_view:
+    dependency: transitive
+    description:
+      name: photo_view
+      sha256: "1fc3d970a91295fbd1364296575f854c9863f225505c28c46e0a03e48960c75e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.15.0"
   platform:
     dependency: transitive
     description:
@@ -2322,7 +2330,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "74d9fb19cc7d9f0be53015806da44833dbe67b93"
+      resolved-ref: "10c6ec1c455c1fd7464b3e9a12d3367c57810a21"
       url: "https://github.com/iisthehimanshu/turn_highlighter.git"
     source: git
     version: "2.0.0"
@@ -2339,7 +2347,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "60c9dabf6aac594560231dc5fd267437995c2259"
+      resolved-ref: d52b960a77ee939dca63770a76437a2508c06cda
       url: "https://github.com/iisthehimanshu/unified_map_view.git"
     source: git
     version: "0.0.1"
