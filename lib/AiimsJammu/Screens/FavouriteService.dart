@@ -523,7 +523,7 @@ class _FavouriteServiceState extends State<FavouriteService> {
                                       Expanded(
                                         child: OutlinedButton(
                                           onPressed: () {
-                                            _shareContent("${AppConfig.baseUrl}/#/iway-apps/aiimsj.com/service?serviceId=${FserviceId[index]}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
+                                            _shareContent("${AppConfig.baseUrl}/#/iway-apps/aiimsj.com/service?serviceId=${FserviceId[index]}&appStore=com.iwayplus.aig&playStore=com.iwayplus.aig");
 
                                             // _shareContent(shareText);
                                           },

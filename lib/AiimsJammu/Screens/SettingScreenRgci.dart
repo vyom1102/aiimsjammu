@@ -108,8 +108,8 @@ class _SettingScreenState extends State<SettingScreen> {
   Future<void> checkForUpdate() async {
     print("checking update");
     final newVersion = NewVersionPlus(
-      androidId: 'com.iwayplus.aiimsjammu',
-      iOSId: 'com.iwayplus.aiimsjammu',
+      androidId: 'com.iwayplus.aig',
+      iOSId: 'com.iwayplus.aig',
     );
 
     try {
@@ -421,7 +421,7 @@ class _SettingScreenState extends State<SettingScreen> {
                           onTap: () async {
                             final url = Theme.of(context).platform == TargetPlatform.iOS
                                 ? 'https://apps.apple.com/in/app/aiims-jammu-navigation/id6677034083'
-                                : 'https://play.google.com/store/apps/details?id=com.iwayplus.aiimsjammu';
+                                : 'https://play.google.com/store/apps/details?id=com.iwayplus.aig';
                             if (await canLaunch(url)) {
                               await launch(url);
                             } else {

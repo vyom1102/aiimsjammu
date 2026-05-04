@@ -545,7 +545,7 @@ class _FavouriteDoctorState extends State<FavouriteDoctor> {
                                       Expanded(
                                         child: OutlinedButton(
                                           onPressed: () {
-                                            _shareContent("${AppConfig.baseUrl}/#/iway-apps/aiimsj.com/doctor?docId=${FdoctorId[index]}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
+                                            _shareContent("${AppConfig.baseUrl}/#/iway-apps/aiimsj.com/doctor?docId=${FdoctorId[index]}&appStore=com.iwayplus.aig&playStore=com.iwayplus.aig");
 
                                             // _shareContent(shareText);
                                           },

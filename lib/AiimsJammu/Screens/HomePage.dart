@@ -146,7 +146,7 @@ class _HomePageState extends State<HomePage> {
   List<dynamic> _filteredDoctors = [];
   Widget? mapPreview;
   Map<dynamic, dynamic> combinedLandmarkData = {};
-  final ws = wsocket("com.iwayplus.aiimsjammu");
+  final ws = wsocket("com.iwayplus.aig");
 
   @override
   void initState() {
@@ -155,6 +155,7 @@ class _HomePageState extends State<HomePage> {
     fetchAndStoreBuildingIds();
     getDriverDetail();
     mapDataVersionCycle();
+    _initNavigationSDK();
     // loadData();
     NotificationSocket.receiveMessage();
     checkForUpdate();
@@ -177,6 +178,17 @@ class _HomePageState extends State<HomePage> {
     _scrollController = ScrollController(initialScrollOffset: 140.0);
     // requestStoragePermission();
     requestMicPermission();
+  }
+  Future<void> _initNavigationSDK() async {
+    await NavigationSDK.initializeapp(venueName: "AIGHospital");
+
+    final signInBox = await Hive.openBox('SignInDatabase');
+    if (signInBox.containsKey("accessToken")) {
+      await NavigationSDK.preLoadDataForNative(
+        buildingAllApi.selectedVenue,
+        isInternetConnected: true,
+      );
+    }
   }
   Future<bool> requestMicPermission() async {
     var status = await Permission.microphone.status;
@@ -639,8 +651,8 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> checkForUpdate() async {
     final newVersion = NewVersionPlus(
-      androidId: 'com.iwayplus.aiimsjammu',
-      iOSId: 'com.iwayplus.aiimsjammu',
+      androidId: 'com.iwayplus.aig',
+      iOSId: 'com.iwayplus.aig',
     );
 
     try {
@@ -681,7 +693,7 @@ class _HomePageState extends State<HomePage> {
                 // Add your app update logic here
                 final url = Theme.of(context).platform == TargetPlatform.iOS
                     ? 'https://apps.apple.com/in/app/aiims-jammu-navigation/id6677034083'
-                    : 'https://play.google.com/store/apps/details?id=com.iwayplus.aiimsjammu';
+                    : 'https://play.google.com/store/apps/details?id=com.iwayplus.aig';
                 if (await canLaunch(url)) {
                   await launch(url);
                 } else {
@@ -944,7 +956,8 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  var userInfoBox=Hive.box('UserInformation');
+  // var userInfoBox=Hive.box('UserInformation');
+  Box get userInfoBox => Hive.box('UserInformation');
 
   void promptLocationAccess() {
     if(userInfoBox.containsKey("userTracking") && userInfoBox.get("userTracking")){
@@ -997,7 +1010,9 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  var versionBox = Hive.box('VersionData');
+  // var versionBox = Hive.box('VersionData');
+  Box get versionBox => Hive.box('VersionData');
+
   void versionApiCall() async{
     try {
       await DataVersionApi()
@@ -1008,8 +1023,10 @@ class _HomePageState extends State<HomePage> {
 
     }
   }
-  var DashboardListBox = Hive.box('DashboardList');
-  var userListBox = Hive.box('user');
+  // var DashboardListBox = Hive.box('DashboardList');
+  Box get DashboardListBox => Hive.box('DashboardList');
+  // var userListBox = Hive.box('user');
+  Box get userListBox => Hive.box('user');
 
   Future<void> checkForReload() async {
     if(userListBox.containsKey('name')){

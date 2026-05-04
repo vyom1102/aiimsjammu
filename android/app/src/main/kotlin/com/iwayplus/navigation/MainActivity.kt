@@ -1,4 +1,4 @@
-package com.iwayplus.aiimsjammu
+package com.iwayplus.aig
 
 
 import android.Manifest

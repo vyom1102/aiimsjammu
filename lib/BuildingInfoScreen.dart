@@ -74,7 +74,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
   }
   bool bluetoohEnabled = false;
   SingletonFunctionController controller = SingletonFunctionController();
-  final ws = wsocket("com.iwayplus.aiimsjammu");
+  final ws = wsocket("com.iwayplus.aig");
 
 
   @override

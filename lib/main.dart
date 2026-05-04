@@ -47,7 +47,9 @@ Future<void> main() async {
 
   var directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
-  await NavigationSDK.initializeapp(venueName: "AIGHospital");
+  await Hive.openBox('SignInDatabase');
+  await Hive.openBox('SwitchingDatabaseInfo');
+  // await NavigationSDK.initializeapp(venueName: "AIGHospital");
   await interactionManager.initialize();
   await sessionManager.initialize();
   await navigationManager.initialize();
@@ -65,12 +67,12 @@ Future<void> main() async {
   ]);
 
   var signInDatabaseBox = Hive.box('SignInDatabase');
-  if (signInDatabaseBox.containsKey("accessToken")) {
-    await NavigationSDK.preLoadDataForNative(
-      buildingAllApi.selectedVenue,
-      isInternetConnected: true,
-    );
-  }
+  // if (signInDatabaseBox.containsKey("accessToken")) {
+  //   await NavigationSDK.preLoadDataForNative(
+  //     buildingAllApi.selectedVenue,
+  //     isInternetConnected: true,
+  //   );
+  // }
 
 
   WakelockPlus.enable();
@@ -94,7 +96,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
   String? initialServiceId;
   bool isLocating=false;
   late io.Socket _socket;
-  wsocket soc = wsocket("com.iwayplus.aiimsjammu");
+  wsocket soc = wsocket("com.iwayplus.aig");
 
   @override
   void initState() {
@@ -172,7 +174,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
 
     });
   }
-  var locBox=Hive.box('LocationPermission');
+  // var locBox=Hive.box('LocationPermission');
+  Box get locBox => Hive.box('LocationPermission');
   Future<void> requestLocationPermission() async {
     final status = await Permission.location.request();
     print(status);

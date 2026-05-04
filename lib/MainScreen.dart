@@ -51,7 +51,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   late int index;
-  final ws = wsocket("com.iwayplus.aiimsjammu");
+  final ws = wsocket("com.iwayplus.aig");
 
 
   final screens = [
@@ -125,8 +125,8 @@ class _MainScreenState extends State<MainScreen> {
 
   Future<void> checkForUpdate() async {
     final newVersion = NewVersionPlus(
-      androidId: 'com.iwayplus.aiimsjammu',
-      iOSId: 'com.iwayplus.aiimsjammu',
+      androidId: 'com.iwayplus.aig',
+      iOSId: 'com.iwayplus.aig',
     );
     try {
       final status = await newVersion.getVersionStatus();

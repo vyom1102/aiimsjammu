@@ -101,7 +101,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       'username': widget.email,
       'oldPassword': oldPassword,
       'newPassword': newPassword,
-      "appId":"com.iwayplus.aiimsjammu"
+      "appId":"com.iwayplus.aig"
     };
 
     try {

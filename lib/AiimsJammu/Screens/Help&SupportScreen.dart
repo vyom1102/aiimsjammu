@@ -113,7 +113,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             child: InkWell(
               onTap: () {
 
-                _launchURL('https://play.google.com/store/apps/details?id=com.iwayplus.aiimsjammu');
+                _launchURL('https://play.google.com/store/apps/details?id=com.iwayplus.aig');
               },
               child: Container(
                 width: MediaQuery.sizeOf(context).width,
@@ -203,10 +203,10 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
               onTap: (){
                 final storeurl = Theme.of(context).platform == TargetPlatform.iOS
                     ? 'https://apps.apple.com/in/app/aiims-jammu-navigation/id6677034083'
-                    : 'https://play.google.com/store/apps/details?id=com.iwayplus.aiimsjammu';
+                    : 'https://play.google.com/store/apps/details?id=com.iwayplus.aig';
 
                 _shareContent(storeurl);
-                // _shareContent("https://play.google.com/store/apps/details?id=com.iwayplus.aiimsjammu");
+                // _shareContent("https://play.google.com/store/apps/details?id=com.iwayplus.aig");
               //   aiims-jammu-navigation/id6677034083
               },
               child: Container(
