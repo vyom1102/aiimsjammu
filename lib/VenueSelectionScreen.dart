@@ -62,7 +62,7 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
   // Replace with your actual document ID
   bool checkedForBuildingAllUpdated = false;
   bool isLocating=false;
-  final ws = wsocket("com.iwayplus.aiimsjammu");
+  final ws = wsocket("com.iwayplus.aig");
 
 
 

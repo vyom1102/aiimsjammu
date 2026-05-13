@@ -815,7 +815,7 @@ class _ServiceInfo1State extends State<ServiceInfo1> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () {
-                    _shareContent("${AppConfig.baseUrl}/#/iway-apps/aiimsj.com/service?serviceId=${widget.id}&appStore=com.iwayplus.aiimsjammu&playStore=com.iwayplus.aiimsjammu");
+                    _shareContent("${AppConfig.baseUrl}/#/iway-apps/aiimsj.com/service?serviceId=${widget.id}&appStore=com.iwayplus.aig&playStore=com.iwayplus.aig");
 
                     // _shareContent("iwayplus://aiimsj.com/service?serviceId=${widget.id}");
                   },

@@ -1458,9 +1458,11 @@ packages:
   navigation_sdk:
     dependency: "direct main"
     description:
-      path: "/Users/macmini/StudioProjects/navigation_sdk"
-      relative: false
-    source: path
+      path: "."
+      ref: pip
+      resolved-ref: "0b54b397d4f1b39b9cf5f70deb264837b94aca42"
+      url: "https://github.com/udit6023/navigation_sdk.git"
+    source: git
     version: "1.0.0+1"
   nested:
     dependency: transitive

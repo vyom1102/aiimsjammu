@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'AA/language.dart';
 
 class AppConfig {
-  static String appID = "com.iwayplus.aiimsjammu";
+  static String appID = "com.iwayplus.aig";
 
 
   static String get baseUrl {
