@@ -227,16 +227,18 @@ class ApiDataFetcher {
 void main() async {
   // Configuration - REPLACE WITH YOUR ACTUAL VALUES
   final fetcher = ApiDataFetcher(
-    accessToken: '7caabf90-c517-11f0-b412-a52d7d953b2c',
-    baseUrl: 'https://maps.iwayplus.in',  // e.g., 'https://api.example.com'
+    accessToken: '7cc62870-d67e-11f0-91ed-2f0eb903e7db',
+    baseUrl: 'https://dev.iwayplus.in',  // e.g., 'https://api.example.com'
   );
-  var buildingData = await fetcher.fetchBuildingIDS("AIIMSJAMMU");
+  var buildingData = await fetcher.fetchBuildingIDS("AIGHospital");
   buildingData.buildings?.forEach((building) async {
     await fetcher.fetchAllData(
       buildingId: building.id,
     );
   });
-  await fetcher.fetchAllData(
-    buildingId: buildingData.campus!.id,
-  );
+  if(buildingData.campus?.id != null){
+    await fetcher.fetchAllData(
+      buildingId: buildingData.campus!.id,
+    );
+  }
 }

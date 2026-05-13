@@ -12,7 +12,7 @@ class BuildingData {
       buildings: (json['buildings'] as List<dynamic>)
           .map((e) => Building.fromJson(e))
           .toList(),
-      campus: Campus.fromJson(json['campus']),
+      campus: json?['campus']?["_id"] != null?Campus.fromJson(json['campus']):null,
     );
   }
 
