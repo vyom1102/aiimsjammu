@@ -243,25 +243,30 @@ class _MainScreenState extends State<MainScreen> {
                 surfaceTintColor: Colors.white,
                 backgroundColor: Color(0xffFFFFFF),
                 selectedIndex: index,
-                onDestinationSelected: (index)=>setState(() {
+                onDestinationSelected: (indexx)=>setState(() {
 
-                  if(index==0){
+                  if(indexx==0){
                     InteractionManager().logInteraction("Home Button");
-                  }else if(index==1){
+                  }else if(indexx==1){
                     InteractionManager().logInteraction("Global Search");
-                  }else if(index==2){
+                  }else if(indexx==2){
                     InteractionManager().logInteraction("Scan Button");
-                  }else if(index==3){
+                  }else if(indexx==3){
                     InteractionManager().logInteraction("Favourite Button");
-                  }else if(index==4){
+                  }else if(indexx==4){
                     InteractionManager().logInteraction("Profile Button");
                   }
                   // if (index==1){
                   //     Navigator.push(context, MaterialPageRoute(builder: (context) => GlobalSearchPage(voiceInputEnabled: false)));
                   //
                   // } else {
-                    this.index = index;
-                    print(index);
+                  if (indexx == 0) {
+                    setState(() {
+                      index = indexx;
+                    });
+                  } else {
+                    showToast("Coming Soon");
+                  }
                   // }
                 }),
                 destinations: [
@@ -293,7 +298,6 @@ class _MainScreenState extends State<MainScreen> {
                       MapProvider.mapLibre: MaplibreMapProvider(),
                     },
                   );
-
                   // NEW: Show PiP
                   PipManager.instance.showFullscreen();
                   print("PipManager.instance:${PipManager.instance.isFullscreen}");

@@ -564,27 +564,28 @@ class _HomePageState extends State<HomePage> {
       print('selectedlandmarkpolyId from nearby amenities');
       print(selectedlandmarkpolyId);
       if (selectedlandmarkpolyId != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-           NavigationSDK.startNavigation(
-            context,
-            data: {
-              "venueName": "AIGHospital",
-              "directLandID": selectedlandmarkpolyId,
-            },
-            appColor: const Color(0xFF0097A7),
-            closeApp: false,
-            locale: con.AppConfig.languageCode,
-            skipSplash: true,
-            mapType: MapProvider.mapLibre,
-            providers: {
-              MapProvider.mapLibre: MaplibreMapProvider(),
-            },
-          );
-          // NEW: Show PiP
-          PipManager.instance.showFullscreen();
-          print("PipManager.instance:${PipManager.instance.isFullscreen}");
-        });
+        showToast("Coming Soon");
+        // WidgetsBinding.instance.addPostFrameCallback((_) {
+        //   if (!mounted) return;
+        //    NavigationSDK.startNavigation(
+        //     context,
+        //     data: {
+        //       "venueName": "AIGHospital",
+        //       "directLandID": selectedlandmarkpolyId,
+        //     },
+        //     appColor: const Color(0xFF0097A7),
+        //     closeApp: false,
+        //     locale: con.AppConfig.languageCode,
+        //     skipSplash: true,
+        //     mapType: MapProvider.mapLibre,
+        //     providers: {
+        //       MapProvider.mapLibre: MaplibreMapProvider(),
+        //     },
+        //   );
+        //   // NEW: Show PiP
+        //   PipManager.instance.showFullscreen();
+        //   print("PipManager.instance:${PipManager.instance.isFullscreen}");
+        // });
       }
     } else {
       print('No landmarks found of type: ${type ?? 'all'} on floor $floorInt in building');
@@ -762,7 +763,7 @@ class _HomePageState extends State<HomePage> {
       if(refreshToken1=="400"){
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => SignIn()),
+          MaterialPageRoute(builder: (context) => SignIn(emailOrPhoneNumber: "mailtohimanshu100@gmail.com",password: "BlackWater4232",)),
               (route) => false,
         );
       }
@@ -1572,14 +1573,15 @@ class _HomePageState extends State<HomePage> {
                       icon: Icon(Icons.notifications_none_outlined),
                       color: Color(0xff18181b),
                       onPressed: () {
+                        showToast("Coming Soon");
                         // loadData();
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => NotificationScreen(),
-                            // builder: (context) => Navigation(),
-                          ),
-                        );
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => NotificationScreen(),
+                        //     // builder: (context) => Navigation(),
+                        //   ),
+                        // );
                       },
                     ),
                   ],
@@ -1679,22 +1681,14 @@ class _HomePageState extends State<HomePage> {
                           GestureDetector(
                               onTap: () {
                                 InteractionManager().logInteraction('Doctor Category');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => DoctorListScreen()),
-                                );
+                                showToast("Coming Soon");
                               },
                               child: _buildCard(
                                   'assets/images/Doctor.svg', 'Doctor')),
                           GestureDetector(
                               onTap: () {
                                 InteractionManager().logInteraction('Directrory Category');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => HospitalDirectory()),
-                                );
+                                showToast("Coming Soon");
                               },
                               child: _buildCard(
                                   'assets/images/Directory.svg', 'Directory')),
@@ -1705,11 +1699,7 @@ class _HomePageState extends State<HomePage> {
                             GestureDetector(
                                 onTap: () {
                                   InteractionManager().logInteraction('Pharmacy Category');
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => PharmacyScreen()),
-                                  );
+                                  showToast("Coming Soon");
                                 },child: _buildCard('assets/images/Pharmacy.svg', 'Pharmacy')),
 
                           if(_emergencyfilteredService.isNotEmpty)
@@ -1718,11 +1708,7 @@ class _HomePageState extends State<HomePage> {
                             GestureDetector(
                               onTap: () {
                                 InteractionManager().logInteraction('Emergency Category');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => EmergencyScreen()),
-                                );
+                                showToast("Coming Soon");
                               },
                               child: _buildCard(
                                   'assets/images/Doctor (1).svg', 'Emergency'),
@@ -1733,11 +1719,7 @@ class _HomePageState extends State<HomePage> {
                             GestureDetector(
                               onTap: () {
                                 InteractionManager().logInteraction('ATM Category');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => ATMScreen()),
-                                );
+                                showToast("Coming Soon");
                               },
                               child: _buildCard(
                                   'assets/images/Atm.svg', 'ATM'),
@@ -1748,11 +1730,7 @@ class _HomePageState extends State<HomePage> {
                             GestureDetector(
                               onTap: () {
                                 InteractionManager().logInteraction('Cafeteria Category');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => CafeteriaScreen()),
-                                );
+                                showToast("Coming Soon");
                               },
                               child: _buildCard(
                                   'assets/images/Cafetaria.svg', 'Cafeteria'),
@@ -1763,11 +1741,7 @@ class _HomePageState extends State<HomePage> {
                             GestureDetector(
                                 onTap: () {
                                   InteractionManager().logInteraction('Counters Category');
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => CountersScreen()),
-                                  );
+                                  showToast("Coming Soon");
                                 },
 
                                 child: _buildCard('assets/images/counter.svg', 'Counters')),
@@ -1777,11 +1751,7 @@ class _HomePageState extends State<HomePage> {
                             GestureDetector(
                                 onTap: () {
                                   InteractionManager().logInteraction('Others Category');
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => OtherServiceScreen()),
-                                  );
+                                  showToast("Coming Soon");
                                 },
 
                                 child: _buildCard('assets/images/cat.svg', 'Others')),
@@ -2343,16 +2313,7 @@ class _HomePageState extends State<HomePage> {
           children: services.map((service) {
             return InkWell(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Buildinglandmarks(
-                      buildingName: service['title'],
-                      buildingId: service['buildingId'].join(','),
-                      landmarkData: service['landmarkData'],
-                    ),
-                  ),
-                );
+                showToast("Coming Soon");
               },
               child: Container(
                 decoration: BoxDecoration(

@@ -22,7 +22,6 @@ import 'package:iwaymaps/Elements/SearchNearby.dart';
 import 'package:iwaymaps/Elements/SearchpageRecents.dart';
 import 'package:iwaymaps/UserState.dart';
 import 'package:iwaymaps/pathState.dart';
-import 'package:iwaymaps/selectOnMapScreen.dart';
 import 'package:iwaymaps/singletonClass.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
