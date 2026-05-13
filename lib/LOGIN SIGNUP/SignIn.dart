@@ -206,7 +206,7 @@ class _SignInState extends State<SignIn> {
                                       margin: EdgeInsets.fromLTRB(10, 20, 0, 0),
                                       child: Image.asset(
                                         // scale: 10,
-                                          'assets/images/signinlogo.png'),
+                                          'assets/images/dashboardlogo.png'),
                                     ),
                                   ],
                                 ),

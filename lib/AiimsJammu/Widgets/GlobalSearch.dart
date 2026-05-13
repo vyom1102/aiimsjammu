@@ -29,7 +29,6 @@ import '../../StringStorage.dart';
 import '../../Userbox.dart';
 import '../../config.dart';
 import '../../navigationTools.dart';
-import '../../selectOnMapScreen.dart';
 import '../../singletonClass.dart';
 import '../Screens/DoctorProfile.dart';
 import '../Screens/ServiceInfo.dart';
