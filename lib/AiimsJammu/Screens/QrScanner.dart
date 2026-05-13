@@ -1,9 +1,89 @@
+// // //
+// // // import 'package:flutter/material.dart';
+// // // import 'package:qr_code_scanner/qr_code_scanner.dart';
+// // // import 'dart:convert';
+// // //
+// // // import '../Widgets/LocationIdFunction.dart';
+// // // import '../Widgets/Translator.dart';
+// // //
+// // // class QRScannerScreen extends StatefulWidget {
+// // //   @override
+// // //   _QRScannerScreenState createState() => _QRScannerScreenState();
+// // // }
+// // //
+// // // class _QRScannerScreenState extends State<QRScannerScreen> {
+// // //   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+// // //   QRViewController? controller;
+// // //
+// // //   @override
+// // //   void reassemble() {
+// // //     super.reassemble();
+// // //     if (controller != null) {
+// // //       controller!.pauseCamera();
+// // //     }
+// // //     controller?.resumeCamera();
+// // //   }
+// // //
+// // //   @override
+// // //   Widget build(BuildContext context) {
+// // //     return Scaffold(
+// // //       appBar: AppBar(
+// // //         title: TranslatorWidget('QR Scanner'),
+// // //       ),
+// // //       body: Column(
+// // //         children: [
+// // //           Expanded(
+// // //             flex: 5,
+// // //             child: QRView(
+// // //               key: qrKey,
+// // //               onQRViewCreated: _onQRViewCreated,
+// // //             ),
+// // //           ),
+// // //           Expanded(
+// // //             flex: 1,
+// // //             child: Center(
+// // //               child: TranslatorWidget('Scan a QR code'),
+// // //             ),
+// // //           ),
+// // //         ],
+// // //       ),
+// // //     );
+// // //   }
+// // //
+// // //   void _onQRViewCreated(QRViewController controller) {
+// // //     this.controller = controller;
+// // //     controller.scannedDataStream.listen((scanData) {
+// // //       try {
+// // //         final data = jsonDecode(scanData.code ?? '');
+// // //         final id = data['id'];
+// // //         final isSource=data['source'];
+// // //         print("-----qr-----");
+// // //         print(isSource);
+// // //         print(id);
+// // //         PassLocationId(context, id);
+// // //         controller?.stopCamera();
+// // //       } catch (e) {
+// // //         print('Error parsing JSON: $e');
+// // //       }
+// // //     });
+// // //   }
+// // //
+// // //   @override
+// // //   void dispose() {
+// // //     controller?.dispose();
+// // //     super.dispose();
+// // //   }
+// // // }
 // //
+// // import 'dart:collection';
 // // import 'package:flutter/material.dart';
+// // import 'package:iwaymaps/api/buildingAllApi.dart';
+// // import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 // // import 'package:qr_code_scanner/qr_code_scanner.dart';
-// // import 'dart:convert';
 // //
-// // import '../Widgets/LocationIdFunction.dart';
+// // import '../../APIMODELS/buildingAll.dart';
+// // import '../../Elements/HelperClass.dart';
+// // import '.dart';
 // // import '../Widgets/Translator.dart';
 // //
 // // class QRScannerScreen extends StatefulWidget {
@@ -15,20 +95,95 @@
 // //   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
 // //   QRViewController? controller;
 // //
+// //   static String? bid;
+// //   static String? landmarkID;
+// //   static String? source;
+// //   bool _isDeepLinkHandled = false;
 // //   @override
 // //   void reassemble() {
 // //     super.reassemble();
-// //     if (controller != null) {
-// //       controller!.pauseCamera();
-// //     }
+// //     controller?.pauseCamera();
 // //     controller?.resumeCamera();
+// //   }
+// //
+// //   static Future<void> iwaymapsDeepLink(Uri? uri, BuildContext context, String appName) async {
+// //     if (uri == null) {
+// //       print("Error: URI is null.");
+// //       return;
+// //     }
+// //
+// //     print("Deep link URI: ${uri.toString()}");
+// //
+// //     String queryString = uri.fragment.contains('?') ? uri.fragment.split('?').last : '';
+// //     Uri actualUri = Uri.parse('https://iwayplus.com/?$queryString');
+// //
+// //     bid = actualUri.queryParameters['bid'];
+// //     landmarkID = actualUri.queryParameters['landmark'];
+// //     source = actualUri.queryParameters['source'];
+// //
+// //     if (bid == null || landmarkID == null) {
+// //       print("Error: Missing query parameters.");
+// //       return;
+// //     }
+// //
+// //     try {
+// //       if(bid == "66794105b80a6778c53c4856" || bid =="6675792ca3119bff0e732f61") {
+// //         final buildings = await buildingAllApi().fetchBuildingAllData();
+// //
+// //         print("Fetched buildings: $buildings");
+// //
+// //         final venue = buildings
+// //             .firstWhere(
+// //               (building) => building.sId == bid,
+// //           orElse: () => throw Exception("Building not found."),
+// //         )
+// //             .venueName;
+// //
+// //         final venueMap = await HelperClass.groupBuildings(buildings);
+// //         final allBuildingMap = await HelperClass.createAllbuildingMap(
+// //             venueMap, venue!);
+// //
+// //         buildingAllApi.allBuildingID = allBuildingMap;
+// //         buildingAllApi.selectedBuildingID = bid!;
+// //         buildingAllApi.selectedID = bid!;
+// //         buildingAllApi.selectedVenue = venue;
+// //
+// //         if (source != null) {
+// //           Navigator.push(
+// //             context,
+// //             MaterialPageRoute(
+// //               builder: (context) => Navigation(directsourceID: source ?? ""),
+// //             ),
+// //           );
+// //         } else {
+// //           Navigator.push(
+// //             context,
+// //             MaterialPageRoute(
+// //               builder: (context) => Navigation(directLandID: landmarkID ?? ""),
+// //             ),
+// //           );
+// //         }
+// //       }
+// //       else{
+// //         HelperClass.showToast("Invalid qr");
+// //       }
+// //     } catch (e) {
+// //       print("Error handling deep link: $e");
+// //     }
 // //   }
 // //
 // //   @override
 // //   Widget build(BuildContext context) {
 // //     return Scaffold(
 // //       appBar: AppBar(
-// //         title: TranslatorWidget('QR Scanner'),
+// //         centerTitle: true,
+// //         title: TranslatorWidget(
+// //           'QR Scanner',
+// //           style: TextStyle(
+// //           fontSize: 18,
+// //           fontWeight: FontWeight.w500,
+// //           ),
+// //         ),
 // //       ),
 // //       body: Column(
 // //         children: [
@@ -42,7 +197,14 @@
 // //           Expanded(
 // //             flex: 1,
 // //             child: Center(
-// //               child: TranslatorWidget('Scan a QR code'),
+// //               child: TranslatorWidget(
+// //                'Scan QR code',
+// //                 style: TextStyle(
+// //                   fontSize: 12,
+// //                   fontWeight: FontWeight.w400,
+// //                 ),
+// //
+// //               ),
 // //             ),
 // //           ),
 // //         ],
@@ -50,20 +212,19 @@
 // //     );
 // //   }
 // //
+// //
 // //   void _onQRViewCreated(QRViewController controller) {
 // //     this.controller = controller;
 // //     controller.scannedDataStream.listen((scanData) {
-// //       try {
-// //         final data = jsonDecode(scanData.code ?? '');
-// //         final id = data['id'];
-// //         final isSource=data['source'];
-// //         print("-----qr-----");
-// //         print(isSource);
-// //         print(id);
-// //         PassLocationId(context, id);
-// //         controller?.stopCamera();
-// //       } catch (e) {
-// //         print('Error parsing JSON: $e');
+// //       if (!_isDeepLinkHandled) {
+// //         _isDeepLinkHandled = true;
+// //         try {
+// //           final uri = Uri.parse(scanData.code ?? '');
+// //           iwaymapsDeepLink(uri, context, "aiimsj.com");
+// //           controller.stopCamera();
+// //         } catch (e) {
+// //           print('Error parsing URL: $e');
+// //         }
 // //       }
 // //     });
 // //   }
@@ -80,10 +241,16 @@
 // import 'package:iwaymaps/api/buildingAllApi.dart';
 // import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 // import 'package:qr_code_scanner/qr_code_scanner.dart';
-//
+// import 'package:navigation_sdk/navigation_sdk.dart';
+// import 'package:unified_map_view/unified_map_view.dart';
+// import 'package:unified_map_view/maplibre.dart';
+// import '../../API/QRDataAPI.dart';
+// import '../../APIMODELS/QRDataAPIModel.dart';
 // import '../../APIMODELS/buildingAll.dart';
 // import '../../Elements/HelperClass.dart';
-// import '.dart';
+// import '../../MainScreen.dart';
+// // import '../../Navigation.dart';
+// import '../Widgets/LocationIdFunction.dart';
 // import '../Widgets/Translator.dart';
 //
 // class QRScannerScreen extends StatefulWidget {
@@ -111,61 +278,52 @@
 //       print("Error: URI is null.");
 //       return;
 //     }
-//
 //     print("Deep link URI: ${uri.toString()}");
-//
 //     String queryString = uri.fragment.contains('?') ? uri.fragment.split('?').last : '';
 //     Uri actualUri = Uri.parse('https://iwayplus.com/?$queryString');
-//
 //     bid = actualUri.queryParameters['bid'];
 //     landmarkID = actualUri.queryParameters['landmark'];
 //     source = actualUri.queryParameters['source'];
-//
 //     if (bid == null || landmarkID == null) {
 //       print("Error: Missing query parameters.");
 //       return;
 //     }
-//
 //     try {
-//       if(bid == "66794105b80a6778c53c4856" || bid =="6675792ca3119bff0e732f61") {
-//         final buildings = await buildingAllApi().fetchBuildingAllData();
+//       final buildings = await buildingAllApi().fetchBuildingAllData();
+//       print("Fetched buildings: $buildings");
+//       final venue = buildings.firstWhere(
+//             (building) => building.sId == bid,
+//         orElse: () => throw Exception("Building not found."),
+//       ).venueName;
+//       final venueMap = await HelperClass.groupBuildings(buildings);
+//       final allBuildingMap = await HelperClass.createAllbuildingMap(venueMap, venue!);
 //
-//         print("Fetched buildings: $buildings");
-//
-//         final venue = buildings
-//             .firstWhere(
-//               (building) => building.sId == bid,
-//           orElse: () => throw Exception("Building not found."),
-//         )
-//             .venueName;
-//
-//         final venueMap = await HelperClass.groupBuildings(buildings);
-//         final allBuildingMap = await HelperClass.createAllbuildingMap(
-//             venueMap, venue!);
-//
-//         buildingAllApi.allBuildingID = allBuildingMap;
-//         buildingAllApi.selectedBuildingID = bid!;
-//         buildingAllApi.selectedID = bid!;
-//         buildingAllApi.selectedVenue = venue;
-//
-//         if (source != null) {
-//           Navigator.push(
-//             context,
-//             MaterialPageRoute(
-//               builder: (context) => Navigation(directsourceID: source ?? ""),
-//             ),
-//           );
-//         } else {
-//           Navigator.push(
-//             context,
-//             MaterialPageRoute(
-//               builder: (context) => Navigation(directLandID: landmarkID ?? ""),
-//             ),
-//           );
-//         }
-//       }
-//       else{
-//         HelperClass.showToast("Invalid qr");
+//       buildingAllApi.allBuildingID = allBuildingMap;
+//       buildingAllApi.selectedBuildingID = bid!;
+//       buildingAllApi.selectedID = bid!;
+//       buildingAllApi.selectedVenue = venue;
+//       if (source != null) {
+//         NavigationSDK.callWithLandMarkId(
+//           context,
+//           "AIIMSJAMMU",
+//           source!,
+//           const Color(0xFF0097A7),
+//           false,
+//           AppConfig.languageCode,
+//           mapType: MapProvider.mapLibre,
+//           providers: {MapProvider.mapLibre: MaplibreMapProvider()},
+//         );
+//       } else {
+//         NavigationSDK.callWithLandMarkId(
+//           context,
+//           "AIIMSJAMMU",
+//           landmarkID ?? "",
+//           const Color(0xFF0097A7),
+//           false,
+//           AppConfig.languageCode,
+//           mapType: MapProvider.mapLibre,
+//           providers: {MapProvider.mapLibre: MaplibreMapProvider()},
+//         );
 //       }
 //     } catch (e) {
 //       print("Error handling deep link: $e");
@@ -178,11 +336,14 @@
 //       appBar: AppBar(
 //         centerTitle: true,
 //         title: TranslatorWidget(
-//           'QR Scanner',
+//             'QR Scanner',
 //           style: TextStyle(
-//           fontSize: 18,
-//           fontWeight: FontWeight.w500,
+//             fontSize: 18,
+//             fontWeight: FontWeight.w500,
 //           ),
+//           // text: 'QR Scanner',
+//           // fontSize: '18',
+//           // fontWeight: '500',
 //         ),
 //       ),
 //       body: Column(
@@ -198,12 +359,13 @@
 //             flex: 1,
 //             child: Center(
 //               child: TranslatorWidget(
-//                'Scan QR code',
+//                 'Scan QR code',
 //                 style: TextStyle(
-//                   fontSize: 12,
-//                   fontWeight: FontWeight.w400,
+//                   fontSize: 12
 //                 ),
-//
+//                 // text: 'Scan QR code',
+//                 // fontSize: '12',
+//                 // fontWeight: '400',
 //               ),
 //             ),
 //           ),
@@ -213,14 +375,91 @@
 //   }
 //
 //
+//   String? extractLandmarkId(String url) {
+//     try {
+//       // Using RegExp to find the landmark parameter
+//       final RegExp regExp = RegExp(r'[?&]landmark=([^&#]*)');
+//       final Match? match = regExp.firstMatch(url);
+//
+//       if (match != null && match.groupCount >= 1) {
+//         return match.group(1);
+//       }
+//
+//       return null; // Return null if no landmark ID is found
+//     } catch (e) {
+//       print('Error extracting landmark ID: $e');
+//       return null;
+//     }
+//   }
 //   void _onQRViewCreated(QRViewController controller) {
 //     this.controller = controller;
-//     controller.scannedDataStream.listen((scanData) {
+//     controller.scannedDataStream.listen((scanData) async {
 //       if (!_isDeepLinkHandled) {
 //         _isDeepLinkHandled = true;
 //         try {
 //           final uri = Uri.parse(scanData.code ?? '');
-//           iwaymapsDeepLink(uri, context, "aiimsj.com");
+//           String qrCode = uri.fragment.split('/').last;
+//           print("qrCode");
+//           print(qrCode);
+//
+//           bool isHandled = false;
+//           bool isSecondHandled = false;
+//           List<QRDataAPIModel>? qrData = await QRDataAPI().fetchQRData(buildingAllApi.allBuildingID.keys.toList());
+//
+//           if (qrData != null) {
+//             for (var e in qrData) {
+//               if (e.code == qrCode) {
+//                 if (e.landmarkId == null) {
+//                   HelperClass.launchURL(scanData.code!);
+//                 } else {
+//                   PassLocationId(context, e.landmarkId!);
+//                 }
+//                 isHandled = true;
+//                 break;
+//               }
+//             }
+//           }
+//
+//           if (!isHandled && uri.toString().contains("/aiimsj.com/landmark")) {
+//             final b = uri.queryParameters['bid'];
+//             final l = uri.queryParameters['landmark'];
+//
+//             if (b != null) bid = b;
+//             if (l != null) landmarkID = l;
+//             String? id = extractLandmarkId(uri.toString());
+//             print(id);
+//             print("bid  landmarkID  source $bid <-----> $landmarkID <------> $source");
+//
+//             await buildingAllApi().fetchBuildingAllData().then((value) async {
+//               buildingAllApi.findBuildings(value);
+//               print("deeplink $bid ${uri.queryParameters['bid']}");
+//               isSecondHandled = true;
+//               NavigationSDK.callWithLandMarkId(
+//                 context,
+//                 "AIIMSJAMMU",
+//                 id ?? "",
+//                 const Color(0xFF0097A7),
+//                 false,
+//                 AppConfig.languageCode,
+//                 mapType: MapProvider.mapLibre,
+//                 providers: {MapProvider.mapLibre: MaplibreMapProvider()},
+//               );
+//
+//             });
+//           }else{
+//             HelperClass.showToast("Invalid/Unassigned QR");
+//             print("qr pop");
+//             Navigator.pushReplacement(
+//                 context,
+//                 MaterialPageRoute(
+//                     builder: (context) =>
+//                         MainScreen(initialIndex: 0,)));
+//           }
+//
+//
+//           print(qrData);
+//           print("qrScanner");
+//           print(uri);
 //           controller.stopCamera();
 //         } catch (e) {
 //           print('Error parsing URL: $e');
@@ -235,242 +474,3 @@
 //     super.dispose();
 //   }
 // }
-
-import 'dart:collection';
-import 'package:flutter/material.dart';
-import 'package:iwaymaps/api/buildingAllApi.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
-import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:navigation_sdk/navigation_sdk.dart';
-import 'package:unified_map_view/unified_map_view.dart';
-import 'package:unified_map_view/maplibre.dart';
-import '../../API/QRDataAPI.dart';
-import '../../APIMODELS/QRDataAPIModel.dart';
-import '../../APIMODELS/buildingAll.dart';
-import '../../Elements/HelperClass.dart';
-import '../../MainScreen.dart';
-// import '../../Navigation.dart';
-import '../Widgets/LocationIdFunction.dart';
-import '../Widgets/Translator.dart';
-
-class QRScannerScreen extends StatefulWidget {
-  @override
-  _QRScannerScreenState createState() => _QRScannerScreenState();
-}
-
-class _QRScannerScreenState extends State<QRScannerScreen> {
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  QRViewController? controller;
-
-  static String? bid;
-  static String? landmarkID;
-  static String? source;
-  bool _isDeepLinkHandled = false;
-  @override
-  void reassemble() {
-    super.reassemble();
-    controller?.pauseCamera();
-    controller?.resumeCamera();
-  }
-
-  static Future<void> iwaymapsDeepLink(Uri? uri, BuildContext context, String appName) async {
-    if (uri == null) {
-      print("Error: URI is null.");
-      return;
-    }
-    print("Deep link URI: ${uri.toString()}");
-    String queryString = uri.fragment.contains('?') ? uri.fragment.split('?').last : '';
-    Uri actualUri = Uri.parse('https://iwayplus.com/?$queryString');
-    bid = actualUri.queryParameters['bid'];
-    landmarkID = actualUri.queryParameters['landmark'];
-    source = actualUri.queryParameters['source'];
-    if (bid == null || landmarkID == null) {
-      print("Error: Missing query parameters.");
-      return;
-    }
-    try {
-      final buildings = await buildingAllApi().fetchBuildingAllData();
-      print("Fetched buildings: $buildings");
-      final venue = buildings.firstWhere(
-            (building) => building.sId == bid,
-        orElse: () => throw Exception("Building not found."),
-      ).venueName;
-      final venueMap = await HelperClass.groupBuildings(buildings);
-      final allBuildingMap = await HelperClass.createAllbuildingMap(venueMap, venue!);
-
-      buildingAllApi.allBuildingID = allBuildingMap;
-      buildingAllApi.selectedBuildingID = bid!;
-      buildingAllApi.selectedID = bid!;
-      buildingAllApi.selectedVenue = venue;
-      if (source != null) {
-        NavigationSDK.callWithLandMarkId(
-          context,
-          "AIIMSJAMMU",
-          source!,
-          const Color(0xFF0097A7),
-          false,
-          AppConfig.languageCode,
-          mapType: MapProvider.mapLibre,
-          providers: {MapProvider.mapLibre: MaplibreMapProvider()},
-        );
-      } else {
-        NavigationSDK.callWithLandMarkId(
-          context,
-          "AIIMSJAMMU",
-          landmarkID ?? "",
-          const Color(0xFF0097A7),
-          false,
-          AppConfig.languageCode,
-          mapType: MapProvider.mapLibre,
-          providers: {MapProvider.mapLibre: MaplibreMapProvider()},
-        );
-      }
-    } catch (e) {
-      print("Error handling deep link: $e");
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: TranslatorWidget(
-            'QR Scanner',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-          ),
-          // text: 'QR Scanner',
-          // fontSize: '18',
-          // fontWeight: '500',
-        ),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            flex: 5,
-            child: QRView(
-              key: qrKey,
-              onQRViewCreated: _onQRViewCreated,
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Center(
-              child: TranslatorWidget(
-                'Scan QR code',
-                style: TextStyle(
-                  fontSize: 12
-                ),
-                // text: 'Scan QR code',
-                // fontSize: '12',
-                // fontWeight: '400',
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-
-  String? extractLandmarkId(String url) {
-    try {
-      // Using RegExp to find the landmark parameter
-      final RegExp regExp = RegExp(r'[?&]landmark=([^&#]*)');
-      final Match? match = regExp.firstMatch(url);
-
-      if (match != null && match.groupCount >= 1) {
-        return match.group(1);
-      }
-
-      return null; // Return null if no landmark ID is found
-    } catch (e) {
-      print('Error extracting landmark ID: $e');
-      return null;
-    }
-  }
-  void _onQRViewCreated(QRViewController controller) {
-    this.controller = controller;
-    controller.scannedDataStream.listen((scanData) async {
-      if (!_isDeepLinkHandled) {
-        _isDeepLinkHandled = true;
-        try {
-          final uri = Uri.parse(scanData.code ?? '');
-          String qrCode = uri.fragment.split('/').last;
-          print("qrCode");
-          print(qrCode);
-
-          bool isHandled = false;
-          bool isSecondHandled = false;
-          List<QRDataAPIModel>? qrData = await QRDataAPI().fetchQRData(buildingAllApi.allBuildingID.keys.toList());
-
-          if (qrData != null) {
-            for (var e in qrData) {
-              if (e.code == qrCode) {
-                if (e.landmarkId == null) {
-                  HelperClass.launchURL(scanData.code!);
-                } else {
-                  PassLocationId(context, e.landmarkId!);
-                }
-                isHandled = true;
-                break;
-              }
-            }
-          }
-
-          if (!isHandled && uri.toString().contains("/aiimsj.com/landmark")) {
-            final b = uri.queryParameters['bid'];
-            final l = uri.queryParameters['landmark'];
-
-            if (b != null) bid = b;
-            if (l != null) landmarkID = l;
-            String? id = extractLandmarkId(uri.toString());
-            print(id);
-            print("bid  landmarkID  source $bid <-----> $landmarkID <------> $source");
-
-            await buildingAllApi().fetchBuildingAllData().then((value) async {
-              buildingAllApi.findBuildings(value);
-              print("deeplink $bid ${uri.queryParameters['bid']}");
-              isSecondHandled = true;
-              NavigationSDK.callWithLandMarkId(
-                context,
-                "AIIMSJAMMU",
-                id ?? "",
-                const Color(0xFF0097A7),
-                false,
-                AppConfig.languageCode,
-                mapType: MapProvider.mapLibre,
-                providers: {MapProvider.mapLibre: MaplibreMapProvider()},
-              );
-
-            });
-          }else{
-            HelperClass.showToast("Invalid/Unassigned QR");
-            print("qr pop");
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        MainScreen(initialIndex: 0,)));
-          }
-
-
-          print(qrData);
-          print("qrScanner");
-          print(uri);
-          controller.stopCamera();
-        } catch (e) {
-          print('Error parsing URL: $e');
-        }
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    controller?.dispose();
-    super.dispose();
-  }
-}

@@ -30,10 +30,10 @@ dependencies:
     sdk: flutter
 
   navigation_sdk:
-    git:
-      url: https://github.com/udit6023/navigation_sdk.git
-      ref: pip
-##    path: /Users/macmini/StudioProjects/navigation_sdk
+#    git:
+#      url: https://github.com/udit6023/navigation_sdk.git
+#      ref: pip
+    path: /Users/macmini/StudioProjects/navigation_sdk
 
 
 
@@ -87,7 +87,6 @@ dependencies:
   share_plus: ^9.0.0
   turf: ^0.0.9
   geolocator: ^11.0.0
-  qr_code_scanner: ^1.0.1
   barcode_scan2: ^4.3.0
   persistent_bottom_nav_bar: ^5.0.2
   in_app_update: ^4.2.2

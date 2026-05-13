@@ -179,17 +179,23 @@ class _HomePageState extends State<HomePage> {
     // requestStoragePermission();
     requestMicPermission();
   }
-  Future<void> _initNavigationSDK() async {
-    await NavigationSDK.initializeapp(venueName: "AIGHospital");
 
-    final signInBox = await Hive.openBox('SignInDatabase');
-    if (signInBox.containsKey("accessToken")) {
-      await NavigationSDK.preLoadDataForNative(
-        buildingAllApi.selectedVenue,
-        isInternetConnected: true,
-      );
-    }
+  bool _isMapInitialized=false;
+  Future<void> _initNavigationSDK() async {
+
+    print("Before init: $_isMapInitialized");
+
+    final isInitialized = await NavigationSDK.initializeapp(
+      venueName: 'AIGHospital',
+    );
+
+    setState(() {
+      _isMapInitialized = isInitialized;
+    });
+
+    print("After init: $_isMapInitialized");
   }
+
   Future<bool> requestMicPermission() async {
     var status = await Permission.microphone.status;
 
@@ -2226,7 +2232,7 @@ class _HomePageState extends State<HomePage> {
           //       label: "Map",
           //       child: Lottie.asset('assets/images/floatingmap.json')),
           // ),
-          floatingActionButton: FloatingActionButton(
+          floatingActionButton:(_isMapInitialized)? FloatingActionButton(
             onPressed: (){
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (!mounted) return;
@@ -2253,7 +2259,7 @@ class _HomePageState extends State<HomePage> {
             backgroundColor: Color(0xFFFEAB01),
             shape: CircleBorder(),
             child: Lottie.asset('assets/images/floatingmap.json'),
-          )
+          ):Container()
 
       ),
     );

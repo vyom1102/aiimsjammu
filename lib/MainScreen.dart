@@ -58,7 +58,7 @@ class _MainScreenState extends State<MainScreen> {
     HomePage(),
     GlobalSearchPage(voiceInputEnabled: false,frombottombar: true,),
     // GlobalSearchPage(voiceInputEnabled: false),
-    QRScannerScreen(),
+    // QRScannerScreen(),
     FavouriteRGCIScreen(),
     ProfilePage(),
   ];
@@ -70,7 +70,23 @@ class _MainScreenState extends State<MainScreen> {
     index = widget.initialIndex;
     checkPermission();
     setIDforWebSocket();
+    _initNavigationSDK();
     print(index);
+  }
+  bool _isMapInitialized=false;
+  Future<void> _initNavigationSDK() async {
+
+    print("Before init: $_isMapInitialized");
+
+    final isInitialized = await NavigationSDK.initializeapp(
+      venueName: 'AIGHospital',
+    );
+
+    setState(() {
+      _isMapInitialized = isInitialized;
+    });
+
+    print("After init: $_isMapInitialized");
   }
 
 
@@ -279,7 +295,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
           ),
-            floatingActionButton: FloatingActionButton(
+            floatingActionButton: (_isMapInitialized)?FloatingActionButton(
               heroTag: 'mainscreen',
               onPressed: (){
                 WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -308,7 +324,7 @@ class _MainScreenState extends State<MainScreen> {
               child: Semantics(
                   label: "Map",
                   child: Lottie.asset('assets/images/floatingmap.json')),
-            ),
+            ):Container(),
         ),
       ),
     );
