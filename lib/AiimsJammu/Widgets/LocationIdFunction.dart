@@ -4,7 +4,6 @@ import 'package:navigation_sdk/navigation_sdk.dart';
 import 'package:unified_map_view/unified_map_view.dart';
 import 'package:unified_map_view/maplibre.dart';
 
-import '../../Navigation.dart';
 
 
 void PassLocationId(BuildContext context,String Id){
@@ -24,6 +23,7 @@ void PassLocationId(BuildContext context,String Id){
       AppConfig.languageCode,
       mapType: MapProvider.mapLibre, providers: {MapProvider.mapLibre : MaplibreMapProvider()}
   );
+  PipManager.instance.showFullscreen();
 
   print(Id);
 

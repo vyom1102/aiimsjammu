@@ -4,7 +4,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:iwaymaps/waypoint.dart';
 
 
-import 'APIMODELS/GlobalAnnotationModel.dart';
 import 'APIMODELS/beaconData.dart';
 import 'APIMODELS/landmark.dart';
 import 'APIMODELS/patchDataModel.dart';
@@ -32,7 +31,6 @@ class Building{
   static HashMap<String, beacon> apibeaconmap = HashMap();
   static String thresh = "";
   static Map<String,List<PathModel>> waypoint = {};
-  static GlobalModel? GlobalAnnotation = null;
   static Map<String,g.LatLng> allBuildingID = {
   };
   Map<String,Map<int, g.LatLng>> ARCoordinates = {};

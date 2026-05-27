@@ -26,7 +26,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
     setState(() {
       isLoading = true;
     });
-
     notificationsList = await LocalNotificationAPI().getNotifications();
     setState(() {
       isLoading = false;

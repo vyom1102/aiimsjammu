@@ -32,7 +32,7 @@ dependencies:
   navigation_sdk:
     git:
       url: https://github.com/udit6023/navigation_sdk.git
-      ref: landmarkPanel
+      ref: main
 
 
 

@@ -9,12 +9,12 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
-import 'package:iwaymaps/UserState.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:iwaymaps/websocket/interactionManager.dart';
 import 'package:iwaymaps/websocket/navigationLogManager.dart';
 import 'package:iwaymaps/websocket/sessionManager.dart';
 import 'package:navigation_sdk/navigation_sdk.dart' hide LOCALES;
+import 'package:navigation_sdk/pip_overlay.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:path_provider/path_provider.dart';
@@ -25,19 +25,15 @@ import 'API/buildingAllApi.dart';
 import 'AiimsJammu/Screens/DoctorProfile1.dart';
 import 'AiimsJammu/Screens/ServiceInfo1.dart';
 import 'AiimsJammu/Screens/SplashScreen.dart';
-import 'AiimsJammu/Widgets/WebSocketDriver.dart';
-import 'BluetoothManager/BLEManager.dart';
+import 'DATABASE/BOXES/LocalNotificationAPIDatabaseModelBOX.dart';
 import 'Elements/deeplinks.dart';
 import 'MainScreen.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
-import 'fingerprinting/fingerprinting.dart';
 
 final interactionManager = InteractionManager();
 final sessionManager = SessionManager();
 final navigationManager=NavigationLogManager();
-BLEManager bleManager=BLEManager();
-Fingerprinting fingerprinting=Fingerprinting();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -139,9 +135,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
     _socket.onConnect((_) async {
       print('✅ Connected to WebSocket Server in main.dart');
       // sendMessage();
-      await LocationTrackingService().initialize();
-
-      LocationTrackingService().startTracking();
     });
 
     _socket.onDisconnect((_) => print('⚠️ Disconnected from WebSocket Server main.dart'));
@@ -202,6 +195,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
     requestLocationPermission();
     return
       MaterialApp(
+        navigatorKey: PipManager.instance.rootNavigatorKey,
       title: "IWAYPLUS",
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -211,6 +205,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
           selectionHandleColor: Color(0xff0B6B94), // Change selection handle color
         ),
       ),
+        builder: (context, child) => Stack(
+          children: [
+            child!,
+            const PipOverlay(),
+          ],
+        ),
       home: FutureBuilder<bool>(
         future: null,
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {

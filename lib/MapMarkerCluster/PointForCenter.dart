@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import '../NAVIGATIONTools.dart';
 
 class PointForCenter {
   final double lat;
@@ -17,7 +16,7 @@ class LeftMost {
   /// Returns which point is leftmost when looking in the direction of globalAngle
   /// Returns: -1 if p1 is leftmost, 1 if p2 is leftmost, 0 if equal
   int leftMostPoint(PointForCenter p1, PointForCenter p2, double globalAngle) {
-    double angle = tools.calculateBearing([p1.lat, p1.lon], [p2.lat, p2.lon]);
+    double angle = 0.0;
     if(globalAngle < 0){
       globalAngle += 360;
     }

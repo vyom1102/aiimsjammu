@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import '../APIMODELS/polylinedata.dart';
-import '../NAVIGATIONTools.dart';
 
 class BuildingStore extends ChangeNotifier {
   final Map<String, List<int>> availableFloorsInAllBuildings = {};
@@ -24,22 +23,22 @@ class BuildingStore extends ChangeNotifier {
   }
 
   void processAvailableFloors(List<polylinedata> buildings) {
-    for (final building in buildings) {
-      final polyline = building.polyline;
-      final buildingID = polyline?.buildingID;
-      final floors = polyline?.floors;
-
-      if (buildingID == null || floors == null) continue;
-
-      availableFloorsInAllBuildings[buildingID] = [];
-
-      final floorNumbers = floors
-          .where((floor) => floor.floor != null)
-          .map((floor) => tools.alphabeticalToNumerical(floor.floor!))
-          .toList();
-
-      availableFloorsInAllBuildings[buildingID]!.addAll(floorNumbers);
-    }
+    // for (final building in buildings) {
+    //   final polyline = building.polyline;
+    //   final buildingID = polyline?.buildingID;
+    //   final floors = polyline?.floors;
+    //
+    //   if (buildingID == null || floors == null) continue;
+    //
+    //   availableFloorsInAllBuildings[buildingID] = [];
+    //
+    //   final floorNumbers = floors
+    //       .where((floor) => floor.floor != null)
+    //       .map((floor) => tools.alphabeticalToNumerical(floor.floor!))
+    //       .toList();
+    //
+    //   availableFloorsInAllBuildings[buildingID]!.addAll(floorNumbers);
+    // }
     notifyListeners();
   }
 

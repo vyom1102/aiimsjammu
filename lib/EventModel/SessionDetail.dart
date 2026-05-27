@@ -25,7 +25,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'dart:typed_data';
 import 'dart:io';
 import 'dart:ui' as ui;
-import '../Navigation.dart';
 import 'APIModel/CardData.dart';
 
 class SessionDetail extends StatefulWidget {

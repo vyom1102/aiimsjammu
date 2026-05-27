@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
-import 'package:iwaymaps/Network/APIDetails.dart';
 import 'package:iwaymaps/config.dart';
 import 'Userbox.dart';
 import 'navigationLogModel.dart';

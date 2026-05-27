@@ -17,40 +17,45 @@ class LocalNotificationAPI{
   String refreshToken = signInBox.get("refreshToken");
   final NotifiBox = LocalNotificationAPIDatabaseModelBOX.getData();
   Future<List<NotificationsInLocalNotificationModule>> getNotifications()async {
-    List<ConnectivityResult> connectivityResult = await (Connectivity().checkConnectivity());
-    bool deviceConnected = false;
-    // if(connectivityResult.contains(ConnectivityResult.mobile)){
-    //   deviceConnected = true;
-    // }else if(connectivityResult.contains(ConnectivityResult.wifi) ){
-    //   deviceConnected = true;
-    // }
-    if(!deviceConnected && NotifiBox.containsKey("com.iwayplus.navigation")){
-      print("LocalNotificationAPI DATA FROM DATABASE");
-      Map<String, dynamic> responseBody = NotifiBox.get("com.iwayplus.navigation")!.responseBody;
-      LocalNotificationAPIModel notificationData =LocalNotificationAPIModel.fromJson(responseBody);
-      List<NotificationsInLocalNotificationModule> notificationsList = notificationData.notifications!;
-      return notificationsList;
+    try{
+      List<ConnectivityResult> connectivityResult = await (Connectivity().checkConnectivity());
+      bool deviceConnected = false;
+      // if(connectivityResult.contains(ConnectivityResult.mobile)){
+      //   deviceConnected = true;
+      // }else if(connectivityResult.contains(ConnectivityResult.wifi) ){
+      //   deviceConnected = true;
+      // }
+      if(!deviceConnected && NotifiBox.containsKey("com.iwayplus.navigation")){
+        print("LocalNotificationAPI DATA FROM DATABASE");
+        Map<String, dynamic> responseBody = NotifiBox.get("com.iwayplus.navigation")!.responseBody;
+        LocalNotificationAPIModel notificationData =LocalNotificationAPIModel.fromJson(responseBody);
+        List<NotificationsInLocalNotificationModule> notificationsList = notificationData.notifications!;
+        return notificationsList;
+      }
+      final response = await http.get(
+        Uri.parse(baseUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': accessToken
+        },
+      );
+      if (response.statusCode == 200) {
+        print("LocalNotificationAPI DATA FROM API");
+        Map<String, dynamic> responseBody =  json.decode(response.body);
+        LocalNotificationAPIModel notificationData = LocalNotificationAPIModel.fromJson(responseBody);
+        List<NotificationsInLocalNotificationModule> notificationsList = notificationData.notifications!;
+        final notificationSaveData = LocalNotificationAPIDatabaseModel(responseBody: responseBody);
+        NotifiBox.put("com.iwayplus.navigation", notificationSaveData);
+        notificationSaveData.save();
+        return notificationsList;
+      }
+      else {
+        print(response.reasonPhrase);
+        return [];
+      }
+    }catch(e){
+      return [];
     }
-    final response = await http.get(
-      Uri.parse(baseUrl),
-      headers: {
-        'Content-Type': 'application/json',
-        'x-access-token': accessToken
-      },
-    );
-    if (response.statusCode == 200) {
-      print("LocalNotificationAPI DATA FROM API");
-      Map<String, dynamic> responseBody =  json.decode(response.body);
-      LocalNotificationAPIModel notificationData =LocalNotificationAPIModel.fromJson(responseBody);
-      List<NotificationsInLocalNotificationModule> notificationsList = notificationData.notifications!;
-      final notificationSaveData = LocalNotificationAPIDatabaseModel(responseBody: responseBody);
-      NotifiBox.put("com.iwayplus.navigation", notificationSaveData);
-      notificationSaveData.save();
-      return notificationsList;
-    }
-    else {
-    print(response.reasonPhrase);
-    return [];
-    }
+
   }
 }

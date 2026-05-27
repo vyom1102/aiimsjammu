@@ -31,7 +31,6 @@ import 'package:iwaymaps/API/DataVersionApi.dart';
 import 'package:iwaymaps/API/buildingAllApi.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/NoInternetConnection.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/OpeningClosingStatus.dart';
-import '../../API/GlobalAnnotationapi.dart';
 import '../../API/PatchApi.dart';
 import '../../API/PolyLineApi.dart';
 import '../../API/RefreshTokenAPI.dart';
@@ -53,20 +52,12 @@ import '../../DATABASE/BOXES/PolyLineAPIModelBOX.dart';
 import '../../DATABASE/BOXES/WayPointModelBOX.dart';
 import '../../Elements/HelperClass.dart';
 // import '../../Navigation.dart';
-import '../../Repository/RepositoryManager.dart';
-import '../../UserState.dart';
-import '../../VenueManager/VenueManager.dart';
 import '../../VersioInfo.dart';
-import '../../buildingState.dart';
-import '../../singletonClass.dart';
 import '../../websocket/NotifIcationSocket.dart';
 import '../../websocket/UserLog.dart';
 import '../../websocket/interactionManager.dart';
-import '../Widgets/MapPreview.dart';
 import '../Widgets/Translator.dart';
-import '../Widgets/WebSocketDriver.dart';
 import '../Widgets/defaultMap.dart';
-import '/DestinationSearchPage.dart';
 import '/AiimsJammu/Screens/ATMScreen.dart';
 import '/AiimsJammu/Screens/AllAnnouncementScreen.dart';
 import '/AiimsJammu/Screens/CafeteriaScreen.dart';
@@ -152,8 +143,6 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     getUserDataFromHive();
     fetchAndStoreBuildingIds();
-    getDriverDetail();
-    mapDataVersionCycle();
     // loadData();
     NotificationSocket.receiveMessage();
     checkForUpdate();
@@ -167,7 +156,6 @@ class _HomePageState extends State<HomePage> {
     fetchAllLandmarkData();
     setInitialLandmarkData();
     isUserValid();
-    callbackFunc();
     checkPermission();
     requestNotificationPermission();
     // SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID);
@@ -201,29 +189,6 @@ class _HomePageState extends State<HomePage> {
   //   return;
   // }
 
-  Future<void> mapDataVersionCycle() async {
-    print("mapDataVersionCycle");
-    VenueManager().runDataVersionCycle();
-  }
-  Future<void> loadData() async {
-    await RepositoryManager().loadBuildings().then((value) async {
-      var buildings = VenueManager().buildings?.buildings;
-      if(buildings != null) {
-        for (var building in buildings) {
-          await RepositoryManager().runAPICallDataVersion(building.id,generateJSON: true);
-          await RepositoryManager().runAPICallBeaconData(building.id,generateJSON: true);
-          await RepositoryManager().runAPICallLandmarkData(building.id,generateJSON: true);
-          await RepositoryManager().runAPICallWaypointData(building.id,generateJSON: true);
-          await RepositoryManager().runAPICallGlobalAnnotationData(building.id,generateJSON: true);
-          await RepositoryManager().runAPICallPatchData(building.id,generateJSON: true);
-          await RepositoryManager().runAPICallPolylineData(building.id,generateJSON: true);
-          // await RepositoryManager().runAPIcallBuildingByVenue(building.id,generateJSON: true);
-        }
-      }
-
-    });
-
-  }
 
   checkPermission()async{
     await requestLocationPermission();
@@ -233,7 +198,6 @@ class _HomePageState extends State<HomePage> {
   Future<void> enableBT() async {
     BluetoothEnable.enableBluetooth.then((value) {});
   }
-
   Future<void> requestBluetoothConnectPermission() async {
     final PermissionStatus permissionStatus =
     await Permission.bluetoothScan.request();
@@ -252,7 +216,6 @@ class _HomePageState extends State<HomePage> {
       // Permission denied, handle accordingly
     }
   }
-
   Future<void> fetchAllLandmarkData() async {
     if (globalBuildingIds.isEmpty) {
       await fetchAndStoreBuildingIds();
@@ -629,37 +592,6 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void callbackFunc(){
-    SingletonFunctionController().executeFunction(buildingAllApi.allBuildingID).then((_){
-      SingletonFunctionController.timer?.whenComplete((){
-        localizeUser();
-      });
-    });
-  }
-  Future<void> localizeUser({bool speakTTS = true}) async {
-    double highestweight = 0;
-    String nearestBeacon = "";
-    print("binresult ${SingletonFunctionController.btadapter.BIN}");
-    for (int i = 0;
-    i < SingletonFunctionController.btadapter.BIN.length;
-    i++) {
-      if (SingletonFunctionController.btadapter.BIN[i]!.isNotEmpty) {
-        SingletonFunctionController.btadapter.BIN[i]!.forEach((key, value) {
-          if (value < 0) {
-            value = value * -1;
-          }
-          if (value > highestweight) {
-            highestweight = value;
-            nearestBeacon = key;
-          }
-        });
-        break;
-      }
-    }
-    if (nearestBeacon != "" && Building.apibeaconmap[nearestBeacon] != null) {
-      SingletonFunctionController.currentBeacon = nearestBeacon;
-    }
-  }
 
   bool _updateAvailable = false;
   bool _checkingForUpdate = true;
@@ -743,7 +675,6 @@ class _HomePageState extends State<HomePage> {
     }
     print("userLoc");
     print(userLoc);
-    UserState.geoFenced=await HelperClass.getGeoFenced(userLoc!);
   }
 
   Future<Position?> getUsersCurrentLatLng()async{
@@ -1050,14 +981,7 @@ class _HomePageState extends State<HomePage> {
     print("driver check");
     print(userListBox.containsKey('isDriver'));
     print(userListBox.get('isDriver'));
-    if(userListBox.containsKey('isDriver')) {
 
-      if (userListBox.get('isDriver')) {
-        print("Driver");
-        await LocationTrackingService().initialize();
-        LocationTrackingService().startTracking();
-      }
-    }
     if(userListBox.containsKey('username')){
       emailAddress = userListBox.get('username');
       print('username from database');
@@ -1160,47 +1084,6 @@ class _HomePageState extends State<HomePage> {
       print('_doctors from api');
     }
 
-  }
-  Future<void> getDriverDetail() async {
-    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
-
-    try {
-      final response = await http.post(
-        Uri.parse(baseUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': '$accessToken',
-        },
-      );
-      print("driver get");
-      print(response.statusCode);
-      print(response.body);
-
-      if (response.statusCode == 200) {
-        Map<String, dynamic> responseBody = json.decode(response.body);
-        setState(() async {
-
-          isDriver = responseBody["userTracking"]??false;
-          if(isDriver) {
-            await LocationTrackingService().initialize();
-            LocationTrackingService().startTracking();
-          }
-          userListBox.put('isDriver', isDriver);
-          print("userTracking11");
-          print(isDriver);
-          print(responseBody['userTracking']);
-          print(userListBox.get('isDriver'));
-        });
-      } else if (response.statusCode == 403) {
-        String newAccessToken = await RefreshTokenAPI.refresh();
-        accessToken = newAccessToken;
-        await getDriverDetail();
-
-      } else {
-      }
-    } catch (e) {
-      // Handle errors
-    }
   }
 
   @override
@@ -1433,7 +1316,6 @@ class _HomePageState extends State<HomePage> {
 
 
   Future<void> _refresh() async {
-    mapDataVersionCycle();
   }
 
 

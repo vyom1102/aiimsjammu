@@ -10,7 +10,6 @@ import 'package:unified_map_view/unified_map_view.dart';
 import 'package:unified_map_view/maplibre.dart';
 import '../API/buildingAllApi.dart';
 import '../APIMODELS/buildingAll.dart';
-import '../Navigation.dart';
 
 class Deeplink{
   static String? initialDocId; // To store the initial doctor's ID from the deep link

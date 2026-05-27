@@ -8,8 +8,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/GlobalSearch.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
-import 'package:iwaymaps/UserState.dart';
-import 'package:iwaymaps/singletonClass.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:iwaymaps/websocket/interactionManager.dart';
 import 'package:lottie/lottie.dart';
@@ -21,10 +19,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '/MapScreen.dart';
 import '/AiimsJammu/Screens/FavouriteRGCIScreen.dart';
 import '/AiimsJammu/Screens/QrScanner.dart';
-import '/VenueSelectionScreen.dart';
 // import '/Navigation.dart';
 
 import './AiimsJammu/Screens/HomePage.dart';
@@ -278,16 +274,22 @@ class _MainScreenState extends State<MainScreen> {
               heroTag: 'mainscreen',
 
               onPressed: (){
-                NavigationSDK.startNavigation(
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  NavigationSDK.startNavigation(
                     context,
                     data: {"venueName": "AIIMSJAMMU"},
-                    appColor: const Color(0xFF0097A7),
+                    appColor:  const Color(0xFF0097A7),
                     closeApp: false,
-                    locale: AppConfig.languageCode,
-                    skipSplash: true,
-                    mapType: MapProvider.mapLibre,
-                    providers: {MapProvider.mapLibre: MaplibreMapProvider()}
-                );
+                    skipSplash: false,
+                      locale: AppConfig.languageCode,
+                      mapType: MapProvider.mapLibre,
+                      providers: {MapProvider.mapLibre: MaplibreMapProvider()}
+                  );
+
+                  // NEW: Show PiP
+                  PipManager.instance.showFullscreen();
+                });
               },
               backgroundColor: Color(0xFFFEAB01),
               shape: CircleBorder(),
