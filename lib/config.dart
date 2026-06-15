@@ -35,7 +35,9 @@ class AppConfig {
   static final ValueNotifier<String> languageNotifier = ValueNotifier('en');
 
   static setLanguage({required String value}) {
+    print("value in setLanguage $value");
     _language = Language.fromString(value);
+    print("_language ${_language.code}");
     languageNotifier.value = value;
   }
   static String get languageCode => _language.code;

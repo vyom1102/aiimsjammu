@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
+import 'package:iwaymaps/config.dart' as con;
 import 'package:iwaymaps/AiimsJammu/Widgets/GlobalSearch.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/UserState.dart';
@@ -79,7 +80,7 @@ class _MainScreenState extends State<MainScreen> {
     print("Before init: $_isMapInitialized");
 
     final isInitialized = await NavigationSDK.initializeapp(
-      venueName: 'AIGHospital',
+      venueName: 'AIIMS Bhopal',
     );
 
     setState(() {
@@ -298,16 +299,17 @@ class _MainScreenState extends State<MainScreen> {
             floatingActionButton: (_isMapInitialized)?FloatingActionButton(
               heroTag: 'mainscreen',
               onPressed: (){
+                print("con.AppConfig.languageCode ${con.AppConfig.languageCode}");
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (!mounted) return;
                   NavigationSDK.startNavigation(
                     context,
                     data: {
-                      "venueName": "AIGHospital",
+                      "venueName": "AIIMS Bhopal",
                     },
                     appColor: const Color(0xFF0097A7),
                     closeApp: false,
-                    locale: AppConfig.languageCode,
+                    locale: con.AppConfig.languageCode,
                     skipSplash: false,
                     mapType: MapProvider.mapLibre,
                     providers: {

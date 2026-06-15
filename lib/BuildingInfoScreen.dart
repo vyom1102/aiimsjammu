@@ -371,7 +371,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                        data: {"venueName": "AIIMSJAMMU"},
                                        appColor: const Color(0xFFEC5B13),
                                        closeApp: false,
-                                       locale: 'en',
+                                       locale: AppConfig.languageCode,
                                        skipSplash: false,
                                        mapType: MapProvider.mapLibre,
                                        providers: {MapProvider.mapLibre: MaplibreMapProvider()},

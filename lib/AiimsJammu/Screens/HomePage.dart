@@ -186,7 +186,7 @@ class _HomePageState extends State<HomePage> {
     print("Before init: $_isMapInitialized");
 
     final isInitialized = await NavigationSDK.initializeapp(
-      venueName: 'AIGHospital',
+      venueName: 'AIIMS Bhopal',
     );
 
     setState(() {
@@ -588,7 +588,7 @@ class _HomePageState extends State<HomePage> {
         //    NavigationSDK.startNavigation(
         //     context,
         //     data: {
-        //       "venueName": "AIGHospital",
+        //       "venueName": "AIIMS Bhopal",
         //       "directLandID": selectedlandmarkpolyId,
         //     },
         //     appColor: const Color(0xFF0097A7),
@@ -1567,7 +1567,7 @@ class _HomePageState extends State<HomePage> {
                     Column(
                       children: [
                         Text(
-                          'AIG Hyderabad',
+                          'AIIMS Bhopal',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Color(0xFF003666),
@@ -1592,19 +1592,30 @@ class _HomePageState extends State<HomePage> {
                         )
                       ],
                     ),
-                    IconButton(
-                      icon: Icon(Icons.notifications_none_outlined),
-                      color: Color(0xff18181b),
-                      onPressed: () {
-                        showToast("Coming Soon");
-                        // loadData();
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => NotificationScreen(),
-                        //     // builder: (context) => Navigation(),
-                        //   ),
-                        // );
+                    ValueListenableBuilder<String>(
+                      valueListenable: con.AppConfig.languageNotifier,
+                      builder: (context, lang, _) {
+                        final bool isEnglish = lang == 'en';
+                        return GestureDetector(
+                          onTap: () {
+                            con.AppConfig.setLanguage(
+                                value: isEnglish ? 'hi' : 'en');
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Color(0xFFF1F1F1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            padding: const EdgeInsets.all(2),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _buildLangOption('EN', isEnglish),
+                                _buildLangOption('HI', !isEnglish),
+                              ],
+                            ),
+                          ),
+                        );
                       },
                     ),
                   ],
@@ -2239,7 +2250,7 @@ class _HomePageState extends State<HomePage> {
                 NavigationSDK.startNavigation(
                   context,
                   data: {
-                    "venueName": "AIGHospital",
+                    "venueName": "AIIMS Bhopal",
                   },
                   appColor: const Color(0xFF0097A7),
                   closeApp: false,
@@ -2312,6 +2323,24 @@ class _HomePageState extends State<HomePage> {
             ),
           );
         }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildLangOption(String label, bool selected) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: selected ? Color(0xFF003666) : Colors.transparent,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: selected ? Colors.white : Color(0xff18181b),
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

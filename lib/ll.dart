@@ -49,7 +49,7 @@ class ApiDataFetcher {
   // Save data to file
   Future<void> saveToFile(String filename, dynamic data) async {
     try {
-      final file = File('api_data/$filename');
+      final file = File('assets/api_data/$filename');
       await file.create(recursive: true);
       await file.writeAsString(jsonEncode(data));
       print('✓ Saved: $filename');
@@ -230,7 +230,7 @@ void main() async {
     accessToken: '7cc62870-d67e-11f0-91ed-2f0eb903e7db',
     baseUrl: 'https://dev.iwayplus.in',  // e.g., 'https://api.example.com'
   );
-  var buildingData = await fetcher.fetchBuildingIDS("AIGHospital");
+  var buildingData = await fetcher.fetchBuildingIDS("AIIMS Bhopal");
   buildingData.buildings?.forEach((building) async {
     await fetcher.fetchAllData(
       buildingId: building.id,

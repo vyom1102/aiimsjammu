@@ -49,7 +49,7 @@ Future<void> main() async {
   Hive.init(directory.path);
   await Hive.openBox('SignInDatabase');
   await Hive.openBox('SwitchingDatabaseInfo');
-  // await NavigationSDK.initializeapp(venueName: "AIGHospital");
+  // await NavigationSDK.initializeapp(venueName: "AIIMS Bhopal");
   await interactionManager.initialize();
   await sessionManager.initialize();
   await navigationManager.initialize();
@@ -218,13 +218,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
           selectionColor: Colors.greenAccent.withOpacity(0.5), // Change selection color
           selectionHandleColor: Color(0xff0B6B94), // Change selection handle color
         ),
-      ),
-      // ✅ PipOverlay always on top, across all screens/routes
-      builder: (context, child) => Stack(
-        children: [
-          child!,
-          const PipOverlay(),
-        ],
       ),
       home: FutureBuilder<bool>(
         future: null,
