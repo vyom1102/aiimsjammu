@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.4.5+45
+version: 0.4.6+46
 environment:
   sdk: '>=3.0.6 <4.0.0'
 
@@ -41,7 +41,6 @@ dependencies:
   cupertino_icons: ^1.0.2
   google_maps_flutter: ^2.5.3
   http: ^1.2.1
-  flutter_speed_dial: ^7.0.0
   collection: ^1.17.1
   sliding_up_panel: ^2.0.0+1
   flutter_blue_plus: ^1.31.12
@@ -54,25 +53,19 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   flutter_animate: ^4.5.0 #animations
-  flutter_staggered_animations:
-  vibration: ^1.8.4
   maplibre_gl: ^0.21.0
   wakelock_plus:
 
   shared_preferences: ^2.2.2
   easter_egg_trigger: ^1.0.1
   fluttertoast: ^8.2.4
-  easy_search_bar: ^2.5.0
   auto_size_text: ^3.0.0
   sensors_plus: ^4.0.2
-  marquee_widget: ^1.2.0
-  google_maps: ^6.3.0
   geodesy: ^0.10.2
   chips_choice: ^3.0.1
   speech_to_text:
 
   fuzzy: <1.0.0
-  flutter_animator: ^3.2.2
 
   upgrader:
   intl_phone_number_input: ^0.7.3+1
@@ -84,17 +77,11 @@ dependencies:
   flutter_cache_manager:
   url_launcher: ^6.2.5
   share_plus: ^9.0.0
-  turf: ^0.0.9
   geolocator: ^11.0.0
   qr_code_scanner: ^1.0.1
-  barcode_scan2: ^4.3.0
-  persistent_bottom_nav_bar: ^5.0.2
-  in_app_update: ^4.2.2
   image_picker: ^1.1.1
   quickalert: ^1.1.0
   connectivity_plus: ^6.0.3
-  internet_connection_checker: ^1.0.0+1
-  internet_connection_checker_plus: ^2.3.0
   web_socket_channel: ^2.4.5
   socket_io_client: ^2.0.3+1
   bluetooth_enable_fork: ^0.1.6
@@ -103,16 +90,12 @@ dependencies:
   mockito: ^5.1.0
   new_version_plus: ^0.0.11
   cached_network_image: ^3.3.1
-  loading_animation_widget: ^1.2.1
   app_links: ^6.1.1
   qr_flutter: ^4.1.0
-  widget_to_marker:
   string_similarity: ^2.1.1
   flutter_local_notifications: ^17.2.2
   provider: ^6.1.2
-  ml_linalg: ^13.12.6
   device_meta: ^1.1.31
-  app_settings: ^5.1.1
   csv:
 dependency_overrides:
   share_plus: ^11.1.0

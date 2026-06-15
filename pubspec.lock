@@ -83,7 +83,7 @@ packages:
     source: hosted
     version: "1.0.4"
   app_settings:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: app_settings
       sha256: "476df1d85cec143c3d27dd1c7451629a59c0c5ccf70a0adcbfa92a0a2d928705"
@@ -186,14 +186,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.0"
-  barcode_scan2:
-    dependency: "direct main"
-    description:
-      name: barcode_scan2
-      sha256: ee34fad7148248f4450652909f5188ad95c9b6f512e75088e96bc3e96ff2e9eb
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.4.0"
   base58check:
     dependency: transitive
     description:
@@ -555,7 +547,7 @@ packages:
     source: hosted
     version: "1.0.1"
   easy_search_bar:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: easy_search_bar
       sha256: b20343be8ab94ed9e1550cf8cbd5323c344bd9b58b9319fb6e62d75395c0bcaa
@@ -680,7 +672,7 @@ packages:
     source: hosted
     version: "4.5.2"
   flutter_animator:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: flutter_animator
       sha256: e020529278d891ece0c420bc2f8801c38160b2fc69c377a0c9a5bec2596fd7af
@@ -893,7 +885,7 @@ packages:
     source: hosted
     version: "0.1.3"
   flutter_speed_dial:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: flutter_speed_dial
       sha256: "698a037274a66dbae8697c265440e6acb6ab6cae9ac5f95c749e7944d8f28d41"
@@ -901,7 +893,7 @@ packages:
     source: hosted
     version: "7.0.0"
   flutter_staggered_animations:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: flutter_staggered_animations
       sha256: "81d3c816c9bb0dca9e8a5d5454610e21ffb068aedb2bde49d2f8d04f75538351"
@@ -1079,7 +1071,7 @@ packages:
     source: hosted
     version: "12.1.3"
   google_maps:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: google_maps
       sha256: "555d5d736339b0478e821167ac521c810d7b51c3b2734e6802a9f046b64ea37a"
@@ -1270,30 +1262,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1+1"
-  in_app_update:
-    dependency: "direct main"
-    description:
-      name: in_app_update
-      sha256: "489572accaa55b51518b2d64676ca8c3c6d4c989fa53cf718001882237691a3c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.2.3"
-  internet_connection_checker:
-    dependency: "direct main"
-    description:
-      name: internet_connection_checker
-      sha256: "1c683e63e89c9ac66a40748b1b20889fd9804980da732bf2b58d6d5456c8e876"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0+1"
-  internet_connection_checker_plus:
-    dependency: "direct main"
-    description:
-      name: internet_connection_checker_plus
-      sha256: "11e7ff6cbab22dbd2af4b21618dc0ffa77a345de3fdd2a138b05d17075f84ffa"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.7.0"
   intl:
     dependency: "direct main"
     description:
@@ -1407,7 +1375,7 @@ packages:
     source: hosted
     version: "2.1.1"
   loading_animation_widget:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: loading_animation_widget
       sha256: "9fe23381f3096e902f39e87e487648ff7f74925e86234353fa885bb9f6c98004"
@@ -1464,7 +1432,7 @@ packages:
     source: hosted
     version: "0.21.0"
   marquee_widget:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: marquee_widget
       sha256: a8333b921508a2777727f66f26eaed69ee625ea9580e9504999d3281f44fe4d0
@@ -1504,7 +1472,7 @@ packages:
     source: hosted
     version: "1.0.6"
   ml_linalg:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: ml_linalg
       sha256: abbbd506dc894f8b0394cf5c5d45aab45b7e2a89b86bba9c9b5b8a412b4bec5d
@@ -1736,14 +1704,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1"
-  persistent_bottom_nav_bar:
-    dependency: "direct main"
-    description:
-      name: persistent_bottom_nav_bar
-      sha256: e2e031e3366fde01511e372a9a19d720a9b252bb456e5c8d77a30d7a4a2ddfb0
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.0.2"
   petitparser:
     dependency: transitive
     description:
@@ -1792,14 +1752,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
-  protobuf:
-    dependency: transitive
-    description:
-      name: protobuf
-      sha256: "68645b24e0716782e58948f8467fd42a880f255096a821f9e7d0ec625b00c84d"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.0"
   provider:
     dependency: "direct main"
     description:
@@ -2310,7 +2262,7 @@ packages:
     source: hosted
     version: "1.0.3+1"
   turf:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: turf
       sha256: "75347c45a5c1de805db7cb182286f05a3770e01546626c4dc292709d15cbe436"
@@ -2504,7 +2456,7 @@ packages:
     source: hosted
     version: "3.0.2"
   vibration:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: vibration
       sha256: "06588a845a4ebc73ab7ff7da555c2b3dbcd9676164b5856a38bf0b2287f1045d"
@@ -2624,7 +2576,7 @@ packages:
     source: hosted
     version: "1.11.0"
   widget_to_marker:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: widget_to_marker
       sha256: "073a4d54045f4413ac923cf986e2290390589b937e8f2123b16c457ae3f67e4f"
