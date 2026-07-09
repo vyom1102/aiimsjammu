@@ -569,7 +569,7 @@ class _HomePageState extends State<HomePage> {
           appColor: const Color(0xFF0097A7),
           closeApp: false,
           locale: AppConfig.languageCode,
-          skipSplash: true,
+          skipSplash: false,
           mapType: MapProvider.mapLibre,
           providers: {
             MapProvider.mapLibre: MaplibreMapProvider(),
@@ -2220,7 +2220,7 @@ class _HomePageState extends State<HomePage> {
                   appColor: const Color(0xFF0097A7),
                   closeApp: false,
                   locale: AppConfig.languageCode,
-                  skipSplash: true,
+                  skipSplash: false,
                   mapType: MapProvider.mapLibre,
                   providers: {MapProvider.mapLibre: MaplibreMapProvider()}
               );

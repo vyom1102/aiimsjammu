@@ -26,6 +26,22 @@ subprojects {
 subprojects {
     afterEvaluate { project ->
 
+        // Fix legacy plugins (e.g. qr_code_scanner) that don't declare a
+        // namespace, which AGP 8+ requires. Derive it from the manifest package.
+        if (project.hasProperty("android")) {
+            def androidExt = project.extensions.getByName("android")
+            if (androidExt.namespace == null) {
+                def manifestFile = new File(project.projectDir, "src/main/AndroidManifest.xml")
+                if (manifestFile.exists()) {
+                    def manifestText = manifestFile.getText("UTF-8")
+                    def matcher = manifestText =~ /package="([^"]+)"/
+                    if (matcher.find()) {
+                        androidExt.namespace = matcher.group(1)
+                    }
+                }
+            }
+        }
+
         // Force Java toolchain to 17 everywhere
         if (project.plugins.hasPlugin("java") ||
                 project.plugins.hasPlugin("com.android.application") ||

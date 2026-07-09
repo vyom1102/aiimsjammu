@@ -286,9 +286,6 @@ class _MainScreenState extends State<MainScreen> {
                       mapType: MapProvider.mapLibre,
                       providers: {MapProvider.mapLibre: MaplibreMapProvider()}
                   );
-
-                  // NEW: Show PiP
-                  PipManager.instance.showFullscreen();
                 });
               },
               backgroundColor: Color(0xFFFEAB01),
