@@ -36,6 +36,18 @@ subprojects {
                     sourceCompatibility = JavaVersion.VERSION_17
                     targetCompatibility = JavaVersion.VERSION_17
                 }
+
+                // Some older plugins (e.g. qr_code_scanner) don't declare a namespace,
+                // which newer AGP requires. Backfill it from the manifest's package attr.
+                if (ext.namespace == null) {
+                    def manifest = new File(project.projectDir, 'src/main/AndroidManifest.xml')
+                    if (manifest.exists()) {
+                        def pkg = new XmlSlurper().parse(manifest).@package.text()
+                        if (pkg != null && !pkg.isEmpty()) {
+                            ext.namespace = pkg
+                        }
+                    }
+                }
             }
         }
 
