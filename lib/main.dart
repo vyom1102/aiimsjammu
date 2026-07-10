@@ -219,13 +219,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
           selectionHandleColor: Color(0xff0B6B94), // Change selection handle color
         ),
       ),
-      // ✅ PipOverlay always on top, across all screens/routes
-      builder: (context, child) => Stack(
-        children: [
-          child!,
-          const PipOverlay(),
-        ],
-      ),
       home: FutureBuilder<bool>(
         future: null,
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {

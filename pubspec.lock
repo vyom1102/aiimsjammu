@@ -2349,11 +2349,9 @@ packages:
   unified_map_view:
     dependency: transitive
     description:
-      path: "."
-      ref: main
-      resolved-ref: "9480d97a07b7e9050260a79cae82911bd613f528"
-      url: "https://github.com/iisthehimanshu/unified_map_view.git"
-    source: git
+      path: "../unified_map_view"
+      relative: true
+    source: path
     version: "0.0.1"
   universal_ble:
     dependency: transitive

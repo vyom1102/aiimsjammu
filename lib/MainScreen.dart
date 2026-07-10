@@ -300,12 +300,13 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: (){
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (!mounted) return;
+                  NavigationSDK.setDistanceUnit(DistanceUnit.meters);
                   NavigationSDK.startNavigation(
                     context,
                     data: {
                       "venueName": "AIGHospital",
                     },
-                    appColor: const Color(0xFF0097A7),
+                    appColor: Colors.blueAccent,
                     closeApp: false,
                     locale: AppConfig.languageCode,
                     skipSplash: false,
