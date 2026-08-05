@@ -7,10 +7,10 @@ import 'package:iwaymaps/Elements/buildingCard.dart';
 import 'API/BuildingAPI.dart';
 import 'APIMODELS/Building.dart';
 import 'APIMODELS/buildingAll.dart';
-import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'Elements/InsideBuildingCard.dart';
-import 'DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
-import 'DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
+import 'package:navigation_sdk/src/DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
 
 
 class FavouriteScreen extends StatefulWidget {

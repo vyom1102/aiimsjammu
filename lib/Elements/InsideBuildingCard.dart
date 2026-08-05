@@ -9,10 +9,10 @@ import 'package:unified_map_view/unified_map_view.dart';
 import 'package:unified_map_view/maplibre.dart';
 import '../API/buildingAllApi.dart';
 import '../APIMODELS/buildingAll.dart';
-import '../DATABASE/BOXES/BuildingAPIModelBox.dart';
-import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
-import '../DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
-import '../DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/BuildingAPIModelBox.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
+import 'package:navigation_sdk/src/DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
 // import '../Navigation.dart';
 
 class InsideBuildingCard extends StatefulWidget {

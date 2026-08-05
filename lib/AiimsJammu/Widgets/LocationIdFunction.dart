@@ -17,7 +17,7 @@ void PassLocationId(BuildContext context,String Id){
 
     NavigationSDK.callWithLandMarkId(
         context,
-        "AIGHospital",
+        "ApolloHospital",
         Id,
         Color(0xFF0097A7),
         false,

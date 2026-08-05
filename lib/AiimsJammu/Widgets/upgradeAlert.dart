@@ -338,7 +338,7 @@ class _CoolUpgradeAlertState extends State<CoolUpgradeAlert>
   void _launchStore() async {
     try {
       final uri = Platform.isAndroid
-          ? Uri.parse('https://play.google.com/store/apps/details?id=com.iwayplus.aig')
+          ? Uri.parse('https://play.google.com/store/apps/details?id=com.apollo.hyderabad')
           : Uri.parse('https://apps.apple.com/in/app/aiims-jammu-navigation/id6677034083');
 
       if (await canLaunchUrl(uri)) {

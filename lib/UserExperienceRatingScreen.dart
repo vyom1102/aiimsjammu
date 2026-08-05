@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../VenueSelectionScreen.dart';
-import 'package:test/scaffolding.dart';
 
 
 class UserExperienceRatingScreen extends StatefulWidget {
@@ -103,14 +101,6 @@ class _UserExperienceRatingScreenState
                             if (_feedback.isNotEmpty) {
                               print('Feedback: $_feedback');
                             }
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(builder: (context) => VenueSelectionScreen()),
-                                  (Route<dynamic> route) {
-                                print("RouteStack");
-                                print(route);
-                                return false;},
-                            );
                           }
                         : null,
                     child: Padding(

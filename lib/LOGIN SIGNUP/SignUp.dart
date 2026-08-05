@@ -229,7 +229,7 @@ class _SignUpState extends State<SignUp> {
     };
     var request = http.Request(
         'POST', Uri.parse('${AppConfig.baseUrl}/auth/username'));
-    request.body = json.encode({"username": username,"appId":"com.iwayplus.aig"});
+    request.body = json.encode({"username": username,"appId":"com.apollo.hyderabad"});
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();

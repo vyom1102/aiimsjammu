@@ -6,8 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '../APIMODELS/LocalNotificationAPIModel.dart';
-import '../DATABASE/BOXES/LocalNotificationAPIDatabaseModelBOX.dart';
-import '../DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/LocalNotificationAPIDatabaseModelBOX.dart';
+import 'package:navigation_sdk/src/DATABASE/DATABASEMODEL/LocalNotificationAPIDatabaseModel.dart';
 import '../config.dart';
 
 class LocalNotificationAPI{

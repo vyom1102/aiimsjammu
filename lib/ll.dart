@@ -230,7 +230,7 @@ void main() async {
     accessToken: '7cc62870-d67e-11f0-91ed-2f0eb903e7db',
     baseUrl: 'https://dev.iwayplus.in',  // e.g., 'https://api.example.com'
   );
-  var buildingData = await fetcher.fetchBuildingIDS("AIGHospital");
+  var buildingData = await fetcher.fetchBuildingIDS("ApolloHospital");
   buildingData.buildings?.forEach((building) async {
     await fetcher.fetchAllData(
       buildingId: building.id,

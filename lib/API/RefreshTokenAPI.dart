@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
-import '../DATABASE/BOXES/PatchAPIModelBox.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/PatchAPIModelBox.dart';
 import '../config.dart';
 
 class RefreshTokenAPI {

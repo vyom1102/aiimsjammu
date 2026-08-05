@@ -24,20 +24,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '/MapScreen.dart';
 import '/AiimsJammu/Screens/FavouriteRGCIScreen.dart';
 import '/AiimsJammu/Screens/QrScanner.dart';
-import '/VenueSelectionScreen.dart';
-// import '/Navigation.dart';
+import '../../config.dart' as con;
 
 import './AiimsJammu/Screens/HomePage.dart';
 import 'API/buildingAllApi.dart';
 import 'AiimsJammu/Screens/ProfilePage.dart';
 import 'AiimsJammu/Widgets/upgradeAlert.dart';
-import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
-import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
-import 'DATABASE/BOXES/LandMarkApiModelBox.dart';
-import 'DATABASE/BOXES/OutDoorModelBOX.dart';
-import 'DATABASE/BOXES/PatchAPIModelBox.dart';
-import 'DATABASE/BOXES/PolyLineAPIModelBOX.dart';
-import 'DATABASE/BOXES/WayPointModelBOX.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/BeaconAPIModelBOX.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/LandMarkApiModelBox.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/OutDoorModelBOX.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/PatchAPIModelBox.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/PolyLineAPIModelBOX.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/WayPointModelBOX.dart';
 import 'FavouriteScreen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -51,7 +50,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   late int index;
-  final ws = wsocket("com.iwayplus.aig");
+  final ws = wsocket("com.apollo.hyderabad");
 
 
   final screens = [
@@ -79,7 +78,7 @@ class _MainScreenState extends State<MainScreen> {
     print("Before init: $_isMapInitialized");
 
     final isInitialized = await NavigationSDK.initializeapp(
-      venueName: 'AIGHospital',
+      venueName: 'ApolloHospital',
     );
 
     setState(() {
@@ -141,8 +140,8 @@ class _MainScreenState extends State<MainScreen> {
 
   Future<void> checkForUpdate() async {
     final newVersion = NewVersionPlus(
-      androidId: 'com.iwayplus.aig',
-      iOSId: 'com.iwayplus.aig',
+      androidId: 'com.apollo.hyderabad',
+      iOSId: 'com.apollo.hyderabad',
     );
     try {
       final status = await newVersion.getVersionStatus();
@@ -304,11 +303,11 @@ class _MainScreenState extends State<MainScreen> {
                   NavigationSDK.startNavigation(
                     context,
                     data: {
-                      "venueName": "AIGHospital",
+                      "venueName": "ApolloHospital",
                     },
                     appColor: Colors.blueAccent,
                     closeApp: false,
-                    locale: AppConfig.languageCode,
+                    locale: con.AppConfig.languageCode,
                     skipSplash: false,
                     mapType: MapProvider.mapLibre,
                     providers: {

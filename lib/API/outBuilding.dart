@@ -3,10 +3,10 @@ import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '../APIMODELS/outdoormodel.dart';
-import '../DATABASE/BOXES/OutDoorModelBOX.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/OutDoorModelBOX.dart';
 import '../api/RefreshTokenAPI.dart';
 import '../config.dart';
-import '../DATABASE/DATABASEMODEL/OutDoorModel.dart';
+import 'package:navigation_sdk/src/DATABASE/DATABASEMODEL/OutDoorModel.dart';
 
 class outBuilding {
   final String baseUrl = "${AppConfig.baseUrl}/secured/outdoor";

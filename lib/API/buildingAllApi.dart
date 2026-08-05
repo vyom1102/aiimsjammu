@@ -11,8 +11,8 @@ import '/APIMODELS/beaconData.dart';
 import '/APIMODELS/buildingAll.dart';
 import '/APIMODELS/polylinedata.dart';
 import '/APIMODELS/landmark.dart';
-import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
-import '../DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
+import 'package:navigation_sdk/src/DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 
 
 class buildingAllApi {

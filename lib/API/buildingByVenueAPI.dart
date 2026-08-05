@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '../API/buildingAllApi.dart';
-import '../DATABASE/BOXES/BuildingByVenueMapAPIBOX.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/BuildingByVenueMapAPIBOX.dart';
 import '../ELEMENTS/HelperClass.dart';
 import '../APIMODELS/Buildingbyvenue.dart';
 import '../Userbox.dart';

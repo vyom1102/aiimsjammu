@@ -59,7 +59,7 @@ class SignInAPI{
   }
   static Future<int> sendOtpForgetPassword(String user) async {
     final String xaccesstoken = AppConfig.Authorization;
-    final Map<String, dynamic> data = {"username": "${user}", "digits":4,"appId":"com.iwayplus.aig"};
+    final Map<String, dynamic> data = {"username": "${user}", "digits":4,"appId":"com.apollo.hyderabad"};
     final response = await http.post(
       Uri.parse('${AppConfig.baseUrl}/auth/otp/username'),
       body: EncryptedbodyForApi(data),
@@ -88,7 +88,7 @@ class SignInAPI{
       "username": "$user",
       "password": "$pass",
       "otp": "$otp",
-      "appId":"com.iwayplus.aig"
+      "appId":"com.apollo.hyderabad"
 
     };
     final response = await http.post(

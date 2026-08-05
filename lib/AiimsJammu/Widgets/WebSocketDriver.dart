@@ -28,7 +28,7 @@ class LocationTrackingService {
   String? _accessToken;
   String? _refreshToken;
   String _profile = "user"; // Default
-  String get _appId => "com.iwayplus.aig-${_profile == "driver" ? "vehicle" : "user"}";
+  String get _appId => "com.apollo.hyderabad-${_profile == "driver" ? "vehicle" : "user"}";
 
   bool get isTracking => _isTracking;
   bool get isConnected => _isConnected;

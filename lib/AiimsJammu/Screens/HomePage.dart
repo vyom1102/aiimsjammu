@@ -42,15 +42,15 @@ import '../../API/outBuilding.dart';
 import '../../API/waypoint.dart';
 import '../../APIMODELS/DataVersion.dart';
 import '../../APIMODELS/landmark.dart';
-import '../../DATABASE/BOXES/BeaconAPIModelBOX.dart';
-import '../../DATABASE/BOXES/BuildingAPIModelBox.dart';
-import '../../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
-import '../../DATABASE/BOXES/DataVersionLocalModelBOX.dart';
-import '../../DATABASE/BOXES/LandMarkApiModelBox.dart';
-import '../../DATABASE/BOXES/OutDoorModelBOX.dart';
-import '../../DATABASE/BOXES/PatchAPIModelBox.dart';
-import '../../DATABASE/BOXES/PolyLineAPIModelBOX.dart';
-import '../../DATABASE/BOXES/WayPointModelBOX.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/BeaconAPIModelBOX.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/BuildingAPIModelBox.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/DataVersionLocalModelBOX.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/LandMarkApiModelBox.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/OutDoorModelBOX.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/PatchAPIModelBox.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/PolyLineAPIModelBOX.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/WayPointModelBOX.dart';
 import '../../Elements/HelperClass.dart';
 // import '../../Navigation.dart';
 import '../../Repository/RepositoryManager.dart';
@@ -146,7 +146,7 @@ class _HomePageState extends State<HomePage> {
   List<dynamic> _filteredDoctors = [];
   Widget? mapPreview;
   Map<dynamic, dynamic> combinedLandmarkData = {};
-  final ws = wsocket("com.iwayplus.aig");
+  final ws = wsocket("com.apollo.hyderabad");
 
   @override
   void initState() {
@@ -157,7 +157,6 @@ class _HomePageState extends State<HomePage> {
     mapDataVersionCycle();
     _initNavigationSDK();
     // loadData();
-    NotificationSocket.receiveMessage();
     checkForUpdate();
     _pageController = PageController(initialPage: _currentPage);
     getLocs();
@@ -186,7 +185,7 @@ class _HomePageState extends State<HomePage> {
     print("Before init: $_isMapInitialized");
 
     final isInitialized = await NavigationSDK.initializeapp(
-      venueName: 'AIGHospital',
+      venueName: 'ApolloHospital',
     );
 
     setState(() {
@@ -588,7 +587,7 @@ class _HomePageState extends State<HomePage> {
         //    NavigationSDK.startNavigation(
         //     context,
         //     data: {
-        //       "venueName": "AIGHospital",
+        //       "venueName": "ApolloHospital",
         //       "directLandID": selectedlandmarkpolyId,
         //     },
         //     appColor: const Color(0xFF0097A7),
@@ -658,8 +657,8 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> checkForUpdate() async {
     final newVersion = NewVersionPlus(
-      androidId: 'com.iwayplus.aig',
-      iOSId: 'com.iwayplus.aig',
+      androidId: 'com.apollo.hyderabad',
+      iOSId: 'com.apollo.hyderabad',
     );
 
     try {
@@ -700,7 +699,7 @@ class _HomePageState extends State<HomePage> {
                 // Add your app update logic here
                 final url = Theme.of(context).platform == TargetPlatform.iOS
                     ? 'https://apps.apple.com/in/app/aiims-jammu-navigation/id6677034083'
-                    : 'https://play.google.com/store/apps/details?id=com.iwayplus.aig';
+                    : 'https://play.google.com/store/apps/details?id=com.apollo.hyderabad';
                 if (await canLaunch(url)) {
                   await launch(url);
                 } else {
@@ -1508,6 +1507,24 @@ class _HomePageState extends State<HomePage> {
   //
   // }
 
+  Widget _buildLangOption(String label, bool selected) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: selected ? Color(0xFF003666) : Colors.transparent,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: selected ? Colors.white : Color(0xff18181b),
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -1567,7 +1584,7 @@ class _HomePageState extends State<HomePage> {
                     Column(
                       children: [
                         Text(
-                          'AIG Hyderabad',
+                          'Apollo 24/7',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Color(0xFF003666),
@@ -1592,19 +1609,30 @@ class _HomePageState extends State<HomePage> {
                         )
                       ],
                     ),
-                    IconButton(
-                      icon: Icon(Icons.notifications_none_outlined),
-                      color: Color(0xff18181b),
-                      onPressed: () {
-                        showToast("Coming Soon");
-                        // loadData();
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => NotificationScreen(),
-                        //     // builder: (context) => Navigation(),
-                        //   ),
-                        // );
+                    ValueListenableBuilder<String>(
+                      valueListenable: con.AppConfig.languageNotifier,
+                      builder: (context, lang, _) {
+                        final bool isEnglish = lang == 'en';
+                        return GestureDetector(
+                          onTap: () {
+                            con.AppConfig.setLanguage(
+                                value: isEnglish ? 'hi' : 'en');
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Color(0xFFF1F1F1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            padding: const EdgeInsets.all(2),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _buildLangOption('EN', isEnglish),
+                                _buildLangOption('HI', !isEnglish),
+                              ],
+                            ),
+                          ),
+                        );
                       },
                     ),
                   ],
@@ -2239,7 +2267,7 @@ class _HomePageState extends State<HomePage> {
                 NavigationSDK.startNavigation(
                   context,
                   data: {
-                    "venueName": "AIGHospital",
+                    "venueName": "ApolloHospital",
                   },
                   appColor: const Color(0xFF0097A7),
                   closeApp: false,

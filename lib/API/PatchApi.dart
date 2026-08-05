@@ -5,14 +5,14 @@ import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '../APIMODELS/patchDataModel.dart';
-import '../DATABASE/DATABASEMODEL/PatchAPIModel.dart';
+import 'package:navigation_sdk/src/DATABASE/DATABASEMODEL/PatchAPIModel.dart';
 import '../ELEMENTS/HelperClass.dart';
 import '../api/buildingAllApi.dart';
 import '../config.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 
-import '../DATABASE/BOXES/PatchAPIModelBox.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/PatchAPIModelBox.dart';
 import '../VersioInfo.dart';
 import 'RefreshTokenAPI.dart';
 

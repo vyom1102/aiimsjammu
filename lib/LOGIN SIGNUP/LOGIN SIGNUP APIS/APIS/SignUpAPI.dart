@@ -15,7 +15,7 @@ class SignUpAPI{
       "name": name,
       "password": password,
       "otp": OTP,
-      "appId":"com.iwayplus.aig"
+      "appId":"com.apollo.hyderabad"
     };
 
     final response = await http.post(
@@ -46,7 +46,7 @@ class SignUpAPI{
 
   Future<bool> checkUserExists(String username) async {
     return false;
-    final Map<String, dynamic> data = {"username": username, "appId":"com.iwayplus.aig"};
+    final Map<String, dynamic> data = {"username": username, "appId":"com.apollo.hyderabad"};
 
     final response = await http.post(
       Uri.parse('${AppConfig.baseUrl}/auth/username'),

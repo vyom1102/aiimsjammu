@@ -99,7 +99,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       itemBuilder: (context, index) {
         final notification = notificationsList[index];
         print(notification.appId.runtimeType);
-        if(notification.appId == 'com.iwayplus.aig') {
+        if(notification.appId == 'com.apollo.hyderabad') {
           return Card(
             elevation: 1,
             margin: EdgeInsets.only(bottom: 16),

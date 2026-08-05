@@ -15,15 +15,14 @@ import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:iwaymaps/API/buildingAllApi.dart';
-import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
+import 'package:navigation_sdk/src/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/Elements/buildingCard.dart';
 import 'package:iwaymaps/singletonClass.dart';
-import 'package:test/test.dart';
 import 'API/BuildingAPI.dart';
 import 'APIMODELS/Building.dart';
 import 'APIMODELS/buildingAll.dart';
-import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
+import 'package:navigation_sdk/src/DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'Elements/InsideBuildingCard.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:navigation_sdk/navigation_sdk.dart';
@@ -74,7 +73,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
   }
   bool bluetoohEnabled = false;
   SingletonFunctionController controller = SingletonFunctionController();
-  final ws = wsocket("com.iwayplus.aig");
+  final ws = wsocket("com.apollo.hyderabad");
 
 
   @override

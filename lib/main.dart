@@ -43,13 +43,14 @@ Fingerprinting fingerprinting=Fingerprinting();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await FlutterLocalization.instance.ensureInitialized();
   // await Firebase.initializeApp();
 
   var directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
   await Hive.openBox('SignInDatabase');
   await Hive.openBox('SwitchingDatabaseInfo');
-  // await NavigationSDK.initializeapp(venueName: "AIGHospital");
+  // await NavigationSDK.initializeapp(venueName: "ApolloHospital");
   await interactionManager.initialize();
   await sessionManager.initialize();
   await navigationManager.initialize();
@@ -96,7 +97,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
   String? initialServiceId;
   bool isLocating=false;
   late io.Socket _socket;
-  wsocket soc = wsocket("com.iwayplus.aig");
+  wsocket soc = wsocket("com.apollo.hyderabad");
 
   @override
   void initState() {

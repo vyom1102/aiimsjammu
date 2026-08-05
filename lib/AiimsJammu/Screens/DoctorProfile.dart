@@ -349,7 +349,7 @@ class _DoctorProfileState extends State<DoctorProfile> {
         ),
         actions: [
           IconButton(onPressed: (){
-            _shareContent("${AppConfig.baseUrl}/#/iway-apps/aiimsj.com/doctor?docId=${widget.docId}&appStore=aiims-jammu-navigation/id6677034083&playStore=com.iwayplus.aig");
+            _shareContent("${AppConfig.baseUrl}/#/iway-apps/aiimsj.com/doctor?docId=${widget.docId}&appStore=aiims-jammu-navigation/id6677034083&playStore=com.apollo.hyderabad");
 
             // _shareContent("iwayplus://aiimsj.com/doctor?docId=${widget.docId}");
           }, icon: Icon(Icons.share_outlined)),
