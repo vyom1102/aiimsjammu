@@ -1,3 +1,4 @@
+import 'package:iwaymaps/service/map_calling_function.dart';
 import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
@@ -5,9 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
-import 'package:navigation_sdk/navigation_sdk.dart';
-import 'package:unified_map_view/unified_map_view.dart';
-import 'package:unified_map_view/maplibre.dart';
 import '../API/buildingAllApi.dart';
 import '../APIMODELS/buildingAll.dart';
 
@@ -64,27 +62,9 @@ class Deeplink{
         buildingAllApi.selectedID = bid!;
         buildingAllApi.selectedVenue = venue;
         if(Deeplink.source != null){
-          NavigationSDK.startNavigation(
-              context,
-              data: {"venueName": "AIIMSJAMMU"},
-              appColor: const Color(0xFF0097A7),
-              closeApp: false,
-              locale: AppConfig.languageCode,
-              skipSplash: false,
-              mapType: MapProvider.mapLibre,
-              providers: {MapProvider.mapLibre: MaplibreMapProvider()}
-          );
+          NavigationService.startVenueNavigation(context);
         }else{
-          NavigationSDK.startNavigation(
-              context,
-              data: {"venueName": "AIIMSJAMMU"},
-              appColor: const Color(0xFF0097A7),
-              closeApp: false,
-              locale: AppConfig.languageCode,
-              skipSplash: false,
-              mapType: MapProvider.mapLibre,
-              providers: {MapProvider.mapLibre: MaplibreMapProvider()}
-          );
+          NavigationService.startVenueNavigation(context);
         }
         return;
       });
@@ -127,27 +107,9 @@ class Deeplink{
         buildingAllApi.selectedID = bid!;
         buildingAllApi.selectedVenue = venue;
         if(Deeplink.source != null){
-          NavigationSDK.startNavigation(
-              context,
-              data: {"venueName": "AIIMSJAMMU"},
-              appColor: const Color(0xFF0097A7),
-              closeApp: false,
-              locale: AppConfig.languageCode,
-              skipSplash: false,
-              mapType: MapProvider.mapLibre,
-              providers: {MapProvider.mapLibre: MaplibreMapProvider()}
-          );
+          NavigationService.startVenueNavigation(context);
         }else{
-          NavigationSDK.startNavigation(
-              context,
-              data: {"venueName": "AIIMSJAMMU"},
-              appColor: const Color(0xFF0097A7),
-              closeApp: false,
-              locale: AppConfig.languageCode,
-              skipSplash: false,
-              mapType: MapProvider.mapLibre,
-              providers: {MapProvider.mapLibre: MaplibreMapProvider()}
-          );
+          NavigationService.startVenueNavigation(context);
         }
         return;
       });
@@ -192,27 +154,9 @@ class Deeplink{
         buildingAllApi.findBuildings(value);
         print("deeplink $bid ${uri!.queryParameters['bid']}");
         if(Deeplink.source != null){
-          NavigationSDK.startNavigation(
-              context,
-              data: {"venueName": "AIIMSJAMMU"},
-              appColor: const Color(0xFF0097A7),
-              closeApp: false,
-              locale: AppConfig.languageCode,
-              skipSplash: false,
-              mapType: MapProvider.mapLibre,
-              providers: {MapProvider.mapLibre: MaplibreMapProvider()}
-          );
+          NavigationService.startVenueNavigation(context);
         }else{
-          NavigationSDK.startNavigation(
-              context,
-              data: {"venueName": "AIIMSJAMMU"},
-              appColor: const Color(0xFF0097A7),
-              closeApp: false,
-              locale: AppConfig.languageCode,
-              skipSplash: false,
-              mapType: MapProvider.mapLibre,
-              providers: {MapProvider.mapLibre: MaplibreMapProvider()}
-          );
+          NavigationService.startVenueNavigation(context);
         }
         return;
       });

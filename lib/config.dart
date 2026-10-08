@@ -31,6 +31,9 @@ class AppConfig {
       return '023357e0-cf4f-11ef-8c00-45832f202b2e';
     }
   }
+  static const String venueName = 'IITDelhi';
+  static const List<String> buildingIds = [];
+
   static Language _language = Language.english;
   static final ValueNotifier<String> languageNotifier = ValueNotifier('en');
 

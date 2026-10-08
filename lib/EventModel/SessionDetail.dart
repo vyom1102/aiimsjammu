@@ -1,3 +1,4 @@
+import 'package:iwaymaps/service/map_calling_function.dart';
 import 'dart:async';
 import 'dart:ui' as img;
 import 'dart:ui';
@@ -14,9 +15,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
-import 'package:unified_map_view/unified_map_view.dart';
-import 'package:unified_map_view/maplibre.dart';
-import 'package:navigation_sdk/navigation_sdk.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/rendering.dart';
@@ -1008,16 +1006,7 @@ class SessionDetailState extends State<SessionDetail> {
                 ),
               ),
               onPressed: () {
-                NavigationSDK.startNavigation(
-                  context,
-                  data: {"venueName": "AIIMSJAMMU"},
-                  appColor: const Color(0xFF0097A7),
-                  closeApp: false,
-                  locale: AppConfig.languageCode,
-                  skipSplash: false,
-                  mapType: MapProvider.mapLibre,
-                  providers: {MapProvider.mapLibre: MaplibreMapProvider()},
-                );
+                NavigationService.startVenueNavigation(context);
               },
               child: Center(
                 child: Row(

@@ -14,8 +14,6 @@ import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:iwaymaps/websocket/interactionManager.dart';
 import 'package:iwaymaps/websocket/navigationLogManager.dart';
 import 'package:iwaymaps/websocket/sessionManager.dart';
-import 'package:navigation_sdk/navigation_sdk.dart' hide LOCALES;
-import 'package:navigation_sdk/pip_overlay.dart';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_localization/flutter_localization.dart';
@@ -31,6 +29,7 @@ import 'AiimsJammu/Widgets/WebSocketDriver.dart';
 import 'BluetoothManager/BLEManager.dart';
 import 'Elements/deeplinks.dart';
 import 'MainScreen.dart';
+import 'config.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'fingerprinting/fingerprinting.dart';
 
@@ -49,6 +48,7 @@ Future<void> main() async {
   Hive.init(directory.path);
   await Hive.openBox('SignInDatabase');
   await Hive.openBox('SwitchingDatabaseInfo');
+  await Hive.openBox('LocationPermission');
   // await NavigationSDK.initializeapp(venueName: "AIGHospital");
   await interactionManager.initialize();
   await sessionManager.initialize();
@@ -209,7 +209,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
     }
     requestLocationPermission();
     return MaterialApp(
-      navigatorKey:PipManager.instance.rootNavigatorKey,
       title: "IWAYPLUS",
       theme: ThemeData(
         primarySwatch: Colors.blue,

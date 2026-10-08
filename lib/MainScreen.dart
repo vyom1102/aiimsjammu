@@ -1,3 +1,4 @@
+import 'package:iwaymaps/service/map_calling_function.dart';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,9 +14,6 @@ import 'package:iwaymaps/singletonClass.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:iwaymaps/websocket/interactionManager.dart';
 import 'package:lottie/lottie.dart';
-import 'package:unified_map_view/unified_map_view.dart';
-import 'package:unified_map_view/maplibre.dart';
-import 'package:navigation_sdk/navigation_sdk.dart';
 import 'package:new_version_plus/new_version_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:quickalert/models/quickalert_type.dart';
@@ -70,23 +68,7 @@ class _MainScreenState extends State<MainScreen> {
     index = widget.initialIndex;
     checkPermission();
     setIDforWebSocket();
-    _initNavigationSDK();
     print(index);
-  }
-  bool _isMapInitialized=false;
-  Future<void> _initNavigationSDK() async {
-
-    print("Before init: $_isMapInitialized");
-
-    final isInitialized = await NavigationSDK.initializeapp(
-      venueName: 'AIGHospital',
-    );
-
-    setState(() {
-      _isMapInitialized = isInitialized;
-    });
-
-    print("After init: $_isMapInitialized");
   }
 
 
@@ -295,37 +277,15 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
           ),
-            floatingActionButton: (_isMapInitialized)?FloatingActionButton(
+            floatingActionButton: FloatingActionButton(
               heroTag: 'mainscreen',
-              onPressed: (){
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (!mounted) return;
-                  NavigationSDK.setDistanceUnit(DistanceUnit.meters);
-                  NavigationSDK.startNavigation(
-                    context,
-                    data: {
-                      "venueName": "AIGHospital",
-                    },
-                    appColor: Colors.blueAccent,
-                    closeApp: false,
-                    locale: AppConfig.languageCode,
-                    skipSplash: false,
-                    mapType: MapProvider.mapLibre,
-                    providers: {
-                      MapProvider.mapLibre: MaplibreMapProvider(),
-                    },
-                  );
-                  // NEW: Show PiP
-                  PipManager.instance.showFullscreen();
-                  print("PipManager.instance:${PipManager.instance.isFullscreen}");
-                });
-              },
+              onPressed: () => NavigationService.startVenueNavigation(context),
               backgroundColor: Color(0xFFFEAB01),
               shape: CircleBorder(),
               child: Semantics(
                   label: "Map",
                   child: Lottie.asset('assets/images/floatingmap.json')),
-            ):Container(),
+            ),
         ),
       ),
     );

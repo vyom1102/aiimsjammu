@@ -1,8 +1,6 @@
+import 'package:iwaymaps/service/map_calling_function.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:navigation_sdk/navigation_sdk.dart';
-import 'package:unified_map_view/unified_map_view.dart';
-import 'package:unified_map_view/maplibre.dart';
 
 
 
@@ -15,18 +13,7 @@ void PassLocationId(BuildContext context,String Id){
   //   ),
   // );
 
-    NavigationSDK.callWithLandMarkId(
-        context,
-        "AIGHospital",
-        Id,
-        Color(0xFF0097A7),
-        false,
-        AppConfig.languageCode,
-        mapType: MapProvider.mapLibre, providers: {MapProvider.mapLibre : MaplibreMapProvider()}
-    );
-    // NEW: Show PiP
-    PipManager.instance.showFullscreen();
-    print("PipManager.instance:${PipManager.instance.isFullscreen}");
+    NavigationService.startLandmarkNavigation(context, Id);
   print(Id);
 
 }

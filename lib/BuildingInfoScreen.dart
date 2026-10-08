@@ -1,4 +1,5 @@
 
+import 'package:iwaymaps/service/map_calling_function.dart';
 import 'dart:collection';
 import 'dart:developer';
 
@@ -19,16 +20,12 @@ import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/Elements/buildingCard.dart';
 import 'package:iwaymaps/singletonClass.dart';
-import 'package:test/test.dart';
 import 'API/BuildingAPI.dart';
 import 'APIMODELS/Building.dart';
 import 'APIMODELS/buildingAll.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'Elements/InsideBuildingCard.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
-import 'package:navigation_sdk/navigation_sdk.dart';
-import 'package:unified_map_view/unified_map_view.dart';
-import 'package:unified_map_view/maplibre.dart';
 
 // import 'Navigation.dart';
 
@@ -349,16 +346,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                     // }
                                     //customEnableBT(context);
 
-                                   NavigationSDK.startNavigation(
-                                     context,
-                                     data: {"venueName": "AIIMSJAMMU"},
-                                     appColor: const Color(0xFFEC5B13),
-                                     closeApp: false,
-                                     locale: AppConfig.languageCode,
-                                     skipSplash: false,
-                                     mapType: MapProvider.mapLibre,
-                                     providers: {MapProvider.mapLibre: MaplibreMapProvider()},
-                                   );
+                                   NavigationService.startVenueNavigation(context);
                                 }else{
                                    if (widget.dist == 0) {
                                      wsocket.message["AppInitialization"]["BID"] = widget.receivedAllBuildingList![index].sId!;
@@ -366,16 +354,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                      buildingAllApi.setStoredString(widget.receivedAllBuildingList![index].sId!);
                                      buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
                                      buildingAllApi.setStoredAllBuildingID(allBuildingID);
-                                     NavigationSDK.startNavigation(
-                                       context,
-                                       data: {"venueName": "AIIMSJAMMU"},
-                                       appColor: const Color(0xFFEC5B13),
-                                       closeApp: false,
-                                       locale: 'en',
-                                       skipSplash: false,
-                                       mapType: MapProvider.mapLibre,
-                                       providers: {MapProvider.mapLibre: MaplibreMapProvider()},
-                                     );
+                                     NavigationService.startVenueNavigation(context);
                                    }else{
                                       HelperClass.showToast("Not your current venue");
                                     }
@@ -741,16 +720,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
               buildingAllApi.setStoredString(currentData.sId!);
               buildingAllApi.setSelectedBuildingID(currentData.sId!);
               buildingAllApi.setStoredAllBuildingID(allBuildingID);
-              NavigationSDK.callWithLandMarkId(
-                context,
-                "AIIMSJAMMU",
-                "0a8bdc2-b0b2-662a-ae5-bff7bff350c0",
-                const Color(0xFF0097A7),
-                false,
-                AppConfig.languageCode,
-                mapType: MapProvider.mapLibre,
-                providers: {MapProvider.mapLibre: MaplibreMapProvider()},
-              );
+              NavigationService.startLandmarkNavigation(context, "0a8bdc2-b0b2-662a-ae5-bff7bff350c0");
             }, icon: Icon(Icons.accessibility_outlined),)
                 // Flexible(
                 //   child: Container(

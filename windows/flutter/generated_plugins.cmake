@@ -3,18 +3,15 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  adapter_manager
   app_links
-  audioplayers_windows
   connectivity_plus
   file_selector_windows
   flutter_localization
-  flutter_secure_storage_windows
   flutter_tts
   geolocator_windows
   permission_handler_windows
   share_plus
-  universal_ble
+  speech_to_text_windows
   url_launcher_windows
 )
 

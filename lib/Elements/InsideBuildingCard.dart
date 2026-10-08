@@ -1,12 +1,10 @@
+import 'package:iwaymaps/service/map_calling_function.dart';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:hive/hive.dart';
-import 'package:navigation_sdk/navigation_sdk.dart';
-import 'package:unified_map_view/unified_map_view.dart';
-import 'package:unified_map_view/maplibre.dart';
 import '../API/buildingAllApi.dart';
 import '../APIMODELS/buildingAll.dart';
 import '../DATABASE/BOXES/BuildingAPIModelBox.dart';
@@ -71,16 +69,7 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
               buildingAllApi.setStoredString(widget.buildingId);
               buildingAllApi.setSelectedBuildingID(widget.buildingId);
               buildingAllApi.setStoredAllBuildingID(widget.allBuildingID);
-              NavigationSDK.startNavigation(
-                context,
-                data: {"venueName": "AIIMSJAMMU"},
-                appColor: const Color(0xFF0097A7),
-                closeApp: false,
-                locale: AppConfig.languageCode,
-                skipSplash: false,
-                mapType: MapProvider.mapLibre,
-                providers: {MapProvider.mapLibre: MaplibreMapProvider()},
-              );
+              NavigationService.startVenueNavigation(context);
             },
             child: Container(
               width: 168,
@@ -112,16 +101,7 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
               buildingAllApi.setStoredString(widget.buildingId);
               buildingAllApi.setSelectedBuildingID(widget.buildingId);
               buildingAllApi.setStoredAllBuildingID(widget.allBuildingID);
-              NavigationSDK.startNavigation(
-                context,
-                data: {"venueName": "AIIMSJAMMU"},
-                appColor: const Color(0xFF0097A7),
-                closeApp: false,
-                locale: AppConfig.languageCode,
-                skipSplash: false,
-                mapType: MapProvider.mapLibre,
-                providers: {MapProvider.mapLibre: MaplibreMapProvider()},
-              );
+              NavigationService.startVenueNavigation(context);
             },
             child: Container(
               margin: EdgeInsets.only(top: 12,left: 8),
@@ -146,16 +126,7 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
                   buildingAllApi.setSelectedBuildingID(widget.buildingId);
 
                   buildingAllApi.setStoredAllBuildingID(widget.allBuildingID);
-                  NavigationSDK.startNavigation(
-                    context,
-                    data: {"venueName": "AIIMSJAMMU"},
-                    appColor: const Color(0xFF0097A7),
-                    closeApp: false,
-                    locale: AppConfig.languageCode,
-                    skipSplash: false,
-                    mapType: MapProvider.mapLibre,
-                    providers: {MapProvider.mapLibre: MaplibreMapProvider()},
-                  );
+                  NavigationService.startVenueNavigation(context);
                 },
                 child: Container(
                   margin: EdgeInsets.only(left: 8,top:3,bottom: 8),

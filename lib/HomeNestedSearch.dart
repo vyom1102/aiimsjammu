@@ -1,8 +1,6 @@
+import 'package:iwaymaps/service/map_calling_function.dart';
 import 'package:flutter/material.dart';
-import 'package:navigation_sdk/navigation_sdk.dart';
 
-import 'package:unified_map_view/unified_map_view.dart';
-import 'package:unified_map_view/maplibre.dart';
 import 'API/buildingAllApi.dart';
 import 'APIMODELS/buildingAll.dart';
 import 'Elements/buildingCard.dart';
@@ -84,16 +82,7 @@ class HomeNestedSearch extends SearchDelegate{
           // },
           onTap: () {
             buildingAllApi.setStoredString(data.sId!);
-            NavigationSDK.startNavigation(
-              context,
-              data: {"venueName": "AIIMSJAMMU"},
-              appColor: const Color(0xFF0097A7),
-              closeApp: false,
-              locale: AppConfig.languageCode,
-              skipSplash: false,
-              mapType: MapProvider.mapLibre,
-              providers: {MapProvider.mapLibre: MaplibreMapProvider()},
-            );
+            NavigationService.startVenueNavigation(context);
           },
           child: buildingCard(imageURL: data.buildingPhoto ?? "",
             Name: data.buildingName ?? "",

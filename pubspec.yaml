@@ -29,11 +29,11 @@ dependencies:
   flutter:
     sdk: flutter
 
-  navigation_sdk:
+#  navigation_sdk:
 #    git:
 #      url: https://github.com/udit6023/navigation_sdk.git
 #      ref: landmarkPanel
-    path: ../navigation_sdk
+#    path: ../navigation_sdk
 
 
 
@@ -56,7 +56,7 @@ dependencies:
   hive_flutter: ^1.1.0
   flutter_animate: ^4.5.0 #animations
   flutter_staggered_animations:
-  vibration: ^1.8.4
+  vibration: ^3.2.1
   maplibre_gl: ^0.21.0
   wakelock_plus:
 
@@ -70,7 +70,7 @@ dependencies:
   google_maps: ^6.3.0
   geodesy: ^0.10.2
   chips_choice: ^3.0.1
-  speech_to_text:
+  speech_to_text: ^7.0.0
 
   fuzzy: <1.0.0
   flutter_animator: ^3.2.2
@@ -87,8 +87,6 @@ dependencies:
   share_plus: ^9.0.0
   turf: ^0.0.9
   geolocator: ^11.0.0
-  qr_code_scanner: ^1.0.1
-  barcode_scan2: ^4.3.0
   persistent_bottom_nav_bar: ^5.0.2
   in_app_update: ^4.2.2
   image_picker: ^1.1.1
@@ -100,7 +98,6 @@ dependencies:
   socket_io_client: ^2.0.3+1
   bluetooth_enable_fork: ^0.1.6
   translator: ^1.0.0
-  test: ^1.16.0
   mockito: ^5.1.0
   new_version_plus: ^0.0.11
   cached_network_image: ^3.3.1
@@ -112,9 +109,10 @@ dependencies:
   flutter_local_notifications: ^17.2.2
   provider: ^6.1.2
   ml_linalg: ^13.12.6
-  device_meta: ^1.1.31
+  device_info_plus:
   app_settings: ^5.1.1
   csv:
+  iwayplus_scanner: ^0.2.6
 dependency_overrides:
   share_plus: ^11.1.0
   web: ^1.0.0
@@ -128,7 +126,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: ^0.13.1
-  analyzer: ^6.4.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -158,7 +155,6 @@ flutter:
     - assets/profilePageAssets/
     - assets/PreLoads/
     - assets/DoctorProfileAssets/
-    - assets/api_data/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
