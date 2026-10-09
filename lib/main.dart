@@ -50,7 +50,7 @@ Future<void> main() async {
   Hive.init(directory.path);
   await Hive.openBox('SignInDatabase');
   await Hive.openBox('SwitchingDatabaseInfo');
-  // await NavigationSDK.initializeapp(venueName: "ApolloHospital");
+  // await NavigationSDK.initializeapp(venueName: "AIGHospital");
   await interactionManager.initialize();
   await sessionManager.initialize();
   await navigationManager.initialize();

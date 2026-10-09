@@ -78,7 +78,7 @@ class _MainScreenState extends State<MainScreen> {
     print("Before init: $_isMapInitialized");
 
     final isInitialized = await NavigationSDK.initializeapp(
-      venueName: 'ApolloHospital',
+      venueName: 'AIGHospital',
     );
 
     setState(() {
@@ -303,7 +303,7 @@ class _MainScreenState extends State<MainScreen> {
                   NavigationSDK.startNavigation(
                     context,
                     data: {
-                      "venueName": "ApolloHospital",
+                      "venueName": "AIGHospital",
                     },
                     appColor: Colors.blueAccent,
                     closeApp: false,

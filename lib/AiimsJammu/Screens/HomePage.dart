@@ -185,7 +185,7 @@ class _HomePageState extends State<HomePage> {
     print("Before init: $_isMapInitialized");
 
     final isInitialized = await NavigationSDK.initializeapp(
-      venueName: 'ApolloHospital',
+      venueName: 'AIGHospital',
     );
 
     setState(() {
@@ -587,7 +587,7 @@ class _HomePageState extends State<HomePage> {
         //    NavigationSDK.startNavigation(
         //     context,
         //     data: {
-        //       "venueName": "ApolloHospital",
+        //       "venueName": "AIGHospital",
         //       "directLandID": selectedlandmarkpolyId,
         //     },
         //     appColor: const Color(0xFF0097A7),
@@ -1584,7 +1584,7 @@ class _HomePageState extends State<HomePage> {
                     Column(
                       children: [
                         Text(
-                          'Apollo 24/7',
+                          'AIG Hyderabad',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Color(0xFF003666),
@@ -2267,7 +2267,7 @@ class _HomePageState extends State<HomePage> {
                 NavigationSDK.startNavigation(
                   context,
                   data: {
-                    "venueName": "ApolloHospital",
+                    "venueName": "AIGHospital",
                   },
                   appColor: const Color(0xFF0097A7),
                   closeApp: false,
