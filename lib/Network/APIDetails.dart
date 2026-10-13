@@ -1,4 +1,4 @@
-import 'package:device_meta/device_meta.dart';
+import 'device_meta.dart';
 import 'package:flutter/foundation.dart';
 
 import '../APIMODELS/Buildingbyvenue.dart';

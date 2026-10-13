@@ -4,4 +4,6 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Lets debug builds load a local web map (MAP_BASE_URL=http://localhost...). -->
+    <application android:usesCleartextTraffic="true"/>
 </manifest>

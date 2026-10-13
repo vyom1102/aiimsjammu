@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
-import 'package:device_meta/device_meta.dart';
+import '../Network/device_meta.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
