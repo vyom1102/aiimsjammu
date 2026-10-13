@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../VenueSelectionScreen.dart';
-import 'package:test/scaffolding.dart';
 
 
 class UserExperienceRatingScreen extends StatefulWidget {

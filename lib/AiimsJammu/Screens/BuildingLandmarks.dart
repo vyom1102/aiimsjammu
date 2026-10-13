@@ -404,6 +404,7 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
                           // },
                           onTap: () {
                             NavigationSDK.callWithLandMarkId(
+                              apiKey: "98f13750-c905-11f0-b802-d78f56bdcf4f",
                               context,
                               "AIIMSJAMMU",
                               polyId,

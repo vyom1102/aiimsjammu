@@ -297,8 +297,6 @@ class _VenueSelectionScreenState extends State<VenueSelectionScreen>{
                   width: 60,
                   child: SvgPicture.asset("assets/MainScreen_IwayplusLogo.svg"),
                 ),codes: [
-                EasterEggTriggers.SwipeDown,
-                EasterEggTriggers.LongPress,
               ],
                 action: (){
                   final BeaconBox = BeaconAPIModelBOX.getData();

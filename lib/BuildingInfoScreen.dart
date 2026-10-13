@@ -19,7 +19,6 @@ import 'package:iwaymaps/DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/Elements/buildingCard.dart';
 import 'package:iwaymaps/singletonClass.dart';
-import 'package:test/test.dart';
 import 'API/BuildingAPI.dart';
 import 'APIMODELS/Building.dart';
 import 'APIMODELS/buildingAll.dart';
@@ -350,6 +349,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                     //customEnableBT(context);
 
                                    NavigationSDK.startNavigation(
+                                     apiKey: "98f13750-c905-11f0-b802-d78f56bdcf4f",
                                      context,
                                      data: {"venueName": "AIIMSJAMMU"},
                                      appColor: const Color(0xFFEC5B13),
@@ -367,6 +367,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
                                      buildingAllApi.setSelectedBuildingID(widget.receivedAllBuildingList![index].sId!);
                                      buildingAllApi.setStoredAllBuildingID(allBuildingID);
                                      NavigationSDK.startNavigation(
+                                       apiKey: "98f13750-c905-11f0-b802-d78f56bdcf4f",
                                        context,
                                        data: {"venueName": "AIIMSJAMMU"},
                                        appColor: const Color(0xFFEC5B13),
@@ -742,6 +743,7 @@ class _BuildingInfoScreenState extends State<BuildingInfoScreen> {
               buildingAllApi.setSelectedBuildingID(currentData.sId!);
               buildingAllApi.setStoredAllBuildingID(allBuildingID);
               NavigationSDK.callWithLandMarkId(
+                apiKey: "98f13750-c905-11f0-b802-d78f56bdcf4f",
                 context,
                 "AIIMSJAMMU",
                 "0a8bdc2-b0b2-662a-ae5-bff7bff350c0",

@@ -46,38 +46,6 @@ class PushNotifications {
   // }
 
 
-// initalize local notifications
-  static Future localNotiInit() async {
-    // initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
-    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
-    final DarwinInitializationSettings initializationSettingsDarwin =
-    DarwinInitializationSettings(
-      onDidReceiveLocalNotification: (id, title, body, payload) => null,
-    );
-    final LinuxInitializationSettings initializationSettingsLinux =
-    LinuxInitializationSettings(defaultActionName: 'Open notification');
-    final InitializationSettings initializationSettings =
-    InitializationSettings(
-        android: initializationSettingsAndroid,
-        iOS: initializationSettingsDarwin,
-        linux: initializationSettingsLinux);
-        _flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onDidReceiveNotificationResponse: onNotificationTap,
-        onDidReceiveBackgroundNotificationResponse: onNotificationTap,
-
-        );
-
-
-    // _flutterLocalNotificationsPlugin.initialize(initializationSettings,
-    //   onDidReceiveBackgroundNotificationResponse: (value){
-    //     print("onDidReceiveBackgroundNotificationResponse");
-    //     print(value.notificationResponseType);
-    //     print(value);
-    //   }
-    // );
-
-
-  }
 
   // on tap local notification in foreground
   static void onNotificationTap(NotificationResponse notificationResponse) {

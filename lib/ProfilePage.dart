@@ -210,7 +210,6 @@ class _ProfilePageState extends State<ProfilePage> {
       body: (isLoading)?Center(child: CircularProgressIndicator(),):Column(
         children: [
           EasterEggTrigger(
-            codes: [EasterEggTriggers.SwipeRight,EasterEggTriggers.SwipeRight,EasterEggTriggers.LongPress],
             action: (){
               Navigator.push(
                 context,

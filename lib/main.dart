@@ -43,6 +43,7 @@ Fingerprinting fingerprinting=Fingerprinting();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await FlutterLocalization.instance.ensureInitialized();
   // await Firebase.initializeApp();
 
   var directory = await getApplicationDocumentsDirectory();

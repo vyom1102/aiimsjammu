@@ -302,6 +302,7 @@ class _MainScreenState extends State<MainScreen> {
                   if (!mounted) return;
                   NavigationSDK.setDistanceUnit(DistanceUnit.meters);
                   NavigationSDK.startNavigation(
+                    apiKey: "98f13750-c905-11f0-b802-d78f56bdcf4f",
                     context,
                     data: {
                       "venueName": "AIGHospital",

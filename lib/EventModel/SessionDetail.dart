@@ -1009,6 +1009,7 @@ class SessionDetailState extends State<SessionDetail> {
               ),
               onPressed: () {
                 NavigationSDK.startNavigation(
+                  apiKey: "98f13750-c905-11f0-b802-d78f56bdcf4f",
                   context,
                   data: {"venueName": "AIIMSJAMMU"},
                   appColor: const Color(0xFF0097A7),

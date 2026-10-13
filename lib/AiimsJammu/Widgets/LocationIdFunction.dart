@@ -16,6 +16,7 @@ void PassLocationId(BuildContext context,String Id){
   // );
 
     NavigationSDK.callWithLandMarkId(
+        apiKey: "98f13750-c905-11f0-b802-d78f56bdcf4f",
         context,
         "AIGHospital",
         Id,
