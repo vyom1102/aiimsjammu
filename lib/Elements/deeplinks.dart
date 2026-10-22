@@ -72,7 +72,8 @@ class Deeplink{
               locale: AppConfig.languageCode,
               skipSplash: true,
               mapType: MapProvider.mapLibre,
-              providers: {MapProvider.mapLibre: MaplibreMapProvider()}
+              providers: {MapProvider.mapLibre: MaplibreMapProvider()},
+              apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
           );
         }else{
           NavigationSDK.startNavigation(
@@ -83,7 +84,8 @@ class Deeplink{
               locale: AppConfig.languageCode,
               skipSplash: true,
               mapType: MapProvider.mapLibre,
-              providers: {MapProvider.mapLibre: MaplibreMapProvider()}
+              providers: {MapProvider.mapLibre: MaplibreMapProvider()},
+              apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
           );
         }
         return;
@@ -135,7 +137,8 @@ class Deeplink{
               locale: AppConfig.languageCode,
               skipSplash: true,
               mapType: MapProvider.mapLibre,
-              providers: {MapProvider.mapLibre: MaplibreMapProvider()}
+              providers: {MapProvider.mapLibre: MaplibreMapProvider()},
+              apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
           );
         }else{
           NavigationSDK.startNavigation(
@@ -146,7 +149,8 @@ class Deeplink{
               locale: AppConfig.languageCode,
               skipSplash: true,
               mapType: MapProvider.mapLibre,
-              providers: {MapProvider.mapLibre: MaplibreMapProvider()}
+              providers: {MapProvider.mapLibre: MaplibreMapProvider()},
+              apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
           );
         }
         return;
@@ -200,7 +204,8 @@ class Deeplink{
               locale: AppConfig.languageCode,
               skipSplash: true,
               mapType: MapProvider.mapLibre,
-              providers: {MapProvider.mapLibre: MaplibreMapProvider()}
+              providers: {MapProvider.mapLibre: MaplibreMapProvider()},
+              apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
           );
         }else{
           NavigationSDK.startNavigation(
@@ -211,7 +216,8 @@ class Deeplink{
               locale: AppConfig.languageCode,
               skipSplash: true,
               mapType: MapProvider.mapLibre,
-              providers: {MapProvider.mapLibre: MaplibreMapProvider()}
+              providers: {MapProvider.mapLibre: MaplibreMapProvider()},
+              apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
           );
         }
         return;

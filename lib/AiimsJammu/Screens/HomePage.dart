@@ -574,6 +574,7 @@ class _HomePageState extends State<HomePage> {
           providers: {
             MapProvider.mapLibre: MaplibreMapProvider(),
           },
+            apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
         );
       }
 
@@ -2222,7 +2223,8 @@ class _HomePageState extends State<HomePage> {
                   locale: AppConfig.languageCode,
                   skipSplash: false,
                   mapType: MapProvider.mapLibre,
-                  providers: {MapProvider.mapLibre: MaplibreMapProvider()}
+                  providers: {MapProvider.mapLibre: MaplibreMapProvider()},
+                  apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
               );
             },
             backgroundColor: Color(0xFFFEAB01),

@@ -1017,6 +1017,7 @@ class SessionDetailState extends State<SessionDetail> {
                   skipSplash: true,
                   mapType: MapProvider.mapLibre,
                   providers: {MapProvider.mapLibre: MaplibreMapProvider()},
+                    apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
                 );
               },
               child: Center(

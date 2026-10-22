@@ -284,7 +284,8 @@ class _MainScreenState extends State<MainScreen> {
                     skipSplash: false,
                       locale: AppConfig.languageCode,
                       mapType: MapProvider.mapLibre,
-                      providers: {MapProvider.mapLibre: MaplibreMapProvider()}
+                      providers: {MapProvider.mapLibre: MaplibreMapProvider()},
+                      apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
                   );
                 });
               },

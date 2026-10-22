@@ -410,7 +410,8 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
                                 Color(0xFF0097A7),
                                 false,
                                 AppConfig.languageCode,
-                                mapType: MapProvider.mapLibre, providers: {MapProvider.mapLibre : MaplibreMapProvider()}
+                                mapType: MapProvider.mapLibre, providers: {MapProvider.mapLibre : MaplibreMapProvider()},
+                                apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
                             );
                             PipManager.instance.showFullscreen();
                           },
