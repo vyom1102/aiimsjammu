@@ -18,9 +18,9 @@ class AppConfig {
 
   static String get encryptionKey {
     if (baseUrl == 'https://dev.iwayplus.in') {
-      return 'rtyHuAxNZPIyx1YMCXQJcx6dX1ev0/svf79IWd1teX0=';
+      return 'GeSrLvAGmj9bWAP6m1luJGSlyXjypUj+3KkBalrEEf4=';
     } else {
-      return 'YuXmrhpu5ENd+erlQ6TXmijrtYO72Icpm6irw7f/a9E=';
+      return 'GeSrLvAGmj9bWAP6m1luJGSlyXjypUj+3KkBalrEEf4=';
     }
   }
 
@@ -28,7 +28,7 @@ class AppConfig {
     if (baseUrl == 'https://dev.iwayplus.in') {
       return 'd52f6110-c69a-11ef-aa4e-e7aa7912987a';
     } else {
-      return '023357e0-cf4f-11ef-8c00-45832f202b2e';
+      return '8412dc40-d741-11f0-b9f0-9f755e230c44';
     }
   }
   static Language _language = Language.english;

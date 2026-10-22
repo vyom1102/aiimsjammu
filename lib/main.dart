@@ -37,7 +37,7 @@ final navigationManager=NavigationLogManager();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // await Firebase.initializeApp();
-
+  await FlutterLocalization.instance.ensureInitialized();
   var directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
   await NavigationSDK.initializeapp(venueName: "AIIMSJAMMU");

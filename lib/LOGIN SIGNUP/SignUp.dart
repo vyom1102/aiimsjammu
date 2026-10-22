@@ -7,17 +7,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:quickalert/models/quickalert_type.dart';
-import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'dart:math';
 import 'package:upgrader/upgrader.dart';
 import 'package:lottie/lottie.dart' as lot;
 import '../Elements/HelperClass.dart';
 import '../MainScreen.dart';
 import '../config.dart';
+import 'LOGIN SIGNUP APIS/APIS/SignUpAPI.dart';
 import 'LOGIN SIGNUP APIS/APIS/SendOTPAPI.dart';
 import 'SignIn.dart';
-import 'VerifyYourAccount.dart';
 import 'package:http/http.dart' as http;
 
 class SignUp extends StatefulWidget {
@@ -696,118 +694,42 @@ class _SignUpState extends State<SignUp> {
                                                 finalMailEditingController = mailEditingController.text;
                                               }
 
-                                              try {
-                                                print("checking phone number");
-                                                print(finalMailEditingController);
-
-
-                                                bool userExists = await checkUserExists(finalMailEditingController);
-                                                if(!userExists){
-                                                  bool otpSent = await SendOTPAPI().sendOTP(finalMailEditingController);
-                                                  if (!otpSent) {
-                                                    HelperClass.showToast("Invalid email");
-                                                    Navigator.of(context).pop(); // Dismiss the loading dialog
-                                                    return; // Exit the function
-                                                  }
-                                                }
-
-                                                Navigator.of(context).pop(); // Dismiss the loading dialog
-
-                                                if (containsOnlyNumeric(mailEditingController.text)) {
-                                                  if (mailEditingController.text.length != 10) {
-                                                    QuickAlert.show(
-                                                      context: context,
-                                                      type: QuickAlertType.error,
-                                                      title: 'Error',
-                                                      text: 'Incorrect phone number entered',
-                                                      confirmBtnText: 'OK',
-                                                    );
-                                                  } else if (userExists) {
-                                                    QuickAlert.show(
-                                                      context: context,
-                                                      type: QuickAlertType.error,
-                                                      title: 'Error',
-                                                      text: 'User already exists. Please use a different phone number.',
-                                                      confirmBtnText: 'OK',
-                                                      onConfirmBtnTap: () {
-                                                        Navigator.pop(context);
-                                                        Navigator.pushReplacement(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                            builder: (context) => SignIn(
-                                                              emailOrPhoneNumber: mailEditingController.text,
-                                                            ),
-                                                          ),
-                                                        );
-                                                      },
-                                                    );
-                                                  }
-                                                  else{
-                                                    Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                        builder: (context) => VerifyYourAccount(
-                                                          previousScreen: 'SignUp',
-                                                          userEmailOrPhone: mailEditingController.text,
-                                                          userName: nameEditingController.text,
-                                                          userPasword: passEditingController.text,
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }
-                                                } else if (userExists) {
-                                                  QuickAlert.show(
-                                                    context: context,
-                                                    type: QuickAlertType.error,
-                                                    title: 'Error',
-                                                    text: 'User already exists. Please use a different email address.',
-                                                    confirmBtnText: 'OK',
-                                                    onConfirmBtnTap: () {
-                                                      Navigator.pop(context);
-                                                      Navigator.pushReplacement(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                          builder: (context) => SignIn(
-                                                            emailOrPhoneNumber: mailEditingController.text,
-                                                          ),
-                                                        ),
-                                                      );
-                                                    },
-                                                  );
-                                                } else {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) => VerifyYourAccount(
-                                                        previousScreen: 'SignUp',
-                                                        userEmailOrPhone: mailEditingController.text,
-                                                        userName: nameEditingController.text,
-                                                        userPasword: passEditingController.text,
-                                                      ),
-                                                    ),
-                                                  );
-                                                }
-                                              } catch (error) {
-                                                Navigator.of(context).pop(); // Dismiss the loading dialog
-                                                print(error);
-                                                showDialog(
-                                                  context: context,
-                                                  builder: (BuildContext context) {
-                                                    return AlertDialog(
-                                                      title: Text("Error"),
-                                                      content: Text('An error occurred while checking user existence. Please try again.'),
-                                                      actions: <Widget>[
-                                                        TextButton(
-                                                          child: Text('OK'),
-                                                          onPressed: () {
-                                                            Navigator.of(context).pop();
-                                                          },
-                                                        ),
-                                                      ],
-                                                    );
-                                                  },
-                                                );
+                                              if (containsOnlyNumeric(mailEditingController.text) &&
+                                                  mailEditingController.text.length != 10) {
+                                                Navigator.of(context).pop();
+                                                HelperClass.showToast("Incorrect phone number entered");
+                                                return;
                                               }
+
+                                              bool signedUp = false;
+                                              try {
+                                                final otpSent = await SendOTPAPI().sendOTP(finalMailEditingController);
+                                                if (!otpSent) {
+                                                  HelperClass.showToast("Unable to initialize verification. Please try again.");
+                                                  return;
+                                                }
+                                                signedUp = await SignUpAPI().signUP(
+                                                  finalMailEditingController,
+                                                  nameEditingController.text,
+                                                  passEditingController.text,
+                                                  '2026',
+                                                );
+                                              } catch (_) {
+                                                HelperClass.showToast("Unable to sign up. Please try again.");
+                                              } finally {
+                                                if (context.mounted) Navigator.of(context).pop();
+                                              }
+                                              if (!context.mounted || !signedUp) return;
+                                              Navigator.pushAndRemoveUntil(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => SignIn(
+                                                    emailOrPhoneNumber: mailEditingController.text,
+                                                    password: passEditingController.text,
+                                                  ),
+                                                ),
+                                                (route) => false,
+                                              );
                                             } else {
                                               HelperClass.showToast("Passwords do not match.");
                                             }

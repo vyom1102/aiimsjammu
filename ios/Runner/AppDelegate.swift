@@ -5,7 +5,7 @@ import Flutter
 import CoreLocation
 
 @main
-@objc class AppDelegate: FlutterAppDelegate, CLLocationManagerDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate, CLLocationManagerDelegate {
     private let gpsChannelName = "gps_scan"
     private let bleChannelName = "ble_scanner"
 
@@ -28,14 +28,19 @@ import CoreLocation
             UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
         }
 
-        let controller = window?.rootViewController as! FlutterViewController
+        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+
+    func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+        GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+        let messenger = engineBridge.applicationRegistrar.messenger()
 
         // Register GPS Streaming EventChannel
-        let gpsChannel = FlutterEventChannel(name: gpsChannelName, binaryMessenger: controller.binaryMessenger)
+        let gpsChannel = FlutterEventChannel(name: gpsChannelName, binaryMessenger: messenger)
         gpsChannel.setStreamHandler(GPSStreamHandler())
 
         // Register BLE Scanner MethodChannel
-        let bleChannel = FlutterMethodChannel(name: bleChannelName, binaryMessenger: controller.binaryMessenger)
+        let bleChannel = FlutterMethodChannel(name: bleChannelName, binaryMessenger: messenger)
         let bleManager = BLEManager()
 
         bleChannel.setMethodCallHandler { (call, result) in
@@ -54,10 +59,6 @@ import CoreLocation
             }
         }
 
-        // Register generated plugins
-        GeneratedPluginRegistrant.register(with: self)
-
-        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
 }
 
