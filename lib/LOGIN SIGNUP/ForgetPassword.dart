@@ -10,7 +10,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import '../MainScreen.dart';
 import 'LOGIN SIGNUP APIS/APIS/SignInAPI.dart';
 import 'SignIn.dart';
-import 'VerifyYourAccount.dart';
+import 'CreateNewPassword.dart';
 class ForgetPassword extends StatefulWidget {
   const ForgetPassword({super.key});
 
@@ -407,12 +407,9 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                                     MaterialPageRoute(
                                                       builder:
                                                           (context) =>
-                                                          VerifyYourAccount(
-                                                            userEmailOrPhone:
-                                                            mailEditingController
-                                                                .text,
-                                                            previousScreen:
-                                                            'ForgetPassword',
+                                                          CreateNewPassword(
+                                                            otp: '2026',
+                                                            user: '+91${mailEditingController.text}',
                                                           ),
                                                     ),
                                                   )
@@ -435,12 +432,9 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                                       MaterialPageRoute(
                                                         builder:
                                                             (context) =>
-                                                            VerifyYourAccount(
-                                                              userEmailOrPhone:
-                                                              mailEditingController
-                                                                  .text,
-                                                              previousScreen:
-                                                              'ForgetPassword',
+                                                            CreateNewPassword(
+                                                              otp: '2026',
+                                                              user: mailEditingController.text,
                                                             ),
                                                       ),
                                                     )
