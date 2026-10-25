@@ -42,17 +42,15 @@ PODS:
     - Flutter
   - geolocator_apple (1.2.0):
     - Flutter
-  - Google-Maps-iOS-Utils (5.0.0):
-    - GoogleMaps (~> 8.0)
+  - Google-Maps-iOS-Utils (6.1.0):
+    - GoogleMaps (~> 9.0)
   - google_maps_flutter_ios (0.0.1):
     - Flutter
     - Google-Maps-iOS-Utils (< 7.0, >= 5.0)
-    - GoogleMaps (< 10.0, >= 8.4)
-  - GoogleMaps (8.4.0):
-    - GoogleMaps/Maps (= 8.4.0)
-  - GoogleMaps/Base (8.4.0)
-  - GoogleMaps/Maps (8.4.0):
-    - GoogleMaps/Base
+    - GoogleMaps (< 11.0, >= 8.4)
+  - GoogleMaps (9.4.0):
+    - GoogleMaps/Maps (= 9.4.0)
+  - GoogleMaps/Maps (9.4.0)
   - image_picker_ios (0.0.1):
     - Flutter
   - libphonenumber_plugin (0.0.1):
@@ -262,9 +260,9 @@ SPEC CHECKSUMS:
   flutter_tts: b88dbc8655d3dc961bc4a796e4e16a4cc1795833
   fluttertoast: 2c67e14dce98bbdb200df9e1acf610d7a6264ea1
   geolocator_apple: 1560c3c875af2a412242c7a923e15d0d401966ff
-  Google-Maps-iOS-Utils: 66d6de12be1ce6d3742a54661e7a79cb317a9321
-  google_maps_flutter_ios: 0291eb2aa252298a769b04d075e4a9d747ff7264
-  GoogleMaps: 8939898920281c649150e0af74aa291c60f2e77d
+  Google-Maps-iOS-Utils: 0a484b05ed21d88c9f9ebbacb007956edd508a96
+  google_maps_flutter_ios: 17552876e72723da1d41accc22f03b5f7afbde69
+  GoogleMaps: 0608099d4870cac8754bdba9b6953db543432438
   image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
   libphonenumber_plugin: d134f173b22bfa5ede50887071f087f309277f8c
   localization_engine: 77f75824b8f028d3779c27080757b49934be4f04

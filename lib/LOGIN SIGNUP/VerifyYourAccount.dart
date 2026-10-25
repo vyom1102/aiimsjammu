@@ -393,10 +393,12 @@ class _VerifyYourAccountState extends State<VerifyYourAccount> {
                                               }
                                               else{
 
-                                                  if(await SignUpAPI().signUP(finalSendingEmailORPhone, widget.userName, widget.userPasword, '2026')){
+                                                  final result = await SignUpAPI().signUP(finalSendingEmailORPhone, widget.userName, widget.userPasword, '2026');
+                                                  if (!context.mounted) return;
+                                                  if (result != SignUpResult.failure) {
                                                     Navigator.pushAndRemoveUntil(context,
                                                       MaterialPageRoute(
-                                                        builder: (context) => SignIn(emailOrPhoneNumber: widget.userEmailOrPhone,password: widget.userPasword,)
+                                                        builder: (context) => SignIn(emailOrPhoneNumber: widget.userEmailOrPhone,password: result == SignUpResult.success ? widget.userPasword : null,)
                                                       ),(route) => false,
                                                     );
                                                   }else{

@@ -466,7 +466,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                             color: Colors.white,
                                           )
                                               : const Text(
-                                            'Send OTP',
+                                            'Continue',
                                             style: TextStyle(
                                               fontFamily: 'Roboto',
                                               fontSize: 16,

@@ -1,14 +1,29 @@
 import 'dart:convert';
 
-import 'package:hive/hive.dart';
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import '../../../config.dart';
-import '/Elements/HelperClass.dart';
+enum SignUpResult {
+  success,
+  userAlreadyExists,
+  failure;
+
+  static SignUpResult fromResponse(int statusCode, Map<String, dynamic> data) {
+    if (data['status'] == false && data['message'] == 'User already exist!') {
+      return SignUpResult.userAlreadyExists;
+    }
+    return statusCode == 200 && data['status'] == true
+        ? SignUpResult.success
+        : SignUpResult.failure;
+  }
+}
+
 class SignUpAPI{
 
   final String xaccesstoken = AppConfig.Authorization;
 
-  Future<bool> signUP(String username,String name, String password,String OTP) async {
+  Future<SignUpResult> signUP(String username,String name, String password,String OTP) async {
     final String baseUrl = "${AppConfig.baseUrl}/auth/signup";
     final Map<String, dynamic> data = {
       "username": username,
@@ -28,20 +43,20 @@ class SignUpAPI{
     );
     print('---response--- ${response.statusCode}');
     print(response.body);
-    if (response.statusCode == 200) {
-      var responseData = json.decode(response.body);
-      if (responseData['status']) {
-       return true;
-      } else {
-        print("SignUpAPI--response.statusCode ${responseData['status']} ");
-        HelperClass.showToast(responseData["message"], showInRelease: true);
-      }
-    } else {
-      var responseData = json.decode(response.body);
-      print("SignUpAPI--response.statusCode response.body ${response.statusCode} ${response.body}");
-      HelperClass.showToast(responseData["message"], showInRelease: true);
+    final responseData = json.decode(response.body) as Map<String, dynamic>;
+    final result = SignUpResult.fromResponse(response.statusCode, responseData);
+    if (result != SignUpResult.success) {
+      Fluttertoast.showToast(
+        msg: responseData["message"],
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.grey,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
     }
-    return false;
+    return result;
   }
 
   Future<bool> checkUserExists(String username) async {

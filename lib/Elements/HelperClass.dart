@@ -167,8 +167,8 @@ class HelperClass{
       return input.substring(0, maxLength - 2) + ' ..';
     }
   }
-  static void showToast(String mssg, {bool showInRelease = false}) {
-    if (!kDebugMode && !showInRelease) return;
+  static void showToast(String mssg) {
+    if (!kDebugMode) return;
     Fluttertoast.showToast(
       msg: mssg,
       toastLength: Toast.LENGTH_SHORT,

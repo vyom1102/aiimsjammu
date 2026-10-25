@@ -1042,50 +1042,50 @@ packages:
     dependency: transitive
     description:
       name: google_maps
-      sha256: "555d5d736339b0478e821167ac521c810d7b51c3b2734e6802a9f046b64ea37a"
+      sha256: "6811afff50dc410b860622ac89df125f5be1eada3ad69197e4c24dd18f2ef0e0"
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.0"
+    version: "8.3.0"
   google_maps_flutter:
     dependency: "direct main"
     description:
       name: google_maps_flutter
-      sha256: ae66fef3e71261d7df2eff29b2a119e190b2884325ecaa55321b1e17b5504066
+      sha256: "392492775b6928b7419bd1d04c7562dab73a543e71078088a40ae7324acd3641"
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.3"
+    version: "2.18.1"
   google_maps_flutter_android:
     dependency: transitive
     description:
       name: google_maps_flutter_android
-      sha256: "10cf27bee8c560f8e69992b3a0f27ddf1d7acbea622ddb13ef3f587848a73f26"
+      sha256: "9247f703b646e85c72213007853908ad473eb85dac73747f5dc9d370b8250b5c"
       url: "https://pub.dev"
     source: hosted
-    version: "2.14.7"
+    version: "2.21.0"
   google_maps_flutter_ios:
     dependency: transitive
     description:
       name: google_maps_flutter_ios
-      sha256: "6f798adb0aa1db5adf551f2e39e24bd06c8c0fbe4de912fb2d9b5b3f48147b02"
+      sha256: fdfef49c2cb79fb74ca982ba47aa4eeff9847007073a753cd77f74908241ef4e
       url: "https://pub.dev"
     source: hosted
-    version: "2.13.2"
+    version: "2.18.7"
   google_maps_flutter_platform_interface:
     dependency: transitive
     description:
       name: google_maps_flutter_platform_interface
-      sha256: a951981c22d790848efb9f114f81794945bc5c06bc566238a419a92f110af6cb
+      sha256: "742e86787abac8b08352aaf31b2d1fffc77038ab2e9ebd8d4d7013eec9e97218"
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.5"
+    version: "2.17.0"
   google_maps_flutter_web:
     dependency: transitive
     description:
       name: google_maps_flutter_web
-      sha256: "6245721c160d6f531c1ef568cf9bef8d660cd585a982aa75121269030163785a"
+      sha256: "65911541b63c3ac7ae46c62a0bddaf130bb9e85b478d4650b0e69468ab6af7d6"
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.4+3"
+    version: "0.6.5"
   graphs:
     dependency: transitive
     description:
@@ -1278,14 +1278,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.7"
-  js_wrapping:
-    dependency: transitive
-    description:
-      name: js_wrapping
-      sha256: e385980f7c76a8c1c9a560dfb623b890975841542471eade630b2871d243851c
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.7.4"
   json_annotation:
     dependency: transitive
     description:
@@ -1855,10 +1847,10 @@ packages:
     dependency: transitive
     description:
       name: sanitize_html
-      sha256: "12669c4a913688a26555323fb9cec373d8f9fbe091f2d01c40c723b33caa8989"
+      sha256: "60257e2b8fd8b13b7c755065c2639a6c800031bb5bd3e30a007fc6739c77b2e1"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "2.2.0"
   sensors_plus:
     dependency: "direct main"
     description:

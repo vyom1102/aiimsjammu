@@ -701,14 +701,14 @@ class _SignUpState extends State<SignUp> {
                                                 return;
                                               }
 
-                                              bool signedUp = false;
+                                              SignUpResult signUpResult = SignUpResult.failure;
                                               try {
                                                 final otpSent = await SendOTPAPI().sendOTP(finalMailEditingController);
                                                 if (!otpSent) {
                                                   HelperClass.showToast("Unable to initialize verification. Please try again.");
                                                   return;
                                                 }
-                                                signedUp = await SignUpAPI().signUP(
+                                                signUpResult = await SignUpAPI().signUP(
                                                   finalMailEditingController,
                                                   nameEditingController.text,
                                                   passEditingController.text,
@@ -719,13 +719,15 @@ class _SignUpState extends State<SignUp> {
                                               } finally {
                                                 if (context.mounted) Navigator.of(context).pop();
                                               }
-                                              if (!context.mounted || !signedUp) return;
+                                              if (!context.mounted || signUpResult == SignUpResult.failure) return;
                                               Navigator.pushAndRemoveUntil(
                                                 context,
                                                 MaterialPageRoute(
                                                   builder: (context) => SignIn(
                                                     emailOrPhoneNumber: mailEditingController.text,
-                                                    password: passEditingController.text,
+                                                    password: signUpResult == SignUpResult.success
+                                                        ? passEditingController.text
+                                                        : null,
                                                   ),
                                                 ),
                                                 (route) => false,
