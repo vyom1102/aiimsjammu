@@ -1,3 +1,4 @@
+import 'AiimsJammu/Screens/hosted_web_map_screen.dart';
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -295,38 +296,22 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
           ),
-            floatingActionButton: (_isMapInitialized)?FloatingActionButton(
+            floatingActionButton: FloatingActionButton(
               heroTag: 'mainscreen',
-              onPressed: (){
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (!mounted) return;
-                  NavigationSDK.setDistanceUnit(DistanceUnit.meters);
-                  NavigationSDK.startNavigation(
-                    apiKey: "98f13750-c905-11f0-b802-d78f56bdcf4f",
-                    context,
-                    data: {
-                      "venueName": "AIGHospital",
-                    },
-                    appColor: Colors.blueAccent,
-                    closeApp: false,
-                    locale: AppConfig.languageCode,
-                    skipSplash: false,
-                    mapType: MapProvider.mapLibre,
-                    providers: {
-                      MapProvider.mapLibre: MaplibreMapProvider(),
-                    },
-                  );
-                  // NEW: Show PiP
-                  PipManager.instance.showFullscreen();
-                  print("PipManager.instance:${PipManager.instance.isFullscreen}");
-                });
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (_) => const HostedWebMapScreen(
+                    venueName: 'AIGHospital',
+                    apiKey: '98f13750-c905-11f0-b802-d78f56bdcf4f',
+                  ),
+                ));
               },
               backgroundColor: Color(0xFFFEAB01),
               shape: CircleBorder(),
               child: Semantics(
                   label: "Map",
                   child: Lottie.asset('assets/images/floatingmap.json')),
-            ):Container(),
+            ),
         ),
       ),
     );

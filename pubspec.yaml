@@ -33,13 +33,14 @@ dependencies:
 #    git:
 #      url: https://github.com/udit6023/navigation_sdk.git
 #      ref: landmarkPanel
-    path: ../navigation_sdk
+    path: /Users/macmini/StudioProjects/navigation_sdk
 
 
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  iwayplus_scanner: ^0.2.6
   google_maps_flutter: ^2.5.3
   http: ^1.2.1
   flutter_speed_dial: ^7.0.0
@@ -116,9 +117,9 @@ dependencies:
   csv:
 dependency_overrides:
   maplibre_gl_web:
-    path: ../navigation_sdk/third_party/maplibre_gl_web
+    path: /Users/macmini/StudioProjects/navigation_sdk/third_party/maplibre_gl_web
   nylo_support:
-    path: ../navigation_sdk/third_party/nylo_support
+    path: /Users/macmini/StudioProjects/navigation_sdk/third_party/nylo_support
   share_plus: ^11.1.0
   web: ^1.0.0
   permission_handler: ^12.0.0+1

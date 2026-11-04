@@ -7,9 +7,7 @@ import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
-import 'package:unified_map_view/unified_map_view.dart';
-import 'package:unified_map_view/maplibre.dart';
-import 'package:navigation_sdk/navigation_sdk.dart';
+import 'hosted_web_map_screen.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/BuildingLandmarks.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/DirectoryScreen.dart';
@@ -155,7 +153,6 @@ class _HomePageState extends State<HomePage> {
     fetchAndStoreBuildingIds();
     getDriverDetail();
     mapDataVersionCycle();
-    _initNavigationSDK();
     // loadData();
     NotificationSocket.receiveMessage();
     checkForUpdate();
@@ -178,22 +175,6 @@ class _HomePageState extends State<HomePage> {
     _scrollController = ScrollController(initialScrollOffset: 140.0);
     // requestStoragePermission();
     requestMicPermission();
-  }
-
-  bool _isMapInitialized=false;
-  Future<void> _initNavigationSDK() async {
-
-    print("Before init: $_isMapInitialized");
-
-    final isInitialized = await NavigationSDK.initializeapp(
-      venueName: 'AIGHospital',
-    );
-
-    setState(() {
-      _isMapInitialized = isInitialized;
-    });
-
-    print("After init: $_isMapInitialized");
   }
 
   Future<bool> requestMicPermission() async {
@@ -2232,35 +2213,19 @@ class _HomePageState extends State<HomePage> {
           //       label: "Map",
           //       child: Lottie.asset('assets/images/floatingmap.json')),
           // ),
-          floatingActionButton:(_isMapInitialized)? FloatingActionButton(
-            onPressed: (){
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (!mounted) return;
-                NavigationSDK.startNavigation(
-                  apiKey: "98f13750-c905-11f0-b802-d78f56bdcf4f",
-                  context,
-                  data: {
-                    "venueName": "AIGHospital",
-                  },
-                  appColor: const Color(0xFF0097A7),
-                  closeApp: false,
-                  locale: con.AppConfig.languageCode,
-                  skipSplash: true,
-                  mapType: MapProvider.mapLibre,
-                  providers: {
-                    MapProvider.mapLibre: MaplibreMapProvider(),
-                  },
-                );
-
-                // NEW: Show PiP
-                PipManager.instance.showFullscreen();
-                print("PipManager.instance:${PipManager.instance.isFullscreen}");
-              });
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute<void>(
+                builder: (_) => const HostedWebMapScreen(
+                  venueName: 'AIGHospital',
+                  apiKey: '98f13750-c905-11f0-b802-d78f56bdcf4f',
+                ),
+              ));
             },
             backgroundColor: Color(0xFFFEAB01),
             shape: CircleBorder(),
             child: Lottie.asset('assets/images/floatingmap.json'),
-          ):Container()
+          )
 
       ),
     );
