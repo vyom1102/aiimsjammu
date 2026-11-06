@@ -8,17 +8,10 @@ import 'package:unified_map_view/maplibre.dart';
 
 void PassLocationId(BuildContext context,String Id){
   print("devteam $Id");
-  // Navigator.push(
-  //   context,
-  //   MaterialPageRoute(
-  //     builder: (context) => Navigation(directLandID: Id,),
-  //   ),
-  // );
-
     NavigationSDK.callWithLandMarkId(
         apiKey: "98f13750-c905-11f0-b802-d78f56bdcf4f",
         context,
-        "AIGHospital",
+        "Apollo-Gurugram",
         Id,
         Color(0xFF0097A7),
         false,

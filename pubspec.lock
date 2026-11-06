@@ -1641,11 +1641,9 @@ packages:
   panel_sdk:
     dependency: transitive
     description:
-      path: "."
-      ref: main
-      resolved-ref: "35f15d2a8f16dd1edb258bfc60bc8d46ad3cd77d"
-      url: "https://github.com/vyom1102/Panel_SDK.git"
-    source: git
+      path: "../../panel_sdk"
+      relative: true
+    source: path
     version: "1.0.0"
   path:
     dependency: transitive

@@ -1548,7 +1548,7 @@ class _HomePageState extends State<HomePage> {
                     Column(
                       children: [
                         Text(
-                          'AIG Hyderabad',
+                          'Apollo Hospitals',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Color(0xFF003666),
@@ -2217,7 +2217,7 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute<void>(
                 builder: (_) => const HostedWebMapScreen(
-                  venueName: 'AIGHospital',
+                  venueName: 'Apollo-Gurugram',
                   apiKey: '98f13750-c905-11f0-b802-d78f56bdcf4f',
                 ),
               ));
