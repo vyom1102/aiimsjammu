@@ -64,7 +64,8 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <meta-data android:name="flutter_deeplinking_enabled" android:value="true"/>
+            <!-- Links are handled by app_links (lib/main.dart), not Flutter's router. -->
+            <meta-data android:name="flutter_deeplinking_enabled" android:value="false"/>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -73,6 +74,14 @@
                 <data android:scheme="iwayplus" android:host="aiimsj.com" android:pathPrefix="/service"/>
                 <data android:scheme="iwayplus" android:host="aiimsj.com" android:pathPrefix="/landmark"/>
 
+            </intent-filter>
+            <!-- aiimsjammu://VenueMapScreen?venueName=..&destinationLandmarkId=..&sourceLandmarkId=..
+                 No host filter: Android matches hosts case-sensitively, the app checks it. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="aiimsjammu" />
             </intent-filter>
 
         </activity>

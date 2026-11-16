@@ -1,4 +1,5 @@
 
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:app_links/app_links.dart';
@@ -21,12 +22,16 @@ import 'DATABASE/openAppBoxes.dart';
 import 'config.dart';
 import 'Elements/deeplinks.dart';
 import 'MainScreen.dart';
+import 'service/map_calling_function.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 
 final interactionManager = InteractionManager();
 final sessionManager = SessionManager();
 final navigationManager=NavigationLogManager();
+
+/// Root navigator, so deep links can open screens from outside the widget tree.
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,7 +72,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
   late String googleSignInUserName='';
   final FlutterLocalization localization = FlutterLocalization.instance;
-  late AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
   String? _accessToken;
   String? initialDocId;
   String? initialServiceId;
@@ -84,24 +89,39 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
     //  LocationTrackingService().initialize();
     // LocationTrackingService().startTracking();
 
-    // _initDeepLinkListener();
+    // One subscription for the app's lifetime. app_links also delivers the
+    // link that cold-started the app on this stream.
+    _linkSubscription = AppLinks().uriLinkStream.listen(_onDeepLink);
 
     super.initState();
   }
 
+  @override
+  void dispose() {
+    _linkSubscription?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
-  void _initDeepLinkListener(BuildContext c) async {
-    _appLinks = AppLinks();
-    _appLinks.uriLinkStream.listen((Uri? uri) {
-        Deeplink.deeplinkConditions(uri, c).then((v){
-          setState(() {
-            initialDocId = Deeplink.initialDocId;
-            initialServiceId=Deeplink.initialServiceId;
-            _accessToken=Deeplink.accessToken;
-          });
-        });
+
+  void _onDeepLink(Uri uri) {
+    // A cold-start link can arrive before the navigator exists.
+    final navContext = rootNavigatorKey.currentContext;
+    if (navContext == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _onDeepLink(uri));
+      return;
+    }
+    if (NavigationService.openFromDeepLink(navContext, uri)) return;
+    Deeplink.deeplinkConditions(uri, navContext).then((_) {
+      if (!mounted) return;
+      setState(() {
+        initialDocId = Deeplink.initialDocId;
+        initialServiceId = Deeplink.initialServiceId;
+        _accessToken = Deeplink.accessToken;
+      });
     });
   }
+
   void configureLocalization(){
     localization.init(mapLocales: LOCALES, initLanguageCode: 'en');
     localization.onTranslatedLanguage = ontranslatedLanguage;
@@ -180,6 +200,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
     requestLocationPermission();
     return
       MaterialApp(
+      navigatorKey: rootNavigatorKey,
       title: "IWAYPLUS",
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -206,7 +227,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
             if (!signInDatabaseBox.containsKey("accessToken")) {
               return SplashScreen();
             } else {
-              _initDeepLinkListener(context);
               if (initialDocId != null) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   Navigator.pushNamed(context, '/doctor/$initialDocId');
@@ -222,7 +242,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
               }
             }
           } else {
-            _initDeepLinkListener(context);
 
             if (initialDocId != null) {
               WidgetsBinding.instance.addPostFrameCallback((_) {

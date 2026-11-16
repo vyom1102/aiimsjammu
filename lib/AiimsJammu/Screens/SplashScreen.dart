@@ -195,9 +195,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     // Navigate to main screen after animation completes
     Timer(const Duration(seconds: 6), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => SignIn()),
+      if (!mounted) return;
+      // Replace the splash route itself, not whatever is on top: a deep link
+      // may have opened the venue map over the splash in the meantime.
+      final splashRoute = ModalRoute.of(context);
+      if (splashRoute == null) return;
+      Navigator.of(context).replace(
+        oldRoute: splashRoute,
+        newRoute: MaterialPageRoute(builder: (context) => SignIn()),
       );
     });
   }

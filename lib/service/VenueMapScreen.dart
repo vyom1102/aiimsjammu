@@ -12,8 +12,8 @@ class VenueMapScreen extends StatefulWidget {
   final String? destinationLandmarkId;
 
   /// Landmark the user is standing at: the map localizes them there instead
-  /// of waiting for a position fix. The hosted page takes this or
-  /// [destinationLandmarkId], never both (it keeps the destination).
+  /// of waiting for a position fix. Either landmark, both, or neither may be
+  /// given; each one present is passed to the page.
   final String? sourceLandmarkId;
   final List<String>? buildingIDs;
 
@@ -24,6 +24,27 @@ class VenueMapScreen extends StatefulWidget {
     this.sourceLandmarkId,
     this.buildingIDs,
   });
+
+  /// Hosted map URL:
+  /// `https://maps.iwayplus.in/iwaymaps/?apiKey=..&venueName=..`
+  /// `[&destinationLandmarkId=..][&sourceLandmarkId=..]`
+  static String mapUrl({
+    required String venueName,
+    String? destinationLandmarkId,
+    String? sourceLandmarkId,
+    List<String>? buildingIDs,
+    String baseUrl = 'https://maps.iwayplus.in/iwaymaps/',
+  }) {
+    return Uri.parse(baseUrl).replace(queryParameters: {
+      'apiKey': AppConfig.Authorization,
+      'venueName': venueName,
+      if (destinationLandmarkId != null)
+        'destinationLandmarkId': destinationLandmarkId,
+      if (sourceLandmarkId != null) 'sourceLandmarkId': sourceLandmarkId,
+      if (buildingIDs != null && buildingIDs.isNotEmpty)
+        'buildingIds': buildingIDs,
+    }).toString();
+  }
 
   @override
   State<VenueMapScreen> createState() => _VenueMapScreenState();
@@ -40,16 +61,13 @@ class _VenueMapScreenState extends State<VenueMapScreen>
   // produces no readings. Null while the request is still on screen.
   bool? _granted;
 
-  String get _url => Uri.parse(_mapBaseUrl).replace(queryParameters: {
-        'venueName': widget.venueName,
-        'apiKey': AppConfig.Authorization,
-        if (widget.destinationLandmarkId != null)
-          'destinationLandmarkId': widget.destinationLandmarkId!,
-        if (widget.sourceLandmarkId != null)
-          'sourceLandmarkId': widget.sourceLandmarkId!,
-        if (widget.buildingIDs != null && widget.buildingIDs!.isNotEmpty)
-          'buildingIds': widget.buildingIDs!,
-      }).toString();
+  String get _url => VenueMapScreen.mapUrl(
+        venueName: widget.venueName,
+        destinationLandmarkId: widget.destinationLandmarkId,
+        sourceLandmarkId: widget.sourceLandmarkId,
+        buildingIDs: widget.buildingIDs,
+        baseUrl: _mapBaseUrl,
+      );
 
   // With a venue the page can still draw the map without positioning, and its
   // own relocalize prompt offers Open Settings — so denied permissions don't

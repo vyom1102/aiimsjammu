@@ -36,7 +36,17 @@
 				<string>iwayplus</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.iwayplus.aiimsjammu.venuemap</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>aiimsjammu</string>
+			</array>
+		</dict>
 	</array>
+	<key>FlutterDeepLinkingEnabled</key>
+	<false/>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSApplicationQueriesSchemes</key>
