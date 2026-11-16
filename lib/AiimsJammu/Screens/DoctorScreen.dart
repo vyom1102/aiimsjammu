@@ -11,7 +11,6 @@ import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../API/RefreshTokenAPI.dart';
 import '../../config.dart';
-import '../Data/DoctorDemoData.dart';
 import 'package:http/http.dart' as http;
 
 import '../Widgets/LocationIdFunction.dart';

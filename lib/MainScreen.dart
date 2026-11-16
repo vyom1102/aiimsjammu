@@ -1,19 +1,14 @@
 import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
+import 'package:iwaymaps/service/map_calling_function.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/GlobalSearch.dart';
-import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:iwaymaps/websocket/interactionManager.dart';
 import 'package:lottie/lottie.dart';
-import 'package:unified_map_view/unified_map_view.dart';
-import 'package:unified_map_view/maplibre.dart';
-import 'package:navigation_sdk/navigation_sdk.dart';
 import 'package:new_version_plus/new_version_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:quickalert/models/quickalert_type.dart';
@@ -24,17 +19,10 @@ import '/AiimsJammu/Screens/QrScanner.dart';
 // import '/Navigation.dart';
 
 import './AiimsJammu/Screens/HomePage.dart';
-import 'API/buildingAllApi.dart';
 import 'AiimsJammu/Screens/ProfilePage.dart';
 import 'AiimsJammu/Widgets/upgradeAlert.dart';
-import 'DATABASE/BOXES/BeaconAPIModelBOX.dart';
 import 'DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import 'DATABASE/BOXES/LandMarkApiModelBox.dart';
-import 'DATABASE/BOXES/OutDoorModelBOX.dart';
-import 'DATABASE/BOXES/PatchAPIModelBox.dart';
-import 'DATABASE/BOXES/PolyLineAPIModelBOX.dart';
-import 'DATABASE/BOXES/WayPointModelBOX.dart';
-import 'FavouriteScreen.dart';
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -148,24 +136,11 @@ class _MainScreenState extends State<MainScreen> {
     if (!hasHandledUpdate) {
       print("entereddd");
       // App has been updated - run your reset logic
-      final BeaconBox = BeaconAPIModelBOX.getData();
-      final BuildingAllBox = BuildingAllAPIModelBOX.getData();
-      final LandMarkBox = LandMarkApiModelBox.getData();
-      final PatchBox = PatchAPIModelBox.getData();
-      final PolyLineBox = PolylineAPIModelBOX.getData();
-      final WayPointBox = WayPointModeBOX.getData();
-      final OutBuildingBox = OutDoorModeBOX.getData();
-      BeaconBox.clear();
-      BuildingAllBox.clear();
-      LandMarkBox.clear();
-      PatchBox.clear();
-      PolyLineBox.clear();
-      WayPointBox.clear();
-      OutBuildingBox.clear();
+      // App has been updated - drop cached venue data so it is refetched.
+      // (Map data itself is loaded by the hosted web map.)
+      BuildingAllAPIModelBOX.getData().clear();
+      LandMarkApiModelBox.getData().clear();
       print("clearedafterupdate");
-      //showToast("Database Cleared ${BeaconBox.length},${BuildingAllBox.length},${LandMarkBox.length},${PatchBox.length},${PolyLineBox.length},${WayPointBox.length},${OutBuildingBox.length}");
-
-      await resetBluetooth();  // Reset Bluetooth adapter or any other necessary reset logic
 
       // Mark that the update has been handled to avoid running the reset again
       await prefs.setBool('hasHandledUpdate', true);
@@ -174,17 +149,6 @@ class _MainScreenState extends State<MainScreen> {
 
 
     }
-  }
-  Future<void> resetBluetooth() async {
-    // Turn Bluetooth off
-    try {
-      await FlutterBluePlus.turnOff().timeout(Duration(seconds: 20)); // Increased timeout to 20s
-    } catch (e) {
-      print('Failed to turn off Bluetooth: $e');
-    }
-    // Turn Bluetooth on after a short delay
-    await Future.delayed(Duration(seconds: 2));
-    await FlutterBluePlus.turnOn();
   }
   @override
   Widget build(BuildContext context) {
@@ -276,17 +240,7 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: (){
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (!mounted) return;
-                  NavigationSDK.startNavigation(
-                    context,
-                    data: {"venueName": "AIIMSJAMMU"},
-                    appColor:  const Color(0xFF0097A7),
-                    closeApp: false,
-                    skipSplash: false,
-                      locale: AppConfig.languageCode,
-                      mapType: MapProvider.mapLibre,
-                      providers: {MapProvider.mapLibre: MaplibreMapProvider()},
-                      apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
-                  );
+                  NavigationService.startVenueNavigation(context);
                 });
               },
               backgroundColor: Color(0xFFFEAB01),

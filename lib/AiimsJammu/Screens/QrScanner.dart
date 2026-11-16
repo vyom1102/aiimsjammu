@@ -236,17 +236,12 @@
 //   }
 // }
 
-import 'dart:collection';
+import 'package:iwaymaps/service/map_calling_function.dart';
 import 'package:flutter/material.dart';
 import 'package:iwaymaps/api/buildingAllApi.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:navigation_sdk/navigation_sdk.dart';
-import 'package:unified_map_view/unified_map_view.dart';
-import 'package:unified_map_view/maplibre.dart';
 import '../../API/QRDataAPI.dart';
 import '../../APIMODELS/QRDataAPIModel.dart';
-import '../../APIMODELS/buildingAll.dart';
 import '../../Elements/HelperClass.dart';
 import '../../MainScreen.dart';
 // import '../../Navigation.dart';
@@ -303,29 +298,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
       buildingAllApi.selectedID = bid!;
       buildingAllApi.selectedVenue = venue;
       if (source != null) {
-        NavigationSDK.callWithLandMarkId(
-          context,
-          "AIIMSJAMMU",
-          source!,
-          const Color(0xFF0097A7),
-          false,
-          AppConfig.languageCode,
-          mapType: MapProvider.mapLibre,
-          providers: {MapProvider.mapLibre: MaplibreMapProvider()},
-            apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
-        );
+        NavigationService.startLandmarkLocalization(context, source!);
       } else {
-        NavigationSDK.callWithLandMarkId(
-          context,
-          "AIIMSJAMMU",
-          landmarkID ?? "",
-          const Color(0xFF0097A7),
-          false,
-          AppConfig.languageCode,
-          mapType: MapProvider.mapLibre,
-          providers: {MapProvider.mapLibre: MaplibreMapProvider()},
-            apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
-        );
+        NavigationService.startLandmarkNavigation(context, landmarkID ?? "");
       }
     } catch (e) {
       print("Error handling deep link: $e");
@@ -436,17 +411,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               buildingAllApi.findBuildings(value);
               print("deeplink $bid ${uri.queryParameters['bid']}");
               isSecondHandled = true;
-              NavigationSDK.callWithLandMarkId(
-                context,
-                "AIIMSJAMMU",
-                id ?? "",
-                const Color(0xFF0097A7),
-                false,
-                AppConfig.languageCode,
-                mapType: MapProvider.mapLibre,
-                providers: {MapProvider.mapLibre: MaplibreMapProvider()},
-                  apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
-              );
+              NavigationService.startLandmarkNavigation(context, id ?? "");
 
             });
           }else{

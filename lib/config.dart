@@ -31,6 +31,9 @@ class AppConfig {
       return '8412dc40-d741-11f0-b9f0-9f755e230c44';
     }
   }
+  /// Venue loaded by the hosted Iwayplus map (see service/VenueMapScreen.dart).
+  static const String venueName = 'AIIMSJAMMU';
+
   static Language _language = Language.english;
   static final ValueNotifier<String> languageNotifier = ValueNotifier('en');
 

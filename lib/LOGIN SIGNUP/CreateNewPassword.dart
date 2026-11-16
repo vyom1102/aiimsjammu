@@ -6,15 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:math';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:iwaymaps/Elements/HelperClass.dart';
-import 'package:upgrader/upgrader.dart';
-import 'package:lottie/lottie.dart' as lot;
-import '../MainScreen.dart';
 import 'LOGIN SIGNUP APIS/APIS/SignInAPI.dart';
 import 'SignIn.dart';
-import 'VerifyYourAccount.dart';
 
 class CreateNewPassword extends StatefulWidget {
   final String otp;

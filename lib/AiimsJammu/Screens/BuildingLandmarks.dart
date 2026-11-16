@@ -1,11 +1,9 @@
 
 import 'package:flutter/material.dart';
+import 'package:iwaymaps/service/map_calling_function.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/Translator.dart';
-import 'package:navigation_sdk/navigation_sdk.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:unified_map_view/unified_map_view.dart';
-import 'package:unified_map_view/maplibre.dart';
 
 class Buildinglandmarks extends StatefulWidget {
   final String buildingName;
@@ -403,17 +401,7 @@ class _BuildinglandmarksState extends State<Buildinglandmarks> {
                           //   );
                           // },
                           onTap: () {
-                            NavigationSDK.callWithLandMarkId(
-                                context,
-                                "AIIMSJAMMU",
-                                polyId,
-                                Color(0xFF0097A7),
-                                false,
-                                AppConfig.languageCode,
-                                mapType: MapProvider.mapLibre, providers: {MapProvider.mapLibre : MaplibreMapProvider()},
-                                apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
-                            );
-                            PipManager.instance.showFullscreen();
+                            NavigationService.startLandmarkNavigation(context, polyId);
                           },
                           child: Container(
                             decoration: BoxDecoration(

@@ -1,16 +1,12 @@
 import 'dart:collection';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import '/API/RefreshTokenAPI.dart';
 import '/APIMODELS/outdoormodel.dart';
 import '/config.dart';
-import '/APIMODELS/beaconData.dart';
 import '/APIMODELS/buildingAll.dart';
-import '/APIMODELS/polylinedata.dart';
-import '/APIMODELS/landmark.dart';
 import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
 import '../DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
 

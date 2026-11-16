@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:iwaymaps/AiimsJammu/Screens/SplashScreen.dart';
 import 'package:upgrader/upgrader.dart';
 import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';

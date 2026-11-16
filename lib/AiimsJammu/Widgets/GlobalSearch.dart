@@ -4,18 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/LocationIdFunction.dart';
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 import 'package:string_similarity/string_similarity.dart';
 
 
-import 'package:chips_choice/chips_choice.dart';
-import 'package:easter_egg_trigger/easter_egg_trigger.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:fuzzy/data/result.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -23,17 +17,11 @@ import '../../API/RefreshTokenAPI.dart';
 import '../../APIMODELS/landmark.dart';
 import '../../Elements/SearchpageResults.dart';
 import '../../config.dart';
-import '../../navigationTools.dart';
-import '../../singletonClass.dart';
 import '../Screens/DoctorProfile.dart';
 import '../Screens/ServiceInfo.dart';
 import '/API/buildingAllApi.dart';
 import '/API/ladmarkApi.dart';
-import '/APIMODELS/buildingAll.dart';
-import '/Elements/DestinationPageChipsWidget.dart';
 import '/Elements/HelperClass.dart';
-import '/Elements/SearchNearby.dart';
-import '/Elements/SearchpageRecents.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:http/http.dart' as http;
@@ -425,43 +413,6 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
 
   bool topCategory=false;
 
-  void sortAndSeparateByUserLocation(int userLat, int userLng, int userFloor, String userBuildingID,Landmarks value,String searchedtext) {
-
-
-    if (value.name!.toLowerCase().contains(searchedtext.toLowerCase()) && value.buildingID==userBuildingID && value.floor==userFloor) {
-      searchResults.add(SearchpageResults(
-        name: value.name!,
-        location: value.buildingID == buildingAllApi.outdoorID ? "${value
-            .venueName}" : "Floor ${value.floor}, ${value.buildingName}, ${value
-            .venueName}",
-        onClicked: onVenueClicked,
-        ID: value.properties!.polyId!,
-        bid: value.buildingID!,
-        floor: value.floor!,
-        coordX: value.doorX??value.coordinateX!,
-        coordY: value.doorY??value.coordinateY!,
-        accessible: value.element!.subType == "restRoom" &&
-            value.properties!.washroomType == "Handicapped" ? "true" : "false",
-        distance: 0,
-      ));
-    }
-    // Step 1: Sort the main list as per previous logic
-    searchResults.sort((a, b) {
-      // Building comparison
-      // Distance comparison within the same building and floor
-      double distanceA = tools.calculateDistance([userLat, userLng], [a.coordX!, a.coordY!]);
-      double distanceB = tools.calculateDistance([userLat, userLng], [b.coordX!, b.coordY!]);
-      // Populate the distance field for each element
-      a.distance = (distanceA*0.306).toInt();
-      b.distance = (distanceB*0.306).toInt();
-      return distanceA.compareTo(distanceB);
-    });
-    if(searchResults.length>2){
-      print("searchResults after in desti: ${searchResults[1].name}  ${searchResults[1].coordX} ${searchResults[1].coordY}");
-    }
-
-  }
-
   String normalizeString(String input) {
     // Remove common prefixes and convert to lowercase
     input = input.toLowerCase().replaceAll(RegExp(r'^(dr|mr|mrs|ms|prof)\s*'), '');
@@ -561,23 +512,18 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
                     print("Landmark match found: ${value.name}");
                     result.forEach((fuseResult) {
                       if (fuseResult.score < 0.5) {
-                        if((searchResults.isNotEmpty) && SingletonFunctionController().getlocalizedBeacon()!=null){
-                          sortAndSeparateByUserLocation(SingletonFunctionController().getlocalizedBeacon()!.coordinateX!,SingletonFunctionController().getlocalizedBeacon()!.coordinateY!,SingletonFunctionController().getlocalizedBeacon()!.floor!,SingletonFunctionController().getlocalizedBeacon()!.buildingID!,value,normalizedSearchText);
-                        }
-                        else{
-                          print("got into this");
-                          searchResults.add(SearchpageResults(
-                            name: value.name!,
-                            location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
-                            onClicked: onVenueClicked,
-                            ID: value.properties!.polyId!,
-                            bid: value.buildingID!,
-                            floor: value.floor!,
-                            coordX: value.coordinateX!,
-                            coordY: value.coordinateY!,
-                            accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,
-                          ));
-                        }
+                        print("got into this");
+                        searchResults.add(SearchpageResults(
+                          name: value.name!,
+                          location: value.buildingID == buildingAllApi.outdoorID?"${value.venueName}":"Floor ${value.floor}, ${value.buildingName}, ${value.venueName}",
+                          onClicked: onVenueClicked,
+                          ID: value.properties!.polyId!,
+                          bid: value.buildingID!,
+                          floor: value.floor!,
+                          coordX: value.coordinateX!,
+                          coordY: value.coordinateY!,
+                          accessible: value.element!.subType=="restRoom" && value.properties!.washroomType=="Handicapped"? "true":"false", distance: 0,
+                        ));
                         locationCount++;
                       }
                     });

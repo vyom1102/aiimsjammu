@@ -1,8 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:iwaymaps/service/map_calling_function.dart';
 import 'package:flutter/material.dart';
-import 'package:navigation_sdk/navigation_sdk.dart';
-import 'package:unified_map_view/unified_map_view.dart';
-import 'package:unified_map_view/maplibre.dart';
 
 
 
@@ -14,17 +12,7 @@ void PassLocationId(BuildContext context,String Id){
   //     builder: (context) => Navigation(directLandID: Id,),
   //   ),
   // );
-  NavigationSDK.callWithLandMarkId(
-      context,
-      "AIIMSJAMMU",
-      Id,
-      Color(0xFF0097A7),
-      false,
-      AppConfig.languageCode,
-      mapType: MapProvider.mapLibre, providers: {MapProvider.mapLibre : MaplibreMapProvider()},
-      apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
-  );
-  PipManager.instance.showFullscreen();
+  NavigationService.startLandmarkNavigation(context, Id);
 
   print(Id);
 

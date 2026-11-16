@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
@@ -9,7 +8,6 @@ import 'package:http/http.dart' as ht;
 
 
 // import '../fcmapi.dart';
-import '../main.dart';
 // import '../userdata.dart';
 
 class PushNotifications {

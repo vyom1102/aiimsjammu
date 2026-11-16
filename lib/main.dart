@@ -2,29 +2,23 @@
 import 'dart:io' show Platform;
 
 import 'package:app_links/app_links.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
-import 'package:iwaymaps/Elements/HelperClass.dart';
 import 'package:iwaymaps/websocket/UserLog.dart';
 import 'package:iwaymaps/websocket/interactionManager.dart';
 import 'package:iwaymaps/websocket/navigationLogManager.dart';
 import 'package:iwaymaps/websocket/sessionManager.dart';
-import 'package:navigation_sdk/navigation_sdk.dart' hide LOCALES;
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_localization/flutter_localization.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '/localization/locales.dart';
-import 'API/buildingAllApi.dart';
 import 'AiimsJammu/Screens/DoctorProfile1.dart';
 import 'AiimsJammu/Screens/ServiceInfo1.dart';
 import 'AiimsJammu/Screens/SplashScreen.dart';
-import 'DATABASE/BOXES/LocalNotificationAPIDatabaseModelBOX.dart';
+import 'DATABASE/openAppBoxes.dart';
+import 'config.dart';
 import 'Elements/deeplinks.dart';
 import 'MainScreen.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
@@ -40,7 +34,7 @@ Future<void> main() async {
   await FlutterLocalization.instance.ensureInitialized();
   var directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
-  await NavigationSDK.initializeapp(venueName: "AIIMSJAMMU");
+  await openAppBoxes();
   await interactionManager.initialize();
   await sessionManager.initialize();
   await navigationManager.initialize();
@@ -56,14 +50,6 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-
-  var signInDatabaseBox = Hive.box('SignInDatabase');
-  if (signInDatabaseBox.containsKey("accessToken")) {
-    await NavigationSDK.preLoadDataForNative(
-      buildingAllApi.selectedVenue,
-      isInternetConnected: true,
-    );
-  }
 
 
   WakelockPlus.enable();
@@ -194,7 +180,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
     requestLocationPermission();
     return
       MaterialApp(
-        navigatorKey: PipManager.instance.rootNavigatorKey,
       title: "IWAYPLUS",
       theme: ThemeData(
         primarySwatch: Colors.blue,

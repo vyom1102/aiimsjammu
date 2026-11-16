@@ -7,10 +7,6 @@ import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
-import 'package:unified_map_view/unified_map_view.dart';
-import 'package:unified_map_view/maplibre.dart';
-import 'package:navigation_sdk/navigation_sdk.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/BuildingLandmarks.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/DirectoryScreen.dart';
 import 'package:iwaymaps/AiimsJammu/Widgets/GlobalSearch.dart';
@@ -18,63 +14,33 @@ import 'package:iwaymaps/LOGIN%20SIGNUP/SignIn.dart';
 import 'package:lottie/lottie.dart';
 import 'package:new_version_plus/new_version_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:quickalert/models/quickalert_type.dart';
-import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:intl/intl.dart';
 import 'package:iwaymaps/API/DataVersionApi.dart';
 import 'package:iwaymaps/API/buildingAllApi.dart';
-import 'package:iwaymaps/AiimsJammu/Screens/NoInternetConnection.dart';
-import 'package:iwaymaps/AiimsJammu/Widgets/OpeningClosingStatus.dart';
-import '../../API/PatchApi.dart';
-import '../../API/PolyLineApi.dart';
+import '../../config.dart';
+import '../../service/map_calling_function.dart';
 import '../../API/RefreshTokenAPI.dart';
 import '../../API/UsergetAPI.dart';
-import '../../API/buildingByVenueAPI.dart';
-import '../../API/ladmarkApi.dart';
-import '../../API/outBuilding.dart';
-import '../../API/waypoint.dart';
-import '../../APIMODELS/DataVersion.dart';
-import '../../APIMODELS/landmark.dart';
-import '../../DATABASE/BOXES/BeaconAPIModelBOX.dart';
-import '../../DATABASE/BOXES/BuildingAPIModelBox.dart';
-import '../../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
-import '../../DATABASE/BOXES/DataVersionLocalModelBOX.dart';
-import '../../DATABASE/BOXES/LandMarkApiModelBox.dart';
-import '../../DATABASE/BOXES/OutDoorModelBOX.dart';
-import '../../DATABASE/BOXES/PatchAPIModelBox.dart';
-import '../../DATABASE/BOXES/PolyLineAPIModelBOX.dart';
-import '../../DATABASE/BOXES/WayPointModelBOX.dart';
-import '../../Elements/HelperClass.dart';
 // import '../../Navigation.dart';
-import '../../VersioInfo.dart';
 import '../../websocket/NotifIcationSocket.dart';
 import '../../websocket/UserLog.dart';
 import '../../websocket/interactionManager.dart';
 import '../Widgets/Translator.dart';
-import '../Widgets/defaultMap.dart';
 import '/AiimsJammu/Screens/ATMScreen.dart';
-import '/AiimsJammu/Screens/AllAnnouncementScreen.dart';
 import '/AiimsJammu/Screens/CafeteriaScreen.dart';
 import '/AiimsJammu/Screens/CountersScreen.dart';
 import '/AiimsJammu/Screens/DoctorScreen.dart';
 import '/AiimsJammu/Screens/EmergencyScreen.dart';
 import '/AiimsJammu/Screens/NotificationScreen.dart';
 import '/AiimsJammu/Screens/OtherServices.dart';
-import '/AiimsJammu/Screens/ServiceInfo.dart';
-import '/AiimsJammu/Screens/ServicesScreen.dart';
 import 'package:http/http.dart' as http;
 import '/AiimsJammu/Widgets/LocationIdFunction.dart';
-import '/AiimsJammu/Widgets/NearbyServiceCard.dart';
-import '../Widgets/AnouncementCard.dart';
-import '../Widgets/CalculateDistance.dart';
 import '../Widgets/ImageCarouse.dart';
-import '../Data/ServicesDemoData.dart';
 import 'PharmacyScreen.dart';
 
 //hospital id = 6673e7a3b92e69bc7f4b40ae
@@ -560,22 +526,7 @@ class _HomePageState extends State<HomePage> {
       print('selectedlandmarkpolyId from nearby amenities');
       print(selectedlandmarkpolyId);
       if (selectedlandmarkpolyId != null) {
-        await NavigationSDK.startNavigation(
-          context,
-          data: {
-            "venueName": "AIIMSJAMMU",
-            "directLandID": selectedlandmarkpolyId,
-          },
-          appColor: const Color(0xFF0097A7),
-          closeApp: false,
-          locale: AppConfig.languageCode,
-          skipSplash: false,
-          mapType: MapProvider.mapLibre,
-          providers: {
-            MapProvider.mapLibre: MaplibreMapProvider(),
-          },
-            apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
-        );
+        await NavigationService.startLandmarkNavigation(context, selectedlandmarkpolyId!);
       }
 
     } else {
@@ -2215,17 +2166,7 @@ class _HomePageState extends State<HomePage> {
           // ),
           floatingActionButton: FloatingActionButton(
             onPressed: (){
-              NavigationSDK.startNavigation(
-                context,
-                  data: {"venueName": "AIIMSJAMMU"},
-                  appColor: const Color(0xFF0097A7),
-                  closeApp: false,
-                  locale: AppConfig.languageCode,
-                  skipSplash: false,
-                  mapType: MapProvider.mapLibre,
-                  providers: {MapProvider.mapLibre: MaplibreMapProvider()},
-                  apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
-              );
+              NavigationService.startVenueNavigation(context);
             },
             backgroundColor: Color(0xFFFEAB01),
             shape: CircleBorder(),

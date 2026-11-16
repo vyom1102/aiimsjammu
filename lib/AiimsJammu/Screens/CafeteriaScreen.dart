@@ -8,13 +8,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hive/hive.dart';
 
-import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:http/http.dart' as http;
 import '../../API/RefreshTokenAPI.dart';
 import '../../config.dart';
 import '../Widgets/CalculateDistance.dart';
-import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/OpeningClosingStatus.dart';
 import '../Widgets/Translator.dart';
 import 'serviceInfo.dart';

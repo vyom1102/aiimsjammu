@@ -9,15 +9,10 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hive/hive.dart';
 import '../../config.dart';
 import '../Widgets/Translator.dart';
-import '/AiimsJammu/Data/ServicesDemoData.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../Data/DoctorDemoData.dart';
 import 'package:http/http.dart' as http;
 import '../../API/guestloginapi.dart';
 import '../Widgets/CalculateDistance.dart';
-import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/OpeningClosingStatus.dart';
 import 'serviceInfo.dart';
 class PharmacyScreen extends StatefulWidget {
