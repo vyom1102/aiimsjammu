@@ -2,16 +2,18 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:geodesy/geodesy.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as g;
 import 'package:hive/hive.dart';
-import 'package:iwaymaps/BuildingInfoScreen.dart';
-import 'package:iwaymaps/DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
+import 'package:navigation_sdk/navigation_sdk.dart';
+import 'package:unified_map_view/unified_map_view.dart';
+import 'package:unified_map_view/maplibre.dart';
 import '../API/buildingAllApi.dart';
 import '../APIMODELS/buildingAll.dart';
 import '../DATABASE/BOXES/BuildingAPIModelBox.dart';
 import '../DATABASE/BOXES/BuildingAllAPIModelBOX.dart';
+import '../DATABASE/BOXES/FavouriteDataBaseModelBox.dart';
 import '../DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
-import '../Navigation.dart';
+// import '../Navigation.dart';
 
 class InsideBuildingCard extends StatefulWidget {
   String buildingImageURL;
@@ -19,7 +21,7 @@ class InsideBuildingCard extends StatefulWidget {
   String buildingTag;
   String buildingId;
   bool buildingFavourite;
-  HashMap<String,LatLng> allBuildingID ;
+  HashMap<String,g.LatLng> allBuildingID ;
 
   InsideBuildingCard(
       {required this.buildingImageURL, required this.buildingName, required this.buildingTag, required this.buildingId, required this.buildingFavourite, required this.allBuildingID});
@@ -65,15 +67,20 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
       child: Column(
         children: [
           GestureDetector(
-            onTap: (){
+            onTap: () {
               buildingAllApi.setStoredString(widget.buildingId);
               buildingAllApi.setSelectedBuildingID(widget.buildingId);
               buildingAllApi.setStoredAllBuildingID(widget.allBuildingID);
-              Navigator.push(
+              NavigationSDK.startNavigation(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => Navigation(),
-                ),
+                data: {"venueName": "AIIMSJAMMU"},
+                appColor: const Color(0xFF0097A7),
+                closeApp: false,
+                locale: AppConfig.languageCode,
+                skipSplash: true,
+                mapType: MapProvider.mapLibre,
+                providers: {MapProvider.mapLibre: MaplibreMapProvider()},
+                  apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
               );
             },
             child: Container(
@@ -106,11 +113,16 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
               buildingAllApi.setStoredString(widget.buildingId);
               buildingAllApi.setSelectedBuildingID(widget.buildingId);
               buildingAllApi.setStoredAllBuildingID(widget.allBuildingID);
-              Navigator.push(
+              NavigationSDK.startNavigation(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => Navigation(),
-                ),
+                data: {"venueName": "AIIMSJAMMU"},
+                appColor: const Color(0xFF0097A7),
+                closeApp: false,
+                locale: AppConfig.languageCode,
+                skipSplash: true,
+                mapType: MapProvider.mapLibre,
+                providers: {MapProvider.mapLibre: MaplibreMapProvider()},
+                  apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
               );
             },
             child: Container(
@@ -136,11 +148,16 @@ class _InsideBuildingCardState extends State<InsideBuildingCard> {
                   buildingAllApi.setSelectedBuildingID(widget.buildingId);
 
                   buildingAllApi.setStoredAllBuildingID(widget.allBuildingID);
-                  Navigator.push(
+                  NavigationSDK.startNavigation(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => Navigation(),
-                    ),
+                    data: {"venueName": "AIIMSJAMMU"},
+                    appColor: const Color(0xFF0097A7),
+                    closeApp: false,
+                    locale: AppConfig.languageCode,
+                    skipSplash: true,
+                    mapType: MapProvider.mapLibre,
+                    providers: {MapProvider.mapLibre: MaplibreMapProvider()},
+                      apiKey: '8412dc40-d741-11f0-b9f0-9f755e230c44'
                   );
                 },
                 child: Container(

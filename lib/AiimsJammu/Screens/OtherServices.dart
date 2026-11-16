@@ -5,6 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hive/hive.dart';
+import '../../config.dart';
 import '../Widgets/Translator.dart';
 import '/AiimsJammu/Data/ServicesDemoData.dart';
 import 'package:share_plus/share_plus.dart';
@@ -29,15 +31,36 @@ class _OtherServiceScreenState extends State<OtherServiceScreen> {
   List<String> _selectedServices = [];
   bool _isLoading = true;
   String token = "";
+  var DashboardListBox = Hive.box('DashboardList');
 
   TextEditingController _searchController = TextEditingController();
   @override
   void initState() {
     super.initState();
     // _loadServices();
-    _loadOtherServicesFromAPI();
-  }
+    // _loadOtherServicesFromAPI();
+    checkForReload();
 
+  }
+  void checkForReload(){
+    if(DashboardListBox.containsKey('_services')){
+      _services = DashboardListBox.get('_services');
+      setState(() {
+        _filteredServices = _services.where((service) =>
+        service['type'] != 'Pharmacy' &&
+            service['type'] != 'Ambulance' &&
+            service['type'] != 'BloodBank' &&
+            service['type'] != 'Counters' &&
+            service['type'] != 'Cafeteria'
+        ).toList();        _isLoading = false;
+      });
+      print('otherss FROM DATABASE');
+
+    }else{
+      _loadOtherServicesFromAPI();
+      print('otherss API CALL');
+    }
+  }
 
   void _loadOtherServicesFromAPI() async {
 
@@ -50,7 +73,7 @@ class _OtherServiceScreenState extends State<OtherServiceScreen> {
       print('trying');
       final response = await http.get(
 
-        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
           "x-access-token": token,
@@ -70,6 +93,8 @@ class _OtherServiceScreenState extends State<OtherServiceScreen> {
                 service['type'] != 'Counters' &&
                 service['type'] != 'Cafeteria'
             ).toList();
+            DashboardListBox.put('_services', responseData['data']);
+
             _isLoading = false;
           });
 
@@ -203,6 +228,8 @@ class _OtherServiceScreenState extends State<OtherServiceScreen> {
                           type: service['type'],
                           startTime: service['startTime'],
                           endTime: service['endTime'],
+                          latitude:service['latitude'],
+                          longitude:service['longitude'],
                         ),
                       ),
                     );

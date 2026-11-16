@@ -1,61 +1,72 @@
 
 import 'dart:io' show Platform;
 
+import 'package:app_links/app_links.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
+import 'package:iwaymaps/Elements/HelperClass.dart';
+import 'package:iwaymaps/websocket/UserLog.dart';
+import 'package:iwaymaps/websocket/interactionManager.dart';
+import 'package:iwaymaps/websocket/navigationLogManager.dart';
+import 'package:iwaymaps/websocket/sessionManager.dart';
+import 'package:navigation_sdk/navigation_sdk.dart' hide LOCALES;
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_localization/flutter_localization.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import '/localization/locales.dart';
-import 'DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
-import 'DATABASE/DATABASEMODEL/BuildingAPIModel.dart';
-import 'DATABASE/DATABASEMODEL/BuildingAllAPIModel.dart';
-import 'DATABASE/DATABASEMODEL/FavouriteDataBase.dart';
-import 'DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
-import 'DATABASE/DATABASEMODEL/OutDoorModel.dart';
-import 'DATABASE/DATABASEMODEL/PatchAPIModel.dart';
-import 'DATABASE/DATABASEMODEL/PolyLineAPIModel.dart';
-import 'DATABASE/DATABASEMODEL/SignINAPIModel.dart';
-import 'DATABASE/DATABASEMODEL/WayPointModel.dart';
-import 'LOGIN SIGNUP/SignIn.dart';
+import 'API/buildingAllApi.dart';
+import 'AiimsJammu/Screens/DoctorProfile1.dart';
+import 'AiimsJammu/Screens/ServiceInfo1.dart';
+import 'AiimsJammu/Screens/SplashScreen.dart';
+import 'DATABASE/BOXES/LocalNotificationAPIDatabaseModelBOX.dart';
+import 'Elements/deeplinks.dart';
 import 'MainScreen.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
+
+final interactionManager = InteractionManager();
+final sessionManager = SessionManager();
+final navigationManager=NavigationLogManager();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // await Firebase.initializeApp();
-
+  await FlutterLocalization.instance.ensureInitialized();
   var directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
-  Hive.registerAdapter(LandMarkApiModelAdapter());
-  await Hive.openBox<LandMarkApiModel>('LandMarkApiModelFile'); //LandMarkApiModelFile name ke ek file bn rhi hy and usme LandMarkApiModelFile type ke object store ho rhe hy
-  Hive.registerAdapter(PatchAPIModelAdapter());
-  await Hive.openBox<PatchAPIModel>('PatchAPIModelFile');
-  Hive.registerAdapter(PolyLineAPIModelAdapter());
-  await Hive.openBox<PolyLineAPIModel>("PolyLineAPIModelFile");
-  Hive.registerAdapter(BuildingAllAPIModelAdapter());
-  await Hive.openBox<BuildingAllAPIModel>("BuildingAllAPIModelFile");
-  Hive.registerAdapter(FavouriteDataBaseModelAdapter());
-  await Hive.openBox<FavouriteDataBaseModel>("FavouriteDataBaseModelFile");
-  Hive.registerAdapter(BeaconAPIModelAdapter());
-  await Hive.openBox<BeaconAPIModel>('BeaconAPIModelFile');
-  Hive.registerAdapter(BuildingAPIModelAdapter());
-  await Hive.openBox<BuildingAPIModel>('BuildingAPIModelFile');
-  Hive.registerAdapter(OutDoorModelAdapter());
-  await Hive.openBox<OutDoorModel>('OutDoorModelFile');
-  Hive.registerAdapter(WayPointModelAdapter());
-  await Hive.openBox<WayPointModel>('WayPointModelFile');
-
-  await Hive.openBox('Favourites');
-  await Hive.openBox('UserInformation');
-
+  await NavigationSDK.initializeapp(venueName: "AIIMSJAMMU");
+  await interactionManager.initialize();
+  await sessionManager.initialize();
+  await navigationManager.initialize();
   // await Firebase.initializeApp();
 
-  await Hive.openBox('Favourites');
-  await Hive.openBox('Filters');
-  await Hive.openBox('SignInDatabase');
-  await Hive.openBox('LocationPermission');
-  await Hive.openBox('VersionData');
+  var switchDatabaseBox = Hive.box('SwitchingDatabaseInfo');
+  if(!switchDatabaseBox.containsKey("greenDataBase")){
+    switchDatabaseBox.put('greenDataBase', true);
+  }else{
+    print("greenDataBase contians key");
+  }
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  var signInDatabaseBox = Hive.box('SignInDatabase');
+  if (signInDatabaseBox.containsKey("accessToken")) {
+    await NavigationSDK.preLoadDataForNative(
+      buildingAllApi.selectedVenue,
+      isInternetConnected: true,
+    );
+  }
+
+
+  WakelockPlus.enable();
 
   runApp(const MyApp());
 }
@@ -67,39 +78,83 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
   late String googleSignInUserName='';
   final FlutterLocalization localization = FlutterLocalization.instance;
-
-
-  // Future<bool> _isUserAuthenticated() async {
-  //   // Check if the user is already signed in with Google
-  //   User? user = FirebaseAuth.instance.currentUser;
-  //
-  //   // If the user is signed in, return true
-  //   if (user != null) {
-  //     googleSignInUserName = user.displayName!;
-  //     print(user.metadata);
-  //     print(user.emailVerified);
-  //     print(user.phoneNumber);
-  //     print(user.photoURL);
-  //     print(user.tenantId);
-  //     print(user.refreshToken);
-  //
-  //     return true;
-  //   }
-  //   // If the user is not signed in, return false
-  //   return false;
-  // }
+  late AppLinks _appLinks;
+  String? _accessToken;
+  String? initialDocId;
+  String? initialServiceId;
+  bool isLocating=false;
+  late io.Socket _socket;
+  wsocket soc = wsocket("com.iwayplus.aiimsjammu");
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
+    SessionManager().startSession();
     configureLocalization();
+    // _initializeSocket();
+    //  LocationTrackingService().initialize();
+    // LocationTrackingService().startTracking();
+
+    // _initDeepLinkListener();
+
     super.initState();
+  }
+
+
+  void _initDeepLinkListener(BuildContext c) async {
+    _appLinks = AppLinks();
+    _appLinks.uriLinkStream.listen((Uri? uri) {
+        Deeplink.deeplinkConditions(uri, c).then((v){
+          setState(() {
+            initialDocId = Deeplink.initialDocId;
+            initialServiceId=Deeplink.initialServiceId;
+            _accessToken=Deeplink.accessToken;
+          });
+        });
+    });
   }
   void configureLocalization(){
     localization.init(mapLocales: LOCALES, initLanguageCode: 'en');
     localization.onTranslatedLanguage = ontranslatedLanguage;
+  }
+
+
+  void _initializeSocket() {
+    _socket = io.io(AppConfig.baseUrl, <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': true, // Automatically connects on app start
+      'reconnection': true, // Enables auto-reconnect
+      'reconnectionAttempts': 5, // Tries reconnecting 5 times
+      'reconnectionDelay': 2000, // 2s delay between retries
+    });
+
+    _socket.onConnect((_) async {
+      print('✅ Connected to WebSocket Server in main.dart');
+      // sendMessage();
+    });
+
+    _socket.onDisconnect((_) => print('⚠️ Disconnected from WebSocket Server main.dart'));
+    _socket.onError((data) => print('❌ WebSocket Error main.dart : $data'));
+    _socket.onReconnect((_) => print('🔄 Reconnecting...'));
+
+     }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      // App went to background
+      print("App is in the background");
+      InteractionManager().syncLogsToServer("");
+      SessionManager().endSession();
+      NavigationLogManager().syncLogsToServer();
+    } else if (state == AppLifecycleState.resumed) {
+      // App came to foreground
+      print("App is in the foreground");
+    }
   }
 
   void ontranslatedLanguage(Locale? locale){
@@ -107,14 +162,13 @@ class _MyAppState extends State<MyApp> {
 
     });
   }
-
   var locBox=Hive.box('LocationPermission');
   Future<void> requestLocationPermission() async {
     final status = await Permission.location.request();
     print(status);
 
     await locBox.put('location', (status.isGranted)?true:false);
-    if (status.isGranted) {
+    if (status.isGranted){
 
       print('location permission granted');
 
@@ -130,7 +184,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    bool isIOS = Platform.isIOS; // Check if the current platform is iOS
+    bool isIOS = Platform.isIOS;
     bool isAndroid = Platform.isAndroid;
     if(isIOS){
       print("IOS");
@@ -138,9 +192,10 @@ class _MyAppState extends State<MyApp> {
       print("Android");
     }
     requestLocationPermission();
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: "AIIMS Jammu Navigation",
+    return
+      MaterialApp(
+        navigatorKey: PipManager.instance.rootNavigatorKey,
+      title: "IWAYPLUS",
       theme: ThemeData(
         primarySwatch: Colors.blue,
         textSelectionTheme: TextSelectionThemeData(
@@ -162,18 +217,41 @@ class _MyAppState extends State<MyApp> {
           final bool isUserAuthenticated = snapshot.data ?? false;
 
           if (!isUserAuthenticated) {
-            var SignInDatabasebox = Hive.box('SignInDatabase');
-            print("SignInDatabasebox.containsKey(accessToken)");
-            print(SignInDatabasebox.containsKey("accessToken"));
-            if(!SignInDatabasebox.containsKey("accessToken")){
-              return SignIn();
-            }else{
-              return MainScreen(initialIndex: 0);
-            } // Redirect to Sign-In screen if user is not authenticated
+            var signInDatabaseBox = Hive.box('SignInDatabase');
+            if (!signInDatabaseBox.containsKey("accessToken")) {
+              return SplashScreen();
+            } else {
+              _initDeepLinkListener(context);
+              if (initialDocId != null) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Navigator.pushNamed(context, '/doctor/$initialDocId');
+                });
+                return MainScreen(initialIndex: 0);
+              } else if (initialServiceId != null) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Navigator.pushNamed(context, '/service/$initialServiceId');
+                });
+                return MainScreen(initialIndex: 0);
+              } else {
+                return MainScreen(initialIndex: 0);
+              }
+            }
           } else {
-            print("googleSignInUserName");
-            print(googleSignInUserName);
-            return MainScreen(initialIndex: 0); // Redirect to MainScreen if user is authenticated
+            _initDeepLinkListener(context);
+
+            if (initialDocId != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                Navigator.pushNamed(context, '/doctor/$initialDocId');
+              });
+              return MainScreen(initialIndex: 0);
+            } else if (initialServiceId != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                Navigator.pushNamed(context, '/service/$initialServiceId');
+              });
+              return MainScreen(initialIndex: 0);
+            } else {
+              return MainScreen(initialIndex: 0);
+            }
           }
         },
       ),
@@ -188,6 +266,20 @@ class _MyAppState extends State<MyApp> {
         Locale('pa'), // Punjabi
       ],
       localizationsDelegates: localization.localizationsDelegates,
+      onGenerateRoute: (settings) {
+        if (settings.name!.startsWith('/doctor/')) {
+          final docId = settings.name!.substring('/doctor/'.length);
+          return MaterialPageRoute(
+            builder: (context) => DoctorProfile1(docId: docId),
+          );
+        } else if (settings.name!.startsWith('/service/')) {
+          final serviceId = settings.name!.substring('/service/'.length);
+          return MaterialPageRoute(
+            builder: (context) => ServiceInfo1(id: serviceId),
+          );
+        }
+        return null;
+      },
       //LoginScreen(),
       // MainScreen(initialIndex: 0,),
 

@@ -190,15 +190,18 @@ class MapHelper {
       [-180, -85, 180, 85],
       currentZoom.toInt(),
     ).map((mapMarker) async {
+      try {
+        if (mapMarker.isCluster!) {
+          mapMarker.icon = await _getClusterMarker(
+            mapMarker.pointsSize!,
+            clusterColor,
+            clusterTextColor,
+            clusterWidth,
+            '',
+          );
+        }
+      }catch(e){
 
-      if (mapMarker.isCluster!) {
-        mapMarker.icon = await _getClusterMarker(
-          mapMarker.pointsSize!,
-          clusterColor,
-          clusterTextColor,
-          clusterWidth,
-          'assets/pyramids.png',
-        );
       }
       mapMarker.mapController = mapController;
 

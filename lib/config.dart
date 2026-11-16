@@ -1,0 +1,60 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+
+import 'AA/language.dart';
+
+class AppConfig {
+  static String appID = "com.iwayplus.aiimsjammu";
+
+
+  static String get baseUrl {
+    if (kDebugMode) {
+      return 'https://maps.iwayplus.in';
+    } else {
+      return 'https://maps.iwayplus.in';
+    }
+  }
+
+  static String get encryptionKey {
+    if (baseUrl == 'https://dev.iwayplus.in') {
+      return 'GeSrLvAGmj9bWAP6m1luJGSlyXjypUj+3KkBalrEEf4=';
+    } else {
+      return 'GeSrLvAGmj9bWAP6m1luJGSlyXjypUj+3KkBalrEEf4=';
+    }
+  }
+
+  static String get Authorization {
+    if (baseUrl == 'https://dev.iwayplus.in') {
+      return 'd52f6110-c69a-11ef-aa4e-e7aa7912987a';
+    } else {
+      return '8412dc40-d741-11f0-b9f0-9f755e230c44';
+    }
+  }
+  static Language _language = Language.english;
+  static final ValueNotifier<String> languageNotifier = ValueNotifier('en');
+
+  static setLanguage({required String value}) {
+    _language = Language.fromString(value);
+    languageNotifier.value = value;
+  }
+  static String get languageCode => _language.code;
+}
+
+String encryptDecrypt(String input) {
+  String key = AppConfig.encryptionKey;
+  StringBuffer result = StringBuffer();
+  for (int i = 0; i < input.length; i++) {
+// XOR each character of the input with the corresponding character of the key
+    result.writeCharCode(input.codeUnitAt(i) ^ key.codeUnitAt(i % key.length));
+  }
+  return result.toString();
+}
+
+String EncryptedbodyForApi(Map<String, dynamic> data){
+  final jsonEncoder = JsonEncoder();
+  var finalData=jsonEncoder.convert(data);
+  final encryptedData = encryptDecrypt(finalData);
+  return json.encode({"encryptedData":encryptedData});
+}
+

@@ -1,17 +1,24 @@
 
 import 'package:hive/hive.dart';
 
- class UserCredentials{
-   var userInformationBox = Hive.box('UserInformation');
-   String RefreshToken = "";
-   String AccessToken = "";
-   List<dynamic> Roles = [];
-   String UserId = "";
-   String UserHeight = "";
-   String UserPersonWithDisability = "";
-   String UserNavigationModeSetting = "";
-   String UserOrentationSetting = "";
-   String UserPathDetails = '';
+class UserCredentials{
+  var userInformationBox = Hive.box('UserInformation');
+  String RefreshToken = "";
+  String AccessToken = "";
+  List<dynamic> Roles = [];
+  String UserId = "";
+  String UserHeight = "";
+  int UserPersonWithDisability = 0;
+  String UserNavigationModeSetting = "";
+  String UserOrentationSetting = "";
+  String UserPathDetails = '';
+  String userName = '';
+
+
+  String getuserName(){
+    userName = userInformationBox.get('username')??'username';
+    return userName;
+  }
 
 
   void setUserHeight(String userheight){
@@ -23,12 +30,12 @@ import 'package:hive/hive.dart';
     return UserHeight;
   }
 
-  void setUserPersonWithDisability(String userdisabilitytype){
+  void setUserPersonWithDisability(int userdisabilitytype){
     userInformationBox.put('UserDisabilityType', userdisabilitytype);
   }
-  String getUserPersonWithDisability(){
-    UserHeight = userInformationBox.get('UserDisabilityType');
-    return UserHeight;
+  int getUserPersonWithDisability(){
+    UserPersonWithDisability = userInformationBox.get('UserDisabilityType')??0;
+    return UserPersonWithDisability;
   }
 
   void setUserNavigationModeSetting(String userNavigationModeSetting){
@@ -43,17 +50,17 @@ import 'package:hive/hive.dart';
     userInformationBox.put('UserOrentationSetting', userOrentationSetting);
   }
   String getUserOrentationSetting(){
-    UserOrentationSetting = userInformationBox.get('UserOrentationSetting');
+    UserOrentationSetting = userInformationBox.get('UserOrentationSetting')??"Explore Mode";
     return UserOrentationSetting;
   }
 
   void setUserPathDetails(String userUserPathDetails){
     userInformationBox.put('UserPathDetails', userUserPathDetails);
   }
-   String getUserPathDetails(){
-     UserPathDetails = userInformationBox.get('UserPathDetails');
-     return UserPathDetails;
-   }
+  String getUserPathDetails(){
+    UserPathDetails = userInformationBox.get('UserPathDetails')??"Distance in meters";
+    return UserPathDetails;
+  }
 
 
 

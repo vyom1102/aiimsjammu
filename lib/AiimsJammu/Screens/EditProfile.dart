@@ -1,15 +1,22 @@
 
 
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:hive/hive.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../API/DeleteApi.dart';
+import '../../API/RefreshTokenAPI.dart';
 import '../../LOGIN SIGNUP/SignIn.dart';
+import '../../config.dart';
 import '../Widgets/Translator.dart';
 import 'ChangePassword.dart';
 
@@ -27,16 +34,102 @@ class _EditProfileState extends State<EditProfile> {
   String? accessToken;
   String? refreshToken;
   String? originalName;
-
+  String? photoUrl;
+  File? _selectedImage;
+  String? uploadedimage;
   bool isLoading = false;
 
+  Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile
+        != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
 
+      });
+      await uploadImage();
+    }
+  }
+  Future<void> uploadImage() async {
+    final String uploadUrl = "${AppConfig.baseUrl}/secured/upload";
+
+    try {
+      final request = http.MultipartRequest('POST', Uri.parse(uploadUrl));
+      request.headers['x-access-token'] = '$accessToken';
+      request.files.add(await http.MultipartFile.fromPath('image', _selectedImage!.path));
+
+      final response = await request.send();
+      print("responsecode while uploading image");
+      print(response.statusCode);
+      if (response.statusCode == 200) {
+        final responseBody = await response.stream.bytesToString();
+        final responseData = json.decode(responseBody);
+        print(responseData);
+        print(responseData['filename']);
+        if (responseData['status']) {
+          setState(() {
+            photoUrl = responseData['filename'];
+            uploadedimage = responseData['filename'];
+          });
+          print(photoUrl);
+          userListBox.put('photo', photoUrl);
+          print(userListBox.get('photo'));
+          await updateUser(context,photo: "Profile picture");
+        } else {
+          print("Failed to upload image: ${responseData['message']}");
+        }
+      } else if (response.statusCode == 403) {
+        // await refreshTokenAndRetryUpload();
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        uploadImage();
+      } else {
+        print("Failed to upload image. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error while uploading the file: $e");
+    }
+  }
+  Future<void> refreshTokenAndRetryUpload() async {
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
+
+    try {
+      final response = await http.post(
+        Uri.parse(refreshTokenUrl),
+        body: json.encode({
+          "refreshToken": refreshToken,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final newAccessToken = json.decode(response.body)["accessToken"];
+        setState(() {
+          accessToken = newAccessToken;
+        });
+
+        // Update the access token in the local database
+        final signInBox = await Hive.openBox('SignInDatabase');
+        signInBox.put('accessToken', accessToken);
+
+        // Retry the image upload with the new token
+        await uploadImage();
+      } else {
+        print("Failed to refresh token. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error while refreshing the token: $e");
+    }
+  }
   @override
   void initState() {
     super.initState();
     // Retrieve user ID from Hive
     getUserIDFromHive();
   }
+  var userListBox = Hive.box('user');
 
   Future<void> getUserIDFromHive() async {
     final signInBox = await Hive.openBox('SignInDatabase');
@@ -47,10 +140,20 @@ class _EditProfileState extends State<EditProfile> {
       userId = signInBox.get("userId");
       accessToken = signInBox.get('accessToken');
       refreshToken = signInBox.get('refreshToken');
-    });
+      _nameController.text = userListBox.get('name');
+      _emailController.text = userListBox.get('username');
+      uploadedimage = userListBox.get('photo');
 
+    });
+  print("photo");
+  print(uploadedimage);
+  print(userListBox.get('photo'));
     if (userId != null) {
+      if(_nameController.text.isEmpty || uploadedimage==null ) {
       getUserDetails();
+      }else{
+        print("name and email from database");
+      }
     } else {
       print("User id is null");
     }
@@ -59,7 +162,7 @@ class _EditProfileState extends State<EditProfile> {
     setState(() {
       isLoading = true;
     });
-    final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
 
     try {
       final response = await http.post(
@@ -79,10 +182,20 @@ class _EditProfileState extends State<EditProfile> {
 
         print("originalName");
         print(originalName);
+        setState(() {
+          // originalName = responseBody["name"];
+          _emailController.text = responseBody["username"]??"Not Available";
+          _nameController.text = responseBody["name"]??"User";
+          uploadedimage = responseBody["photo"]??"not available";
+
+        });
         _nameController.text = originalName!;
       } else if (response.statusCode == 403) {
         // Access token expired, refresh token and retry the call
-        await refreshTokenAndRetryForGetUserDetails(baseUrl);
+        // await refreshTokenAndRetryForGetUserDetails(baseUrl);
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        getUserDetails();
       } else {
         print(response.statusCode);
       }
@@ -95,63 +208,10 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
-  Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
-
-    try {
-      final response = await http.post(
-        Uri.parse(refreshTokenUrl),
-        body: json.encode({
-          "refreshToken": refreshToken,
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final newAccessToken = json.decode(response.body)["accessToken"];
-        setState(() {
-          accessToken = newAccessToken;
-        });
-
-        await getUserDetailsWithNewToken(baseUrl);
-      } else {
-        // Handle token refresh failure
-      }
-    } catch (e) {
-      // Handle errors
-    }
-  }
-
-  Future<void> getUserDetailsWithNewToken(String baseUrl) async {
-    try {
-      final response = await http.post(
-        Uri.parse(baseUrl),
-        body: json.encode({"userId": userId}),
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': '$accessToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        Map<String, dynamic> responseBody = json.decode(response.body);
-        _emailController.text = responseBody["email"];
-        originalName = responseBody["name"];
-        _nameController.text = originalName!;
-      } else {
-        // Handle other status codes after token refresh
-      }
-    } catch (e) {
-      // Handle errors after token refresh
-    }
-  }
-
 
 
   // Future<void> updateUser() async {
-  //   final String updateUrl = "https://dev.iwayplus.in/secured/user/update/$userId";
+  //   final String updateUrl = "${AppConfig.baseUrl}/secured/user/update/$userId";
   //
   //   try {
   //     final response = await http.put(
@@ -182,9 +242,9 @@ class _EditProfileState extends State<EditProfile> {
   //     // Handle errors
   //   }
   // }
-  Future<void> updateUser(BuildContext context) async {
-    final String updateUrl = "https://dev.iwayplus.in/secured/user/update/$userId";
-
+  Future<void> updateUser(BuildContext context,{String? photo}) async {
+    final String updateUrl = "${AppConfig.baseUrl}/secured/user/update/$userId";
+    String text = photo??"Name";
     // Show a loading indicator
     QuickAlert.show(
       context: context,
@@ -200,6 +260,7 @@ class _EditProfileState extends State<EditProfile> {
         body: json.encode({
           "email": _emailController.text,
           "name": _nameController.text,
+          "photo":uploadedimage
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -215,16 +276,23 @@ class _EditProfileState extends State<EditProfile> {
           context: context,
           type: QuickAlertType.success,
           title: 'Success',
-          text: 'Name updated successfully',
+          text: '$text updated successfully',
           confirmBtnText: 'OK',
           onConfirmBtnTap: () {
+            userListBox.put('name', _nameController.text);
+
             Navigator.pop(context);
-            Navigator.pop(context);
+            Navigator.of(context).pop({
+              'shouldRefresh': true
+            });
           },
         );
       } else if (response.statusCode == 403) {
         // Access token expired, refresh token and retry the call
-        await refreshTokenAndRetry(updateUrl);
+        // await refreshTokenAndRetry(updateUrl);
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        updateUser(context);
       } else {
         // Handle other status codes
         QuickAlert.show(
@@ -249,7 +317,7 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future<void> refreshTokenAndRetry(String updateUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -331,15 +399,50 @@ class _EditProfileState extends State<EditProfile> {
             children: [
               Stack(
                 children: [
+                  // Container(
+                  //   width: 150,
+                  //   height: 150,
+                  //   decoration: BoxDecoration(
+                  //     shape: BoxShape.circle,
+                  //     // color: Colors.lightBlue,
+                  //     image: DecorationImage(
+                  //       image: AssetImage('assets/images/Group 4343.png'),
+                  //       fit: BoxFit.cover,
+                  //     ),
+                  //   ),
+                  // ),
                   Container(
                     width: 150,
                     height: 150,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.lightBlue,
-                      image: DecorationImage(
-                        image: AssetImage('assets/profilePageAssets/User image.png'),
-                        fit: BoxFit.cover,
+                      border: Border.all(
+                        color: Colors.grey, // Grey border
+                        width: 2.0, // Border width
+                      ),
+                    ),
+                    child: ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: '${AppConfig.baseUrl}/uploads/$uploadedimage',
+                        width: 150,
+                        height: 150,
+                        fit: BoxFit.contain,
+                        placeholder: (context, url) => Shimmer.fromColors(
+                          baseColor: Colors.grey[300]!,
+                          highlightColor: Colors.grey[100]!,
+                          child: Container(
+                            color: Colors.white,
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          width: 150,
+                          height: 150,
+                          color: Colors.grey[200],
+                          child: Image.asset(
+                            'assets/images/Group 4343.png',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -354,7 +457,7 @@ class _EditProfileState extends State<EditProfile> {
                       child:
                       IconButton(
                         icon: Icon(Icons.camera_alt,color: Colors.white,),
-                        onPressed: null,
+                        onPressed: _pickImage,
                       ),
                     ),
                   ),

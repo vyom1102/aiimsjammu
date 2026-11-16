@@ -1,17 +1,20 @@
 
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hive/hive.dart';
 // import '/Dashboard/Data/ServicesDemoData.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../API/RefreshTokenAPI.dart';
+import '../../config.dart';
 import '../Data/DoctorDemoData.dart';
 import 'package:http/http.dart' as http;
-import '../../API/guestloginapi.dart';
 import '../Widgets/CalculateDistance.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/OpeningClosingStatus.dart';
@@ -27,32 +30,73 @@ class _ATMScreenState extends State<ATMScreen> {
   List<dynamic> _filteredServices= [];
   List<String> _selectedServices = [];
   bool _isLoading = true;
-  String token = "";
+  // String token = "";
+  String? accessToken;
+  String? refreshToken;
+  var DashboardListBox = Hive.box('DashboardList');
 
   TextEditingController _searchController = TextEditingController();
   @override
   void initState() {
     super.initState();
     // _loadServices();
-    _loadATMServicesFromAPI();
+    // _loadATMServicesFromAPI();
+    getUserDataFromHive();
+
+    checkForReload();
+
+    _updateDistances();
+  }
+  Future<void> getUserDataFromHive() async {
+    final signInBox = await Hive.openBox('SignInDatabase');
+    setState(() {
+      accessToken = signInBox.get("accessToken");
+      refreshToken = signInBox.get("refreshToken");
+    });
   }
 
+  Future<void> _updateDistances() async {
+    for (var service in _services) {
+      double distance = await calculateDistance(
+        service['latitude'].toString(),
+        service['longitude'].toString(),
+      );
+      if (distance>=1000){
+        service['distance'] =  '${(distance / 1000).toStringAsFixed(0)} km';
+      }else{
+        service['distance'] =  '${distance.toStringAsFixed(0)} m';
+
+      }
+
+    }
+    setState(() {});
+  }
+  void checkForReload(){
+    if(DashboardListBox.containsKey('_services')){
+      _services = DashboardListBox.get('_services');
+      setState(() {
+        _filteredServices = _services.where((service) => service['type'] == 'ATM').toList();
+        _isLoading = false;
+      });
+      print('atm FROM DATABASE');
+
+    }else{
+      _loadATMServicesFromAPI();
+      print('atm API CALL');
+    }
+  }
 
   void _loadATMServicesFromAPI() async {
 
     try {
-      await guestApi().guestlogin().then((value){
-        if(value.accessToken != null){
-          token = value.accessToken!;
-        }
-      });
+
       print('trying');
       final response = await http.get(
 
-        Uri.parse("https://dev.iwayplus.in/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
+        Uri.parse("${AppConfig.baseUrl}/secured/hospital/all-services/6673e7a3b92e69bc7f4b40ae"),
         headers: {
           'Content-Type': 'application/json',
-          "x-access-token": token,
+          "x-access-token": '$accessToken',
         },);
 
       if (response.statusCode == 200) {
@@ -63,12 +107,18 @@ class _ATMScreenState extends State<ATMScreen> {
             _services = responseData['data'];
             // _filteredServices = _services;
             _filteredServices = _services.where((service) => service['type'] == 'ATM').toList();
+            DashboardListBox.put('_services', responseData['data']);
 
             _isLoading = false;
           });
         } else {
           throw Exception('Response data does not contain the expected list of atm under the "ServiceData" key');
         }
+      }else if(response.statusCode==403){
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        _loadATMServicesFromAPI();
+
       } else {
         throw Exception('Failed to load data: ${response.statusCode}');
       }
@@ -154,6 +204,8 @@ class _ATMScreenState extends State<ATMScreen> {
                             type: service['type'],
                             startTime: service['startTime'],
                             endTime: service['endTime'],
+                            latitude:service['latitude'],
+                            longitude:service['longitude'],
                           ),
                         ),
                       );
@@ -179,12 +231,34 @@ class _ATMScreenState extends State<ATMScreen> {
                               children: [
                                 Stack(
                                   children: [
-                                    Image.network(
-                                      // 'https://dev.iwayplus.in/uploads/$service['image']',
-                                      'https://dev.iwayplus.in/uploads/${service['image']}',
+                                    // Image.network(
+                                    //   // '${AppConfig.baseUrl}/uploads/$service['image']',
+                                    //   '${AppConfig.baseUrl}/uploads/${service['image']}',
+                                    //   width: cardWidth,
+                                    //   height: 140,
+                                    //   fit: BoxFit.cover,
+                                    // ),
+                                    CachedNetworkImage(
+                                      imageUrl: '${AppConfig.baseUrl}/uploads/${service['image']}',
                                       width: cardWidth,
                                       height: 140,
-                                      fit: BoxFit.cover,
+                                      fit: BoxFit.fill,
+                                      placeholder: (context, url) => Shimmer.fromColors(
+                                        baseColor: Colors.grey[300]!,
+                                        highlightColor: Colors.grey[100]!,
+                                        child: Container(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) => Container(
+                                        width: 250,
+                                        height: 140,
+                                        color: Colors.grey[200],
+                                        child:Image.asset(
+                                          'assets/images/DefaultCorousalImage.png',
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
                                     ),
                                     Positioned(
                                       top: 0,
@@ -293,34 +367,16 @@ class _ATMScreenState extends State<ATMScreen> {
                                     SizedBox(
                                       width: 8,
                                     ),
-                                    FutureBuilder<double>(
-                                      future: calculateDistance(service['locationId']),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState == ConnectionState.waiting) {
-                                          return SizedBox(
-                                            width: 25,
-                                            height: 25, // Adjust width as needed
-                                            child: CircularProgressIndicator(),
-                                          );
-                                        } else if (snapshot.hasError) {
-                                          return Text(
-                                            'Error',
-                                            style: TextStyle(color: Colors.red),
-                                          );
-                                        } else {
-                                          return Text(
-                                            '${snapshot.data!.toStringAsFixed(2)} m',
-                                            style: TextStyle(
-                                              color: Color(0xFF8D8C8C),
-                                              fontSize: 14,
-                                              fontFamily: 'Roboto',
-                                              fontWeight: FontWeight.w400,
-                                              height: 0.10,
-                                            ),
-                                          );
-                                        }
-                                      },
-                                    ),
+                                    Semantics(
+                                      label: "Distance",
+                                      child: TranslatorWidget(
+                                        service['distance'] ?? "50 m",
+                                        style: TextStyle(
+                                            color: Color(0xFF8D8C8C)
+                                        ),
+
+                                      ),
+                                    )
                                   ],
                                 ),
                                 SizedBox(height: 12),

@@ -4,13 +4,13 @@ class outdoormodel {
 
   outdoormodel({this.status, this.data});
 
-  outdoormodel.fromJson(Map<String, dynamic> json) {
+  outdoormodel.fromJson(dynamic json) {
     status = json['status'];
     data = json['data'] != null ? new Data.fromJson(json['data']) : null;
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['status'] = this.status;
     if (this.data != null) {
       data['data'] = this.data!.toJson();
@@ -23,6 +23,7 @@ class Data {
   String? sId;
   String? campusId;
   List<String>? buildingIds;
+  bool? globalAnnotation;
   String? createdAt;
   String? updatedAt;
   int? iV;
@@ -33,16 +34,18 @@ class Data {
       {this.sId,
         this.campusId,
         this.buildingIds,
+        this.globalAnnotation,
         this.createdAt,
         this.updatedAt,
         this.iV,
         this.floor,
         this.visibility});
 
-  Data.fromJson(Map<String, dynamic> json) {
+  Data.fromJson(Map<dynamic, dynamic> json) {
     sId = json['_id'];
     campusId = json['campusId'];
-    buildingIds = json['buildingIds'].cast<String>();
+    buildingIds = json['buildingIds']?.cast<String>();
+    globalAnnotation = json['globalAnnotation'] ?? false;
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
@@ -50,11 +53,12 @@ class Data {
     visibility = json['visibility'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['_id'] = this.sId;
     data['campusId'] = this.campusId;
     data['buildingIds'] = this.buildingIds;
+    data['globalAnnotation'] = this.globalAnnotation;
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;

@@ -23,6 +23,8 @@ class customMarker {
     );
   }
 
+
+
   static Marker visibility(bool visible , Marker marker ) {
     return Marker(
         markerId: marker.markerId,
@@ -31,6 +33,17 @@ class customMarker {
         rotation: marker.rotation, // Use the new rotation value if provided, otherwise keep the old one
         anchor: marker.anchor,
         visible: visible
+    );
+  }
+
+  static Marker changeIcon(BitmapDescriptor icon , Marker marker ) {
+    return Marker(
+        markerId: marker.markerId,
+        position: marker.position,
+        icon: icon,
+        rotation: marker.rotation, // Use the new rotation value if provided, otherwise keep the old one
+        anchor: marker.anchor,
+        visible: marker.visible
     );
   }
 
@@ -47,5 +60,14 @@ class customMarker {
 
   static Polygon Polygonvisibility(bool visible , Polygon polygon ) {
     return polygon.copyWith(visibleParam: visible);
+  }
+
+  static Polyline extendPolyline(Polyline polyline, List<LatLng> points) {
+    return Polyline(
+      polylineId: polyline.polylineId,
+      points: points,
+      color: polyline.color,
+      width: polyline.width,
+    );
   }
 }

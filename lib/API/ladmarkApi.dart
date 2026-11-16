@@ -1,56 +1,87 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:iwaymaps/DATABASE/BOXES/LandMarkApiModelBox.dart';
-import 'package:iwaymaps/DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
-import '../APIMODELS/polylinedata.dart';
+import '../ELEMENTS/HelperClass.dart';
 import '../APIMODELS/landmark.dart';
-import '../Elements/HelperClass.dart';
+import '../DATABASE/BOXES/LandMarkApiModelBox.dart';
+import '../DATABASE/DATABASEMODEL/LandMarkApiModel.dart';
+import '../api/buildingAllApi.dart';
+import '../config.dart';
 import '../VersioInfo.dart';
 import 'RefreshTokenAPI.dart';
-import 'buildingAllApi.dart';
-import 'guestloginapi.dart';
 import 'package:hive/hive.dart';
 
 
 class landmarkApi {
-  final String baseUrl = "https://dev.iwayplus.in/secured/landmarks";
+  final String baseUrl = "${AppConfig.baseUrl}/secured/landmarks";
   static var signInBox = Hive.box('SignInDatabase');
   String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");
 
 
-
-  Future<land> fetchLandmarkData({String? id = null}) async {
+String getDecryptedData(String encryptedData){
+  Map<String, dynamic> encryptedResponseBody = json.decode(encryptedData);
+  print("encryptedResponseBody $encryptedResponseBody");
+  String newResponse=encryptDecrypt(encryptedResponseBody['encryptedData']);
+  List<dynamic> originalList = jsonDecode(newResponse);
+  // Wrap in landmarks header
+  Map<String, dynamic> wrappedResponse = {
+    "landmarks": originalList
+  };
+  return jsonEncode(wrappedResponse);
+}
+  Future<land> fetchLandmarkData({String? id = null, bool outdoor = false}) async {
     print("landmark");
     accessToken = signInBox.get("accessToken");
     final LandMarkBox = LandMarkApiModelBox.getData();
-    if(LandMarkBox.containsKey(id??buildingAllApi.getStoredString()) && !VersionInfo.landmarksDataVersionUpdate){
+    print("version check${VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id)}");
+    print("landmark version check${id}");
+    if(LandMarkBox.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingLandmarkDataVersionUpdate.containsKey(id??buildingAllApi.getStoredString()) && VersionInfo.buildingLandmarkDataVersionUpdate[id??buildingAllApi.getStoredString()]! == false){
       print("LANDMARK DATA FORM DATABASE ");
       print(id??buildingAllApi.getStoredString());
       Map<String, dynamic> responseBody = LandMarkBox.get(id??buildingAllApi.getStoredString())!.responseBody;
       print("Himanshuch ${land.fromJson(responseBody).landmarks![0].buildingName}");
       return land.fromJson(responseBody);
     }
-
-
+    print("outdoor boolean $outdoor");
     final Map<String, dynamic> data = {
       "id": id??buildingAllApi.getStoredString(),
+      "outdoor": outdoor
     };
-
     final response = await http.post(
       Uri.parse(baseUrl),
       body: json.encode(data),
       headers: {
         'Content-Type': 'application/json',
-        'x-access-token': accessToken
+        'x-access-token': accessToken,
+        'Authorization': AppConfig.Authorization
       },
     );
-
+    print("landmark debug ${response.statusCode}  ${response.body}");
     if (response.statusCode == 200) {
-      Map<String, dynamic> responseBody = json.decode(response.body);
+      print('LANDMARK DATA FROM API');
+
+      try{
+        Map<String, dynamic> responseBody = json.decode(response.body);
+        final landmarkData = LandMarkApiModel(responseBody: responseBody);
+        LandMarkBox.put(land.fromJson(responseBody).landmarks![0].buildingID,landmarkData);
+        landmarkData.save();
+        return land.fromJson(responseBody);
+      }catch(e){
+        String finalResponse=getDecryptedData(response.body);
+        Map<String, dynamic> responseBody = json.decode(finalResponse);
+        final landmarkData = LandMarkApiModel(responseBody: responseBody);
+        LandMarkBox.put(land.fromJson(responseBody).landmarks![0].buildingID,landmarkData);
+        landmarkData.save();
+        return land.fromJson(responseBody);
+      }
+
+    String finalResponse=getDecryptedData(response.body);
+      // Output the transformed response
+      Map<String, dynamic> responseBody = json.decode(finalResponse);
+      print("checkid $id");
       String APITime = responseBody['landmarks'][0]['updatedAt']!;
       final landmarkData = LandMarkApiModel(responseBody: responseBody);
-
       print('LANDMARK DATA FROM API');
       print(responseBody.containsValue("polylineExist"));
       // print(LandMarkBox.length);
@@ -91,7 +122,6 @@ class landmarkApi {
       String newAccessToken = await RefreshTokenAPI.refresh();
       print('Refresh done');
       accessToken = newAccessToken;
-
       final response = await http.post(
         Uri.parse(baseUrl),
         body: json.encode(data),
@@ -100,7 +130,6 @@ class landmarkApi {
           'x-access-token': accessToken
         },
       );
-
       if (response.statusCode == 200) {
         Map<String, dynamic> responseBody = json.decode(response.body);
         String APITime = responseBody['landmarks'][0]['updatedAt']!;
@@ -117,7 +146,7 @@ class landmarkApi {
         return landData;
       }
     } else {
-      HelperClass.showToast("MishorError in LANDMARK API API");
+      HelperClass.showToast("MishorError in LANDMARK API API \n LANDMARK API ");
       throw Exception('Failed to load data');
     }
   }

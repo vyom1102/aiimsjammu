@@ -1,0 +1,76 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:hive/hive.dart';
+import 'package:http/http.dart' as http;
+import '../APIMODELS/UsergetAPIModel.dart';
+import '../ELEMENTS/UserCredential.dart';
+import '../Elements/HelperClass.dart';
+import '../api/RefreshTokenAPI.dart';
+import '/config.dart';
+
+
+class UsergetAPI{
+
+  final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
+  static var signInBox = Hive.box('SignInDatabase');
+  String accessToken = signInBox.get("accessToken");
+  var userInfoBox=Hive.box('UserInformation');
+
+  Future<void> getUserDetailsApi(String userId) async {
+    print('ingetuser');
+
+    final response = await http.post(
+      Uri.parse(baseUrl),
+      body: json.encode({"userId": userId}),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-access-token': accessToken,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> responseBody = json.decode(response.body);
+      print('UsergetAPI FROM API');
+      print(responseBody);
+      UsergetAPIModel currentUsergetAPI = UsergetAPIModel.fromJson(responseBody);
+      print("response.statusCode--");
+      print(currentUsergetAPI.username);
+      print(currentUsergetAPI.sId);
+      print("userTracking");
+      UserCredentials().setUserId(currentUsergetAPI.sId!);
+      userInfoBox.put("sId", currentUsergetAPI.sId);
+      userInfoBox.put("name", currentUsergetAPI.name);
+      userInfoBox.put("updatedAt", currentUsergetAPI.updatedAt);
+      userInfoBox.put("createdAt", currentUsergetAPI.createdAt);
+      userInfoBox.put("iV", currentUsergetAPI.iV);
+      userInfoBox.put("roles", currentUsergetAPI.roles);
+      userInfoBox.put("appId", currentUsergetAPI.appId);
+      userInfoBox.put("disabilities", currentUsergetAPI.disabilities);
+      userInfoBox.put("dob", currentUsergetAPI.dob);
+      userInfoBox.put("email", currentUsergetAPI.email);
+      userInfoBox.put("gender", currentUsergetAPI.gender);
+      userInfoBox.put("favourites", currentUsergetAPI.favourites);
+      userInfoBox.put("mobile", currentUsergetAPI.mobile);
+      userInfoBox.put("mobileVerification", currentUsergetAPI.mobileVerification);
+      userInfoBox.put("username", currentUsergetAPI.username);
+      print("currentUsergetAPI.userTracking");
+      print(currentUsergetAPI.appId);
+      userInfoBox.put("userTracking", currentUsergetAPI.userTracking??false);
+      print(userInfoBox.keys);
+
+
+    } else if (response.statusCode == 403) {
+      print('UsergetAPI in error 403');
+      String newAccessToken = await RefreshTokenAPI.refresh();
+      print('Refresh done');
+      accessToken = newAccessToken;
+      getUserDetailsApi(userId);
+    } else {
+      HelperClass.showToast('Failed to load data \n USERGET API');
+      throw Exception('Failed to load data');
+    }
+
+
+  }
+
+}

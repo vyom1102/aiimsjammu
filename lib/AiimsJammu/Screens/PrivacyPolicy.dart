@@ -10,7 +10,9 @@ class PrivacyPolicy extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        title: Text("Privacy Policy"),
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(0),
           child: Container(

@@ -1,12 +1,14 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import 'package:iwaymaps/Elements/HelperClass.dart';
+import '/config.dart';
+import '/Elements/HelperClass.dart';
 
-import 'RefreshTokenAPI.dart';
+import '/API/RefreshTokenAPI.dart';
 
 class DeleteApi {
-  static String baseUrl = "https://dev.iwayplus.in/secured/user/delete";
+  static String baseUrl = "${AppConfig.baseUrl}/secured/user/delete";
   static var signInBox = Hive.box('SignInDatabase');
   static String accessToken = signInBox.get("accessToken");
   String refreshToken = signInBox.get("refreshToken");

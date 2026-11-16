@@ -1,11 +1,20 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:ui' as ui;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../API/RefreshTokenAPI.dart';
+import '../../config.dart';
 import '../Widgets/CalculateDistance.dart';
 import '../Widgets/LocationIdFunction.dart';
 import '../Widgets/OpeningClosingStatus.dart';
@@ -27,6 +36,8 @@ class ServiceInfo extends StatefulWidget {
 
   final String startTime;
   final String endTime;
+  final String latitude;
+  final String longitude;
 
   const ServiceInfo({
     required this.id,
@@ -41,6 +52,8 @@ class ServiceInfo extends StatefulWidget {
     required this.about,
     required this.startTime,
     required this.endTime,
+    required this.latitude,
+    required this.longitude,
   });
 
   @override
@@ -49,14 +62,16 @@ class ServiceInfo extends StatefulWidget {
 
 class _ServiceInfoState extends State<ServiceInfo> {
   // final String phoneNumber = contact;
-  final String shareText = 'https://play.google.com/store/apps/details?id=com.iwayplus.rgcinavigation';
+  // final String shareText = 'https://play.google.com/store/apps/details?id=com.iwayplus.rgcinavigation';
   bool isFavorite=false;
   String? userId;
   String? accessToken;
   String? refreshToken;
   List<String>? favoriteServiceIds;
+  double? _distanceFuture;
+
   Future<void> getUserDetails() async {
-    final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
 
     try {
       final response = await http.post(
@@ -87,7 +102,10 @@ class _ServiceInfoState extends State<ServiceInfo> {
         }
 
       } else if (response.statusCode == 403) {
-        await refreshTokenAndRetryForGetUserDetails(baseUrl);
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        getUserDetails();
+        // await refreshTokenAndRetryForGetUserDetails(baseUrl);
       } else {
         // Handle other status codes
       }
@@ -113,7 +131,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
   }
   Future<void> updateUserFavorites() async {
 
-    String baseUrl = "https://dev.iwayplus.in/secured/user/toggle-favourites";
+    String baseUrl = "${AppConfig.baseUrl}/secured/user/toggle-favourites";
 
     Map<String, String> headers = {
       'Content-Type': 'application/json',
@@ -155,14 +173,17 @@ class _ServiceInfoState extends State<ServiceInfo> {
       }
     } else if (response.statusCode == 403) {
       // Access token expired, refresh token and retry the call
-      await refreshTokenAndRetryForGetUserDetails(baseUrl);
+      // await refreshTokenAndRetryForGetUserDetails(baseUrl);
+      String newAccessToken = await RefreshTokenAPI.refresh();
+      accessToken = newAccessToken;
+      updateUserFavorites();
     } else {
       print('Failed to add doctor to favorites: ${response.statusCode}');
     }
   }
 
   Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
+    final String refreshTokenUrl = "${AppConfig.baseUrl}/api/refreshToken";
 
     try {
       final response = await http.post(
@@ -199,13 +220,79 @@ class _ServiceInfoState extends State<ServiceInfo> {
     await launch(launchUri.toString());
   }
 
+  // Future<void> _shareContent(String text) async {
+  //   await Share.share(text);
+  // }
   Future<void> _shareContent(String text) async {
-    await Share.share(text);
+    try {
+      final qrValidationResult = QrValidator.validate(
+        data: text,
+        version: QrVersions.auto,
+        errorCorrectionLevel: QrErrorCorrectLevel.L,
+      );
+      if (qrValidationResult.status != QrValidationStatus.valid) {
+        throw Exception('QR code generation failed');
+      }
+      final qrCode = qrValidationResult.qrCode;
+
+      final ByteData imageData = await rootBundle.load('assets/images/qrlogo.png');
+      final ui.Codec codec = await ui.instantiateImageCodec(imageData.buffer.asUint8List());
+      final ui.FrameInfo fi = await codec.getNextFrame();
+      final ui.Image image = fi.image;
+
+      final painter = QrPainter.withQr(
+        qr: qrCode!,
+        color: const Color(0xFF0B6B94),
+        emptyColor: const Color(0xFFFFFFFF),
+        gapless: true,
+        embeddedImage: image,
+        embeddedImageStyle: QrEmbeddedImageStyle(
+          size: Size(300, 300),
+        ),
+      );
+
+      final int qrSize = 2048;
+      final int padding = 100;
+      final int totalSize = qrSize + (2 * padding);
+
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+
+      canvas.drawColor(Colors.white, BlendMode.src);
+
+      canvas.translate(padding.toDouble(), padding.toDouble());
+      painter.paint(canvas, Size(qrSize.toDouble(), qrSize.toDouble()));
+
+      final picture = recorder.endRecording();
+      final img = await picture.toImage(totalSize, totalSize);
+      final pngBytes = await img.toByteData(format: ui.ImageByteFormat.png);
+
+      final buffer = pngBytes!.buffer.asUint8List();
+
+      final tempDir = await getTemporaryDirectory();
+      final tempPath = '${tempDir.path}/service_share.png';
+      final file = await File(tempPath).writeAsBytes(buffer);
+
+      await Share.shareXFiles([XFile(file.path)], text: text);
+    } catch (e) {
+      print('Error sharing content: $e');
+    }
   }
+
   @override
   void initState() {
     getUserIDFromHive();
     super.initState();
+    distance();
+
+  }
+
+  void distance() async{
+    calculateDistance(widget.latitude, widget.longitude).then((value){
+      setState(() {
+        _distanceFuture = value;
+      });
+    });
   }
   @override
   Widget build(BuildContext context) {
@@ -243,12 +330,34 @@ class _ServiceInfoState extends State<ServiceInfo> {
               Stack(
                 children: [
 
-                  Image.network(
-                    'https://dev.iwayplus.in/uploads/${widget.imagePath}',
-                    // width: 250,
+                  // Image.network(
+                  //   '${AppConfig.baseUrl}/uploads/${widget.imagePath}',
+                  //   // width: 250,
+                  //   width: MediaQuery.of(context).size.width,
+                  //   height: 200,
+                  //   fit: BoxFit.cover,
+                  // ),
+                  CachedNetworkImage(
+                    imageUrl: '${AppConfig.baseUrl}/uploads/${widget.imagePath}',
                     width: MediaQuery.of(context).size.width,
                     height: 200,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.fill,
+                    placeholder: (context, url) => Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Container(
+                        color: Colors.white,
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      width: 250,
+                      height: 140,
+                      color: Colors.grey[200],
+                      child:Image.asset(
+                        'assets/images/DefaultCorousalImage.png',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                   Positioned(
                     top: 0,
@@ -366,33 +475,48 @@ class _ServiceInfoState extends State<ServiceInfo> {
                   ),
 
                   FutureBuilder<double>(
-                    future: calculateDistance(widget.locationId),
+                    future: null,
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
+                      if (snapshot.connectionState ==
+                          ConnectionState.waiting) {
                         return SizedBox(
                           width: 25,
-                          height: 25,// Adjust width as needed
+                          height: 25,
                           child: CircularProgressIndicator(),
                         );
                       } else if (snapshot.hasError) {
-                        return Text(
+                        return TranslatorWidget(
                           'Error',
                           style: TextStyle(color: Colors.red),
                         );
                       } else {
-                        return Text(
-                          '${snapshot.data!.toStringAsFixed(2)} m',
-                          style: TextStyle(
-                            color: Color(0xFF8D8C8C),
-                            fontSize: 14,
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w400,
-                            height: 0.10,
-                          ),
-                        );
+                        double distance = _distanceFuture ?? 0;
+                        if (distance >= 1000) {
+                          return TranslatorWidget(
+                            '${(distance / 1000).toStringAsFixed(0)} km',
+                            style: TextStyle(
+                              color: Color(0xFF8D8C8C),
+                              fontSize: 14,
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w400,
+                              height: 0.10,
+                            ),
+                          );
+                        } else {
+                          return TranslatorWidget(
+                            '${distance.toStringAsFixed(0)} m',
+                            style: TextStyle(
+                              color: Color(0xFF8D8C8C),
+                              fontSize: 14,
+                              fontFamily: 'Roboto',
+                              fontWeight: FontWeight.w400,
+                              height: 0.10,
+                            ),
+                          );
+                        }
                       }
                     },
-                  ),
+                  )
 
                 ],
               ),
@@ -406,7 +530,8 @@ class _ServiceInfoState extends State<ServiceInfo> {
                 ],
               ),
               SizedBox(height: 16,),
-              Padding(
+              if(widget.about.isNotEmpty)
+                Padding(
                 padding: const EdgeInsets.only(top: 8.0,left: 16,right: 16),
                 child: Row(
                   children: [
@@ -423,6 +548,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                   ],
                 ),
               ),
+              if(widget.about.isNotEmpty)
               Padding(
                 padding: EdgeInsets.only(top: 12.0,right: 16,left: 16,bottom: 16),
                 child: TranslatorWidget('Designing the operation hours section for a mobile app involves displaying the opening and closing hours of a business ',
@@ -512,7 +638,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                         Column(
                           children: [
                             TranslatorWidget(
-                              'Monday to Sunday',
+                              '    Monday to Sunday',
                               style: TextStyle(
                                 color: Color(0xFF595967),
                                 fontSize: 14,
@@ -523,7 +649,7 @@ class _ServiceInfoState extends State<ServiceInfo> {
                             ),
                             SizedBox(height: 4,),
                             TranslatorWidget(
-                              '     ${widget.startTime} Am - ${widget.endTime} Pm',
+                              '${widget.startTime} - ${widget.endTime} ',
                               style: TextStyle(
                                 color: Color(0xFF595967),
                                 fontSize: 14,
@@ -609,7 +735,9 @@ class _ServiceInfoState extends State<ServiceInfo> {
             Expanded(
               child: OutlinedButton(
                 onPressed: () {
-                  _shareContent(shareText);
+                  _shareContent("${AppConfig.baseUrl}/#/iway-apps/aiimsj.com/service?serviceId=${widget.id}&appStore=aiims-jammu-navigation/id6677034083&playStore=com.iwayplus.aiimsjammu");
+
+                  // _shareContent("iwayplus://aiimsj.com/service?serviceId=${widget.id}");
                 },
                 style: OutlinedButton
                     .styleFrom(

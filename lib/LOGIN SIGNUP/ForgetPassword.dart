@@ -10,7 +10,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import '../MainScreen.dart';
 import 'LOGIN SIGNUP APIS/APIS/SignInAPI.dart';
 import 'SignIn.dart';
-import 'VerifyYourAccount.dart';
+import 'CreateNewPassword.dart';
 class ForgetPassword extends StatefulWidget {
   const ForgetPassword({super.key});
 
@@ -93,9 +93,9 @@ class _ForgetPasswordState extends State<ForgetPassword> {
     if (nameEditingController.text.length > 0) {
       setState(() {
         outlineheaderColorForName =
-            Color(0xff0B6B94);
+            Color(0xff24b9b0); // Change the button color to green
         outlineTextColorForName =
-            Color(0xff0B6B94);
+            Color(0xff24b9b0); // Change the button color to green
       });
     } else {
       setState(() {
@@ -109,15 +109,15 @@ class _ForgetPasswordState extends State<ForgetPassword> {
   void emailFieldListner() {
     if (mailEditingController.text.isNotEmpty) {
       setState(() {
-        buttonBGColor = Color(0xff0B6B94);
+        buttonBGColor = Color(0xff24b9b0);
         loginclickable = true;
       });
 
       setState(() {
         outlineheaderColor =
-            Color(0xff0B6B94); // Change the button color to green
+            Color(0xff24b9b0); // Change the button color to green
         outlineTextColor =
-            Color(0xff0B6B94); // Change the button color to green
+            Color(0xff24b9b0); // Change the button color to green
       });
     } else {
       setState(() {
@@ -132,15 +132,15 @@ class _ForgetPasswordState extends State<ForgetPassword> {
     if (passEditingController.text.length > 0) {
       if (mailEditingController.text.length > 0) {
         setState(() {
-          buttonBGColor = Color(0xff0B6B94);
+          buttonBGColor = Color(0xff24b9b0);
           loginclickable = true;
         });
       }
       setState(() {
         outlineheaderColorForPass =
-            Color(0xff0B6B94); // Change the button color to green
+            Color(0xff24b9b0); // Change the button color to green
         outlineTextColorForPass =
-            Color(0xff0B6B94); // Change the button color to green
+            Color(0xff24b9b0); // Change the button color to green
       });
     } else {
       setState(() {
@@ -153,7 +153,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
 
   void signINButtonControler() {
     setState(() {
-      buttonBGColor = Color(0xff0B6B94);
+      buttonBGColor = Color(0xff24b9b0);
     });
   }
 
@@ -407,12 +407,9 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                                     MaterialPageRoute(
                                                       builder:
                                                           (context) =>
-                                                          VerifyYourAccount(
-                                                            userEmailOrPhone:
-                                                            mailEditingController
-                                                                .text,
-                                                            previousScreen:
-                                                            'ForgetPassword',
+                                                          CreateNewPassword(
+                                                            otp: '2026',
+                                                            user: '+91${mailEditingController.text}',
                                                           ),
                                                     ),
                                                   )
@@ -435,12 +432,9 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                                       MaterialPageRoute(
                                                         builder:
                                                             (context) =>
-                                                            VerifyYourAccount(
-                                                              userEmailOrPhone:
-                                                              mailEditingController
-                                                                  .text,
-                                                              previousScreen:
-                                                              'ForgetPassword',
+                                                            CreateNewPassword(
+                                                              otp: '2026',
+                                                              user: mailEditingController.text,
                                                             ),
                                                       ),
                                                     )
@@ -472,7 +466,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                                             color: Colors.white,
                                           )
                                               : const Text(
-                                            'Send OTP',
+                                            'Continue',
                                             style: TextStyle(
                                               fontFamily: 'Roboto',
                                               fontSize: 16,

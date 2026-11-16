@@ -4,14 +4,14 @@ class DataVersion {
 
   DataVersion({this.status, this.versionData});
 
-  DataVersion.fromJson(Map<String, dynamic> json) {
+  DataVersion.fromJson(dynamic json) {
     status = json['status'];
     versionData = json['versionData'] != null
         ? new DataVersionModel.fromJson(json['versionData'])
         : null;
   }
 
-  Map<String, dynamic> toJson() {
+  Map<dynamic, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['status'] = this.status;
     if (this.versionData != null) {
@@ -28,6 +28,7 @@ class DataVersionModel {
   int? patchDataVersion;
   int? polylineDataVersion;
   int? landmarksDataVersion;
+  int? globalAnnotationVersion;
   String? createdAt;
   String? updatedAt;
   int? iV;
@@ -39,30 +40,33 @@ class DataVersionModel {
         this.patchDataVersion,
         this.polylineDataVersion,
         this.landmarksDataVersion,
+        this.globalAnnotationVersion,
         this.createdAt,
         this.updatedAt,
         this.iV});
 
-  DataVersionModel.fromJson(Map<String, dynamic> json) {
+  DataVersionModel.fromJson(Map<dynamic, dynamic> json) {
     sId = json['_id'];
     buildingID = json['building_ID'];
     buildingDataVersion = json['buildingDataVersion'];
     patchDataVersion = json['patchDataVersion'];
     polylineDataVersion = json['polylineDataVersion'];
     landmarksDataVersion = json['landmarksDataVersion'];
+    globalAnnotationVersion = json['globalAnnotationVersion'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+  Map<dynamic, dynamic> toJson() {
+    final Map<dynamic, dynamic> data = new Map<dynamic, dynamic>();
     data['_id'] = this.sId;
     data['building_ID'] = this.buildingID;
     data['buildingDataVersion'] = this.buildingDataVersion;
     data['patchDataVersion'] = this.patchDataVersion;
     data['polylineDataVersion'] = this.polylineDataVersion;
     data['landmarksDataVersion'] = this.landmarksDataVersion;
+    data['globalAnnotationVersion'] = this.globalAnnotationVersion;
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;

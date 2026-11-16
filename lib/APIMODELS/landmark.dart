@@ -1,3 +1,11 @@
+import '../EventModel/APIModel/ExhibitorModel.dart';
+import '../EventModel/APIModel/CategoryModel.dart' as category;
+import '../EventModel/APIModel/SessionModel.dart' as session;
+import '../EventModel/APIModel/SubEventsModel.dart' as subEvent;
+import '../EventModel/ConferenceMapper.dart';
+import '../EventModel/EventStatus.dart';
+import 'package:intl/intl.dart';
+
 class land {
   bool? landmarkExist;
   List<Landmarks>? landmarks;
@@ -8,7 +16,7 @@ class land {
 
   land({this.landmarkExist, this.landmarks, this.landmarksMap,this.landmarkNames, this.landmarksNameMap}); // Update the constructor
 
-  land.fromJson(Map<dynamic, dynamic> json) {
+  land.fromJson(dynamic json) {
     landmarkExist = json['landmarkExist'];
     if (json['landmarks'] != null) {
       landmarks = <Landmarks>[];
@@ -18,6 +26,7 @@ class land {
       json['landmarks'].forEach((v) {
         Landmarks landmark = Landmarks.fromJson(v);
         landmarks!.add(landmark);
+        landmarksMap![landmark.sId!] = landmark; // Add to the map using polyID as the key
         if(landmark.properties!.polyId != null){
           landmarksMap![landmark.properties!.polyId!] = landmark; // Add to the map using polyID as the key
         }
@@ -40,6 +49,8 @@ class land {
     return data;
   }
 
+
+
   void mergeLandmarks(List<Landmarks>? landmarksList) {
     if (landmarksList != null) {
       landmarks ??= [];
@@ -48,9 +59,9 @@ class land {
       landmarksMap ??= {};
       landmarksNameMap ??= {};
       for (var landmark in landmarksList) {
+        landmarksMap![landmark.sId!] = landmark; // Add to the map using polyID as the key
         if (landmark.properties!.polyId != null) {
           landmarksMap![landmark.properties!.polyId!] = landmark;
-
         }
         if (landmark.name != null) {
           landmarkNames ??= [];
@@ -63,6 +74,49 @@ class land {
       print("Himanshuchecker ${landmarksMap!.length}");
     }
   }
+
+  void populateRenderDetailsUsingExhibitor(List<ExhibitorModel> exhibitorsList){
+    if(landmarks != null && landmarks!.isNotEmpty){
+      List<String?>? locations = exhibitorsList.map((exhibitor)=>exhibitor.location?.sId).toList();
+      print("locationList $locations");
+      print(exhibitorsList.first.location?.toJson());
+      for (var landmark in landmarks!) {
+        var exhibitors = exhibitorsList.where((exhibitor)=>exhibitor.location?.sId == landmark.sId);
+        if(landmark.sId == "68e3da9642926fb1bc88ee0d"){
+          print("exhibitor ${exhibitors.first.toJson()}");
+        }
+        if(landmark.renderDetail.preSet){
+          if(exhibitors.isNotEmpty){
+            var exhibitor = exhibitors.first;
+            landmark.renderDetail = renderDetails(exhibitor.organization??landmark.name??landmark.element?.subType??"", exhibitor.companyLogo??"", landmark.name??landmark.element?.subType??"", "#34CD2", "General");
+          }
+        }
+      }
+    }
+  }
+
+  void populateRenderDetailsUsingEvent(List<category.Data> categories, List<session.Data> sessions, List<subEvent.Data> subEvents){
+    if(landmarks != null && landmarks!.isNotEmpty){
+      for (var landmark in landmarks!) {
+        var session = sessions.where((session)=>session.location?.sId == landmark.sId);
+        if(landmark.renderDetail.preSet){
+          if(session.isNotEmpty){
+            for (var sesh in session) {
+              var status = getEventStatus(
+                  startDate: convertUtcToLocal(sesh.date!)!,
+                  endDate: convertUtcToLocal(sesh.date!)!,
+                  startTime: "${DateFormat('yyyy-MM-dd').format(DateTime.parse(convertUtcToLocal(sesh.date!)!))}T${sesh.startTime}",
+                  endTime: "${DateFormat('yyyy-MM-dd').format(DateTime.parse(convertUtcToLocal(sesh.date!)!))}T${sesh.endTime}",
+                  weekdays: null);
+              if(status == EventStatus.goingOn || status == EventStatus.goingToHappen){
+                landmark.renderDetail = renderDetails(landmark.name??landmark.element?.subType??"", "", "","#34CD2", sesh.categoryName);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 
@@ -70,6 +124,7 @@ class Landmarks {
   Element? element;
   Properties? properties;
   String? sId;
+  int? priority;
   String? buildingID;
   int? coordinateX;
   int? coordinateY;
@@ -82,6 +137,10 @@ class Landmarks {
   String? name;
   List<Lifts>? lifts;
   List<Stairs>? stairs;
+  List<Escalator>? escalators;
+  List<Ramps>? ramps;
+  double? centerX;
+  double? centerY;
   List<Others>? others;
   String? createdAt;
   String? updatedAt;
@@ -89,10 +148,26 @@ class Landmarks {
   String? buildingName;
   String? venueName;
   bool? wasPolyIdNull ;
+  String? roadName;
+  renderDetails? _renderDetail;
+
+
+  renderDetails get renderDetail {
+    if (_renderDetail != null) {
+      return _renderDetail!;
+    }else {
+      return renderDetails(this.name??this.element?.subType??"", this.properties?.filename??"", this.name??this.element?.subType??"", "#3AADE8", null);
+    }
+  }
+
+  set renderDetail(renderDetails value) {
+    _renderDetail = value;
+  }
 
   Landmarks(
       {this.element,
         this.properties,
+        this.priority,
         this.sId,
         this.buildingID,
         this.coordinateX,
@@ -106,15 +181,21 @@ class Landmarks {
         this.name,
         this.lifts,
         this.stairs,
+        this.ramps,
+        this.centerX,
+        this.centerY,
+        this.escalators,
         this.others,
         this.createdAt,
         this.updatedAt,
         this.iV,
         this.buildingName,
         this.venueName,
-      this.wasPolyIdNull});
+        this.roadName,
+        this.wasPolyIdNull});
 
-  Landmarks.fromJson(Map<dynamic, dynamic> json) {
+
+  Landmarks.fromJson(dynamic json) {
     element =
     json['element'] != null ? new Element.fromJson(json['element']) : null;
     properties = json['properties'] != null
@@ -122,9 +203,11 @@ class Landmarks {
         : null;
     sId = json['_id'];
     wasPolyIdNull = false;
-    if(properties!.polyId == null){
-      wasPolyIdNull = true;
-      properties!.polyId = json['_id'];
+    if(properties != null) {
+      if (properties!.polyId == null) {
+        wasPolyIdNull = true;
+        properties!.polyId = json['_id'];
+      }
     }
     buildingID = json['building_ID'];
     coordinateX = json['coordinateX']!=null?json['coordinateX'].toInt():json['coordinateX'];
@@ -136,8 +219,11 @@ class Landmarks {
     floor = json['floor'];
     geometryType = json['geometryType'];
     name = json['name'];
-    if(name == null && element!.subType!=null && element!.type != "Floor" && element!.subType != "beacons"){
-      name = element!.subType;
+    if(element != null) {
+      if (name == null && element!.subType != null &&
+          element!.type != "Floor" && element!.subType != "beacons") {
+        name = element!.subType;
+      }
     }
     if (json['lifts'] != null) {
       lifts = <Lifts>[];
@@ -151,6 +237,20 @@ class Landmarks {
         stairs!.add(new Stairs.fromJson(v));
       });
     }
+    if (json['escalators'] != null) {
+      escalators = <Escalator>[];
+      json['escalators'].forEach((v) {
+        escalators!.add(new Escalator.fromJson(v));
+      });
+    }
+    if (json['ramps'] != null) {
+      ramps = <Ramps>[];
+      json['ramps'].forEach((v) {
+        ramps!.add(new Ramps.fromJson(v));
+      });
+    }
+    centerX= json['centerX']!=null?json['centerX']+0.0:json['centerX'];
+    centerY= json['centerY']!=null?json['centerY']+0.0:json['centerY'];
     if (json['others'] != null) {
       others = <Others>[];
       json['others'].forEach((v) {
@@ -160,7 +260,9 @@ class Landmarks {
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     iV = json['__v'];
+    priority = json['priority'];
     buildingName = json['buildingName'];
+    roadName = json['roadName'];
     venueName = json['venueName'];
   }
 
@@ -186,6 +288,14 @@ class Landmarks {
     if (this.lifts != null) {
       data['lifts'] = this.lifts!.map((v) => v.toJson()).toList();
     }
+    if (this.escalators != null) {
+      data['escalators'] = this.escalators!.map((v) => v.toJson()).toList();
+    }
+    if (this.ramps != null) {
+      data['ramps'] = this.ramps!.map((v) => v.toJson()).toList();
+    }
+    data['centerX']=this.centerX;
+    data['centerY']=this.centerY;
     if (this.stairs != null) {
       data['stairs'] = this.stairs!.map((v) => v.toJson()).toList();
     }
@@ -195,11 +305,13 @@ class Landmarks {
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
     data['__v'] = this.iV;
+    data['priority'] = this.priority;
     data['buildingName'] = this.buildingName;
     data['venueName'] = this.venueName;
     return data;
   }
 }
+
 
 class Element {
   String? type;
@@ -229,7 +341,9 @@ class Properties {
   String? email;
   String? endTime;
   String? latitude;
+  String? doorLat;
   String? longitude;
+  String? doorLng;
   String? motion;
   String? node;
   String? nodeId;
@@ -271,7 +385,9 @@ class Properties {
   String? capacity;
   String? callLocation;
   String? panelDir;
+  bool isWaypoint = false;
   String? shopNature;
+  String? alertName;
   String? photo;
   bool? polygonExist;
   String? polyId;
@@ -283,6 +399,7 @@ class Properties {
   List<String>? frConn;
   List<String>? clickedPoints;
   int? floorAngle;
+  String? doorNumber;
   List<String>? polygonId;
 
   Properties(
@@ -295,6 +412,8 @@ class Properties {
         this.endTime,
         this.latitude,
         this.longitude,
+        this.doorLat,
+        this.doorLng,
         this.motion,
         this.node,
         this.nodeId,
@@ -337,6 +456,7 @@ class Properties {
         this.callLocation,
         this.panelDir,
         this.shopNature,
+        this.alertName,
         this.photo,
         this.polygonExist,
         this.polyId,
@@ -348,6 +468,7 @@ class Properties {
         this.frConn,
         this.clickedPoints,
         this.floorAngle,
+        this.doorNumber,
         this.polygonId});
 
   Properties.fromJson(Map<dynamic, dynamic> json) {
@@ -360,9 +481,12 @@ class Properties {
     endTime = json['endTime'];
     latitude = json['latitude'];
     longitude = json['longitude'];
+    doorLat = json['doorLat']??json['doorLatitude'];
+    doorLng = json['doorLng']??json['doorLongitude'];
     motion = json['motion'];
     node = json['node'];
     nodeId = json['nodeId'];
+
     openingMechanism = json['openingMechanism'];
     protocol = json['protocol'];
     startTime = json['startTime'];
@@ -402,18 +526,20 @@ class Properties {
     callLocation = json['callLocation'];
     panelDir = json['panelDir'];
     shopNature = json['shopNature'];
+    alertName = json['alertName'];
     photo = json['photo'];
     polygonExist = json['polygonExist'];
     polyId = json['polyId'];
     filename = json['filename'];
-    nonWalkableGrids = json['nonWalkableGrids'].cast<String>();
+    nonWalkableGrids = json['nonWalkableGrids']?.cast<String>();
     floorLength = json['floorLength'];
     floorBreadth = json['floorBreadth'];
-    flrDistMatrix = json['flr_dist_matrix'].cast<String>();
-    frConn = json['frConn'].cast<String>();
-    clickedPoints = json['clickedPoints'].cast<String>();
+    flrDistMatrix = json['flr_dist_matrix']?.cast<String>();
+    frConn = json['frConn']?.cast<String>();
+    clickedPoints = json['clickedPoints']?.cast<String>();
     floorAngle = json['floorAngle'];
-    polygonId = json['polygonId'].cast<String>();
+    doorNumber = json['doorNumber'];
+    polygonId = json['polygonId']?.cast<String>();
   }
 
   Map<dynamic, dynamic> toJson() {
@@ -427,6 +553,8 @@ class Properties {
     data['endTime'] = this.endTime;
     data['latitude'] = this.latitude;
     data['longitude'] = this.longitude;
+    data['doorLat'] = this.doorLat;
+    data['doorLng'] = this.doorLng;
     data['motion'] = this.motion;
     data['node'] = this.node;
     data['nodeId'] = this.nodeId;
@@ -469,6 +597,7 @@ class Properties {
     data['callLocation'] = this.callLocation;
     data['panelDir'] = this.panelDir;
     data['shopNature'] = this.shopNature;
+    data['alertName'] = this.alertName;
     data['photo'] = this.photo;
     data['polygonExist'] = this.polygonExist;
     data['polyId'] = this.polyId;
@@ -480,6 +609,7 @@ class Properties {
     data['frConn'] = this.frConn;
     data['clickedPoints'] = this.clickedPoints;
     data['floorAngle'] = this.floorAngle;
+    data['doorNumber'] = this.doorNumber;
     data['polygonId'] = this.polygonId;
     return data;
   }
@@ -490,12 +620,18 @@ class Lifts {
   int? distance;
   int? x;
   int? y;
+  double? lat;
+  double? lng;
 
   Lifts({this.name, this.distance, this.x, this.y});
 
   Lifts.fromJson(Map<dynamic, dynamic> json) {
     name = json['name'];
-    distance = json['distance'];
+    try {
+      distance = json['distance'];
+    }catch(e){
+      print('name $name');
+    }
     x = json['x'].toInt();
     y = json['y'].toInt();
   }
@@ -506,18 +642,21 @@ class Lifts {
     data['distance'] = this.distance;
     data['x'] = this.x;
     data['y'] = this.y;
+    data['lat'] = this.lat;
+    data['lng'] = this.lng;
     return data;
   }
 }
 class CommonConnection {
   String? name;
-  int? distance;
+  int? d1;
+  int? d2;
   int? x1;
   int? x2;
   int? y1;
   int? y2;
 
-  CommonConnection({this.name, this.distance, this.x1, this.y1,this.x2,this.y2});
+  CommonConnection({this.name, this.x1, this.y1,this.x2,this.y2,this.d1, this.d2});
 
 }
 class CommonStairs {
@@ -550,6 +689,56 @@ class Stairs {
   Stairs({this.name, this.distance, this.x, this.y});
 
   Stairs.fromJson(Map<dynamic, dynamic> json) {
+    name = json['name'];
+    distance = json['distance'];
+    x = json['x'].toInt();
+    y = json['y'].toInt();
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['name'] = this.name;
+    data['distance'] = this.distance;
+    data['x'] = this.x;
+    data['y'] = this.y;
+    return data;
+  }
+}
+
+class Escalator {
+  String? name;
+  int? distance;
+  int? x;
+  int? y;
+
+  Escalator({this.name, this.distance, this.x, this.y});
+
+  Escalator.fromJson(Map<dynamic, dynamic> json) {
+    name = json['name'];
+    distance = json['distance'];
+    x = json['x'].toInt();
+    y = json['y'].toInt();
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['name'] = this.name;
+    data['distance'] = this.distance;
+    data['x'] = this.x;
+    data['y'] = this.y;
+    return data;
+  }
+}
+
+class Ramps {
+  String? name;
+  int? distance;
+  int? x;
+  int? y;
+
+  Ramps({this.name, this.distance, this.x, this.y});
+
+  Ramps.fromJson(Map<dynamic, dynamic> json) {
     name = json['name'];
     distance = json['distance'];
     x = json['x'].toInt();

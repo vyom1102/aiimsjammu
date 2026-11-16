@@ -3,13 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../DestinationSearchPage.dart';
-import '../SourceAndDestinationPage.dart';
 
 class DestinationPageChipsWidget extends StatefulWidget {
   final String svgPath;
   final String text;
   bool selected;
+  final IconData icon;
   final Function(bool selected) onSelect;
   final Function(String Text) onTap;
 
@@ -19,6 +18,7 @@ class DestinationPageChipsWidget extends StatefulWidget {
     required this.svgPath,
     required this.text,
     this.selected = false,
+    required this.icon,
     required this.onSelect,
     required this.onTap,
   });
@@ -33,9 +33,10 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: widget.text + (widget.selected?"selected":""),
+      label: widget.text,
+      toggled: widget.selected,
       child: AnimatedContainer(
-        margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 7),
+        margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 7),
         padding: EdgeInsets.all(8),
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
@@ -56,21 +57,22 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
             setState(() {
               widget.selected = !widget.selected;
             });
-            widget.onTap(widget.text);
-            widget.onSelect(widget.selected);
-            widget.selected ? print("black") : print("white");
-            // Navigator.push(
-            //     context,
-            //     MaterialPageRoute(
-            //         builder: (context) => DestinationSearchPage(previousFilter: widget.text,))
-            // );
+            if(widget.selected){
+              widget.onTap(widget.text);
+              widget.onSelect(widget.selected);
+              widget.selected ? print("black") : print("white");
+            }else{
+              setState(() {
+                widget.onTap("");
+              });
+            }
           },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Container(
                 margin: EdgeInsets.only(left: 4),
-                child: Icon(Icons.wallet_giftcard_outlined, size: 18, color: widget.selected? Colors.white: Colors.black,),
+                child: Icon(widget.icon, size: 18, color: widget.selected? Colors.white: Colors.black,),
               ),
               Semantics(
                 excludeSemantics: true,
@@ -89,9 +91,22 @@ class _DestinationPageChipsWidgetState extends State<DestinationPageChipsWidget>
                   ),
                 ),
               ),
-              widget.selected? Container(
-                margin: EdgeInsets.only(left: 4),
-                child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,),
+              widget.selected? Semantics(
+                excludeSemantics: true,
+                child: InkWell(
+                  onTap: (){
+                    setState(() {
+                      widget.selected=!widget.selected;
+                      widget.onTap("");
+                    });
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(left: 4),
+                    child: Semantics(
+                        label: "Unselect ${widget.text}",
+                        child: Icon(Icons.close, size: 18, color: widget.selected? Colors.white: Colors.black,)),
+                  ),
+                ),
               ) : Container()
 
 

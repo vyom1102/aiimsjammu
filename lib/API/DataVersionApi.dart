@@ -1,87 +1,34 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import 'package:iwaymaps/API/BuildingAPI.dart';
-import 'package:iwaymaps/API/buildingAllApi.dart';
-import 'package:iwaymaps/APIMODELS/DataVersion.dart';
-import 'package:iwaymaps/DATABASE/BOXES/BeaconAPIModelBOX.dart';
-import 'package:iwaymaps/DATABASE/DATABASEMODEL/BeaconAPIModel.dart';
-import 'package:iwaymaps/Elements/HelperClass.dart';
+import '../APIMODELS/DataVersion.dart';
+import '../DATABASE/BOXES/DataVersionLocalModelBOX.dart';
+import '../DATABASE/DATABASEMODEL/DataVersionLocalModel.dart';
+import '../ELEMENTS/HelperClass.dart';
+import '../config.dart';
 
-import '../APIMODELS/beaconData.dart';
 import '../VersioInfo.dart';
 import 'RefreshTokenAPI.dart';
-import 'guestloginapi.dart';
 
 
 class DataVersionApi {
-  final String baseUrl = "https://dev.iwayplus.in/secured/data-version";
+  final String baseUrl = "${AppConfig.baseUrl}/secured/data-version";
   static var signInBox = Hive.box('SignInDatabase');
   var versionBox = Hive.box('VersionData');
   String accessToken = signInBox.get("accessToken");
 
+  final DataBox = DataVersionLocalModelBOX.getData();
+  bool shouldBeInjected = false;
 
-  Future<DataVersion> fetchDataVersionApiData(String id) async {
+  Future<void> fetchDataVersionApiData(String id) async {
     accessToken = signInBox.get("accessToken");
 
     final Map<String, dynamic> data = {
       "building_ID": id,
     };
 
-
-    final response = await http.post(
-      Uri.parse(baseUrl),
-      body: json.encode(data),
-      headers: {
-        'Content-Type': 'application/json',
-        'x-access-token': accessToken
-      },
-    );
-
-    if (response.statusCode == 200) {
-      print("DATA VERSION API DATA FROM API");
-      Map<String, dynamic> responseBody = json.decode(response.body);
-      // print(responseBody);
-      // print(DataVersion.fromJson(responseBody).versionData!.landmarksDataVersion);
-      DataVersion DataVersionData = DataVersion.fromJson(responseBody);
-      VersionInfo.patchDataVersion = DataVersionData.versionData!.patchDataVersion!;
-      VersionInfo.buildingDataVersion = DataVersionData.versionData!.buildingDataVersion!;
-      VersionInfo.polylineDataVersion = DataVersionData.versionData!.polylineDataVersion!;
-      VersionInfo.landmarksDataVersion = DataVersionData.versionData!.landmarksDataVersion!;
-
-
-      //versionBox.put("landmarksDataVersion", DataVersionData.versionData!.landmarksDataVersion);
-      // print(DataVersionData.versionData!.buildingID);
-      // if(!versionBox.containsKey(DataVersionData.versionData!.buildingID)) {
-      //   print("VersionBox is empty");
-      //   versionBox.put(
-      //       DataVersionData.versionData!.buildingID, DataVersionData);
-      //   //versionBox.close();
-      // }else{
-      //   print("VersionBox is notEmpty");
-      // }
-      // print(versionBox.keys);
-
-      //List<DataVersionModel> DataVersionList = responseBody.map((data) => DataVersionModel.fromJson(data)).toList();
-
-
-      // print(DataVersionList[0].landmarksDataVersion);
-
-      return DataVersion.fromJson(responseBody);
-      // return DataVersionData;
-
-    } else if (response.statusCode == 403) {
-
-      print('DATA VERSION API in error 403');
-      String newAccessToken = await RefreshTokenAPI.refresh();
-      print('Refresh done');
-      accessToken = newAccessToken;
-
-      final Map<String, dynamic> data = {
-        "building_ID": id,
-      };
-
-
+    try {
       final response = await http.post(
         Uri.parse(baseUrl),
         body: json.encode(data),
@@ -91,49 +38,273 @@ class DataVersionApi {
         },
       );
 
+
       if (response.statusCode == 200) {
         print("DATA VERSION API DATA FROM API");
         Map<String, dynamic> responseBody = json.decode(response.body);
-        // print(responseBody);
-        // print(DataVersion.fromJson(responseBody).versionData!.landmarksDataVersion);
-        DataVersion DataVersionData = DataVersion.fromJson(responseBody);
-        VersionInfo.patchDataVersion = DataVersionData.versionData!.patchDataVersion!;
-        VersionInfo.buildingDataVersion = DataVersionData.versionData!.buildingDataVersion!;
-        VersionInfo.polylineDataVersion = DataVersionData.versionData!.polylineDataVersion!;
-        VersionInfo.landmarksDataVersion = DataVersionData.versionData!.landmarksDataVersion!;
+        final apiData = DataVersion.fromJson(responseBody);
+        print("apiData.versionData!.buildingID");
+        print(apiData.versionData!.buildingID);
+
+        if (DataBox.containsKey(apiData.versionData!.buildingID)) {
+          print('DATA ALREADY PRESENT');
+          final databaseData = DataVersion.fromJson(
+              DataBox.get(apiData.versionData!.buildingID)!.responseBody);
+          if (apiData.versionData!.buildingDataVersion !=
+              databaseData.versionData!.buildingDataVersion) {
+            print("match ${apiData.versionData!.buildingID!} and $id");
+            VersionInfo.buildingBuildingDataVersionUpdate[apiData.versionData!
+                .buildingID!] = true;
+            shouldBeInjected = true;
+            print("Building Version Change = true ${apiData.versionData!
+                .buildingDataVersion} ${databaseData.versionData!
+                .buildingDataVersion}");
+          } else {
+            print("match ${apiData.versionData!.buildingID!} and $id");
+
+            VersionInfo.buildingBuildingDataVersionUpdate[apiData.versionData!
+                .buildingID!] = false;
+            print("Building Version Change = false");
+          }
+
+          if (apiData.versionData!.patchDataVersion !=
+              databaseData.versionData!.patchDataVersion) {
+            VersionInfo.buildingPatchDataVersionUpdate[apiData.versionData!
+                .buildingID!] = true;
+            shouldBeInjected = true;
+            print("Patch Version Change = true ${apiData.versionData!
+                .patchDataVersion} ${databaseData.versionData!
+                .patchDataVersion}");
+          } else {
+            print("match ${apiData.versionData!.buildingID!} and $id");
+
+            VersionInfo.buildingPatchDataVersionUpdate[apiData.versionData!
+                .buildingID!] = false;
+            print("Patch Version Change = false");
+          }
+
+          if (apiData.versionData!.landmarksDataVersion !=
+              databaseData.versionData!.landmarksDataVersion) {
+            VersionInfo.buildingLandmarkDataVersionUpdate[apiData.versionData!
+                .buildingID!] = true;
+            shouldBeInjected = true;
+            print("Landmark Version Change = true ${apiData.versionData!
+                .landmarksDataVersion} ${databaseData.versionData!
+                .landmarksDataVersion}");
+          } else {
+            print("match ${apiData.versionData!.buildingID!} and $id");
+
+            VersionInfo.buildingLandmarkDataVersionUpdate[apiData.versionData!
+                .buildingID!] = false;
+            print("Landmark Version Change = false");
+          }
+
+          if (apiData.versionData!.polylineDataVersion !=
+              databaseData.versionData!.polylineDataVersion) {
+            VersionInfo.buildingPolylineDataVersionUpdate[apiData.versionData!
+                .buildingID!] = true;
+            shouldBeInjected = true;
+            print("Polyline Version Change = true ${apiData.versionData!
+                .polylineDataVersion} ${databaseData.versionData!
+                .polylineDataVersion}");
+          } else {
+            print("match ${apiData.versionData!.buildingID!} and $id");
+
+            VersionInfo.buildingPolylineDataVersionUpdate[apiData.versionData!
+                .buildingID!] = false;
+            print(VersionInfo.buildingPolylineDataVersionUpdate[apiData
+                .versionData!.buildingID!]);
+            print(apiData.versionData!.buildingID!);
+            print("Polyline Version Change = false");
+          }
+          if (shouldBeInjected) {
+            final dataVersionData = DataVersionLocalModel(
+                responseBody: responseBody);
+            DataBox.delete(DataVersion
+                .fromJson(responseBody)
+                .versionData!
+                .buildingID);
+            print("database deleted ${DataBox.containsKey(DataVersion
+                .fromJson(responseBody)
+                .versionData!
+                .buildingID)}");
+            DataBox.put(DataVersion
+                .fromJson(responseBody)
+                .versionData!
+                .buildingID, dataVersionData);
+            print("New Data ${DataVersion
+                .fromJson(responseBody)
+                .versionData!
+                .buildingID} ${dataVersionData}");
+            dataVersionData.save();
+          }
+        } else {
+          print('DATA NOT PRESENT');
+          VersionInfo.buildingBuildingDataVersionUpdate[apiData.versionData!
+              .buildingID!] = false;
+          VersionInfo.buildingPatchDataVersionUpdate[apiData.versionData!
+              .buildingID!] = false;
+          VersionInfo.buildingLandmarkDataVersionUpdate[apiData.versionData!
+              .buildingID!] = false;
+          VersionInfo.buildingPolylineDataVersionUpdate[apiData.versionData!
+              .buildingID!] = false;
+          if (!shouldBeInjected) {
+            print('DATA INJECTED');
+            final dataVersionData = DataVersionLocalModel(
+                responseBody: responseBody);
+            DataBox.put(DataVersion
+                .fromJson(responseBody)
+                .versionData!
+                .buildingID, dataVersionData);
+            dataVersionData.save();
+          }
+        }
+      } else if (response.statusCode == 403) {
+        print('DATA VERSION API in error 403');
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        print('Refresh done');
+        accessToken = newAccessToken;
+
+        final Map<String, dynamic> data = {
+          "building_ID": id,
+        };
 
 
-        //versionBox.put("landmarksDataVersion", DataVersionData.versionData!.landmarksDataVersion);
-        // print(DataVersionData.versionData!.buildingID);
-        // if(!versionBox.containsKey(DataVersionData.versionData!.buildingID)) {
-        //   print("VersionBox is empty");
-        //   versionBox.put(
-        //       DataVersionData.versionData!.buildingID, DataVersionData);
-        //   //versionBox.close();
-        // }else{
-        //   print("VersionBox is notEmpty");
-        // }
-        // print(versionBox.keys);
+        final response = await http.post(
+          Uri.parse(baseUrl),
+          body: json.encode(data),
+          headers: {
+            'Content-Type': 'application/json',
+            'x-access-token': accessToken
+          },
+        );
 
-        //List<DataVersionModel> DataVersionList = responseBody.map((data) => DataVersionModel.fromJson(data)).toList();
+        if (response.statusCode == 200) {
+          print("DATA VERSION API DATA FROM API AFTER 403");
+          Map<String, dynamic> responseBody = json.decode(response.body);
+          final apiData = DataVersion.fromJson(responseBody);
+          if (DataBox.containsKey(apiData.versionData!.buildingID)) {
+            print('DATA ALREADY PRESENT');
+            final databaseData = DataVersion.fromJson(
+                DataBox.get(apiData.versionData!.buildingID)!.responseBody);
+            if (apiData.versionData!.buildingDataVersion !=
+                databaseData.versionData!.buildingDataVersion) {
+              VersionInfo.buildingBuildingDataVersionUpdate[apiData.versionData!
+                  .buildingID!] = true;
+              shouldBeInjected = true;
+              print("Building Version Change = true ${apiData.versionData!
+                  .buildingDataVersion} ${databaseData.versionData!
+                  .buildingDataVersion}");
+            } else {
+              VersionInfo.buildingBuildingDataVersionUpdate[apiData.versionData!
+                  .buildingID!] = false;
+              print("Building Version Change = false");
+            }
 
+            if (apiData.versionData!.patchDataVersion !=
+                databaseData.versionData!.patchDataVersion) {
+              VersionInfo.buildingPatchDataVersionUpdate[apiData.versionData!
+                  .buildingID!] = true;
+              shouldBeInjected = true;
+              print("Patch Version Change = true ${apiData.versionData!
+                  .patchDataVersion} ${databaseData.versionData!
+                  .patchDataVersion}");
+            } else {
+              VersionInfo.buildingPatchDataVersionUpdate[apiData.versionData!
+                  .buildingID!] = false;
+              print("Patch Version Change = false");
+            }
 
-        // print(DataVersionList[0].landmarksDataVersion);
+            if (apiData.versionData!.landmarksDataVersion !=
+                databaseData.versionData!.landmarksDataVersion) {
+              VersionInfo.buildingLandmarkDataVersionUpdate[apiData.versionData!
+                  .buildingID!] = true;
+              shouldBeInjected = true;
+              print("Landmark Version Change = true ${apiData.versionData!
+                  .landmarksDataVersion} ${databaseData.versionData!
+                  .landmarksDataVersion}");
+            } else {
+              VersionInfo.buildingLandmarkDataVersionUpdate[apiData.versionData!
+                  .buildingID!] = false;
+              print("Landmark Version Change = false");
+            }
 
-        return DataVersion.fromJson(responseBody);
-        // return DataVersionData;
-
-      }else{
-        HelperClass.showToast("response.statusCode");
-        throw Exception('Failed to load data');
+            if (apiData.versionData!.polylineDataVersion !=
+                databaseData.versionData!.polylineDataVersion) {
+              VersionInfo.buildingPolylineDataVersionUpdate[apiData.versionData!
+                  .buildingID!] = true;
+              shouldBeInjected = true;
+              print("Polyline Version Change = true ${apiData.versionData!
+                  .polylineDataVersion} ${databaseData.versionData!
+                  .polylineDataVersion}");
+            } else {
+              VersionInfo.buildingPolylineDataVersionUpdate[apiData.versionData!
+                  .buildingID!] = false;
+              print(VersionInfo.buildingPolylineDataVersionUpdate[apiData
+                  .versionData!.buildingID!]);
+              print(apiData.versionData!.buildingID!);
+              print("Polyline Version Change = false");
+            }
+            if (shouldBeInjected) {
+              print("shouldBeInjected");
+              final dataVersionData = DataVersionLocalModel(
+                  responseBody: responseBody);
+              DataBox.delete(DataVersion
+                  .fromJson(responseBody)
+                  .versionData!
+                  .buildingID);
+              print("database deleted ${DataBox.containsKey(DataVersion
+                  .fromJson(responseBody)
+                  .versionData!
+                  .buildingID)}");
+              DataBox.put(DataVersion
+                  .fromJson(responseBody)
+                  .versionData!
+                  .buildingID, dataVersionData);
+              print("New Data ${DataVersion
+                  .fromJson(responseBody)
+                  .versionData!
+                  .buildingID} ${dataVersionData}");
+              dataVersionData.save();
+            } else {
+              print("!shouldBeInjected");
+            }
+          } else {
+            print('DATA NOT PRESENT');
+            VersionInfo.buildingBuildingDataVersionUpdate[apiData.versionData!
+                .buildingID!] = false;
+            VersionInfo.buildingPatchDataVersionUpdate[apiData.versionData!
+                .buildingID!] = false;
+            VersionInfo.buildingLandmarkDataVersionUpdate[apiData.versionData!
+                .buildingID!] = false;
+            VersionInfo.buildingPolylineDataVersionUpdate[apiData.versionData!
+                .buildingID!] = false;
+            if (!shouldBeInjected) {
+              print('DATA INJECTED');
+              final dataVersionData = DataVersionLocalModel(
+                  responseBody: responseBody);
+              DataBox.put(DataVersion
+                  .fromJson(responseBody)
+                  .versionData!
+                  .buildingID, dataVersionData);
+              dataVersionData.save();
+            }
+          }
+        } else {
+          HelperClass.showToast("Unable to load session!! Try again \n DATAVERSION API");
+          throw Exception('Failed to load data');
+        }
+      } else {
+        print(response.statusCode);
+        print("Mishorcheck");
+        print(Exception);
+        throw Exception('Failed to load beacon data');
       }
-    } else {
-      print(response.statusCode);
-
-      print("Mishorcheck");
-      print(Exception);
-      throw Exception('Failed to load beacon data');
-
+    }catch(e){
+      VersionInfo.buildingBuildingDataVersionUpdate[id] = false;
+      VersionInfo.buildingPatchDataVersionUpdate[id] = false;
+      VersionInfo.buildingLandmarkDataVersionUpdate[id] = false;
+      VersionInfo.buildingPolylineDataVersionUpdate[id] = false;
     }
   }
 }

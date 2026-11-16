@@ -7,6 +7,8 @@ import 'dart:convert';
 import 'package:iwaymaps/AiimsJammu/Screens/FavouriteDoctor.dart';
 import 'package:iwaymaps/AiimsJammu/Screens/FavouriteService.dart';
 
+import '../../API/RefreshTokenAPI.dart';
+import '../../config.dart';
 import '../Widgets/Translator.dart';
 
 class FavouriteRGCIScreen extends StatefulWidget {
@@ -32,59 +34,7 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
     getUserIDFromHive();
   }
 
-  Future<void> refreshTokenAndRetryForGetUserDetails(String baseUrl) async {
-    final String refreshTokenUrl = "https://dev.iwayplus.in/api/refreshToken";
 
-    try {
-      final response = await http.post(
-        Uri.parse(refreshTokenUrl),
-        body: json.encode({
-          "refreshToken": refreshToken,
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final newAccessToken = json.decode(response.body)["accessToken"];
-        setState(() {
-          accessToken = newAccessToken;
-        });
-
-        await getUserDetailsWithNewToken(baseUrl);
-      } else {
-        // Handle token refresh failure
-      }
-    } catch (e) {
-      // Handle errors
-    }
-  }
-
-  Future<void> getUserDetailsWithNewToken(String baseUrl) async {
-    try {
-      final response = await http.post(
-        Uri.parse(baseUrl),
-        body: json.encode({"userId": userId}),
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': '$accessToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        Map<String, dynamic> responseBody = json.decode(response.body);
-        print(responseBody);
-        // _emailController.text = responseBody["email"];
-        // originalName = responseBody["name"];
-        // _nameController.text = originalName!;
-      } else {
-        // Handle other status codes after token refresh
-      }
-    } catch (e) {
-      // Handle errors after token refresh
-    }
-  }
 
   Future<void> getUserIDFromHive() async {
     final signInBox = await Hive.openBox('SignInDatabase');
@@ -104,7 +54,7 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
     setState(() {
       isLoading = true;
     });
-    final String baseUrl = "https://dev.iwayplus.in/secured/user/get";
+    final String baseUrl = "${AppConfig.baseUrl}/secured/user/get";
 
     try {
       final response = await http.post(
@@ -156,7 +106,10 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
         // _nameController.text = originalName!;
       } else if (response.statusCode == 403) {
         // Access token expired, refresh token and retry the call
-        await refreshTokenAndRetryForGetUserDetails(baseUrl);
+        // await refreshTokenAndRetryForGetUserDetails(baseUrl);
+        String newAccessToken = await RefreshTokenAPI.refresh();
+        accessToken = newAccessToken;
+        getUserDetails();
       } else {
         print(response.statusCode);
       }
@@ -172,7 +125,11 @@ class _FavouriteRGCIScreenState extends State<FavouriteRGCIScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
+
       appBar: AppBar(
+        backgroundColor: Colors.white,
+
         centerTitle: true,
         title: TranslatorWidget(
           'Favourite',

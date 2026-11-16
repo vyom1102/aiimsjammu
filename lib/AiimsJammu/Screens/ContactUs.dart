@@ -97,7 +97,7 @@ class ContactUs extends StatelessWidget {
                 SizedBox(height: 16,),
                 InkWell(
                   onTap: (){
-                    _makePhoneCall("+91 8587096914");
+                    _makePhoneCall("+91 8899950166");
                   },
 
                   child: Row(
@@ -126,7 +126,7 @@ class ContactUs extends StatelessWidget {
                             textAlign: TextAlign.left,
                           ),
                           TranslatorWidget(
-                            "+91 8587096914",
+                            "+91 8899950166",
                             style: const TextStyle(
                               fontFamily: "Roboto",
                               fontSize: 14,
@@ -144,7 +144,7 @@ class ContactUs extends StatelessWidget {
                 SizedBox(height: 16,),
                 InkWell(
                   onTap: (){
-                    sendMailto(email: "Support@iwayplus.com");
+                    sendMailto(email: "info@aiimsjammu.edu.in");
                   },
                   child: Row(
                     children: [
@@ -172,7 +172,7 @@ class ContactUs extends StatelessWidget {
                           ),
                           SizedBox(height: 8,),
                           TranslatorWidget(
-                            "Support@iwayplus.com",
+                            "info@aiimsjammu.edu.in",
                             style: const TextStyle(
                               fontFamily: "Roboto",
                               fontSize: 14,
@@ -190,7 +190,7 @@ class ContactUs extends StatelessWidget {
                 SizedBox(height: 16,),
                 InkWell(
                   onTap: (){
-                    _launchInWebView(Uri.parse("https://www.iwayplus.com/"));
+                    _launchInWebView(Uri.parse("https://www.aiimsjammu.edu.in/"));
                   },
                   child: Row(
                     children: [
@@ -218,7 +218,7 @@ class ContactUs extends StatelessWidget {
                           ),
                           SizedBox(height: 8,),
                           TranslatorWidget(
-                            "www.iwayplus.com",
+                            "https://www.aiimsjammu.edu.in/",
                             style: const TextStyle(
                               fontFamily: "Roboto",
                               fontSize: 14,
