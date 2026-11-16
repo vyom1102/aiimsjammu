@@ -114,6 +114,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.6.0"
+  asn1lib:
+    dependency: transitive
+    description:
+      name: asn1lib
+      sha256: cfb3cf6a53158918d52dda61bc26f0cc8612a0d3b9dc29e87eaa3423902ca636
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.6.8"
   async:
     dependency: transitive
     description:
@@ -458,6 +466,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.6"
+  data_repository:
+    dependency: transitive
+    description:
+      path: "."
+      ref: main
+      resolved-ref: "7b9f2ff0de0f350609e84174e2032481a8a05923"
+      url: "https://github.com/iisthehimanshu/Data_Repository.git"
+    source: git
+    version: "0.0.1"
   date_field:
     dependency: transitive
     description:
@@ -522,6 +539,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  encrypt:
+    dependency: transitive
+    description:
+      name: encrypt
+      sha256: "62d9aa4670cc2a8798bab89b39fc71b6dfbacf615de6cf5001fb39f7e4a996a2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.3"
   equatable:
     dependency: transitive
     description:
@@ -1363,7 +1388,7 @@ packages:
     description:
       path: "."
       ref: bridge
-      resolved-ref: "942708dc7f9d36fad353f6ab016d9d145094d193"
+      resolved-ref: "64c5df97ff6a045d0fa7edba77a99d8931cab0b1"
       url: "https://github.com/iisthehimanshu/localization_engine.git"
     source: git
     version: "0.0.1"
@@ -1469,7 +1494,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "03beecdab26bee781c61a7cc96542f652a27b260"
+      resolved-ref: "3b1335a14ad484fc5c4ca64b385c16655d1e3519"
       url: "https://github.com/udit6023/navigation_sdk.git"
     source: git
     version: "1.0.0+1"
@@ -1551,7 +1576,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: f99c269c7f2ed245a334c48716506251e0b28736
+      resolved-ref: "05d6c152286bc87eabb6938f676446bed6c25966"
       url: "https://github.com/vyom1102/Panel_SDK.git"
     source: git
     version: "1.0.0"
@@ -1723,6 +1748,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.10.3"
+  pointycastle:
+    dependency: transitive
+    description:
+      name: pointycastle
+      sha256: "4be0097fcf3fd3e8449e53730c631200ebc7b88016acecab2b0da2f0149222fe"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.9.1"
   pool:
     dependency: transitive
     description:
@@ -2230,7 +2263,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "2c3288aa09b1778e8eed93a5ae13eb31f369f70b"
+      resolved-ref: "666e28e490e63e9c77b434498c308a65761757fa"
       url: "https://github.com/iisthehimanshu/unified_map_view.git"
     source: git
     version: "0.0.1"
